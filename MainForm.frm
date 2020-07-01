@@ -338,7 +338,7 @@ Begin VB.Form MainForm
       End
    End
    Begin VB.Frame FrmVideoFormat 
-      Caption         =   "Video format and encryption options"
+      Caption         =   "Video format and scrambling options"
       Height          =   2055
       Left            =   120
       TabIndex        =   16
@@ -391,7 +391,7 @@ Begin VB.Form MainForm
          Width           =   1455
       End
       Begin VB.CheckBox ChkEncryptAudio 
-         Caption         =   "Encrypt audio"
+         Caption         =   "Scramble audio"
          Enabled         =   0   'False
          Height          =   195
          Left            =   120
@@ -798,7 +798,7 @@ Private Sub Form_Load()
     End If
 ' End set paths
 ' Retrieve registry value which contains the hacktv path
-    HackTVPath = GetSetting(App.EXEName, "Settings", "HackTVPath", "")
+    HackTVPath = GetSetting(App.Title, "Settings", "HackTVPath", "")
 ' If the value doesn't exist, set the location to the default directory
     If HackTVPath = "" Then HackTVPath = DefaultHackTVPath
 ' Specifies the help file to be invoked when the F1 key is pressed
@@ -861,7 +861,6 @@ Public Sub detectfork()
     Close #iFileNo
 ' Find something that exists in Captain Jack's fork and not present in fsphil's
 ' In this case, we'll use the enableemm switch
-    ' position = InStr(1, fData, "enableemm")
     If InStr(fData, "enableemm") > 0 Then
 ' Blank the string to save memory, then call the captainjack sub
         fData = ""
@@ -883,7 +882,9 @@ Private Sub fsphil()
     ChkSubtitles.Enabled = False
     forktype = ""
     Call DisablePosition
-    Call AddPALEncryptionTypes
+    If PAL.Value = True Then Call AddPALEncryptionTypes
+    If SECAM.Value = True Then Call AddPALEncryptionTypes
+    If MAC.Value = True Then Call AddMACEncryptionTypes
 End Sub
 
 Private Sub captainjack()
@@ -897,7 +898,9 @@ Private Sub captainjack()
     End If
 ' Set the forktype variable so we know what features to enable or disable later
     forktype = "CJ"
-    Call AddPALEncryptionTypes
+    If PAL.Value = True Then Call AddPALEncryptionTypes
+    If SECAM.Value = True Then Call AddPALEncryptionTypes
+    If MAC.Value = True Then Call AddMACEncryptionTypes
 End Sub
 
 Private Sub exit_Click()
@@ -1779,6 +1782,7 @@ Private Sub UHF_Click()
     If sys = "l" Then Call AddEuropeUHFChannels
     If sys = "d" Then Call AddEuropeUHFChannels
     If sys = "pal-m" Then Call AddNTSCUHFChannels
+    If sys = "dmac-fm" Then Call AddBSBChannels
 End Sub
 
 Private Sub PAL_Click()
@@ -1863,12 +1867,8 @@ Private Sub MAC_Click()
         Call EnableWSSButton
         Call AddWSSModes
     End If
-    If forktype = "CJ" Then
-        Call EnableEncryption
-        Call AddMACEncryptionTypes
-    Else
-        Call DisableEncryption
-    End If
+    Call EnableEncryption
+    Call AddMACEncryptionTypes
     If DualVCMode = True Then Call DisableDualVCMode
     ChkACP.Enabled = True
     With VideoFormat
@@ -2105,25 +2105,29 @@ Private Sub ChkAudio_Click()
 ' Since the audio and NICAM settings are linked, make sure that NICAM isn't enabled when audio is disabled
     If ChkAudio.Value = vbChecked Then
         audiostatus = ""
-        If NICAMSupported = True Then
-            Call EnableNICAM
+        If NICAMSupported = True Then Call EnableNICAM
 ' If Syster or D11 encryption is enabled, enable the encrypt audio checkbox
-            If encryptiontype = "--syster" Then
-                ChkEncryptAudio.Enabled = True
-            ElseIf encryptiontype = "--d11" Then
-                ChkEncryptAudio.Enabled = True
-            End If
+        If forktype = "CJ" Then
+            If encryptiontype = "--syster" Or encryptiontype = "--d11" Then ChkEncryptAudio.Enabled = True
+        Else
+            If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
+            Or encryptiontype = "--double-cut" Then ChkEncryptAudio.Enabled = True
         End If
     Else
         Call DisableNICAM
         audiostatus = "--noaudio"
-' If Syster or D11 encryption is enabled, disable and grey out the encrypt audio checkbox
-        If encryptiontype = "--syster" Then
-            ChkEncryptAudio.Enabled = False
-            ChkEncryptAudio.Value = vbUnchecked
-        ElseIf encryptiontype = "--d11" Then
-            ChkEncryptAudio.Enabled = False
-            ChkEncryptAudio.Value = vbUnchecked
+' If Syster or D11 encryption is not enabled, disable and grey out the encrypt audio checkbox
+        If forktype = "CJ" Then
+            If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
+                ChkEncryptAudio.Enabled = False
+                ChkEncryptAudio.Value = vbUnchecked
+            End If
+        Else
+            If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
+            Or encryptiontype = "--double-cut" Then
+                ChkEncryptAudio.Enabled = False
+                ChkEncryptAudio.Value = vbUnchecked
+            End If
         End If
     End If
 End Sub
@@ -2160,10 +2164,10 @@ End Sub
 
 Private Sub ChkEncryptAudio_Click()
 If ChkEncryptAudio.Value = vbChecked Then
-    If encryptiontype = "--syster" Then
+    If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
         audioencryption = "--systeraudio"
-    ElseIf encryptiontype = "--d11" Then
-        audioencryption = "--systeraudio"
+    ElseIf Not forktype = "CJ" And encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
+        audioencryption = "--scramble-audio"
     End If
 Else
     audioencryption = ""
@@ -2675,6 +2679,37 @@ Private Sub AddSystemDRussiaChannels()
     End With
 End Sub
 
+Private Sub AddBSBChannels()
+' Populate frequency_ch with intermediate frequencies (IFs) for BSB satellite receivers
+' Based on information provided by fsphil at https://www.sanslogic.co.uk/dmac/bsb.html
+' This is untested as I don't have a BSB receiver (yet!)
+' We add the frequency (in Hz) as the item data and pass it raw to hacktv
+    With frequency_ch
+        .Clear
+        ' Now/Sky News
+        ' 11.78502 GHz, IF 1015.84 MHz
+        .AddItem "4 (Now)"
+        .ItemData(.NewIndex) = "1015840000"
+        ' Galaxy/Sky One
+        ' 11.86174 GHz, IF 1092.56 MHz
+        .AddItem "8 (Galaxy)"
+        .ItemData(.NewIndex) = "1092560000"
+        ' The Sports Channel/Sky Sports
+        ' 11.93846 GHz, IF 1169.28 MHz
+        .AddItem "12 (Sports Ch)"
+        .ItemData(.NewIndex) = "1169280000"
+        ' The Power Station/Sky Movies Plus
+        ' 12.01518 GHz, IF 1246.00 MHz
+        .AddItem "16 (Power St)"
+        .ItemData(.NewIndex) = "1246000000"
+        ' The Movie Channel
+        ' 12.09190 GHz, IF 1322.72 MHz
+        .AddItem "20 (Movie Ch)"
+        .ItemData(.NewIndex) = "1322720000"
+        .ListIndex = 0
+    End With
+End Sub
+
 Private Sub SetFrequency()
 ' This sub is only needed when the frequency_ch combobox is enabled
     If frequency_ch.Enabled = True Then
@@ -2879,11 +2914,12 @@ Private Sub CheckVideoFormat()
         Exit Sub
     End If
     If sys = "804" Then
-        Call DisableUHF
+        Call EnableUHF
         Call DisableVHF
         Call EnableFMDeviation
         SampleRate.Text = 20.25
-        CustomFreq.Value = True
+        UHF.Value = True
+        Call AddBSBChannels
         sys = "dmac-fm"
         Exit Sub
     End If
@@ -2970,7 +3006,7 @@ Private Sub AddPALEncryptionTypes()
 ' The index integer value is read later and translated to the correct command line parameters
     With encryption_type
         .Clear
-        .AddItem "No encryption"
+        .AddItem "No scrambling"
         .ItemData(.NewIndex) = "600"
         .AddItem "VideoCrypt-I"
         .ItemData(.NewIndex) = "601"
@@ -2995,11 +3031,11 @@ Private Sub AddMACEncryptionTypes()
 ' The index integer value is read later and translated to the correct command line parameters
     With encryption_type
         .Clear
-        .AddItem "No encryption"
+        .AddItem "No scrambling"
         .ItemData(.NewIndex) = "600"
-        .AddItem "EuroCrypt (single cut)"
+        .AddItem "Single cut"
         .ItemData(.NewIndex) = "607"
-        .AddItem "EuroCrypt (double cut)"
+        .AddItem "Double cut"
         .ItemData(.NewIndex) = "608"
         .ListIndex = "0"
     End With
@@ -3009,6 +3045,7 @@ Private Sub CheckEncryptionType()
     encryptiontype = encryption_type.ItemData(encryption_type.ListIndex)
     If encryptiontype = "600" Then
         Call DisableDualVCMode
+        Call DisableAudioEncryption
         encryptiontype = ""
     ElseIf encryptiontype = "606" Then
     ' Hide the encryption_key box and show the vc1key and vc2key boxes
@@ -3031,8 +3068,8 @@ Private Sub CheckEncryptionType()
         If encryptiontype = "603" Then Call AddVCSModes
         If encryptiontype = "604" Then Call AddSysterModes
         If encryptiontype = "605" Then Call AddSysterModes
-        If encryptiontype = "607" Then Call AddECModes
-        If encryptiontype = "608" Then Call AddECModes
+        If encryptiontype = "607" Then Call AddMACModes
+        If encryptiontype = "608" Then Call AddMACModes
         DualVCMode = False
     End If
 End Sub
@@ -3042,7 +3079,7 @@ Private Sub AddVC1Modes()
     SampleRate.Text = "14"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft encryption (no card required)"
+        .AddItem "Free access/soft scrambling (no card required)"
         .ItemData(.NewIndex) = "611"
         If forktype = "CJ" Then
             .AddItem "Conditional access (Sky 12 card)"
@@ -3089,7 +3126,7 @@ Private Sub AddVC2Modes()
     SampleRate.Text = "14"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft encryption (no card required)"
+        .AddItem "Free access/soft scrambling (no card required)"
         .ItemData(.NewIndex) = "631"
         If forktype = "CJ" Then
             .AddItem "Conditional access (Multichoice Europe card)"
@@ -3153,7 +3190,7 @@ Private Sub AddVCSModes()
     encryptiontype = "--videocrypts"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft encryption (no card required)"
+        .AddItem "Free access/soft scrambling (no card required)"
         .ItemData(.NewIndex) = "641"
         .ListIndex = 0
         .AddItem "Conditional access (BBC Select card)"
@@ -3193,31 +3230,33 @@ Private Sub AddSysterModes()
     encryption_key.ListIndex = "0"
 End Sub
 
-Private Sub AddECModes()
-    If encryptiontype = "607" Then
-        encryptiontype = "--eurocrypt"
-    ElseIf encryptiontype = "608" Then
-        encryptiontype = "--eurocrypt-dc"
+Private Sub AddMACModes()
+    If Not forktype = "CJ" Then
+        If encryptiontype = "607" Then encryptiontype = "--single-cut"
+        If encryptiontype = "608" Then encryptiontype = "--double-cut"
+    Else
+        If encryptiontype = "607" Then encryptiontype = "--eurocrypt"
+        If encryptiontype = "608" Then encryptiontype = "--eurocrypt-dc"
     End If
     With encryption_key
         .Clear
-        .AddItem "Free access (no card required)"
+        .AddItem "No conditional access (free)"
         .ItemData(.NewIndex) = "671"
-        .AddItem "M - Conditional access (FilmNet card)"
+        .AddItem "EuroCrypt M (FilmNet card)"
         .ItemData(.NewIndex) = "672"
-        .AddItem "M - Conditional access (TV1000 card)"
+        .AddItem "EuroCrypt M (TV1000 card)"
         .ItemData(.NewIndex) = "673"
-        .AddItem "M - Conditional access (CTV card)"
+        .AddItem "EuroCrypt M (CTV card)"
         .ItemData(.NewIndex) = "674"
-        .AddItem "M - Conditional access (TV Plus card)"
+        .AddItem "EuroCrypt M (TV Plus card)"
         .ItemData(.NewIndex) = "675"
-        .AddItem "S2 - Conditional access (TVS Denmark card)"
+        .AddItem "EuroCrypt S (TVS Denmark card)"
         .ItemData(.NewIndex) = "676"
-        .AddItem "S2 - Conditional access (RDV card)"
+        .AddItem "EuroCrypt S (RDV card)"
         .ItemData(.NewIndex) = "677"
-        .AddItem "S2 - Conditional access (NRK card)"
+        .AddItem "EuroCrypt S (NRK card)"
         .ItemData(.NewIndex) = "678"
-        .AddItem "S2 - Conditional access (CTV card)"
+        .AddItem "EuroCrypt S (CTV card)"
         .ItemData(.NewIndex) = "679"
         .ListIndex = 0
     End With
@@ -3255,7 +3294,15 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "663" Then encryptionkey = "cesfa"
         If encryptionkey = "665" Then encryptionkey = "premiere-fa"
 ' EuroCrypt
-        If encryptionkey = "671" Then encryptionkey = "free"
+' Free mode is handled differently depending on the fork used so let's check
+        If encryptionkey = "671" Then
+            If forktype = "CJ" Then
+                encryptionkey = "free"
+            Else
+                encryptionkey = ""
+            End If
+        End If
+' CA modes are handled the same way
         If encryptionkey = "672" Then encryptionkey = "filmnet"
         If encryptionkey = "673" Then encryptionkey = "tv1000"
         If encryptionkey = "674" Then encryptionkey = "ctv"
@@ -3264,6 +3311,12 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "677" Then encryptionkey = "rdv"
         If encryptionkey = "678" Then encryptionkey = "nrk"
         If encryptionkey = "679" Then encryptionkey = "ctvs"
+' fsphil build uses --single-cut or --double-cut as the encryption type, so we append --eurocrypt to the key above
+        If Not forktype = "CJ" Then
+            If encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
+                If Not encryptionkey = "" Then encryptionkey = "--eurocrypt" & Chr(32) & encryptionkey
+            End If
+        End If
 ' ACP is not supported when encryption is enabled, so disable the option
         ChkACP.Enabled = False
         ChkACP.Value = vbUnchecked
@@ -3275,8 +3328,10 @@ Private Sub CheckEncryptionKey()
         Else
             Call DisableEMMOptions
         End If
-' Enable audio encryption for Syster or Discret modes, disable for anything else
+' Enable audio encryption for Syster, Discret or MAC modes, disable for anything else
         If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
+            Call EnableAudioEncryption
+        ElseIf Not forktype = "CJ" And encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
             Call EnableAudioEncryption
         Else
             Call DisableAudioEncryption
@@ -3674,7 +3729,7 @@ Private Function CheckWinePreReqs() As Boolean
     Dim missinghacktv As Integer
     Dim missinggnome As Integer
 ' Retrieve registry value which contains the gnome-terminal path
-    TerminalPath = GetSetting(App.EXEName, "Settings", "TerminalPath", "")
+    TerminalPath = GetSetting(App.Title, "Settings", "TerminalPath", "")
 ' If the value doesn't exist, set the default location to this directory
     If TerminalPath = "" Then
         TerminalPath = DefaultTerminalPath
