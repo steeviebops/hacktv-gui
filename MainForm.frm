@@ -2106,28 +2106,17 @@ Private Sub ChkAudio_Click()
     If ChkAudio.Value = vbChecked Then
         audiostatus = ""
         If NICAMSupported = True Then Call EnableNICAM
-' If Syster or D11 encryption is enabled, enable the encrypt audio checkbox
-        If forktype = "CJ" Then
-            If encryptiontype = "--syster" Or encryptiontype = "--d11" Then ChkEncryptAudio.Enabled = True
-        Else
-            If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
-            Or encryptiontype = "--double-cut" Then ChkEncryptAudio.Enabled = True
-        End If
+' If Syster, D11 or EuroCrypt are enabled, enable the encrypt audio checkbox
+        If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
+        Or encryptiontype = "--double-cut" Then ChkEncryptAudio.Enabled = True
     Else
         Call DisableNICAM
         audiostatus = "--noaudio"
-' If Syster or D11 encryption is not enabled, disable and grey out the encrypt audio checkbox
-        If forktype = "CJ" Then
-            If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
-                ChkEncryptAudio.Enabled = False
-                ChkEncryptAudio.Value = vbUnchecked
-            End If
-        Else
-            If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
-            Or encryptiontype = "--double-cut" Then
-                ChkEncryptAudio.Enabled = False
-                ChkEncryptAudio.Value = vbUnchecked
-            End If
+' If Syster, D11 or EuroCrypt are not enabled, disable and grey out the encrypt audio checkbox
+        If encryptiontype = "--syster" Or encryptiontype = "--d11" Or encryptiontype = "--single-cut" _
+        Or encryptiontype = "--double-cut" Then
+            ChkEncryptAudio.Enabled = False
+            ChkEncryptAudio.Value = vbUnchecked
         End If
     End If
 End Sub
@@ -2166,7 +2155,7 @@ Private Sub ChkEncryptAudio_Click()
 If ChkEncryptAudio.Value = vbChecked Then
     If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
         audioencryption = "--systeraudio"
-    ElseIf Not forktype = "CJ" And encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
+    ElseIf encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
         audioencryption = "--scramble-audio"
     End If
 Else
@@ -3079,7 +3068,7 @@ Private Sub AddVC1Modes()
     SampleRate.Text = "14"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft scrambling (no card required)"
+        .AddItem "Free access/soft scrambled (no card required)"
         .ItemData(.NewIndex) = "611"
         If forktype = "CJ" Then
             .AddItem "Conditional access (Sky 12 card)"
@@ -3126,7 +3115,7 @@ Private Sub AddVC2Modes()
     SampleRate.Text = "14"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft scrambling (no card required)"
+        .AddItem "Free access/soft scrambled (no card required)"
         .ItemData(.NewIndex) = "631"
         If forktype = "CJ" Then
             .AddItem "Conditional access (Multichoice Europe card)"
@@ -3190,7 +3179,7 @@ Private Sub AddVCSModes()
     encryptiontype = "--videocrypts"
     With encryption_key
         .Clear
-        .AddItem "Free access/soft scrambling (no card required)"
+        .AddItem "Free access/soft scrambled (no card required)"
         .ItemData(.NewIndex) = "641"
         .ListIndex = 0
         .AddItem "Conditional access (BBC Select card)"
@@ -3231,13 +3220,8 @@ Private Sub AddSysterModes()
 End Sub
 
 Private Sub AddMACModes()
-    If Not forktype = "CJ" Then
-        If encryptiontype = "607" Then encryptiontype = "--single-cut"
-        If encryptiontype = "608" Then encryptiontype = "--double-cut"
-    Else
-        If encryptiontype = "607" Then encryptiontype = "--eurocrypt"
-        If encryptiontype = "608" Then encryptiontype = "--eurocrypt-dc"
-    End If
+    If encryptiontype = "607" Then encryptiontype = "--single-cut"
+    If encryptiontype = "608" Then encryptiontype = "--double-cut"
     With encryption_key
         .Clear
         .AddItem "No conditional access (free)"
@@ -3250,13 +3234,13 @@ Private Sub AddMACModes()
         .ItemData(.NewIndex) = "674"
         .AddItem "EuroCrypt M (TV Plus card)"
         .ItemData(.NewIndex) = "675"
-        .AddItem "EuroCrypt S (TVS Denmark card)"
+        .AddItem "EuroCrypt S2 (TVS Denmark card)"
         .ItemData(.NewIndex) = "676"
-        .AddItem "EuroCrypt S (RDV card)"
+        .AddItem "EuroCrypt S2 (RDV card)"
         .ItemData(.NewIndex) = "677"
-        .AddItem "EuroCrypt S (NRK card)"
+        .AddItem "EuroCrypt S2 (NRK card)"
         .ItemData(.NewIndex) = "678"
-        .AddItem "EuroCrypt S (CTV card)"
+        .AddItem "EuroCrypt S2 (CTV card)"
         .ItemData(.NewIndex) = "679"
         .ListIndex = 0
     End With
@@ -3294,29 +3278,15 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "663" Then encryptionkey = "cesfa"
         If encryptionkey = "665" Then encryptionkey = "premiere-fa"
 ' EuroCrypt
-' Free mode is handled differently depending on the fork used so let's check
-        If encryptionkey = "671" Then
-            If forktype = "CJ" Then
-                encryptionkey = "free"
-            Else
-                encryptionkey = ""
-            End If
-        End If
-' CA modes are handled the same way
-        If encryptionkey = "672" Then encryptionkey = "filmnet"
-        If encryptionkey = "673" Then encryptionkey = "tv1000"
-        If encryptionkey = "674" Then encryptionkey = "ctv"
-        If encryptionkey = "675" Then encryptionkey = "tvplus"
-        If encryptionkey = "676" Then encryptionkey = "tvs"
-        If encryptionkey = "677" Then encryptionkey = "rdv"
-        If encryptionkey = "678" Then encryptionkey = "nrk"
-        If encryptionkey = "679" Then encryptionkey = "ctvs"
-' fsphil build uses --single-cut or --double-cut as the encryption type, so we append --eurocrypt to the key above
-        If Not forktype = "CJ" Then
-            If encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
-                If Not encryptionkey = "" Then encryptionkey = "--eurocrypt" & Chr(32) & encryptionkey
-            End If
-        End If
+        If encryptionkey = "671" Then encryptionkey = ""
+        If encryptionkey = "672" Then encryptionkey = "--eurocrypt filmnet"
+        If encryptionkey = "673" Then encryptionkey = "--eurocrypt tv1000"
+        If encryptionkey = "674" Then encryptionkey = "--eurocrypt ctv"
+        If encryptionkey = "675" Then encryptionkey = "--eurocrypt tvplus"
+        If encryptionkey = "676" Then encryptionkey = "--eurocrypt tvs"
+        If encryptionkey = "677" Then encryptionkey = "--eurocrypt rdv"
+        If encryptionkey = "678" Then encryptionkey = "--eurocrypt nrk"
+        If encryptionkey = "679" Then encryptionkey = "--eurocrypt ctvs"
 ' ACP is not supported when encryption is enabled, so disable the option
         ChkACP.Enabled = False
         ChkACP.Value = vbUnchecked
@@ -3329,9 +3299,8 @@ Private Sub CheckEncryptionKey()
             Call DisableEMMOptions
         End If
 ' Enable audio encryption for Syster, Discret or MAC modes, disable for anything else
-        If encryptiontype = "--syster" Or encryptiontype = "--d11" Then
-            Call EnableAudioEncryption
-        ElseIf Not forktype = "CJ" And encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
+        If encryptiontype = "--syster" Or encryptiontype = "--d11" _
+        Or encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
             Call EnableAudioEncryption
         Else
             Call DisableAudioEncryption
