@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form MainForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "GUI frontend for hacktv"
-   ClientHeight    =   6885
+   ClientHeight    =   7245
    ClientLeft      =   1425
    ClientTop       =   1080
    ClientWidth     =   12015
@@ -19,13 +19,114 @@ Begin VB.Form MainForm
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   6885
+   ScaleHeight     =   7245
    ScaleWidth      =   12015
+   Begin VB.Frame FrmScramblingOptions 
+      Caption         =   "Video scrambling options"
+      Height          =   1215
+      Left            =   120
+      TabIndex        =   65
+      Top             =   3840
+      Width           =   6495
+      Begin VB.ComboBox encryption_type 
+         Enabled         =   0   'False
+         Height          =   315
+         Left            =   120
+         Style           =   2  'Dropdown List
+         TabIndex        =   74
+         Top             =   360
+         Width           =   1815
+      End
+      Begin VB.CheckBox ChkEncryptAudio 
+         Caption         =   "Scramble audio"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   120
+         TabIndex        =   73
+         Top             =   840
+         Width           =   1455
+      End
+      Begin VB.CheckBox ChkEnableEMM 
+         Caption         =   "Activate card"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   1800
+         TabIndex        =   72
+         Top             =   840
+         Width           =   1455
+      End
+      Begin VB.CheckBox ChkDisableEMM 
+         Caption         =   "Deactivate card"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   3360
+         TabIndex        =   71
+         Top             =   840
+         Width           =   1575
+      End
+      Begin VB.TextBox CardNumber 
+         BackColor       =   &H8000000F&
+         Enabled         =   0   'False
+         Height          =   285
+         Left            =   5040
+         MaxLength       =   13
+         TabIndex        =   70
+         Top             =   840
+         Width           =   1335
+      End
+      Begin VB.ComboBox vc1key 
+         Height          =   315
+         Left            =   2040
+         Style           =   2  'Dropdown List
+         TabIndex        =   69
+         Top             =   360
+         Visible         =   0   'False
+         Width           =   2115
+      End
+      Begin VB.ComboBox vc2key 
+         Height          =   315
+         Left            =   4260
+         Style           =   2  'Dropdown List
+         TabIndex        =   68
+         Top             =   360
+         Visible         =   0   'False
+         Width           =   2115
+      End
+      Begin VB.CheckBox ChkFindKey 
+         Caption         =   "Find keys on PPV card"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   1800
+         TabIndex        =   66
+         Top             =   840
+         Visible         =   0   'False
+         Width           =   2055
+      End
+      Begin VB.ComboBox encryption_key 
+         Enabled         =   0   'False
+         Height          =   315
+         Left            =   2040
+         Style           =   2  'Dropdown List
+         TabIndex        =   75
+         Top             =   360
+         Width           =   4335
+      End
+      Begin VB.CheckBox ChkShowSerial 
+         Caption         =   "Show card serial"
+         Enabled         =   0   'False
+         Height          =   195
+         Left            =   120
+         TabIndex        =   67
+         Top             =   840
+         Visible         =   0   'False
+         Width           =   1575
+      End
+   End
    Begin VB.Frame FrmTeletext 
       Caption         =   "Teletext options"
       Height          =   1215
       Left            =   6720
-      TabIndex        =   46
+      TabIndex        =   38
       Top             =   120
       Width           =   5175
       Begin VB.PictureBox Picture4 
@@ -34,7 +135,7 @@ Begin VB.Form MainForm
          Left            =   120
          ScaleHeight     =   855
          ScaleWidth      =   4995
-         TabIndex        =   47
+         TabIndex        =   39
          Top             =   240
          Width           =   5000
          Begin VB.CommandButton BtnTeletextBrowseFile 
@@ -42,7 +143,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   1680
-            TabIndex        =   70
+            TabIndex        =   61
             Top             =   480
             Width           =   1600
          End
@@ -50,7 +151,7 @@ Begin VB.Form MainForm
             Caption         =   "Teletext"
             Height          =   255
             Left            =   0
-            TabIndex        =   48
+            TabIndex        =   40
             Top             =   120
             Width           =   975
          End
@@ -59,7 +160,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   285
             Left            =   1080
-            TabIndex        =   49
+            TabIndex        =   41
             Top             =   120
             Width           =   3855
          End
@@ -68,7 +169,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   0
-            TabIndex        =   50
+            TabIndex        =   42
             Top             =   480
             Width           =   1600
          End
@@ -77,7 +178,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   3360
-            TabIndex        =   51
+            TabIndex        =   43
             Top             =   480
             Width           =   1605
          End
@@ -85,42 +186,59 @@ Begin VB.Form MainForm
    End
    Begin VB.Frame FrmAdvanced 
       Caption         =   "Advanced options"
-      Height          =   4215
+      Height          =   4575
       Left            =   6720
-      TabIndex        =   52
+      TabIndex        =   44
       Top             =   1440
       Width           =   5175
-      Begin VB.CheckBox ChkCloseOnExit 
-         Caption         =   "Don't close console window on exit"
+      Begin VB.CheckBox ChkInterlace 
+         Caption         =   "Interlaced video"
          Height          =   315
          Left            =   120
-         TabIndex        =   67
-         Top             =   3840
-         Width           =   3015
+         TabIndex        =   64
+         Top             =   960
+         Width           =   1815
+      End
+      Begin VB.CheckBox ChkARCorrection 
+         Caption         =   "16:9 source on 4:3 display"
+         Height          =   315
+         Left            =   120
+         TabIndex        =   63
+         Top             =   2040
+         Width           =   2535
+      End
+      Begin VB.ComboBox ARCorrectionMode 
+         Enabled         =   0   'False
+         Height          =   315
+         Left            =   3600
+         Style           =   2  'Dropdown List
+         TabIndex        =   62
+         Top             =   2040
+         Width           =   1455
       End
       Begin VB.CheckBox ChkShowECM 
          Caption         =   "Show ECMs on console"
          Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   65
-         Top             =   3120
+         TabIndex        =   57
+         Top             =   3840
          Width           =   2055
       End
       Begin VB.CheckBox ChkVerbose 
          Caption         =   "Enable verbose output"
          Height          =   315
          Left            =   120
-         TabIndex        =   66
-         Top             =   3480
+         TabIndex        =   58
+         Top             =   4200
          Width           =   2415
       End
       Begin VB.CheckBox ChkWSS 
          Caption         =   "Widescreen signalling (WSS) on line 23"
          Height          =   315
          Left            =   120
-         TabIndex        =   56
-         Top             =   1320
+         TabIndex        =   48
+         Top             =   1680
          Width           =   3255
       End
       Begin VB.ComboBox wss_mode 
@@ -128,16 +246,16 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   3600
          Style           =   2  'Dropdown List
-         TabIndex        =   57
-         Top             =   1320
+         TabIndex        =   49
+         Top             =   1680
          Width           =   1455
       End
       Begin VB.CheckBox ChkGamma 
          Caption         =   "Gamma correction"
          Height          =   315
          Left            =   120
-         TabIndex        =   58
-         Top             =   1680
+         TabIndex        =   50
+         Top             =   2400
          Width           =   2175
       End
       Begin VB.TextBox gammavalue 
@@ -146,16 +264,16 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   4
-         TabIndex        =   59
-         Top             =   1680
+         TabIndex        =   51
+         Top             =   2400
          Width           =   735
       End
       Begin VB.CheckBox ChkOutputLevel 
          Caption         =   "Output level"
          Height          =   315
          Left            =   120
-         TabIndex        =   60
-         Top             =   2040
+         TabIndex        =   52
+         Top             =   2760
          Width           =   1935
       End
       Begin VB.TextBox outputlevelvalue 
@@ -164,16 +282,16 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   4
-         TabIndex        =   61
-         Top             =   2040
+         TabIndex        =   53
+         Top             =   2760
          Width           =   735
       End
       Begin VB.CheckBox ChkFMDev 
          Caption         =   "FM deviation (MHz)"
          Height          =   315
          Left            =   120
-         TabIndex        =   62
-         Top             =   2400
+         TabIndex        =   54
+         Top             =   3120
          Width           =   1935
       End
       Begin VB.TextBox fm_deviation 
@@ -182,31 +300,31 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   5
-         TabIndex        =   63
-         Top             =   2400
+         TabIndex        =   55
+         Top             =   3120
          Width           =   735
       End
       Begin VB.CheckBox ChkACP 
          Caption         =   "Macrovision ACP"
          Height          =   315
          Left            =   120
-         TabIndex        =   55
-         Top             =   960
+         TabIndex        =   47
+         Top             =   1320
          Width           =   1575
       End
       Begin VB.CheckBox ChkVideoFilter 
          Caption         =   "VSB-AM filter"
          Height          =   315
          Left            =   120
-         TabIndex        =   64
-         Top             =   2760
+         TabIndex        =   56
+         Top             =   3480
          Width           =   3135
       End
       Begin VB.CheckBox ChkAudio 
          Caption         =   "Audio enabled"
          Height          =   315
          Left            =   120
-         TabIndex        =   53
+         TabIndex        =   45
          Top             =   240
          Width           =   1455
       End
@@ -215,7 +333,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   54
+         TabIndex        =   46
          Top             =   600
          Width           =   1575
       End
@@ -225,24 +343,24 @@ Begin VB.Form MainForm
       Height          =   285
       Left            =   120
       Locked          =   -1  'True
-      TabIndex        =   69
-      Top             =   6480
+      TabIndex        =   60
+      Top             =   6840
       Width           =   11775
    End
    Begin VB.CommandButton BtnRun 
       Caption         =   "Run hacktv..."
-      Height          =   375
+      Height          =   615
       Left            =   6720
-      TabIndex        =   68
-      Top             =   5880
+      TabIndex        =   59
+      Top             =   6120
       Width           =   5175
    End
    Begin VB.Frame FrmFrequency 
       Caption         =   "Frequency and TX options"
-      Height          =   1695
+      Height          =   1575
       Left            =   120
-      TabIndex        =   34
-      Top             =   4680
+      TabIndex        =   26
+      Top             =   5160
       Width           =   6495
       Begin VB.PictureBox Picture3 
          BorderStyle     =   0  'None
@@ -250,14 +368,14 @@ Begin VB.Form MainForm
          Left            =   120
          ScaleHeight     =   255
          ScaleWidth      =   4095
-         TabIndex        =   35
+         TabIndex        =   27
          Top             =   360
          Width           =   4095
          Begin VB.OptionButton VHF 
             Caption         =   "VHF"
             Height          =   255
             Left            =   1200
-            TabIndex        =   37
+            TabIndex        =   29
             Top             =   0
             Width           =   615
          End
@@ -265,7 +383,7 @@ Begin VB.Form MainForm
             Caption         =   "UHF"
             Height          =   255
             Left            =   0
-            TabIndex        =   36
+            TabIndex        =   28
             Top             =   0
             Width           =   735
          End
@@ -273,7 +391,7 @@ Begin VB.Form MainForm
             Caption         =   "Custom"
             Height          =   255
             Left            =   3000
-            TabIndex        =   38
+            TabIndex        =   30
             Top             =   0
             Width           =   975
          End
@@ -282,7 +400,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   1320
          MaxLength       =   2
-         TabIndex        =   44
+         TabIndex        =   36
          Text            =   "0"
          Top             =   1200
          Width           =   1455
@@ -292,7 +410,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4680
          MaxLength       =   7
-         TabIndex        =   42
+         TabIndex        =   34
          Top             =   720
          Width           =   1695
       End
@@ -300,7 +418,7 @@ Begin VB.Form MainForm
          Caption         =   "TX RF amplifier"
          Height          =   255
          Left            =   3120
-         TabIndex        =   45
+         TabIndex        =   37
          Top             =   1200
          Width           =   1575
       End
@@ -308,7 +426,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   1320
          Style           =   2  'Dropdown List
-         TabIndex        =   40
+         TabIndex        =   32
          Top             =   720
          Width           =   1455
       End
@@ -316,7 +434,7 @@ Begin VB.Form MainForm
          Caption         =   "TX gain (dB)"
          Height          =   255
          Left            =   120
-         TabIndex        =   43
+         TabIndex        =   35
          Top             =   1200
          Width           =   975
       End
@@ -324,7 +442,7 @@ Begin VB.Form MainForm
          Caption         =   "Frequency (MHz)"
          Height          =   255
          Left            =   3120
-         TabIndex        =   41
+         TabIndex        =   33
          Top             =   720
          Width           =   1335
       End
@@ -332,73 +450,18 @@ Begin VB.Form MainForm
          Caption         =   "Channel"
          Height          =   255
          Left            =   120
-         TabIndex        =   39
+         TabIndex        =   31
          Top             =   720
          Width           =   855
       End
    End
    Begin VB.Frame FrmVideoFormat 
-      Caption         =   "Video format and scrambling options"
-      Height          =   2055
+      Caption         =   "Video format options"
+      Height          =   1215
       Left            =   120
       TabIndex        =   16
       Top             =   2520
       Width           =   6495
-      Begin VB.ComboBox vc2key 
-         Height          =   315
-         Left            =   4260
-         Style           =   2  'Dropdown List
-         TabIndex        =   29
-         Top             =   1200
-         Visible         =   0   'False
-         Width           =   2115
-      End
-      Begin VB.ComboBox vc1key 
-         Height          =   315
-         Left            =   2040
-         Style           =   2  'Dropdown List
-         TabIndex        =   28
-         Top             =   1200
-         Visible         =   0   'False
-         Width           =   2115
-      End
-      Begin VB.TextBox CardNumber 
-         BackColor       =   &H8000000F&
-         Enabled         =   0   'False
-         Height          =   285
-         Left            =   5040
-         MaxLength       =   13
-         TabIndex        =   33
-         Top             =   1680
-         Width           =   1335
-      End
-      Begin VB.CheckBox ChkDisableEMM 
-         Caption         =   "Deactivate card"
-         Enabled         =   0   'False
-         Height          =   195
-         Left            =   3240
-         TabIndex        =   32
-         Top             =   1680
-         Width           =   1575
-      End
-      Begin VB.CheckBox ChkEnableEMM 
-         Caption         =   "Activate card"
-         Enabled         =   0   'False
-         Height          =   195
-         Left            =   1680
-         TabIndex        =   31
-         Top             =   1680
-         Width           =   1455
-      End
-      Begin VB.CheckBox ChkEncryptAudio 
-         Caption         =   "Scramble audio"
-         Enabled         =   0   'False
-         Height          =   195
-         Left            =   120
-         TabIndex        =   30
-         Top             =   1680
-         Width           =   1455
-      End
       Begin VB.PictureBox Picture2 
          BorderStyle     =   0  'None
          Height          =   255
@@ -457,15 +520,6 @@ Begin VB.Form MainForm
          Top             =   720
          Width           =   735
       End
-      Begin VB.ComboBox encryption_type 
-         Enabled         =   0   'False
-         Height          =   315
-         Left            =   120
-         Style           =   2  'Dropdown List
-         TabIndex        =   26
-         Top             =   1200
-         Width           =   1815
-      End
       Begin VB.ComboBox VideoFormat 
          Height          =   315
          Left            =   120
@@ -473,15 +527,6 @@ Begin VB.Form MainForm
          TabIndex        =   23
          Top             =   720
          Width           =   3975
-      End
-      Begin VB.ComboBox encryption_key 
-         Enabled         =   0   'False
-         Height          =   315
-         Left            =   2040
-         Style           =   2  'Dropdown List
-         TabIndex        =   27
-         Top             =   1200
-         Width           =   4335
       End
       Begin VB.Label LblSampleRate 
          Caption         =   "Sample rate (MHz)"
@@ -660,6 +705,9 @@ Begin VB.Form MainForm
       Begin VB.Menu bar4 
          Caption         =   "-"
       End
+      Begin VB.Menu CloseOnExit 
+         Caption         =   "Don't close on exit"
+      End
       Begin VB.Menu GenerateOnly 
          Caption         =   "Generate syntax only"
       End
@@ -694,9 +742,6 @@ Public forktype As String
 Dim demotext As String
 Dim TeefaxPath As String
 
-' Declare a variable used for the "close on exit" setting
-Public closeonexit As Boolean
-
 ' Declare variables used for path resolution
 Public HackTVEXEName As String
 Public HackTVPath As String
@@ -725,6 +770,10 @@ Dim StopProcessing As Boolean
 
 ' Declare boolean used for dual VideoCrypt mode
 Dim DualVCMode As Boolean
+
+' Declare a variable for storing the default sample rate for the selected video mode
+' This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
+Dim DefaultSampleRate As String
 
 ' Declare all variables used for storing parameters
 Dim inputsource As String
@@ -756,6 +805,10 @@ Dim EMMParam As String
 Dim TruncatedCardNumber As String
 Dim ShowECMParam As String
 Dim SubtitlesParam As String
+Dim ScalingMode As String
+Dim Interlaced As String
+Dim ShowCardSerial As String
+Dim FindKey As String
 
 ' Initialise XP-ish window styles
 ' Also initialise a workaround for a bug which causes a VB6 application to crash on exit if
@@ -825,12 +878,14 @@ Private Sub GenerateOnly_Click()
     If GenerateOnly.Checked = False Then
         GenerateOnly.Checked = True
         BtnRun.Caption = "Generate syntax"
-        ChkCloseOnExit.Value = vbUnchecked
-        ChkCloseOnExit.Enabled = False
+        ' Disable the "close on exit" option when "generate only" is enabled
+        CloseOnExit.Checked = False
+        CloseOnExit.Enabled = False
     Else
         GenerateOnly.Checked = False
         BtnRun.Caption = "Run hacktv..."
-        ChkCloseOnExit.Enabled = True
+        ' Re-enable the "close on exit" option
+        CloseOnExit.Enabled = True
     End If
 End Sub
 
@@ -899,6 +954,9 @@ Private Sub fsphil()
     ChkLogo.Enabled = False
     ChkSubtitles.Value = vbUnchecked
     ChkSubtitles.Enabled = False
+    ChkARCorrection.Value = vbUnchecked
+    ChkARCorrection.Enabled = False
+    ARCorrectionMode.ListIndex = -1
     forktype = ""
     Call DisablePosition
     If PAL.Value = True Then Call AddPALEncryptionTypes
@@ -914,6 +972,9 @@ Private Sub captainjack()
         Call EnablePosition
         ChkLogo.Enabled = True
         ChkSubtitles.Enabled = True
+        ChkARCorrection.Enabled = True
+        If ARCorrectionMode.ListCount = 0 Then Call AddAspectRatioScalingOptions
+        ARCorrectionMode.ListIndex = 0
     End If
 ' Set the forktype variable so we know what features to enable or disable later
     forktype = "CJ"
@@ -930,7 +991,7 @@ Private Sub about_Click()
     Dim lblTitle As String
     Dim lblDescription As String
     lblTitle = "About " & App.Title
-    lblDescription = "A GUI frontend for hacktv" & vbCrLf & "Version " & App.Major & "." & App.Minor & " (VB6)" _
+    lblDescription = "A GUI frontend for hacktv" & vbCrLf & "Version " & App.Major & "." & App.Minor _
     & vbCrLf & "Created 2019-2020 by Stephen McGarry" & vbCrLf & vbCrLf _
     & "This application has no affiliation with hacktv's developers and is provided for your convenience."
     MsgBox lblDescription, vbInformation, lblTitle
@@ -949,6 +1010,31 @@ Private Sub ChkSubtitles_Click()
         TxtSubtitleIndex.BackColor = vbButtonFace
         SubtitlesParam = ""
     End If
+End Sub
+
+Private Sub ChkARCorrection_Click()
+    If ChkARCorrection.Value = vbChecked Then
+        ARCorrectionMode.Enabled = True
+    Else
+        ARCorrectionMode.Enabled = False
+        ARCorrectionMode.ListIndex = 0
+    End If
+End Sub
+
+Private Sub AddAspectRatioScalingOptions()
+' Populate the ARCorrectionMode combobox with the arguments for scaling 16:9 content to fit a 4:3 display
+' The index integer value is read later and translated to the correct command line parameters
+    With ARCorrectionMode
+        ' Default behaviour, stretches the video vertically to cover the entire screen
+        .AddItem "Stretched"
+        .ItemData(.NewIndex) = "2101"
+        ' Letterboxes the video by adding black bars to the top and bottom
+        .AddItem "Letterboxed"
+        .ItemData(.NewIndex) = "2102"
+        ' Crops the video by zooming it to fit the 4:3 display and losing the sides
+        .AddItem "Cropped"
+        .ItemData(.NewIndex) = "2103"
+    End With
 End Sub
 
 Private Sub AddWSSModes()
@@ -1016,6 +1102,30 @@ Private Sub ChkGamma_Click()
     End If
 End Sub
 
+Private Sub ChkShowSerial_Click()
+    If ChkShowSerial.Value = vbChecked Then
+        ShowCardSerial = "--showserial"
+    Else
+        ShowCardSerial = ""
+    End If
+End Sub
+
+Private Sub ChkFindKey_Click()
+    If ChkFindKey.Value = vbChecked Then
+        FindKey = "--findkey"
+    Else
+        FindKey = ""
+    End If
+End Sub
+
+Private Sub ChkInterlace_Click()
+    If ChkInterlace.Value = vbChecked Then
+        Interlaced = "--interlace"
+    Else
+        Interlaced = ""
+    End If
+End Sub
+
 Private Sub EnablePosition()
     ChkPosition.Enabled = True
 End Sub
@@ -1061,12 +1171,12 @@ Private Sub ChkShowECM_Click()
     End If
 End Sub
 
-Private Sub ChkCloseOnExit_Click()
+Private Sub CloseOnExit_Click()
 ' If "don't close on exit" is enabled or disabled, set the closeonexit variable accordingly
-    If ChkCloseOnExit.Value = vbChecked Then
-        closeonexit = True
+    If CloseOnExit.Checked = False Then
+        CloseOnExit.Checked = True
     Else
-        closeonexit = False
+        CloseOnExit.Checked = False
     End If
 End Sub
 
@@ -1163,14 +1273,15 @@ Private Sub NewFile_Click()
         Control.Value = ""
     Next
     
+    CloseOnExit.Checked = False
+    Call AddWSSModes
+    If forktype = "" Then Call fsphil
+    If forktype = "CJ" Then Call captainjack
     ChkAudio.Value = vbChecked
     UHF.Value = True
     PAL.Value = True
     LocalSource.Value = True
     txgain.Text = 0
-    Call AddWSSModes
-    If forktype = "" Then Call fsphil
-    If forktype = "CJ" Then Call captainjack
     If Not TitleBar = "" Then Caption = TitleBar
     SaveFile.Caption = "Save..."
     ConfigFileName = ""
@@ -1210,146 +1321,116 @@ Private Sub SaveFileAs_Click()
 End Sub
 
 Private Sub SaveConfigFile(ByVal FileName As String)
+    ' Write file structure
     Open FileName For Output As #iFileNo
-    Print #iFileNo, "; hacktv-gui configuration file. Do not edit this file directly." & vbCrLf
+    Print #iFileNo, "[hacktv]" & vbCrLf & vbCrLf & "[hacktv-gui3]"
     Close #iFileNo
-    ' Save application version to INI file
-    WriteIniValue FileName, App.Title, "version", App.Major & "." & App.Minor
-    ' Save current fork and append a blank line below it for clarity
-    If forktype = "CJ" Then
-        WriteIniValue FileName, App.Title, "fork", "CaptainJack" & vbCrLf
-    Else
-        WriteIniValue FileName, App.Title, "fork", "fsphil" & vbCrLf
-    End If
+    ' Save current fork if applicable
+    If forktype = "CJ" Then WriteIniValue FileName, "hacktv-gui3", "fork", "CaptainJack"
     ' Input source or test card
-    If input_source.Enabled = True Then
-        WriteIniValue FileName, "Settings", "source", input_source.Text
+    If input_source.Enabled = False Then
+        WriteIniValue FileName, "hacktv", "input", "test:colourbars"
+    ElseIf LCase(Right$(input_source.Text, 4)) = ".m3u" Then
+        Dim m3uarrayindex As Integer
+        m3uarrayindex = M3USource.ItemData(M3USource.ListIndex)
+        WriteIniValue FileName, "hacktv", "input", URL(m3uarrayindex)
+        WriteIniValue FileName, "hacktv-gui3", "m3usource", input_source.Text
+        WriteIniValue FileName, "hacktv-gui3", "m3uindex", M3USource.ListIndex
     Else
-        WriteIniValue FileName, "Settings", "source", "test"
-    End If
-    If LCase(Right$(input_source.Text, 4)) = ".m3u" Then
-        WriteIniValue FileName, "Settings", "M3Uindex", M3USource.ListIndex
-    Else
-        WriteIniValue FileName, "Settings", "M3Uindex", ""
+        WriteIniValue FileName, "hacktv", "input", input_source.Text
     End If
     ' Video format
-    If PAL.Value = True Then WriteIniValue FileName, "Settings", "videoformat", "0"
-    If NTSC.Value = True Then WriteIniValue FileName, "Settings", "videoformat", "1"
-    If SECAM.Value = True Then WriteIniValue FileName, "Settings", "videoformat", "2"
-    If BW.Value = True Then WriteIniValue FileName, "Settings", "videoformat", "3"
-    If MAC.Value = True Then WriteIniValue FileName, "Settings", "videoformat", "4"
-    ' Video mode
-    WriteIniValue FileName, "Settings", "mode", VideoFormat.ListIndex
+    WriteIniValue FileName, "hacktv", "mode", sys
     ' Frequency
-    If UHF.Value = True Then
-        WriteIniValue FileName, "Settings", "band", "0"
-        WriteIniValue FileName, "Settings", "channel", frequency_ch.ListIndex
-        WriteIniValue FileName, "Settings", "frequency", ""
-    End If
-    If VHF.Value = True Then
-        WriteIniValue FileName, "Settings", "band", "1"
-        WriteIniValue FileName, "Settings", "channel", frequency_ch.ListIndex
-        WriteIniValue FileName, "Settings", "frequency", ""
-    End If
-    If CustomFreq.Value = True Then
-        WriteIniValue FileName, "Settings", "band", "2"
-        WriteIniValue FileName, "Settings", "channel", ""
-        WriteIniValue FileName, "Settings", "frequency", frequency_mhz.Text
-    End If
-    ' Gain
-    WriteIniValue FileName, "Settings", "gain", txgain.Text
-    ' RF Amp
-    WriteIniValue FileName, "Settings", "amp", ChkRFAmp.Value
+    WriteIniValue FileName, "hacktv-gui3", "channel", frequency_ch.Text
+    WriteIniValue FileName, "hacktv", "frequency", frequency_mhz.Text * 1000000
     ' Sample rate
-    WriteIniValue FileName, "Settings", "samplerate", SampleRate.Text
-     ' Output level
-    WriteIniValue FileName, "Settings", "level", ChkOutputLevel.Value
-    WriteIniValue FileName, "Settings", "levelValue", outputlevelvalue.Text
+    WriteIniValue FileName, "hacktv", "samplerate", SampleRate.Text * 1000000
+    ' Gain
+    WriteIniValue FileName, "hacktv", "gain", txgain.Text
+    ' RF Amp
+    If ChkRFAmp.Value = vbChecked Then WriteIniValue FileName, "hacktv", "amp", ChkRFAmp.Value
+    ' Output level
+    If ChkOutputLevel.Value = vbChecked Then WriteIniValue FileName, "hacktv", "level", outputlevelvalue.Text
     ' FM deviation
-    WriteIniValue FileName, "Settings", "deviation", ChkFMDev.Value
-    WriteIniValue FileName, "Settings", "deviationValue", fm_deviation.Text
+    If ChkFMDev.Value = vbChecked Then WriteIniValue FileName, "hacktv", "deviation", fm_deviation.Text * 1000000
     ' Gamma
-    WriteIniValue FileName, "Settings", "gamma", ChkGamma.Value
-    WriteIniValue FileName, "Settings", "gammaValue", gammavalue.Text
+    If ChkGamma.Value = vbChecked Then WriteIniValue FileName, "hacktv", "gamma", gammavalue.Text
     ' Repeat
-    WriteIniValue FileName, "Settings", "repeat", ChkRepeat.Value
+    If ChkRepeat.Value = vbChecked Then WriteIniValue FileName, "hacktv", "repeat", ChkRepeat.Value
     ' Position
-    WriteIniValue FileName, "Settings", "position", ChkPosition.Value
-    WriteIniValue FileName, "Settings", "positionValue", positionValue.Text
+    If ChkPosition.Value = vbChecked Then WriteIniValue FileName, "hacktv", "position", positionValue.Text
     ' Verbose
-    WriteIniValue FileName, "Settings", "verbose", ChkVerbose.Value
+    If ChkVerbose.Value = vbChecked Then WriteIniValue FileName, "hacktv", "verbose", ChkVerbose.Value
     ' Logo
-    WriteIniValue FileName, "Settings", "logo", ChkLogo.Value
-    If ChkLogo.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "logoValue", LogoFolder.ListIndex
-    Else
-        WriteIniValue FileName, "Settings", "logoValue", ""
-    End If
+    If ChkLogo.Value = vbChecked Then WriteIniValue FileName, "hacktv", "logo", LogoFolder.Text
     ' Timestamp
-    WriteIniValue FileName, "Settings", "timestamp", ChkTimestamp.Value
+    If ChkTimestamp.Value = vbChecked Then WriteIniValue FileName, "hacktv", "timestamp", ChkTimestamp.Value
+    ' Interlace
+    If ChkInterlace.Value = vbChecked Then WriteIniValue FileName, "hacktv", "interlace", ChkInterlace.Value
     ' Teletext
-    WriteIniValue FileName, "Settings", "teletext", ChkTeletext.Value
-    If ChkTeletext.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "teletextpath", teletext_source.Text
-    Else
-        WriteIniValue FileName, "Settings", "teletextpath", ""
+    If LCase(Right$(teletext_source.Text, 4)) = ".t42" Then
+        WriteIniValue FileName, "hacktv", "teletext", "raw:" & teletext_source.Text
+    ElseIf Not teletext_source.Text = "" Then
+        WriteIniValue FileName, "hacktv", "teletext", teletext_source.Text
     End If
     ' WSS
-    WriteIniValue FileName, "Settings", "wss", ChkWSS.Value
-    If ChkWSS.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "wssaspect", wss_mode.ListIndex
-        Else
-        WriteIniValue FileName, "Settings", "wssaspect", ""
-    End If
+    ' We increase the value by one, because zero is interpreted as "option disabled" while 1 is
+    ' interpreted as "auto". We will subtract this again when opening.
+    If ChkWSS.Value = vbChecked Then WriteIniValue FileName, "hacktv", "wss", wss_mode.ListIndex + 1
+    ' AR Correction
+    If ChkARCorrection.Value = vbChecked Then WriteIniValue FileName, "hacktv", "arcorrection", ARCorrectionMode.ListIndex
     ' Encryption
-    WriteIniValue FileName, "Settings", "encryptiontype", encryption_type.ListIndex
     If DualVCMode = False Then
-        If encryption_type.ListIndex = 0 Then
-            WriteIniValue FileName, "Settings", "encryptionkey", ""
-            WriteIniValue FileName, "Settings", "vc1key", ""
-            WriteIniValue FileName, "Settings", "vc2key", ""
-        Else
-            WriteIniValue FileName, "Settings", "encryptionkey", encryption_key.ListIndex
-            WriteIniValue FileName, "Settings", "vc1key", ""
-            WriteIniValue FileName, "Settings", "vc2key", ""
+        If encryptiontype = "--single-cut" Or encryptiontype = "--double-cut" Then
+            WriteIniValue FileName, "hacktv", "scramblingtype", Mid$(encryptiontype, 3)
+            WriteIniValue FileName, "hacktv", "scramblingkey", Mid$(encryptionkey, 3)
+        ElseIf Not encryption_type.ListIndex = 0 Then
+            WriteIniValue FileName, "hacktv", "scramblingtype", Mid$(encryptiontype, 3)
+            WriteIniValue FileName, "hacktv", "scramblingkey", encryptionkey
         End If
     ElseIf DualVCMode = True Then
-        WriteIniValue FileName, "Settings", "encryptionkey", ""
-        WriteIniValue FileName, "Settings", "vc1key", vc1key.ListIndex
-        WriteIniValue FileName, "Settings", "vc2key", vc2key.ListIndex
+        WriteIniValue FileName, "hacktv", "scramblingtype", "videocrypt1+2"
+        WriteIniValue FileName, "hacktv", "scramblingkey", Mid$(encryptiontype, 14)
+        WriteIniValue FileName, "hacktv", "scramblingkey2", Mid$(encryptionkey, 15)
     End If
     ' EMM
     If ChkEnableEMM.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "emm", "1"
-        WriteIniValue FileName, "Settings", "cardnumber", CardNumber.Text
+        WriteIniValue FileName, "hacktv", "emm", "1"
+        If Len(CardNumber.Text) = 9 Then
+            WriteIniValue FileName, "hacktv", "cardnumber", Left$(CardNumber.Text, Len(CardNumber.Text) - 1)
+        ElseIf Len(CardNumber.Text) = 13 Then
+            WriteIniValue FileName, "hacktv", "cardnumber", Mid$(CardNumber.Text, 5, 8)
+            WriteIniValue FileName, "hacktv-gui3", "13digitprefix", Left(CardNumber.Text, 4)
+        End If
     ElseIf ChkDisableEMM.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "emm", "2"
-        WriteIniValue FileName, "Settings", "cardnumber", CardNumber.Text
-    Else
-        WriteIniValue FileName, "Settings", "emm", "0"
-        WriteIniValue FileName, "Settings", "cardnumber", ""
+        WriteIniValue FileName, "hacktv", "emm", "2"
+        If Len(CardNumber.Text) = 9 Then
+            WriteIniValue FileName, "hacktv", "cardnumber", Left$(CardNumber.Text, 8)
+        ElseIf Len(CardNumber.Text) = 13 Then
+            WriteIniValue FileName, "hacktv", "cardnumber", Mid$(CardNumber.Text, 5, 8)
+            WriteIniValue FileName, "hacktv-gui3", "13digitprefix", Left(CardNumber.Text, 4)
+        End If
     End If
+    ' Show card serial
+    If ChkShowSerial.Value = vbChecked Then WriteIniValue FileName, "hacktv", "showserial", ChkShowSerial.Value
+    ' Brute force PPV key
+    If ChkFindKey.Value = vbChecked Then WriteIniValue FileName, "hacktv", "findkey", ChkFindKey.Value
     ' Encrypt audio
-    WriteIniValue FileName, "Settings", "systeraudio", ChkEncryptAudio.Value
+    If ChkEncryptAudio.Value = vbChecked Then WriteIniValue FileName, "hacktv", "scramble-audio", ChkEncryptAudio.Value
     ' ACP
-    WriteIniValue FileName, "Settings", "acp", ChkACP.Value
+    If ChkACP.Value = vbChecked Then WriteIniValue FileName, "hacktv", "acp", ChkACP.Value
     ' Filter
-    WriteIniValue FileName, "Settings", "filter", ChkVideoFilter.Value
+    If ChkVideoFilter.Value = vbChecked Then WriteIniValue FileName, "hacktv", "filter", ChkVideoFilter.Value
     ' Audio
-    WriteIniValue FileName, "Settings", "audio", ChkAudio.Value
+    If ChkAudio.Value = vbChecked Then WriteIniValue FileName, "hacktv", "audio", ChkAudio.Value
     ' NICAM
-    WriteIniValue FileName, "Settings", "nicam", ChkNICAM.Value
+    If ChkNICAM.Value = vbChecked Then WriteIniValue FileName, "hacktv", "nicam", ChkNICAM.Value
     ' Show ECM
-    WriteIniValue FileName, "Settings", "showecm", ChkShowECM.Value
+    If ChkShowECM.Value = vbChecked Then WriteIniValue FileName, "hacktv", "showecm", ChkShowECM.Value
     ' Subtitles
-    WriteIniValue FileName, "Settings", "subtitles", ChkSubtitles.Value
-    If ChkSubtitles.Value = vbChecked Then
-        WriteIniValue FileName, "Settings", "subtitleindex", TxtSubtitleIndex.Text
-    Else
-        WriteIniValue FileName, "Settings", "subtitleindex", ""
-    End If
-    ' Close on exit
-    WriteIniValue FileName, "Settings", "dontcloseonexit", ChkCloseOnExit.Value
+    If ChkSubtitles.Value = vbChecked Then WriteIniValue FileName, "hacktv", "subtitles", ChkSubtitles.Value
+    If ChkSubtitles.Value = vbChecked Then WriteIniValue FileName, "hacktv", "subtitleindex", TxtSubtitleIndex.Text
     ' Display the opened filename in the title bar
     If TitleBarChanged = False Then TitleBar = Caption
     TitleBarChanged = True
@@ -1359,8 +1440,6 @@ End Sub
 
 Private Sub OpenFile_Click()
     Dim fData As String
-    Dim WrongFork As String
-    WrongFork = "Unable to load this file because it was created with a different hacktv fork."
     iFileNo = FreeFile
     ' If a file was specified as a command line parameter, set it as the file to open
     If Command = "" Or FileOpened = True Then
@@ -1406,7 +1485,7 @@ Private Sub OpenFile_Click()
             End If
         End If
     End If
-    ' Open the file to check for the [hacktv-gui] section. This ensures that it's a valid file.
+    ' Open the file to check for the [hacktv] section. This ensures that it's a valid file.
     ' We limit it to 50 lines to avoid performance or buffer overrun issues
     Dim linecounter As Integer
     linecounter = 0
@@ -1416,10 +1495,13 @@ Private Sub OpenFile_Click()
         Line Input #iFileNo, fData
         linecounter = linecounter + 1
         ' Stop processing if or when we find what we need
-        If InStr(fData, "[" & App.Title & "]") > 0 Then Exit Do
+        If fData = "[" & App.Title & "]" Or fData = "[hacktv]" Then Exit Do
         Loop
     Close #iFileNo
-    If Not InStr(fData, "[" & App.Title & "]") > 0 Then
+    ' Fix for preference files with Unix-style line breaks (LF only)
+    If Mid$(fData, 9, 1) = vbLf Then fData = Left$(fData, 8)
+    ' If the correct header is not found, generate an error and stop processing
+    If Not fData = "[" & App.Title & "]" And Not fData = "[hacktv]" Then
         MsgBox "Invalid configuration file.", vbCritical, App.Title
         FileOpened = True
         Call NewFile_Click
@@ -1428,16 +1510,477 @@ Private Sub OpenFile_Click()
     On Error Resume Next
     ' If the path is not fully qualified, add the current working directory path to it
     If Not Mid(ConfigFileName, 2, 1) = ":" Then ConfigFileName = CurDir & Chr(92) & ConfigFileName
-    ' Check if we can read the file
-    If ReadIniValue(ConfigFileName, App.Title, "version") = "" Then
-        MsgBox "File access error. Please file a bug report.", vbCritical, App.Title
+    ' Check the file format
+    If fData = "[hacktv]" Then
+        Call OpenConfigFile(ConfigFileName)
+    ElseIf fData = "[hacktv-gui]" Then
+    ' Inform that this file is in the old format
+        MsgBox "This file was created in an older version of the application." & vbCrLf _
+               & "The save file format has been changed in version 3.0. Older files will continue to load for the time being." & vbCrLf & vbCrLf _
+               & "You can convert the file to the new format by simply saving it again." _
+                , vbInformation, App.Title
+        Call LegacyOpenConfigFile(ConfigFileName)
+    Else
+    End If
+    If Not ConfigFileName = "" Then
+        ' Display the opened filename in the title bar
+        ' Back up the original caption once
+        If TitleBarChanged = False Then TitleBar = Caption
+        TitleBarChanged = True
+        ' Set the caption to the backed up name and the filename
+        If fData = "[hacktv]" Then
+            Caption = TitleBar & " - " & Mid(ConfigFileName, InStrRev(ConfigFileName, "\") + 1, Len(ConfigFileName))
+        ' Add "(compatibility mode)" to the title bar if the save file is in the old format
+        ElseIf fData = "[hacktv-gui]" Then
+            Caption = TitleBar & " - " & Mid(ConfigFileName, InStrRev(ConfigFileName, "\") + 1, Len(ConfigFileName)) & " (compatibility mode)"
+        End If
+        SaveFile.Caption = "Save"
+        ' Set the FileOpened value to True to allow us to open a second file after accepting command line parameters
+        FileOpened = True
+    End If
     Exit Sub
+FileAccessError:
+    MsgBox "Unable to access the requested file. It may be locked by another process or you may not have permission to access it.", vbCritical, App.Title
+End Sub
+
+Private Sub OpenConfigFile(ConfigFileName As String)
+' Sub to handle the new 3.x file format
+    Dim WrongFork As String
+    Dim NoFrequencyOrChannel As String
+    Dim intItem As Integer
+    Dim ImportedOutputDevice As String
+    Dim ImportedVideoFormat As String
+    Dim ImportedScramblingSystem As String
+    Dim ImportedKey As String
+    Dim ImportedVC2Key As String
+    Dim ImportedM3USource As String
+    Dim ImportedChannel As String
+    Dim ImportedFrequency As Long
+    Dim ImportedLevel As String
+    Dim ImportedDeviation As String
+    Dim ImportedGamma As String
+    Dim ImportedPosition As String
+    Dim ImportedLogo As String
+    Dim ImportedTeletext As String
+    Dim ImportedWSS As Integer
+    Dim ImportedAR As Integer
+    Dim ImportedEMM As Integer
+    Dim ImportedCardNumber As String
+    WrongFork = "This file was created with a different fork of hacktv. We will attempt to process the file but some options may not be available."
+    NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted."
+    ' Check the fork value specified in the file. If it doesn't match, give a warning
+    If forktype = "" Then
+        If Not ReadIniValue(ConfigFileName, "hacktv-gui3", "fork") = "" Then
+            MsgBox WrongFork, vbExclamation, App.Title
+        End If
+    ElseIf forktype = "CJ" Then
+        If Not LCase(ReadIniValue(ConfigFileName, "hacktv-gui3", "fork")) = "captainjack" Then
+            MsgBox WrongFork, vbExclamation, App.Title
+        End If
     End If
-    ' Check the version of the application that saved the file
-    ' If it doesn't match this one, generate a warning and continue
-    If Not ReadIniValue(ConfigFileName, App.Title, "version") = App.Major & "." & App.Minor Then
-        MsgBox "This file was created in a different version and may not behave as expected.", vbExclamation, App.Title
+    ' Output device. We don't support this as of yet but it is here for future reference
+    ImportedOutputDevice = LCase(ReadIniValue(ConfigFileName, "hacktv", "output"))
+    If Not ImportedOutputDevice = "" And Not ImportedOutputDevice = "hackrf" Then
+        MsgBox "This application only supports output to HackRF devices at present. Support for other SDRs " _
+        & "may be added in a future release.", vbExclamation, App.Title
     End If
+    ' Input source or test card
+    If LCase(ReadIniValue(ConfigFileName, "hacktv", "input")) = "test:colourbars" Then
+        TestCard.Value = True
+    ' Is the input source an M3U file?
+    ElseIf LCase$(Right$(ReadIniValue(ConfigFileName, "hacktv-gui3", "m3usource"), 4)) = ".m3u" Then
+        ImportedM3USource = ReadIniValue(ConfigFileName, "hacktv-gui3", "m3usource")
+        If M3UHandler(ImportedM3USource) = True Then
+            M3USourceFile = True
+            M3USource.ListIndex = ReadIniValue(ConfigFileName, "hacktv-gui3", "m3uindex")
+        End If
+    Else
+        M3USource.Visible = False
+        input_source.Visible = True
+        M3USourceFile = False
+        LocalSource.Value = True
+        input_source.Text = ReadIniValue(ConfigFileName, "hacktv", "input")
+    End If
+    ' Video format
+    ImportedVideoFormat = LCase(ReadIniValue(ConfigFileName, "hacktv", "mode"))
+    If ImportedVideoFormat = "i" Then
+        PAL.Value = True
+        VideoFormat.ListIndex = 0
+    ElseIf ImportedVideoFormat = "b" Or ImportedVideoFormat = "g" Then
+        PAL.Value = True
+        VideoFormat.ListIndex = 1
+    ElseIf ImportedVideoFormat = "pal-fm" Then
+        PAL.Value = True
+        VideoFormat.ListIndex = 2
+    ElseIf ImportedVideoFormat = "pal-m" Then
+        PAL.Value = True
+        VideoFormat.ListIndex = 3
+    ElseIf ImportedVideoFormat = "m" Then
+        NTSC.Value = True
+        VideoFormat.ListIndex = 0
+     ElseIf ImportedVideoFormat = "ntsc-fm" Then
+        NTSC.Value = True
+        VideoFormat.ListIndex = 1
+    ElseIf ImportedVideoFormat = "ntsc-bs" Then
+        NTSC.Value = True
+        VideoFormat.ListIndex = 2
+    ElseIf ImportedVideoFormat = "apollo-fsc-fm" Then
+        NTSC.Value = True
+        VideoFormat.ListIndex = 3
+    ElseIf ImportedVideoFormat = "m-cbs405" Then
+        NTSC.Value = True
+        VideoFormat.ListIndex = 4
+    ElseIf ImportedVideoFormat = "l" Then
+        SECAM.Value = True
+        VideoFormat.ListIndex = 0
+    ElseIf ImportedVideoFormat = "d" Or ImportedVideoFormat = "k" Then
+        SECAM.Value = True
+        VideoFormat.ListIndex = 1
+    ElseIf ImportedVideoFormat = "secam-fm" Then
+        SECAM.Value = True
+        VideoFormat.ListIndex = 2
+    ElseIf ImportedVideoFormat = "a" Then
+        BW.Value = True
+        VideoFormat.ListIndex = 0
+    ElseIf ImportedVideoFormat = "e" Then
+        BW.Value = True
+        VideoFormat.ListIndex = 1
+    ElseIf ImportedVideoFormat = "240-am" Then
+        BW.Value = True
+        VideoFormat.ListIndex = 2
+    ElseIf ImportedVideoFormat = "30-am" Then
+        BW.Value = True
+        VideoFormat.ListIndex = 3
+    ElseIf ImportedVideoFormat = "apollo-fm" Then
+        BW.Value = True
+        VideoFormat.ListIndex = 4
+    ElseIf ImportedVideoFormat = "d2mac-am" Then
+        MAC.Value = True
+        VideoFormat.ListIndex = 0
+    ElseIf ImportedVideoFormat = "d2mac-fm" Then
+        MAC.Value = True
+        VideoFormat.ListIndex = 1
+    ElseIf ImportedVideoFormat = "dmac-am" Then
+        MAC.Value = True
+        VideoFormat.ListIndex = 2
+    ElseIf ImportedVideoFormat = "dmac-fm" Then
+        MAC.Value = True
+        VideoFormat.ListIndex = 3
+    Else
+        Call InvalidConfigFileValue("video format", ImportedVideoFormat, vbCritical)
+        Call NewFile_Click
+    End If
+    ' Sample rate
+    SampleRate.Text = ReadIniValue(ConfigFileName, "hacktv", "samplerate") / 1000000
+    ' Frequency
+        ' Read values from config file to variables
+        ' As we're dealing with a long integer for the frequency value, return a value of -250 if the value is blank
+        ' Allowing it to return blank will cause a crash
+    ImportedChannel = ReadIniValue(ConfigFileName, "hacktv-gui3", "channel")
+    ImportedFrequency = ReadIniValue(ConfigFileName, "hacktv", "frequency", -250)
+        ' Check if we're dealing with a channel number or custom frequency. If neither, then stop processing
+    If ImportedChannel = "" And ImportedFrequency = "-250" Then
+        MsgBox NoFrequencyOrChannel, vbCritical, App.Title
+        Call NewFile_Click
+        Exit Sub
+    ElseIf ImportedChannel = "" Then
+        CustomFreq.Value = True
+        frequency_mhz.Text = ImportedFrequency / 1000000
+    Else
+        ' Try to find the channel name by trying UHF first
+        UHF.Value = True
+        For intItem = 0 To frequency_ch.ListCount - 1
+            If frequency_ch.List(intItem) = ImportedChannel Then
+                frequency_ch.Text = ImportedChannel
+            End If
+        Next
+        If Not UCase(frequency_ch.Text) = UCase(ImportedChannel) Then
+        ' If not found, try VHF
+            VHF.Value = True
+            For intItem = 0 To frequency_ch.ListCount - 1
+                If frequency_ch.List(intItem) = ImportedChannel Then
+                    frequency_ch.Text = ImportedChannel
+                End If
+            Next
+        ' If still not found, generate an error and use the frequency instead of the channel
+            If Not UCase(frequency_ch.Text) = UCase(ImportedChannel) Then
+                If Not ImportedFrequency = "-250" Then
+                    CustomFreq.Value = True
+                    frequency_mhz.Text = ImportedFrequency / 1000000
+                    Call InvalidConfigFileValue("channel", ImportedChannel)
+                Else
+        ' If not found, and the frequency is also blank, abort
+                    MsgBox NoFrequencyOrChannel, vbCritical, App.Title
+                    Call NewFile_Click
+                    Exit Sub
+                End If
+            End If
+        End If
+    End If
+    ' Gain
+    txgain.Text = ReadIniValue(ConfigFileName, "hacktv", "gain", 0)
+    ' Amp
+    ChkRFAmp.Value = ReadIniValue(ConfigFileName, "hacktv", "amp", 0)
+    ' Output level
+    ImportedLevel = ReadIniValue(ConfigFileName, "hacktv", "level")
+    If Not ImportedLevel = "" Then
+        ChkOutputLevel.Value = vbChecked
+        outputlevelvalue.Text = ImportedLevel
+    End If
+    ' FM deviation
+    If ChkFMDev.Enabled = True Then
+        ImportedDeviation = ReadIniValue(ConfigFileName, "hacktv", "deviation")
+        If Not ImportedDeviation = "" Then
+            ChkFMDev.Value = vbChecked
+            fm_deviation.Text = ReadIniValue(ConfigFileName, "hacktv", "deviation") / 1000000
+        End If
+    End If
+    ' Gamma
+    ImportedGamma = ReadIniValue(ConfigFileName, "hacktv", "gamma")
+    If Not ImportedGamma = "" Then
+        ChkGamma.Value = vbChecked
+        gammavalue.Text = ReadIniValue(ConfigFileName, "hacktv", "gamma")
+    End If
+    ' Repeat
+    If ChkRepeat.Enabled = True Then ChkRepeat.Value = ReadIniValue(ConfigFileName, "hacktv", "repeat", 0)
+    ' Position
+    If ChkPosition.Enabled = True Then
+        ImportedPosition = ReadIniValue(ConfigFileName, "hacktv", "position")
+        If Not ImportedPosition = "" Then
+            ChkPosition.Value = vbChecked
+            positionValue.Text = ReadIniValue(ConfigFileName, "hacktv", "position")
+        End If
+    End If
+    ' Verbose mode
+    ChkVerbose.Value = ReadIniValue(ConfigFileName, "hacktv", "verbose", 0)
+    ' Logo
+    If ChkLogo.Enabled = True Then ImportedLogo = ReadIniValue(ConfigFileName, "hacktv", "logo")
+    ' If a logo is specified, check if it exists first
+    If Not ImportedLogo = "" Then
+        If DoesFileExist(HackTVPath & "\resources\logos\" & ImportedLogo) Then
+            ChkLogo.Value = vbChecked
+            LogoFolder.Text = ImportedLogo
+        Else
+            MsgBox "The file " & ImportedLogo & " could not be found. Logo option disabled.", vbExclamation, App.Title
+        End If
+    End If
+    ' Timestamp
+    If ChkTimestamp.Enabled = True Then ChkTimestamp.Value = ReadIniValue(ConfigFileName, "hacktv", "timestamp", 0)
+    ' Interlace
+    If ChkInterlace.Enabled = True Then ChkInterlace.Value = ReadIniValue(ConfigFileName, "hacktv", "interlace", 0)
+    ' Teletext
+    ImportedTeletext = ReadIniValue(ConfigFileName, "hacktv", "teletext")
+    If Not ImportedTeletext = "" Then
+        ChkTeletext.Value = vbChecked
+        If LCase$(Left$(ImportedTeletext, 4)) = "raw:" Then
+            teletext_source.Text = Mid$(ImportedTeletext, 5)
+        Else
+            teletext_source.Text = ImportedTeletext
+        End If
+    End If
+    ' WSS
+    ImportedWSS = ReadIniValue(ConfigFileName, "hacktv", "wss", 0)
+    If Not ImportedWSS = 0 Then
+        ChkWSS.Value = vbChecked
+        ' Since we increased the value by one when saving, decrease by one when loading
+        wss_mode.ListIndex = ImportedWSS - 1
+    End If
+    ' Aspect ratio correction for 16:9 content on 4:3 display
+    If ChkARCorrection.Enabled = True Then
+        ImportedAR = ReadIniValue(ConfigFileName, "hacktv", "arcorrection", 0)
+        If Not ImportedAR = 0 Then
+            ChkARCorrection.Value = vbChecked
+            ARCorrectionMode.ListIndex = ReadIniValue(ConfigFileName, "hacktv", "arcorrection")
+        End If
+    End If
+    ' Encryption system
+    ImportedScramblingSystem = LCase$(ReadIniValue(ConfigFileName, "hacktv", "scramblingtype"))
+    If Not ImportedScramblingSystem = "" Then ImportedKey = LCase$(ReadIniValue(ConfigFileName, "hacktv", "scramblingkey"))
+    If ImportedScramblingSystem = "" Then
+        encryption_type.ListIndex = 0
+    ElseIf ImportedScramblingSystem = "videocrypt" Then
+        encryption_type.ListIndex = 1
+    ElseIf ImportedScramblingSystem = "videocrypt2" Then
+        encryption_type.ListIndex = 2
+    ElseIf ImportedScramblingSystem = "videocrypt1+2" Then
+        encryption_type.ListIndex = 3
+    ElseIf ImportedScramblingSystem = "videocrypts" Then
+        encryption_type.ListIndex = 4
+    ElseIf ImportedScramblingSystem = "syster" Then
+        encryption_type.ListIndex = 5
+    ElseIf ImportedScramblingSystem = "d11" And forktype = "CJ" Then
+        encryption_type.ListIndex = 6
+    ElseIf ImportedScramblingSystem = "smartcrypt" And forktype = "CJ" Then
+        encryption_type.ListIndex = 7
+    ElseIf ImportedScramblingSystem = "single-cut" Then
+        encryption_type.ListIndex = 1
+    ElseIf ImportedScramblingSystem = "double-cut" Then
+        encryption_type.ListIndex = 2
+    Else
+        Call InvalidConfigFileValue("scrambling system", ImportedScramblingSystem)
+    End If
+    ' Encryption key/viewing card type
+    ' Nothing
+    If ImportedKey = "" And ImportedScramblingSystem = "" Then
+        ' Do nothing
+    ' VideoCrypt 1/2/S (including VC1 side of dual VC1/2 mode)
+    ElseIf ImportedKey = "free" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 0
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 0
+        ' VC2 conditional mode only supported on Captain Jack fork
+    ElseIf ImportedScramblingSystem = "videocrypt2" And ImportedKey = "conditional" And forktype = "CJ" Then
+        encryption_key.ListIndex = 1
+    ElseIf ImportedScramblingSystem = "videocrypt" And ImportedKey = "conditional" _
+    Or ImportedScramblingSystem = "videocrypts" Then
+        encryption_key.ListIndex = 1
+    ElseIf ImportedKey = "sky12" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 1
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 1
+    ElseIf ImportedKey = "sky11" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 2
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 2
+    ElseIf ImportedKey = "sky10" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 3
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 3
+    ElseIf ImportedKey = "sky10ppv" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 4
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 4
+    ElseIf ImportedKey = "sky09" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 5
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 5
+    ElseIf ImportedKey = "sky07" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 6
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 6
+    ElseIf ImportedKey = "sky03" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 7
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 7
+    ElseIf ImportedKey = "tac" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 8
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 8
+    ElseIf ImportedKey = "tac2" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 9
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 9
+    ElseIf ImportedKey = "xtea" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 10
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 10
+    ElseIf ImportedKey = "ppv" And forktype = "CJ" Then
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then encryption_key.ListIndex = 11
+        If ImportedScramblingSystem = "videocrypt1+2" Then vc1key.ListIndex = 11
+    ' Syster/D11/Smartcrypt
+    ElseIf ImportedKey = "" And ImportedScramblingSystem = "syster" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "" And ImportedScramblingSystem = "d11" And forktype = "CJ" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "" And ImportedScramblingSystem = "smartcrypt" And forktype = "CJ" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "premiere-fa" And forktype = "CJ" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "premiere-ca" And forktype = "CJ" Then
+        encryption_key.ListIndex = 1
+    ElseIf ImportedKey = "cfrfa" And forktype = "CJ" Then
+        encryption_key.ListIndex = 2
+    ElseIf ImportedKey = "cfrca" And forktype = "CJ" Then
+        encryption_key.ListIndex = 3
+    ElseIf ImportedKey = "cplfa" And forktype = "CJ" Then
+        encryption_key.ListIndex = 4
+    ElseIf ImportedKey = "cesfa" And forktype = "CJ" Then
+        encryption_key.ListIndex = 5
+    ElseIf ImportedKey = "ntvfa" And forktype = "CJ" Then
+        encryption_key.ListIndex = 6
+    ' Eurocrypt
+    ElseIf ImportedKey = "" And ImportedScramblingSystem = "single-cut" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "" And ImportedScramblingSystem = "double-cut" Then
+        encryption_key.ListIndex = 0
+    ElseIf ImportedKey = "eurocrypt filmnet" Then
+        encryption_key.ListIndex = 1
+    ElseIf ImportedKey = "eurocrypt tv1000" Then
+        encryption_key.ListIndex = 2
+    ElseIf ImportedKey = "eurocrypt ctv" Then
+        encryption_key.ListIndex = 3
+    ElseIf ImportedKey = "eurocrypt ctvs" Then
+        encryption_key.ListIndex = 4
+    ElseIf ImportedKey = "eurocrypt tvplus" Then
+        encryption_key.ListIndex = 5
+    ElseIf ImportedKey = "eurocrypt tvs" Then
+        encryption_key.ListIndex = 6
+    ElseIf ImportedKey = "eurocrypt rdv" Then
+        encryption_key.ListIndex = 7
+    ElseIf ImportedKey = "eurocrypt nrk" Then
+        encryption_key.ListIndex = 8
+    Else
+        If Not ImportedScramblingSystem = "videocrypt1+2" Then Call InvalidConfigFileValue("scrambling key", ImportedKey)
+        If ImportedScramblingSystem = "videocrypt1+2" Then Call InvalidConfigFileValue("VideoCrypt I scrambling key", ImportedKey)
+    End If
+        ' VC2 side of dual VC1/2 mode
+    If ImportedScramblingSystem = "videocrypt1+2" Then
+        ImportedVC2Key = ReadIniValue(ConfigFileName, "hacktv", "scramblingkey2")
+        If ImportedVC2Key = "free" Then
+            vc2key.ListIndex = 0
+        ElseIf ImportedVC2Key = "conditional" And forktype = "CJ" Then
+            vc2key.ListIndex = 1
+        Else
+            Call InvalidConfigFileValue("VideoCrypt II scrambling key", ImportedVC2Key)
+        End If
+    End If
+    ' EMM
+    If ChkEnableEMM.Enabled = True And ChkDisableEMM.Enabled = True Then
+        ImportedEMM = ReadIniValue(ConfigFileName, "hacktv", "emm", 0)
+        If ImportedEMM = 0 Then
+            ChkEnableEMM.Value = vbUnchecked
+            ChkDisableEMM.Value = vbUnchecked
+        ElseIf ImportedEMM = 1 Then
+            ChkEnableEMM.Value = vbChecked
+            ChkDisableEMM.Value = vbUnchecked
+            ImportedCardNumber = ReadIniValue(ConfigFileName, "hacktv", "cardnumber")
+            ImportedCardNumber = ImportedCardNumber & LuhnCheck(ImportedCardNumber)
+            CardNumber.Text = ReadIniValue(ConfigFileName, "hacktv-gui3", "13digitprefix") & ImportedCardNumber
+        ElseIf ImportedEMM = 2 Then
+            ChkEnableEMM.Value = vbUnchecked
+            ChkDisableEMM.Value = vbChecked
+            ImportedCardNumber = ReadIniValue(ConfigFileName, "hacktv", "cardnumber")
+            ImportedCardNumber = ImportedCardNumber & LuhnCheck(ImportedCardNumber)
+            CardNumber.Text = ReadIniValue(ConfigFileName, "hacktv-gui3", "13digitprefix") & ImportedCardNumber
+        End If
+    End If
+    ' Show card serial
+    If ChkShowSerial.Enabled = True Then ChkShowSerial.Value = ReadIniValue(ConfigFileName, "hacktv", "showserial", 0)
+    ' Brute force PPV key
+    If ChkFindKey.Enabled = True Then ChkFindKey.Value = ReadIniValue(ConfigFileName, "hacktv", "findkey", 0)
+    ' Encrypt audio
+    If ChkEncryptAudio.Enabled = True Then ChkEncryptAudio.Value = ReadIniValue(ConfigFileName, "hacktv", "scramble-audio", 0)
+    ' ACP
+    If ChkACP.Enabled = True Then ChkACP.Value = ReadIniValue(ConfigFileName, "hacktv", "acp", 0)
+    ' Filter
+    ChkVideoFilter.Value = ReadIniValue(ConfigFileName, "hacktv", "filter", 0)
+    ' Audio
+    If ChkAudio.Enabled = True Then ChkAudio.Value = ReadIniValue(ConfigFileName, "hacktv", "audio", 0)
+    ' NICAM
+    If ChkNICAM.Enabled = True Then ChkNICAM.Value = ReadIniValue(ConfigFileName, "hacktv", "nicam", 0)
+    ' ECM
+    If ChkShowECM.Enabled = True Then ChkShowECM.Value = ReadIniValue(ConfigFileName, "hacktv", "showecm", 0)
+    ' Subtitles
+    ChkSubtitles.Value = ReadIniValue(ConfigFileName, "hacktv", "subtitles", 0)
+    If ChkSubtitles.Value = vbChecked Then TxtSubtitleIndex.Text = ReadIniValue(ConfigFileName, "hacktv", "subtitleindex")
+End Sub
+
+Private Sub InvalidConfigFileValue(SettingName As String, Value As String, Optional ErrorType As VbMsgBoxStyle)
+' This sub is used to generate an error when an invalid value is found in a config file
+' Saves us writing out the same error message multiple times
+' To use it, just feed two values or variables into it and they will be added to the message below
+    If ErrorType = 0 Then ErrorType = vbExclamation
+    ' If an incorrect encryption system/key was specified, disable encryption
+    If SettingName = "scrambling system" Or SettingName = "scrambling key" Or _
+    SettingName = "VideoCrypt I scrambling key" Or SettingName = "VideoCrypt II scrambling key" _
+    Then encryption_type.ListIndex = 0
+    MsgBox "The " & SettingName & Chr(32) & Chr(34) & Value & Chr(34) & " specified in the configuration file could not be found." & vbCrLf _
+    & "The file may have been created in a newer version or the value is invalid.", ErrorType, App.Title
+End Sub
+
+Private Sub LegacyOpenConfigFile(ConfigFileName As String)
+' Pre-version 3.x file open code, may be removed in a future release
+    Dim WrongFork As String
+    WrongFork = "Unable to load this file because it was created with a different hacktv fork."
     ' Check the fork value specified in the INI file
     ' We don't want to load a file created for a different fork as it won't behave as expected
     If forktype = "" Then
@@ -1563,20 +2106,6 @@ Private Sub OpenFile_Click()
     ' Subtitles
     ChkSubtitles.Value = ReadIniValue(ConfigFileName, "Settings", "subtitles")
     If ChkSubtitles.Value = vbChecked Then TxtSubtitleIndex.Text = ReadIniValue(ConfigFileName, "Settings", "subtitleindex")
-    ' Close on exit
-    ChkCloseOnExit.Value = ReadIniValue(ConfigFileName, "Settings", "dontcloseonexit")
-    ' Display the opened filename in the title bar
-    ' Back up the original caption once
-    If TitleBarChanged = False Then TitleBar = Caption
-    TitleBarChanged = True
-    ' Set the caption to the backed up name and the filename
-    Caption = TitleBar & " - " & Mid(ConfigFileName, InStrRev(ConfigFileName, "\") + 1, Len(ConfigFileName))
-    SaveFile.Caption = "Save"
-    ' Set the FileOpened value to True to allow us to open a second file after accepting command line parameters
-    FileOpened = True
-    Exit Sub
-FileAccessError:
-    MsgBox "Unable to access the requested file. It may be locked by another process or you may not have permission to access it.", vbCritical, App.Title
 End Sub
 
 Private Sub BtnSourceBrowse_Click()
@@ -1836,6 +2365,8 @@ Private Sub NTSC_Click()
         .ItemData(.NewIndex) = "204"
         .AddItem "Apollo Field Sequential Color (525 lines, 29.97 fps)"
         .ItemData(.NewIndex) = "202"
+        .AddItem "CBS Field Sequential Color (405 lines, 72 fps)"
+        .ItemData(.NewIndex) = "205"
         .ListIndex = 0
     End With
 End Sub
@@ -1920,7 +2451,7 @@ End Sub
 
 Private Sub Common625Features()
 ' Configure features common to 625-line modes
-    ChkACP.Enabled = True
+    If Not encryption_key.Enabled = True Then ChkACP.Enabled = True
     Call EnableNICAM
     NICAMSupported = True
     Call EnableTeletextButton
@@ -1933,7 +2464,7 @@ End Sub
 
 Private Sub Common525Features()
 ' Configure features common to 525-line modes
-    ChkACP.Enabled = True
+    If Not encryption_key.Enabled = True Then ChkACP.Enabled = True
     Call DisableNICAM
     NICAMSupported = False
     Call DisableTeletext
@@ -1969,12 +2500,16 @@ Private Sub LocalSource_Click()
     BtnSourceBrowse.Enabled = True
     inputsource = ""
     ChkRepeat.Enabled = True
-    ChkRepeat.Value = 0
+    ChkRepeat.Value = vbUnchecked
+    ChkInterlace.Enabled = True
+    ChkInterlace.Value = vbUnchecked
     If forktype = "CJ" Then
         Call EnablePosition
         ChkTimestamp.Enabled = True
         ChkLogo.Enabled = True
         ChkSubtitles.Enabled = True
+        ChkARCorrection.Enabled = True
+        ARCorrectionMode.ListIndex = 0
     End If
 End Sub
 
@@ -1990,6 +2525,8 @@ Private Sub TestCard_Click()
     BtnSourceBrowse.Enabled = False
     ChkRepeat.Enabled = False
     ChkRepeat.Value = vbUnchecked
+    ChkInterlace.Enabled = False
+    ChkInterlace.Value = vbUnchecked
     If forktype = "CJ" Then
         Call DisablePosition
         ChkTimestamp.Value = vbUnchecked
@@ -1998,8 +2535,11 @@ Private Sub TestCard_Click()
         ChkLogo.Enabled = False
         ChkSubtitles.Value = vbUnchecked
         ChkSubtitles.Enabled = False
+        ChkARCorrection.Value = vbUnchecked
+        ChkARCorrection.Enabled = False
+        ARCorrectionMode.ListIndex = -1
     End If
-    inputsource = "test"
+    inputsource = "test:colourbars"
     input_source.Text = ""
 End Sub
 
@@ -2023,13 +2563,27 @@ End Sub
 
 Private Sub VideoFormat_Click()
     Call CheckVideoFormat
+    If ChkVideoFilter.Value = vbUnchecked Then
+       ' Set the sample rate to the default for the selected mode
+       SampleRate.Text = DefaultSampleRate
+    End If
 End Sub
 
 Private Sub ChkVideoFilter_Click()
     If ChkVideoFilter.Value = vbChecked Then
         filterparam = "--filter"
+        ' Set sample rate to 16 MHz if an FM mode is selected as the filter is designed for 16 MHz only
+        If ChkFMDev.Enabled = True Then
+            If Not MAC.Value = True Then
+                SampleRate.Text = 16
+            Else
+                SampleRate.Text = 20.25
+            End If
+        End If
     Else
         filterparam = ""
+        ' Set sample rate to back to default if an FM mode is selected
+        If ChkFMDev.Enabled = True Then SampleRate.Text = DefaultSampleRate
     End If
 End Sub
 
@@ -2847,7 +3401,7 @@ Private Sub CheckVideoFormat()
         Call EnableNICAM
         NICAMSupported = True
         Call DisableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         sys = "i"
         Exit Sub
     End If
@@ -2859,7 +3413,7 @@ Private Sub CheckVideoFormat()
         Call EnableNICAM
         NICAMSupported = True
         Call DisableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         sys = "g"
         Exit Sub
     End If
@@ -2870,7 +3424,7 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         NICAMSupported = False
         Call EnableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         CustomFreq.Value = True
         sys = "pal-fm"
         Exit Sub
@@ -2883,7 +3437,7 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         NICAMSupported = False
         Call DisableFMDeviation
-        SampleRate.Text = 13.5
+        DefaultSampleRate = 13.5
         sys = "pal-m"
         Exit Sub
     End If
@@ -2893,7 +3447,7 @@ Private Sub CheckVideoFormat()
         Call EnableUHF
         Call AddNTSCUHFChannels
         Call DisableFMDeviation
-        SampleRate.Text = 13.5
+        DefaultSampleRate = 13.5
         sys = "m"
         Exit Sub
     End If
@@ -2903,7 +3457,7 @@ Private Sub CheckVideoFormat()
         Call EnableUHF
         Call AddEuropeUHFChannels
         Call DisableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         sys = "l"
         Exit Sub
     End If
@@ -2913,7 +3467,7 @@ Private Sub CheckVideoFormat()
         VHF.Value = True
         Call AddSystemAChannels
         Call DisableFMDeviation
-        SampleRate.Text = 6.5
+        DefaultSampleRate = 6.48
         sys = "a"
         Exit Sub
     End If
@@ -2922,7 +3476,7 @@ Private Sub CheckVideoFormat()
         Call EnableVHF
         Call AddSystemEChannels
         Call DisableFMDeviation
-        SampleRate.Text = 20.5
+        DefaultSampleRate = 20.475
         sys = "e"
         Exit Sub
     End If
@@ -2930,7 +3484,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call DisableFMDeviation
-        SampleRate.Text = 20.25
+        DefaultSampleRate = 20.25
         CustomFreq.Value = True
         sys = "d2mac-am"
         Exit Sub
@@ -2939,7 +3493,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call EnableFMDeviation
-        SampleRate.Text = 20.25
+        DefaultSampleRate = 20.25
         CustomFreq.Value = True
         sys = "d2mac-fm"
         Exit Sub
@@ -2948,7 +3502,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call DisableFMDeviation
-        SampleRate.Text = 20.25
+        DefaultSampleRate = 20.25
         CustomFreq.Value = True
         sys = "dmac-am"
         Exit Sub
@@ -2957,7 +3511,7 @@ Private Sub CheckVideoFormat()
         Call EnableUHF
         Call DisableVHF
         Call EnableFMDeviation
-        SampleRate.Text = 20.25
+        DefaultSampleRate = 20.25
         UHF.Value = True
         Call AddBSBChannels
         sys = "dmac-fm"
@@ -2967,7 +3521,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call DisableFMDeviation
-        SampleRate.Text = 2
+        DefaultSampleRate = 1.992
         CustomFreq.Enabled = True
         CustomFreq.Value = True
         sys = "240-am"
@@ -2977,7 +3531,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call DisableFMDeviation
-        SampleRate.Text = 0.1
+        DefaultSampleRate = 0.1005
         CustomFreq.Enabled = True
         CustomFreq.Value = True
         sys = "30-am"
@@ -2987,7 +3541,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call EnableFMDeviation
-        SampleRate.Text = 2
+        DefaultSampleRate = 2.048
         CustomFreq.Enabled = True
         CustomFreq.Value = True
         sys = "apollo-fm"
@@ -2998,7 +3552,7 @@ Private Sub CheckVideoFormat()
         Call DisableUHF
         Call DisableVHF
         Call EnableFMDeviation
-        SampleRate.Text = 13.5
+        DefaultSampleRate = 13.5
         CustomFreq.Enabled = True
         CustomFreq.Value = True
         sys = "apollo-fsc-fm"
@@ -3011,7 +3565,7 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         Call AddEuropeUHFChannels
         Call DisableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         sys = "d"
         Exit Sub
     End If
@@ -3022,7 +3576,7 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         NICAMSupported = False
         Call EnableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 13.5
         CustomFreq.Value = True
         sys = "ntsc-fm"
         Exit Sub
@@ -3034,7 +3588,7 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         NICAMSupported = False
         Call EnableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 16
         CustomFreq.Value = True
         sys = "secam-fm"
         Exit Sub
@@ -3046,9 +3600,19 @@ Private Sub CheckVideoFormat()
         Call DisableNICAM
         NICAMSupported = False
         Call EnableFMDeviation
-        SampleRate.Text = 16
+        DefaultSampleRate = 13.5
         CustomFreq.Value = True
         sys = "ntsc-bs"
+        Exit Sub
+    End If
+    If sys = "205" Then
+        Call DisableUHF
+        Call DisableVHF
+        Call DisableFMDeviation
+        DefaultSampleRate = 18.954
+        CustomFreq.Enabled = True
+        CustomFreq.Value = True
+        sys = "m-cbs405"
         Exit Sub
     End If
 End Sub
@@ -3100,6 +3664,13 @@ Private Sub CheckEncryptionType()
     If encryptiontype = "6000" Then
         Call DisableDualVCMode
         Call DisableAudioEncryption
+        SampleRate.Text = DefaultSampleRate
+        ChkFindKey.Enabled = False
+        ChkFindKey.Value = vbUnchecked
+        ChkShowSerial.Enabled = False
+        ChkShowSerial.Value = vbUnchecked
+        ChkShowSerial.Visible = False
+        ChkEncryptAudio.Visible = True
         encryptiontype = ""
     ElseIf encryptiontype = "6006" Then
     ' Hide the encryption_key box and show the vc1key and vc2key boxes
@@ -3117,7 +3688,17 @@ Private Sub CheckEncryptionType()
     Else
         If DualVCMode = True Then Call DisableDualVCMode
         encryption_key.Enabled = True
-        If encryptiontype = "6001" Then Call AddVC1Modes
+        If encryptiontype = "6001" And forktype = "CJ" Then
+            Call AddVC1Modes
+            ChkEncryptAudio.Value = vbUnchecked
+            ChkEncryptAudio.Visible = False
+            ChkShowSerial.Visible = True
+        ElseIf encryptiontype = "6001" Then
+            Call AddVC1Modes
+        ElseIf forktype = "CJ" Then
+            ChkShowSerial.Visible = False
+            ChkEncryptAudio.Visible = True
+        End If
         If encryptiontype = "6002" Then Call AddVC2Modes
         If encryptiontype = "6003" Then Call AddVCSModes
         If encryptiontype = "6004" Then Call AddSysterModes
@@ -3131,7 +3712,11 @@ End Sub
 
 Private Sub AddVC1Modes()
     encryptiontype = "--videocrypt"
-    SampleRate.Text = "14"
+    SampleRate.Text = 14
+    If forktype = "CJ" Then
+        ChkShowSerial.Enabled = True
+        ChkFindKey.Enabled = True
+    End If
     With encryption_key
         .Clear
         .AddItem "Free access/soft scrambled (no card required)"
@@ -3149,12 +3734,16 @@ Private Sub AddVC1Modes()
             .ItemData(.NewIndex) = "6103"
             .AddItem "Conditional access (Sky 07 or 06 card)"
             .ItemData(.NewIndex) = "6104"
+            .AddItem "Conditional access (Sky 03 or 04 card)"
+            .ItemData(.NewIndex) = "6113"
             .AddItem "Conditional access (Old Adult Channel card)"
             .ItemData(.NewIndex) = "6106"
             .AddItem "Conditional access (Newer Adult Channel card)"
             .ItemData(.NewIndex) = "6111"
             .AddItem "Conditional access (xtea mode)"
             .ItemData(.NewIndex) = "6107"
+            .AddItem "Pay-per-view mode (phone cards)"
+            .ItemData(.NewIndex) = "6112"
         Else
             .AddItem "Conditional access (Sky 11 card)"
             .ItemData(.NewIndex) = "6102"
@@ -3178,7 +3767,9 @@ End Sub
 
 Private Sub AddVC2Modes()
     encryptiontype = "--videocrypt2"
-    SampleRate.Text = "14"
+    SampleRate.Text = 14
+    ChkShowSerial.Enabled = False
+    ChkShowSerial.Value = vbUnchecked
     With encryption_key
         .Clear
         .AddItem "Free access/soft scrambled (no card required)"
@@ -3194,7 +3785,9 @@ End Sub
 Private Sub AddBothVCModes()
 ' Adding two encryption types simultaneously is a little awkward with the structure that we have
 ' We won't define the encryptiontype variable yet but will do so when we check the encryption key
-    SampleRate.Text = "14"
+    SampleRate.Text = 14
+    ChkShowSerial.Enabled = False
+    ChkShowSerial.Value = vbUnchecked
     With vc1key
         .Clear
         .AddItem "Free access"
@@ -3213,12 +3806,16 @@ Private Sub AddBothVCModes()
             .ItemData(.NewIndex) = "6103"
             .AddItem "Sky 07 or 06 card"
             .ItemData(.NewIndex) = "6104"
+            .AddItem "Sky 03 card"
+            .ItemData(.NewIndex) = "6113"
             .AddItem "Old Adult Channel card"
             .ItemData(.NewIndex) = "6106"
             .AddItem "Newer Adult Channel card"
             .ItemData(.NewIndex) = "6111"
             .AddItem "xtea mode"
             .ItemData(.NewIndex) = "6107"
+            .AddItem "PPV mode"
+            .ItemData(.NewIndex) = "6112"
         Else
             ' fsphil's version only supports Dual VC1/VC2 in free access mode
             ' So we so grey out the comboboxes as there's only one option anyway
@@ -3241,7 +3838,9 @@ Private Sub AddBothVCModes()
 End Sub
 
 Private Sub AddVCSModes()
-    SampleRate.Text = "14"
+    SampleRate.Text = 14
+    ChkShowSerial.Enabled = False
+    ChkShowSerial.Value = vbUnchecked
     encryptiontype = "--videocrypts"
     With encryption_key
         .Clear
@@ -3257,6 +3856,8 @@ End Sub
 Private Sub AddSysterModes()
 ' Syster, Discret and Smartcrypt all share the same access keys
 ' Therefore, we detect which system was selected
+    ChkShowSerial.Enabled = False
+    ChkShowSerial.Value = vbUnchecked
     If encryptiontype = "6004" Then encryptiontype = "--syster"
     If encryptiontype = "6005" Then encryptiontype = "--d11"
     If encryptiontype = "6009" Then encryptiontype = "--smartcrypt"
@@ -3275,6 +3876,8 @@ Private Sub AddSysterModes()
             .ItemData(.NewIndex) = "6504"
             .AddItem "Free access (Canal+ Spain)"
             .ItemData(.NewIndex) = "6507"
+            .AddItem "Free access (HTB+ Russia)"
+            .ItemData(.NewIndex) = "6508"
         End With
     Else
         With encryption_key
@@ -3287,6 +3890,8 @@ Private Sub AddSysterModes()
 End Sub
 
 Private Sub AddMACModes()
+    ChkShowSerial.Enabled = False
+    ChkShowSerial.Value = vbUnchecked
     If encryptiontype = "6007" Then encryptiontype = "--single-cut"
     If encryptiontype = "6008" Then encryptiontype = "--double-cut"
     With encryption_key
@@ -3330,6 +3935,8 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "6109" Then encryptionkey = "sky10ppv"
         If encryptionkey = "6110" Then encryptionkey = "sky12"
         If encryptionkey = "6111" Then encryptionkey = "tac2"
+        If encryptionkey = "6112" Then encryptionkey = "ppv"
+        If encryptionkey = "6113" Then encryptionkey = "sky03"
 ' VideoCrypt II
         If encryptionkey = "6201" Then encryptionkey = "free"
         If encryptionkey = "6202" Then encryptionkey = "conditional"
@@ -3344,6 +3951,7 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "6505" Then encryptionkey = "cfrfa"
         If encryptionkey = "6506" Then encryptionkey = "cfrca"
         If encryptionkey = "6507" Then encryptionkey = "cesfa"
+        If encryptionkey = "6508" Then encryptionkey = "ntvfa"
 ' EuroCrypt
         If encryptionkey = "6701" Then encryptionkey = ""
         If encryptionkey = "6702" Then encryptionkey = "--eurocrypt filmnet"
@@ -3354,6 +3962,21 @@ Private Sub CheckEncryptionKey()
         If encryptionkey = "6707" Then encryptionkey = "--eurocrypt rdv"
         If encryptionkey = "6708" Then encryptionkey = "--eurocrypt nrk"
         If encryptionkey = "6709" Then encryptionkey = "--eurocrypt ctvs"
+        If encryptionkey = "ppv" Then
+            ChkEncryptAudio.Visible = False
+            ChkEnableEMM.Visible = False
+            ChkDisableEMM.Visible = False
+            CardNumber.Visible = False
+            ChkFindKey.Visible = True
+            ChkFindKey.Enabled = True
+        Else
+            ChkFindKey.Value = vbUnchecked
+            ChkFindKey.Enabled = False
+            ChkFindKey.Visible = False
+            ChkEnableEMM.Visible = True
+            ChkDisableEMM.Visible = True
+            CardNumber.Visible = True
+        End If
 ' ACP is not supported when encryption is enabled, so disable the option
         ChkACP.Enabled = False
         ChkACP.Value = vbUnchecked
@@ -3411,6 +4034,8 @@ Private Sub CheckDualEncryptionKey()
         If encryptiontype = "6109" Then encryptiontype = "--videocrypt sky10ppv"
         If encryptiontype = "6110" Then encryptiontype = "--videocrypt sky12"
         If encryptiontype = "6111" Then encryptiontype = "--videocrypt tac2"
+        If encryptiontype = "6112" Then encryptiontype = "--videocrypt ppv"
+        If encryptiontype = "6113" Then encryptiontype = "--videocrypt sky03"
 ' VideoCrypt II
         encryptionkey = vc2key.ItemData(vc2key.ListIndex)
         If encryptionkey = "6201" Then encryptionkey = "--videocrypt2 free"
@@ -3493,7 +4118,7 @@ Private Sub EnableFMDeviation()
     ChkFMDev.Enabled = True
 ' The --filter parameter enables VSB filtering on AM, or CCIR-405 FM pre-emphasis
 ' filtering on FM, so change the Filter checkbox description to suit
-    ChkVideoFilter.Caption = "CCIR-405 pre-emphasis filter"
+    ChkVideoFilter.Caption = "FM video pre-emphasis filter"
 End Sub
 
 Private Sub DisableFMDeviation()
@@ -3503,6 +4128,10 @@ Private Sub DisableFMDeviation()
     fm_deviation.Text = ""
     fm_deviation.Enabled = False
     fm_deviation.BackColor = vbButtonFace
+    If ChkVideoFilter.Value = vbChecked Then
+        ChkVideoFilter.Value = vbUnchecked
+        SampleRate.Text = DefaultSampleRate
+    End If
 ' Revert Filter checkbox name to VSB-AM
     ChkVideoFilter.Caption = "VSB-AM filter"
 End Sub
@@ -3740,6 +4369,18 @@ Private Function CheckCardNumber() As Boolean
     End If
 End Function
 
+Private Sub CheckAspectRatioScaling()
+    Dim ARIndex As Integer
+    If ChkARCorrection.Value = vbChecked Then
+        ARIndex = ARCorrectionMode.ItemData(ARCorrectionMode.ListIndex)
+        If ARIndex = 2101 Then ScalingMode = ""
+        If ARIndex = 2102 Then ScalingMode = "--letterbox"
+        If ARIndex = 2103 Then ScalingMode = "--pillarbox"
+    Else
+        ScalingMode = ""
+    End If
+End Sub
+
 Private Sub BtnRun_Click()
     If GenerateOnly.Checked = False Then
 ' If running on Wine, don't check for the presence of hacktv.exe as we don't need it.
@@ -3784,7 +4425,7 @@ Private Function CheckWinePreReqs() As Boolean
         CheckWinePreReqs = False
         Exit Function
     End If
-    If closeonexit = False Then
+    If CloseOnExit.Checked = False Then
         If missinggnome = 1 Then
             MsgBox "Unable to find gnome-terminal. Please check the Settings menu to verify its location.", vbCritical, App.Title
             CheckWinePreReqs = False
@@ -3819,6 +4460,7 @@ Private Sub RunTV()
     If CheckGamma = False Then Exit Sub
     If CheckOutputLevel = False Then Exit Sub
     If CheckCardNumber = False Then Exit Sub
+    Call CheckAspectRatioScaling
 
 ' Combine all parameters into one text field
 ' This doesn't include the filename as we will be trimming later
@@ -3832,7 +4474,8 @@ Private Sub RunTV()
     & outputlevelparam & Chr(32) & outputlevelvalue.Text & Chr(32) & filterparam & Chr(32) _
     & positionparam & Chr(32) & positionValue.Text & Chr(32) & timestampParam & Chr(32) _
     & logoParam & Chr(32) & logoPath & Chr(32) & verboseParam & Chr(32) & EMMParam & Chr(32) _
-    & TruncatedCardNumber & Chr(32) & ShowECMParam
+    & TruncatedCardNumber & Chr(32) & ShowECMParam & Chr(32) & ScalingMode & Chr(32) & Interlaced _
+    & Chr(32) & ShowCardSerial & Chr(32) & FindKey
 ' Tidy up parameters by removing additional spaces if required
     Do While InStr(1, allargs.Text, "  ")
         allargs.Text = Replace$(allargs.Text, "  ", " ")
@@ -3848,7 +4491,7 @@ Private Sub RunTV()
     Else
 ' If the Generate only option is enabled, stop here
         If GenerateOnly.Checked = True Then Exit Sub
-        If closeonexit = False Then
+        If CloseOnExit.Checked = False Then
             runpath = HackTVPath & Chr(92) & HackTVEXEName
             args = allargs.Text
         Else
@@ -3874,7 +4517,7 @@ Private Sub TranslatePathsForWine()
 ' Convert TerminalPath variable to use Unix-style naming
     TerminalPath = Replace$(TerminalPath, "Z:\", "/")
     TerminalPath = Replace$(TerminalPath, "\", "/")
-    If closeonexit = False Then
+    If CloseOnExit.Checked = False Then
         gnomeparams = "/c start /d " & Chr(34) & App.Path & Chr(34) & " /unix " & TerminalPath & "/gnome-terminal -- "
     Else
         gnomeparams = "/c start /d " & Chr(34) & App.Path & Chr(34) & " /unix "
@@ -3956,3 +4599,5 @@ Private Sub CleanupBeforeExit()
         End If
     End If
 End Sub
+
+

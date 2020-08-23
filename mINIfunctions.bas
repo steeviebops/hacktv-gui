@@ -5,10 +5,17 @@ Attribute VB_Name = "mINIfunctions"
     Private Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpString As Any, ByVal lpFileName As String) As Long
      
     ' Read INI file
-    Public Function ReadIniValue(FileName As String, Section As String, Key As String) As String
+    ' This function has been modified to return an optional default value rather than returning nothing
+    ' Ideal for cases where a returned null value is unacceptable (e.g. integer or Boolean values)
+    Public Function ReadIniValue(FileName As String, Section As String, Key As String, Optional DefaultVal As String) As String
+    If DefaultVal = vbNullString Then DefaultVal = ""
     Dim RetVal As String * 255, v As Long
     v = GetPrivateProfileString(Section, Key, "", RetVal, 255, FileName)
-    ReadIniValue = Left(RetVal, v)
+    If Not Left(RetVal, v) = "" Then
+        ReadIniValue = Left(RetVal, v)
+    Else
+        If Not DefaultVal = "" Then ReadIniValue = DefaultVal
+    End If
     End Function
    
     ' Write INI file
