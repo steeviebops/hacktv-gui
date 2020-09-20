@@ -1,9 +1,9 @@
-MainForm = 31, 19, 1017, 535, , 39, 76, 961, 707, C
+MainForm = 158, 81, 1144, 597, , 36, 107, 956, 736, C
 mCommonDialog = 21, 24, 1107, 401, C
 mBrowseForFolder = 30, 59, 1116, 436, C
-SettingsForm = 102, 79, 1099, 514, C, 58, 99, 1055, 534, C
+SettingsForm = 287, 20, 1284, 455, C, 58, 99, 1055, 574, C
 mLuhnCheck = 71, 95, 1068, 530, C
-TeletextDownload = 136, 86, 1107, 523, C, 21, 73, 992, 508, C
+TeletextDownload = 252, 307, 1223, 744, C, 21, 73, 992, 508, C
 NetGrab = 0, 0, 971, 435, C, 66, 87, 1037, 522, C
-mSharedFunctions = 342, 350, 1313, 785, 
+mSharedFunctions = 342, 350, 1313, 785, C
 mINIfunctions = 272, 302, 1243, 737, C

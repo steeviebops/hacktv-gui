@@ -21,11 +21,17 @@ Begin VB.Form MainForm
    MaxButton       =   0   'False
    ScaleHeight     =   7245
    ScaleWidth      =   12015
+   Begin hacktv_gui.NetGrab NetGrab2 
+      Left            =   6480
+      Top             =   6480
+      _ExtentX        =   661
+      _ExtentY        =   661
+   End
    Begin VB.Frame FrmScramblingOptions 
       Caption         =   "Video scrambling options"
       Height          =   1215
       Left            =   120
-      TabIndex        =   65
+      TabIndex        =   64
       Top             =   3840
       Width           =   6495
       Begin VB.ComboBox encryption_type 
@@ -33,7 +39,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   120
          Style           =   2  'Dropdown List
-         TabIndex        =   74
+         TabIndex        =   73
          Top             =   360
          Width           =   1815
       End
@@ -42,7 +48,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   120
-         TabIndex        =   73
+         TabIndex        =   72
          Top             =   840
          Width           =   1455
       End
@@ -51,7 +57,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   1800
-         TabIndex        =   72
+         TabIndex        =   71
          Top             =   840
          Width           =   1455
       End
@@ -60,7 +66,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   3360
-         TabIndex        =   71
+         TabIndex        =   70
          Top             =   840
          Width           =   1575
       End
@@ -70,7 +76,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   5040
          MaxLength       =   13
-         TabIndex        =   70
+         TabIndex        =   69
          Top             =   840
          Width           =   1335
       End
@@ -78,7 +84,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   2040
          Style           =   2  'Dropdown List
-         TabIndex        =   69
+         TabIndex        =   68
          Top             =   360
          Visible         =   0   'False
          Width           =   2115
@@ -87,7 +93,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   4260
          Style           =   2  'Dropdown List
-         TabIndex        =   68
+         TabIndex        =   67
          Top             =   360
          Visible         =   0   'False
          Width           =   2115
@@ -97,7 +103,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   1800
-         TabIndex        =   66
+         TabIndex        =   65
          Top             =   840
          Visible         =   0   'False
          Width           =   2055
@@ -107,7 +113,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   2040
          Style           =   2  'Dropdown List
-         TabIndex        =   75
+         TabIndex        =   74
          Top             =   360
          Width           =   4335
       End
@@ -116,7 +122,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   120
-         TabIndex        =   67
+         TabIndex        =   66
          Top             =   840
          Visible         =   0   'False
          Width           =   1575
@@ -184,18 +190,19 @@ Begin VB.Form MainForm
          End
       End
    End
-   Begin VB.Frame FrmAdvanced 
-      Caption         =   "Advanced options"
+   Begin VB.Frame FrmOther 
+      Caption         =   "Additional options"
       Height          =   4575
       Left            =   6720
       TabIndex        =   44
       Top             =   1440
       Width           =   5175
-      Begin VB.CheckBox ChkInterlace 
-         Caption         =   "Interlaced video"
+      Begin VB.CheckBox ChkVITS 
+         Caption         =   "VITS test signal"
+         Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   64
+         TabIndex        =   75
          Top             =   960
          Width           =   1815
       End
@@ -544,6 +551,14 @@ Begin VB.Form MainForm
       TabIndex        =   0
       Top             =   120
       Width           =   6495
+      Begin VB.CheckBox ChkInterlace 
+         Caption         =   "Interlaced video"
+         Height          =   315
+         Left            =   120
+         TabIndex        =   76
+         Top             =   1920
+         Width           =   1815
+      End
       Begin VB.TextBox TxtSubtitleIndex 
          BackColor       =   &H8000000F&
          Enabled         =   0   'False
@@ -557,11 +572,11 @@ Begin VB.Form MainForm
       Begin VB.CheckBox ChkSubtitles 
          Caption         =   "Subtitles"
          Enabled         =   0   'False
-         Height          =   255
-         Left            =   120
+         Height          =   315
+         Left            =   2880
          TabIndex        =   13
          Top             =   1920
-         Width           =   1695
+         Width           =   975
       End
       Begin VB.CheckBox ChkRepeat 
          Caption         =   "Repeat indefinitely"
@@ -667,13 +682,13 @@ Begin VB.Form MainForm
          Width           =   2055
       End
       Begin VB.Label LblSubtitleIndex 
-         Caption         =   "Subtitle index (optional)"
+         Caption         =   "Index (optional)"
          Enabled         =   0   'False
          Height          =   255
-         Left            =   2880
+         Left            =   4080
          TabIndex        =   14
          Top             =   1920
-         Width           =   2055
+         Width           =   1455
       End
    End
    Begin VB.Menu FileMenu 
@@ -690,6 +705,30 @@ Begin VB.Form MainForm
       Begin VB.Menu SaveFileAs 
          Caption         =   "Save As..."
       End
+      Begin VB.Menu MRUbar 
+         Caption         =   "-"
+         Visible         =   0   'False
+      End
+      Begin VB.Menu file1 
+         Caption         =   "MRUFile1"
+         Enabled         =   0   'False
+         Visible         =   0   'False
+      End
+      Begin VB.Menu file2 
+         Caption         =   "MRUFile2"
+         Enabled         =   0   'False
+         Visible         =   0   'False
+      End
+      Begin VB.Menu file3 
+         Caption         =   "MRUFile3"
+         Enabled         =   0   'False
+         Visible         =   0   'False
+      End
+      Begin VB.Menu file4 
+         Caption         =   "MRUFile4"
+         Enabled         =   0   'False
+         Visible         =   0   'False
+      End
       Begin VB.Menu bar3 
          Caption         =   "-"
       End
@@ -700,7 +739,7 @@ Begin VB.Form MainForm
    Begin VB.Menu settings 
       Caption         =   "&Settings"
       Begin VB.Menu PathSettings 
-         Caption         =   "&Paths..."
+         Caption         =   "&Settings..."
       End
       Begin VB.Menu bar4 
          Caption         =   "-"
@@ -711,11 +750,24 @@ Begin VB.Form MainForm
       Begin VB.Menu GenerateOnly 
          Caption         =   "Generate syntax only"
       End
+      Begin VB.Menu bar5 
+         Caption         =   "-"
+      End
+      Begin VB.Menu ClearMRUList 
+         Caption         =   "Clear MRU list..."
+         Enabled         =   0   'False
+      End
+      Begin VB.Menu ResetAllSettings 
+         Caption         =   "Reset all settings..."
+      End
    End
    Begin VB.Menu HelpMenu 
       Caption         =   "&Help"
       Begin VB.Menu HelpIndex 
          Caption         =   "&Index..."
+      End
+      Begin VB.Menu UpdateCheck 
+         Caption         =   "Check for updates..."
       End
       Begin VB.Menu bar2 
          Caption         =   "-"
@@ -775,6 +827,9 @@ Dim DualVCMode As Boolean
 ' This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
 Dim DefaultSampleRate As String
 
+' Declare a variable which we set if the CPU C-state option is set
+Dim CStateSettingChanged As Boolean
+
 ' Declare all variables used for storing parameters
 Dim inputsource As String
 Dim freq As String
@@ -809,12 +864,21 @@ Dim ScalingMode As String
 Dim Interlaced As String
 Dim ShowCardSerial As String
 Dim FindKey As String
+Dim VITS As String
 
 ' Initialise XP-ish window styles
 ' Also initialise a workaround for a bug which causes a VB6 application to crash on exit if
 ' a UserControl is loaded when InitCommonControls is specified.
 Private Declare Function IsUserAnAdmin Lib "shell32" Alias "#680" () As Integer
 Private Declare Function InitCommonControls Lib "comctl32.dll" () As Long
+
+Private Sub ChkVITS_Click()
+    If ChkVITS.Value = vbChecked Then
+        VITS = "--vits"
+    Else
+        VITS = ""
+    End If
+End Sub
 
 Private Sub Form_Initialize()
 ' Don't initialise common controls (for visual styles) on Wine as it doesn't need it.
@@ -841,7 +905,6 @@ Private Sub Form_Initialize()
     ChkTimestamp.Top = LogoFolder.Top + ((LogoFolder.Height - ChkLogo.Height) / 2)
     ChkPosition.Top = positionValue.Top + ((positionValue.Height - ChkPosition.Height) / 2)
     ChkRepeat.Top = positionValue.Top + ((positionValue.Height - ChkPosition.Height) / 2)
-    ChkSubtitles.Top = TxtSubtitleIndex.Top + ((TxtSubtitleIndex.Height - ChkSubtitles.Height))
 End Sub
 
 Private Sub Form_Load()
@@ -870,36 +933,10 @@ Private Sub Form_Load()
     UHF.Value = True
     PAL.Value = True
     LocalSource.Value = True
+' Populate MRU list from registry
+    Call CheckMRUList
 ' If a command line parameter has been specified, call the Open function to read it
     If Not Command = "" Then Call OpenFile_Click
-End Sub
-
-Private Sub GenerateOnly_Click()
-    If GenerateOnly.Checked = False Then
-        GenerateOnly.Checked = True
-        BtnRun.Caption = "Generate syntax"
-        ' Disable the "close on exit" option when "generate only" is enabled
-        CloseOnExit.Checked = False
-        CloseOnExit.Enabled = False
-    Else
-        GenerateOnly.Checked = False
-        BtnRun.Caption = "Run hacktv..."
-        ' Re-enable the "close on exit" option
-        CloseOnExit.Enabled = True
-    End If
-End Sub
-
-Private Sub HelpMenu_Click()
-' If the help file above does not exist in the application directory, grey out the index menu option
-    If DoesFileExist(App.HelpFile) = False Then
-        HelpIndex.Enabled = False
-    Else
-        HelpIndex.Enabled = True
-    End If
-End Sub
-
-Private Sub HelpIndex_Click()
-    ShellExecute Me.hWnd, vbNullString, "hh.exe", App.HelpFile, vbNullString, SW_SHOWNORMAL
 End Sub
 
 Public Sub detectfork()
@@ -983,6 +1020,153 @@ Private Sub captainjack()
     If MAC.Value = True Then Call AddMACEncryptionTypes
 End Sub
 
+Private Sub ResetAllSettings_Click()
+' Deletes all registry settings and exits the application
+' Use this to either uninstall the application (so we leave the system as we found it), or for troubleshooting
+    Dim ResetSettingsPrompt As VbMsgBoxResult
+    ResetSettingsPrompt = MsgBox("This option will remove all of this application's settings from the registry " _
+    & "and exit." & vbCrLf & "Do you wish to continue?", vbQuestion + vbYesNo, App.Title)
+    If ResetSettingsPrompt = vbYes Then
+    ' Delete reg key
+        On Error Resume Next
+        DeleteSetting (App.Title)
+        On Error GoTo 0
+    ' Exit application
+        Unload Me
+    End If
+End Sub
+
+Private Sub CheckMRUList()
+    Dim ConfigFile1 As String
+    Dim ConfigFile2 As String
+    Dim ConfigFile3 As String
+    Dim ConfigFile4 As String
+    file1.Visible = False
+    file2.Visible = False
+    file3.Visible = False
+    file4.Visible = False
+    MRUbar.Visible = False
+    ClearMRUList.Enabled = False
+    ConfigFile1 = GetSetting(App.Title, "Settings", "File1")
+    ConfigFile2 = GetSetting(App.Title, "Settings", "File2")
+    ConfigFile3 = GetSetting(App.Title, "Settings", "File3")
+    ConfigFile4 = GetSetting(App.Title, "Settings", "File4")
+    If Not ConfigFile1 = "" Then
+        MRUbar.Visible = True
+        file1.Enabled = True
+        file1.Caption = ConfigFile1
+        file1.Visible = True
+        ClearMRUList.Enabled = True
+    End If
+    If Not ConfigFile2 = "" Then
+        MRUbar.Visible = True
+        file2.Enabled = True
+        file2.Caption = ConfigFile2
+        file2.Visible = True
+        ClearMRUList.Enabled = True
+    End If
+    If Not ConfigFile3 = "" Then
+        MRUbar.Visible = True
+        file3.Enabled = True
+        file3.Caption = ConfigFile3
+        file3.Visible = True
+        ClearMRUList.Enabled = True
+    End If
+    If Not ConfigFile4 = "" Then
+        MRUbar.Visible = True
+        file4.Enabled = True
+        file4.Caption = ConfigFile4
+        file4.Visible = True
+        ClearMRUList.Enabled = True
+    End If
+    If ConfigFile1 = "" And ConfigFile2 = "" And ConfigFile3 = "" And ConfigFile4 = "" Then
+        file1.Visible = False
+        file2.Visible = False
+        file3.Visible = False
+        file4.Visible = False
+        MRUbar.Visible = False
+        ClearMRUList.Enabled = False
+    End If
+End Sub
+
+Private Sub UpdateMRUList(FilePath As String)
+' This sub adds the specified file path to the #1 position in the MRU list, and shifts everything else down
+    Dim ConfigFile1 As String
+    Dim ConfigFile2 As String
+    Dim ConfigFile3 As String
+    Dim ConfigFile4 As String
+    ConfigFile1 = GetSetting(App.Title, "Settings", "File1")
+    ConfigFile2 = GetSetting(App.Title, "Settings", "File2")
+    ConfigFile3 = GetSetting(App.Title, "Settings", "File3")
+    ConfigFile4 = GetSetting(App.Title, "Settings", "File4")
+    If FilePath = ConfigFile2 Then
+        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        SaveSetting App.Title, "Settings", "File1", FilePath
+        Call CheckMRUList
+    ElseIf FilePath = ConfigFile3 Then
+        SaveSetting App.Title, "Settings", "File3", ConfigFile2
+        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        SaveSetting App.Title, "Settings", "File1", FilePath
+        Call CheckMRUList
+    ElseIf FilePath = ConfigFile4 Then
+        SaveSetting App.Title, "Settings", "File4", ConfigFile3
+        SaveSetting App.Title, "Settings", "File3", ConfigFile2
+        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        SaveSetting App.Title, "Settings", "File1", FilePath
+        Call CheckMRUList
+    ElseIf FilePath = ConfigFile1 Then
+        ' No need to do anything
+    Else
+        SaveSetting App.Title, "Settings", "File4", ConfigFile3
+        SaveSetting App.Title, "Settings", "File3", ConfigFile2
+        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        SaveSetting App.Title, "Settings", "File1", FilePath
+        Call CheckMRUList
+    End If
+End Sub
+
+Private Sub ClearMRUList_Click()
+    Dim ClearMRUPrompt As VbMsgBoxResult
+    ClearMRUPrompt = MsgBox("This will clear the list of most recently used files from the File menu. Do you wish to continue?", _
+    vbQuestion + vbYesNo, App.Title)
+    If ClearMRUPrompt = vbYes Then
+        If Not GetSetting(App.Title, "Settings", "File4") = "" Then DeleteSetting App.Title, "Settings", "File4"
+        If Not GetSetting(App.Title, "Settings", "File3") = "" Then DeleteSetting App.Title, "Settings", "File3"
+        If Not GetSetting(App.Title, "Settings", "File2") = "" Then DeleteSetting App.Title, "Settings", "File2"
+        If Not GetSetting(App.Title, "Settings", "File1") = "" Then DeleteSetting App.Title, "Settings", "File1"
+        Call CheckMRUList
+        ClearMRUList.Enabled = False
+    End If
+End Sub
+
+Private Sub GenerateOnly_Click()
+    If GenerateOnly.Checked = False Then
+        GenerateOnly.Checked = True
+        BtnRun.Caption = "Generate syntax"
+        ' Disable the "close on exit" option when "generate only" is enabled
+        CloseOnExit.Checked = False
+        CloseOnExit.Enabled = False
+    Else
+        GenerateOnly.Checked = False
+        BtnRun.Caption = "Run hacktv..."
+        ' Re-enable the "close on exit" option
+        CloseOnExit.Enabled = True
+    End If
+End Sub
+
+Private Sub HelpMenu_Click()
+' If the help file above does not exist in the application directory, grey out the index menu option
+    If DoesFileExist(App.HelpFile) = False Then
+        HelpIndex.Enabled = False
+    Else
+        HelpIndex.Enabled = True
+    End If
+End Sub
+
+Private Sub HelpIndex_Click()
+    ShellExecute Me.hWnd, vbNullString, "hh.exe", App.HelpFile, vbNullString, SW_SHOWNORMAL
+End Sub
+
 Private Sub exit_Click()
     Unload Me
 End Sub
@@ -995,6 +1179,22 @@ Private Sub about_Click()
     & vbCrLf & "Created 2019-2020 by Stephen McGarry" & vbCrLf & vbCrLf _
     & "This application has no affiliation with hacktv's developers and is provided for your convenience."
     MsgBox lblDescription, vbInformation, lblTitle
+End Sub
+
+Public Sub RestrictCPUIdleStates(Enable As Boolean)
+' This sub enables or disables CPU C-states from C2 onwards. Some systems are very aggressive with CPU power
+' management and this can cause timing issues with hacktv, resulting in choppy video at high sample rates.
+    If Enable = True Then
+' Run powercfg.exe, set the max C-state to 1, then reapply the Balanced power profile with the new setting.
+        ShellExecute Me.hWnd, vbNullString, Environ$("WINDIR") & "\system32\powercfg.exe", "/setacvalueindex 381b4222-f694-41f0-9685-ff5bb260df2e 54533251-82be-4824-96c1-47b60b740d00 9943e905-9a30-4ec1-9b99-44dd3b76f7a2 1", vbNullString, SW_SHOWMINIMIZED
+        ShellExecute Me.hWnd, vbNullString, Environ$("WINDIR") & "\system32\powercfg.exe", "/setactive 381b4222-f694-41f0-9685-ff5bb260df2e", vbNullString, SW_SHOWMINIMIZED
+        CStateSettingChanged = True
+    ElseIf Enable = False Then
+' Run powercfg.exe, set the max C-state to 0 (any), then reapply the Balanced power profile with the new setting.
+        ShellExecute Me.hWnd, vbNullString, Environ$("WINDIR") & "\system32\powercfg.exe", "/setacvalueindex 381b4222-f694-41f0-9685-ff5bb260df2e 54533251-82be-4824-96c1-47b60b740d00 9943e905-9a30-4ec1-9b99-44dd3b76f7a2 0", vbNullString, SW_SHOWMINIMIZED
+        ShellExecute Me.hWnd, vbNullString, Environ$("WINDIR") & "\system32\powercfg.exe", "/setactive 381b4222-f694-41f0-9685-ff5bb260df2e", vbNullString, SW_SHOWMINIMIZED
+        CStateSettingChanged = False
+    End If
 End Sub
 
 Private Sub ChkSubtitles_Click()
@@ -1062,6 +1262,58 @@ End Sub
 
 Private Sub Encryption_Key_Click()
     Call CheckEncryptionKey
+End Sub
+
+Private Sub UpdateCheck_Click()
+' Set variables
+Dim DownloadURL As String
+    DownloadURL = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/master/hacktv-gui.vbp"
+Dim FilePath As String
+    FilePath = Environ$("temp") & "\update.vbp"
+Dim strText As String
+Dim MajorVersion() As String
+Dim MinorVersion() As String
+Dim LatestVersion As String
+Dim UpdatePrompt As VbMsgBoxResult
+UpdatePrompt = MsgBox("This will check for a new version of the application. We do this by downloading " _
+& "part of the source from Github. No personal information is transmitted." & vbCrLf _
+& "Do you wish to continue?", vbYesNo + vbQuestion, App.Title)
+If UpdatePrompt = vbNo Then Exit Sub
+    NetGrab2.DownloadStart DownloadURL, vbAsyncReadSynchronousDownload
+' Check if file exists
+    If DoesFileExist(FilePath) = False Then
+        MsgBox "Unable to check for updates at this time. Please ensure that you are connected to the internet " _
+        & "and try again.", vbCritical, App.Title
+        Exit Sub
+    End If
+' Open the file we downloaded and load it to a string
+    Open FilePath For Input As #iFileNo
+    strText = Input(LOF(1), #iFileNo)
+    Close #iFileNo
+' Delete the downloaded file as we no longer need it
+    Kill FilePath
+' Check the string for the MajorVer and MinorVer lines, then load their values to arrays
+    Between strText, "MajorVer=", vbLf, MajorVersion
+    Between strText, "MinorVer=", vbLf, MinorVersion
+    LatestVersion = MajorVersion(0) & Chr(46) & MinorVersion(0)
+' If version in VBP file is newer than app version then notify
+    If LatestVersion > App.Major & "." & App.Minor Then
+        MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
+        & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
+        & "A new version is now available. Please visit the Github page to download.", vbInformation, App.Title
+        ' "Version " & LatestVersion & " is now available. Please visit the Github page to download.", vbInformation, App.Title
+    ElseIf LatestVersion <= App.Major & "." & App.Minor Then
+        MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
+        & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
+        & "No updates are available at this time.", vbInformation, App.Title
+        'MsgBox "No updates are available at this time.", vbInformation, App.Title
+    End If
+End Sub
+
+Private Sub NetGrab2_DownloadComplete(ByVal nBytes As Long)
+Dim FilePath As String
+    FilePath = Environ$("temp") & "\update.vbp"
+    Call NetGrab2.SaveAs(FilePath)
 End Sub
 
 Private Sub vc1key_Click()
@@ -1431,16 +1683,18 @@ Private Sub SaveConfigFile(ByVal FileName As String)
     ' Subtitles
     If ChkSubtitles.Value = vbChecked Then WriteIniValue FileName, "hacktv", "subtitles", ChkSubtitles.Value
     If ChkSubtitles.Value = vbChecked Then WriteIniValue FileName, "hacktv", "subtitleindex", TxtSubtitleIndex.Text
+    ' VITS
+    If ChkVITS.Value = vbChecked Then WriteIniValue FileName, "hacktv", "vits", ChkVITS.Value
     ' Display the opened filename in the title bar
     If TitleBarChanged = False Then TitleBar = Caption
     TitleBarChanged = True
     Caption = TitleBar & " - " & Mid(FileName, InStrRev(FileName, "\") + 1, Len(FileName))
     SaveFile.Caption = "Save"
+    ' Update MRU list
+    Call UpdateMRUList(FileName)
 End Sub
 
 Private Sub OpenFile_Click()
-    Dim fData As String
-    iFileNo = FreeFile
     ' If a file was specified as a command line parameter, set it as the file to open
     If Command = "" Or FileOpened = True Then
         ' Spawn an open file dialog box to browse for a settings file
@@ -1454,6 +1708,29 @@ Private Sub OpenFile_Click()
                 ConfigFileName = "Z:" & ConfigFileName
             End If
         End If
+    End If
+    Call CheckSelectedFile(ConfigFileName)
+End Sub
+
+Private Sub file1_Click()
+    Call CheckSelectedFile(file1.Caption)
+End Sub
+
+Private Sub file2_Click()
+    Call CheckSelectedFile(file2.Caption)
+End Sub
+
+Private Sub file3_Click()
+    Call CheckSelectedFile(file3.Caption)
+End Sub
+
+Private Sub file4_Click()
+    Call CheckSelectedFile(file4.Caption)
+End Sub
+
+Private Sub CheckSelectedFile(ConfigFileName As String)
+    Dim fData As String
+    iFileNo = FreeFile
     ' If the filename contains quotation marks, remove them as the runtime will crash otherwise
         If InStr(ConfigFileName, Chr(34)) > 0 Then ConfigFileName = Replace$(ConfigFileName, Chr(34), "")
             ' If the file doesn't exist, check the current working directory for it
@@ -1469,7 +1746,6 @@ Private Sub OpenFile_Click()
                     ConfigFileName = CurDir & Chr(92) & ConfigFileName
                 End If
             End If
-    End If
     ' If the specified file name does not have a .htv extension, assume that the file is a source file
     If Not Command = "" And FileOpened = False Then
         If Not Right(LCase(ConfigFileName), 4) = ".htv" Then
@@ -1537,6 +1813,8 @@ Private Sub OpenFile_Click()
         SaveFile.Caption = "Save"
         ' Set the FileOpened value to True to allow us to open a second file after accepting command line parameters
         FileOpened = True
+        ' Update MRU list
+        Call UpdateMRUList(ConfigFileName)
     End If
     Exit Sub
 FileAccessError:
@@ -1670,8 +1948,8 @@ Private Sub OpenConfigFile(ConfigFileName As String)
         Call InvalidConfigFileValue("video format", ImportedVideoFormat, vbCritical)
         Call NewFile_Click
     End If
-    ' Sample rate
-    SampleRate.Text = ReadIniValue(ConfigFileName, "hacktv", "samplerate") / 1000000
+    ' Sample rate (default to 16 MHz if not specified)
+    SampleRate.Text = ReadIniValue(ConfigFileName, "hacktv", "samplerate", 16000000) / 1000000
     ' Frequency
         ' Read values from config file to variables
         ' As we're dealing with a long integer for the frequency value, return a value of -250 if the value is blank
@@ -1786,9 +2064,11 @@ Private Sub OpenConfigFile(ConfigFileName As String)
         wss_mode.ListIndex = ImportedWSS - 1
     End If
     ' Aspect ratio correction for 16:9 content on 4:3 display
+    ' If the arcorrection value is not defined, return -1 and leave the option unchecked
+    ' Otherwise, check the option and process it as normal
     If ChkARCorrection.Enabled = True Then
-        ImportedAR = ReadIniValue(ConfigFileName, "hacktv", "arcorrection", 0)
-        If Not ImportedAR = 0 Then
+        ImportedAR = ReadIniValue(ConfigFileName, "hacktv", "arcorrection", -1)
+        If Not ImportedAR = -1 Then
             ChkARCorrection.Value = vbChecked
             ARCorrectionMode.ListIndex = ReadIniValue(ConfigFileName, "hacktv", "arcorrection")
         End If
@@ -1962,6 +2242,8 @@ Private Sub OpenConfigFile(ConfigFileName As String)
     ' Subtitles
     ChkSubtitles.Value = ReadIniValue(ConfigFileName, "hacktv", "subtitles", 0)
     If ChkSubtitles.Value = vbChecked Then TxtSubtitleIndex.Text = ReadIniValue(ConfigFileName, "hacktv", "subtitleindex")
+    ' VITS
+    If ChkVITS.Enabled = True Then ChkVITS.Value = ReadIniValue(ConfigFileName, "hacktv", "vits", 0)
 End Sub
 
 Private Sub InvalidConfigFileValue(SettingName As String, Value As String, Optional ErrorType As VbMsgBoxStyle)
@@ -2399,6 +2681,7 @@ Private Sub BW_Click()
     Call DisableWSSButton
     Call DisableWSS
     Call DisableEncryption
+    Call DisableVITS
     With VideoFormat
         .Clear
         .AddItem "CCIR System A (405 lines, 25 fps)" ', -3.5 MHz AM audio)" - too long to fit!
@@ -2430,6 +2713,7 @@ Private Sub MAC_Click()
     Call AddMACEncryptionTypes
     If DualVCMode = True Then Call DisableDualVCMode
     ChkACP.Enabled = True
+    Call DisableVITS
     With VideoFormat
         .Clear
         .AddItem "D2-MAC (625 lines, 25 fps, AM, digital audio)"
@@ -2449,6 +2733,15 @@ Private Sub EnableAudioOption()
     ChkAudio.Value = vbChecked
 End Sub
 
+Private Sub EnableVITS()
+    ChkVITS.Enabled = True
+End Sub
+
+Private Sub DisableVITS()
+    ChkVITS.Value = vbUnchecked
+    ChkVITS.Enabled = False
+End Sub
+
 Private Sub Common625Features()
 ' Configure features common to 625-line modes
     If Not encryption_key.Enabled = True Then ChkACP.Enabled = True
@@ -2460,6 +2753,7 @@ Private Sub Common625Features()
         Call AddWSSModes
     End If
     Call EnableEncryption
+    Call EnableVITS
 End Sub
 
 Private Sub Common525Features()
@@ -2472,6 +2766,7 @@ Private Sub Common525Features()
     Call DisableWSSButton
     Call DisableWSS
     Call DisableEncryption
+    Call EnableVITS
 End Sub
 
 Private Sub CustomFreq_Click()
@@ -4461,7 +4756,28 @@ Private Sub RunTV()
     If CheckOutputLevel = False Then Exit Sub
     If CheckCardNumber = False Then Exit Sub
     Call CheckAspectRatioScaling
-
+    
+' Special handling for BSB channels
+' This allows us to have five separate hacktv binaries, each one with a different
+' channel ID so the BSB receiver will show the correct channel name.
+    If sys = "dmac-fm" And GetSetting(App.EXEName, "Settings", "SeparateEXEsForBSB", 0) = 1 Then
+        If frequency_ch.Text = "4 (Now)" Then
+            HackTVEXEName = "hacktv-now.exe"
+        ElseIf frequency_ch.Text = "8 (Galaxy)" Then
+            HackTVEXEName = "hacktv-galaxy.exe"
+        ElseIf frequency_ch.Text = "12 (Sports Ch)" Then
+            HackTVEXEName = "hacktv-sports.exe"
+        ElseIf frequency_ch.Text = "16 (Power St)" Then
+            HackTVEXEName = "hacktv-ps.exe"
+        ElseIf frequency_ch.Text = "20 (Movie Ch)" Then
+            HackTVEXEName = "hacktv-movie.exe"
+        Else
+            HackTVEXEName = "hacktv.exe"
+        End If
+    Else
+        HackTVEXEName = "hacktv.exe"
+    End If
+    
 ' Combine all parameters into one text field
 ' This doesn't include the filename as we will be trimming later
     allargs.Text = videomodeargument & Chr(32) & sys & Chr(32) & frequencyargument & Chr(32) _
@@ -4475,7 +4791,7 @@ Private Sub RunTV()
     & positionparam & Chr(32) & positionValue.Text & Chr(32) & timestampParam & Chr(32) _
     & logoParam & Chr(32) & logoPath & Chr(32) & verboseParam & Chr(32) & EMMParam & Chr(32) _
     & TruncatedCardNumber & Chr(32) & ShowECMParam & Chr(32) & ScalingMode & Chr(32) & Interlaced _
-    & Chr(32) & ShowCardSerial & Chr(32) & FindKey
+    & Chr(32) & ShowCardSerial & Chr(32) & FindKey & Chr(32) & VITS
 ' Tidy up parameters by removing additional spaces if required
     Do While InStr(1, allargs.Text, "  ")
         allargs.Text = Replace$(allargs.Text, "  ", " ")
@@ -4484,13 +4800,16 @@ Private Sub RunTV()
 ' Add the source path to the arguments field
     allargs.Text = SpacesRemoved & Chr(32) & inputsource
 ' If running on Wine, call its sub
-' If running on Windows, check if closeonexit is enabled
-' If enabled, change the parameters to run cmd.exe /k first. If disabled, then run hacktv.exe directly.
     If RunningOnWine = True Then
         Call TranslatePathsForWine
     Else
 ' If the Generate only option is enabled, stop here
         If GenerateOnly.Checked = True Then Exit Sub
+' Check if the option to restrict CPU C-states is enabled
+' If it is, then restrict the C-state to C1 before we start
+        If GetSetting(App.EXEName, "Settings", "RestrictCPUIdleStates") = "1" Then Call RestrictCPUIdleStates(True)
+' If running on Windows, check if closeonexit is enabled
+' If so, change the parameters to run cmd.exe /k first. If disabled, then run hacktv.exe directly.
         If CloseOnExit.Checked = False Then
             runpath = HackTVPath & Chr(92) & HackTVEXEName
             args = allargs.Text
@@ -4499,7 +4818,7 @@ Private Sub RunTV()
             args = " /k call " & Chr(34) & HackTVPath & Chr(92) & HackTVEXEName & Chr(34) & Chr(32) & allargs.Text
         End If
         If IsFileInUse(HackTVPath & Chr(92) & HackTVEXEName) = True Then
-            MsgBox "hacktv.exe cannot be opened. It may be locked by another process or you may not have permission to access it.", vbCritical, App.Title
+            MsgBox HackTVEXEName & " cannot be opened. It may be locked by another process or you may not have permission to access it.", vbCritical, App.Title
         Exit Sub
         End If
 ' Use ShellExecute to run the parameters shown above. We're done.
@@ -4570,6 +4889,8 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
 Private Sub CleanupBeforeExit()
+' If the option to restrict CPU C-states is enabled, revert it to defaults
+    If CStateSettingChanged = True Then Call RestrictCPUIdleStates(False)
 ' Clean up temp files if we made any
     Dim TeefaxHTML As String
     Dim SparkHTML As String

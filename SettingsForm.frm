@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form SettingsForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Path settings"
-   ClientHeight    =   3045
+   ClientHeight    =   3270
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   5655
@@ -18,9 +18,35 @@ Begin VB.Form SettingsForm
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   3045
+   ScaleHeight     =   3270
    ScaleWidth      =   5655
    StartUpPosition =   3  'Windows Default
+   Begin VB.Frame FrmAdvanced 
+      Caption         =   "Advanced"
+      Height          =   975
+      Left            =   120
+      TabIndex        =   14
+      Top             =   1680
+      Width           =   5415
+      Begin VB.CheckBox ChkRestrictCPUIdleStates 
+         Caption         =   "Restrict CPU idle states while running"
+         Height          =   255
+         Left            =   120
+         TabIndex        =   16
+         ToolTipText     =   $"SettingsForm.frx":0000
+         Top             =   600
+         Width           =   3255
+      End
+      Begin VB.CheckBox ChkBSBChannels 
+         Caption         =   "Special handling for BSB channels (beta)"
+         Height          =   255
+         Left            =   120
+         TabIndex        =   15
+         ToolTipText     =   "When enabled, this treats each BSB channel as having its own executable with a custom channel ID."
+         Top             =   240
+         Width           =   3375
+      End
+   End
    Begin VB.Frame Frame1 
       Caption         =   "Fork (auto-detected)"
       Height          =   615
@@ -38,11 +64,11 @@ Begin VB.Form SettingsForm
       End
    End
    Begin VB.CommandButton SettingsReset 
-      Caption         =   "Reset paths"
+      Caption         =   "Reset path"
       Height          =   375
       Left            =   3840
       TabIndex        =   9
-      Top             =   2520
+      Top             =   2760
       Width           =   1575
    End
    Begin VB.CommandButton SettingsOK 
@@ -50,7 +76,7 @@ Begin VB.Form SettingsForm
       Height          =   375
       Left            =   240
       TabIndex        =   7
-      Top             =   2520
+      Top             =   2760
       Width           =   1575
    End
    Begin VB.CommandButton SettingsCancel 
@@ -58,7 +84,7 @@ Begin VB.Form SettingsForm
       Height          =   375
       Left            =   2040
       TabIndex        =   8
-      Top             =   2520
+      Top             =   2760
       Width           =   1575
    End
    Begin VB.Frame TerminalFrame 
@@ -163,9 +189,15 @@ Private Sub Form_Load()
         HackTVPathText.Text = MainForm.HackTVPath
     End If
 ' If running on Wine, show the hidden gnome-terminal path setting
-    If RunningOnWine = True Then Call EnableTerminalPath
+    If RunningOnWine = True Then
+        Call EnableTerminalPath
+    End If
 ' Enables a hidden descriptor label if running on Windows, to fill up the space vacated by the gnome-terminal path
-    If RunningOnWine = False Then FillerLabel.Visible = True
+    If RunningOnWine = False Then
+        FillerLabel.Visible = True
+        ChkBSBChannels.Value = GetSetting(App.EXEName, "Settings", "SeparateEXEsForBSB", 0)
+        ChkRestrictCPUIdleStates.Value = GetSetting(App.EXEName, "Settings", "RestrictCPUIdleStates", 0)
+    End If
     If MainForm.forktype = "CJ" Then
         DetectedFork.Caption = "Captain Jack"
     Else
@@ -175,6 +207,13 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub EnableTerminalPath()
+' Disable advanced options frame and enable terminal path frame
+    SettingsReset.Caption = "Reset paths"
+    ChkBSBChannels.Value = vbUnchecked
+    ChkRestrictCPUIdleStates.Value = vbUnchecked
+    ChkBSBChannels.Enabled = False
+    ChkRestrictCPUIdleStates.Enabled = False
+    FrmAdvanced.Visible = False
     TerminalFrame.Visible = True
     TerminalFrame.Enabled = True
     TerminalText.Enabled = True
@@ -245,6 +284,15 @@ Private Sub ApplyWindowsSettings()
     End If
     MainForm.HackTVPath = HackTVPathText.Text
     regvalue = ""
+    SaveSetting App.EXEName, "Settings", "SeparateEXEsForBSB", ChkBSBChannels.Value
+    
+    If ChkRestrictCPUIdleStates.Value = vbUnchecked And _
+    GetSetting(App.EXEName, "Settings", "RestrictCPUIdleStates", 0) = 1 Then
+        SaveSetting App.EXEName, "Settings", "RestrictCPUIdleStates", ChkRestrictCPUIdleStates.Value
+        Call MainForm.RestrictCPUIdleStates(False)
+    Else
+        SaveSetting App.EXEName, "Settings", "RestrictCPUIdleStates", ChkRestrictCPUIdleStates.Value
+    End If
     If PathChanged = True Then Call MainForm.detectfork
 End Sub
 
