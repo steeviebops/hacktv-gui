@@ -31,7 +31,7 @@ Begin VB.Form MainForm
       Caption         =   "Video scrambling options"
       Height          =   1215
       Left            =   120
-      TabIndex        =   64
+      TabIndex        =   27
       Top             =   3840
       Width           =   6495
       Begin VB.ComboBox encryption_type 
@@ -39,7 +39,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   120
          Style           =   2  'Dropdown List
-         TabIndex        =   73
+         TabIndex        =   28
          Top             =   360
          Width           =   1815
       End
@@ -48,7 +48,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   120
-         TabIndex        =   72
+         TabIndex        =   32
          Top             =   840
          Width           =   1455
       End
@@ -57,7 +57,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   1800
-         TabIndex        =   71
+         TabIndex        =   33
          Top             =   840
          Width           =   1455
       End
@@ -66,7 +66,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   3360
-         TabIndex        =   70
+         TabIndex        =   34
          Top             =   840
          Width           =   1575
       End
@@ -76,7 +76,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   5040
          MaxLength       =   13
-         TabIndex        =   69
+         TabIndex        =   35
          Top             =   840
          Width           =   1335
       End
@@ -84,7 +84,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   2040
          Style           =   2  'Dropdown List
-         TabIndex        =   68
+         TabIndex        =   30
          Top             =   360
          Visible         =   0   'False
          Width           =   2115
@@ -93,7 +93,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   4260
          Style           =   2  'Dropdown List
-         TabIndex        =   67
+         TabIndex        =   31
          Top             =   360
          Visible         =   0   'False
          Width           =   2115
@@ -103,7 +103,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   1800
-         TabIndex        =   65
+         TabIndex        =   38
          Top             =   840
          Visible         =   0   'False
          Width           =   2055
@@ -113,7 +113,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   2040
          Style           =   2  'Dropdown List
-         TabIndex        =   74
+         TabIndex        =   29
          Top             =   360
          Width           =   4335
       End
@@ -122,7 +122,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   195
          Left            =   120
-         TabIndex        =   66
+         TabIndex        =   37
          Top             =   840
          Visible         =   0   'False
          Width           =   1575
@@ -132,7 +132,7 @@ Begin VB.Form MainForm
       Caption         =   "Teletext options"
       Height          =   1215
       Left            =   6720
-      TabIndex        =   38
+      TabIndex        =   50
       Top             =   120
       Width           =   5175
       Begin VB.PictureBox Picture4 
@@ -141,7 +141,7 @@ Begin VB.Form MainForm
          Left            =   120
          ScaleHeight     =   855
          ScaleWidth      =   4995
-         TabIndex        =   39
+         TabIndex        =   51
          Top             =   240
          Width           =   5000
          Begin VB.CommandButton BtnTeletextBrowseFile 
@@ -149,7 +149,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   1680
-            TabIndex        =   61
+            TabIndex        =   76
             Top             =   480
             Width           =   1600
          End
@@ -157,7 +157,7 @@ Begin VB.Form MainForm
             Caption         =   "Teletext"
             Height          =   255
             Left            =   0
-            TabIndex        =   40
+            TabIndex        =   52
             Top             =   120
             Width           =   975
          End
@@ -166,7 +166,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   285
             Left            =   1080
-            TabIndex        =   41
+            TabIndex        =   53
             Top             =   120
             Width           =   3855
          End
@@ -175,7 +175,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   0
-            TabIndex        =   42
+            TabIndex        =   54
             Top             =   480
             Width           =   1600
          End
@@ -184,7 +184,7 @@ Begin VB.Form MainForm
             Enabled         =   0   'False
             Height          =   375
             Left            =   3360
-            TabIndex        =   43
+            TabIndex        =   55
             Top             =   480
             Width           =   1605
          End
@@ -194,7 +194,7 @@ Begin VB.Form MainForm
       Caption         =   "Additional options"
       Height          =   4575
       Left            =   6720
-      TabIndex        =   44
+      TabIndex        =   56
       Top             =   1440
       Width           =   5175
       Begin VB.CheckBox ChkVITS 
@@ -202,7 +202,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   75
+         TabIndex        =   59
          Top             =   960
          Width           =   1815
       End
@@ -219,7 +219,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   3600
          Style           =   2  'Dropdown List
-         TabIndex        =   62
+         TabIndex        =   64
          Top             =   2040
          Width           =   1455
       End
@@ -228,7 +228,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   57
+         TabIndex        =   72
          Top             =   3840
          Width           =   2055
       End
@@ -236,7 +236,7 @@ Begin VB.Form MainForm
          Caption         =   "Enable verbose output"
          Height          =   315
          Left            =   120
-         TabIndex        =   58
+         TabIndex        =   73
          Top             =   4200
          Width           =   2415
       End
@@ -244,7 +244,7 @@ Begin VB.Form MainForm
          Caption         =   "Widescreen signalling (WSS) on line 23"
          Height          =   315
          Left            =   120
-         TabIndex        =   48
+         TabIndex        =   61
          Top             =   1680
          Width           =   3255
       End
@@ -253,7 +253,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   3600
          Style           =   2  'Dropdown List
-         TabIndex        =   49
+         TabIndex        =   62
          Top             =   1680
          Width           =   1455
       End
@@ -261,7 +261,7 @@ Begin VB.Form MainForm
          Caption         =   "Gamma correction"
          Height          =   315
          Left            =   120
-         TabIndex        =   50
+         TabIndex        =   65
          Top             =   2400
          Width           =   2175
       End
@@ -271,7 +271,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   4
-         TabIndex        =   51
+         TabIndex        =   66
          Top             =   2400
          Width           =   735
       End
@@ -279,7 +279,7 @@ Begin VB.Form MainForm
          Caption         =   "Output level"
          Height          =   315
          Left            =   120
-         TabIndex        =   52
+         TabIndex        =   67
          Top             =   2760
          Width           =   1935
       End
@@ -289,7 +289,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   4
-         TabIndex        =   53
+         TabIndex        =   68
          Top             =   2760
          Width           =   735
       End
@@ -297,7 +297,7 @@ Begin VB.Form MainForm
          Caption         =   "FM deviation (MHz)"
          Height          =   315
          Left            =   120
-         TabIndex        =   54
+         TabIndex        =   69
          Top             =   3120
          Width           =   1935
       End
@@ -307,7 +307,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4320
          MaxLength       =   5
-         TabIndex        =   55
+         TabIndex        =   70
          Top             =   3120
          Width           =   735
       End
@@ -315,7 +315,7 @@ Begin VB.Form MainForm
          Caption         =   "Macrovision ACP"
          Height          =   315
          Left            =   120
-         TabIndex        =   47
+         TabIndex        =   60
          Top             =   1320
          Width           =   1575
       End
@@ -323,7 +323,7 @@ Begin VB.Form MainForm
          Caption         =   "VSB-AM filter"
          Height          =   315
          Left            =   120
-         TabIndex        =   56
+         TabIndex        =   71
          Top             =   3480
          Width           =   3135
       End
@@ -331,7 +331,7 @@ Begin VB.Form MainForm
          Caption         =   "Audio enabled"
          Height          =   315
          Left            =   120
-         TabIndex        =   45
+         TabIndex        =   57
          Top             =   240
          Width           =   1455
       End
@@ -340,7 +340,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   315
          Left            =   120
-         TabIndex        =   46
+         TabIndex        =   58
          Top             =   600
          Width           =   1575
       End
@@ -350,7 +350,7 @@ Begin VB.Form MainForm
       Height          =   285
       Left            =   120
       Locked          =   -1  'True
-      TabIndex        =   60
+      TabIndex        =   75
       Top             =   6840
       Width           =   11775
    End
@@ -358,7 +358,7 @@ Begin VB.Form MainForm
       Caption         =   "Run hacktv..."
       Height          =   615
       Left            =   6720
-      TabIndex        =   59
+      TabIndex        =   74
       Top             =   6120
       Width           =   5175
    End
@@ -366,7 +366,7 @@ Begin VB.Form MainForm
       Caption         =   "Frequency and TX options"
       Height          =   1575
       Left            =   120
-      TabIndex        =   26
+      TabIndex        =   36
       Top             =   5160
       Width           =   6495
       Begin VB.PictureBox Picture3 
@@ -375,14 +375,14 @@ Begin VB.Form MainForm
          Left            =   120
          ScaleHeight     =   255
          ScaleWidth      =   4095
-         TabIndex        =   27
+         TabIndex        =   39
          Top             =   360
          Width           =   4095
          Begin VB.OptionButton VHF 
             Caption         =   "VHF"
             Height          =   255
             Left            =   1200
-            TabIndex        =   29
+            TabIndex        =   41
             Top             =   0
             Width           =   615
          End
@@ -390,7 +390,7 @@ Begin VB.Form MainForm
             Caption         =   "UHF"
             Height          =   255
             Left            =   0
-            TabIndex        =   28
+            TabIndex        =   40
             Top             =   0
             Width           =   735
          End
@@ -398,7 +398,7 @@ Begin VB.Form MainForm
             Caption         =   "Custom"
             Height          =   255
             Left            =   3000
-            TabIndex        =   30
+            TabIndex        =   42
             Top             =   0
             Width           =   975
          End
@@ -407,7 +407,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   1320
          MaxLength       =   2
-         TabIndex        =   36
+         TabIndex        =   48
          Text            =   "0"
          Top             =   1200
          Width           =   1455
@@ -417,7 +417,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   4680
          MaxLength       =   7
-         TabIndex        =   34
+         TabIndex        =   46
          Top             =   720
          Width           =   1695
       End
@@ -425,7 +425,7 @@ Begin VB.Form MainForm
          Caption         =   "TX RF amplifier"
          Height          =   255
          Left            =   3120
-         TabIndex        =   37
+         TabIndex        =   49
          Top             =   1200
          Width           =   1575
       End
@@ -433,7 +433,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   1320
          Style           =   2  'Dropdown List
-         TabIndex        =   32
+         TabIndex        =   44
          Top             =   720
          Width           =   1455
       End
@@ -441,7 +441,7 @@ Begin VB.Form MainForm
          Caption         =   "TX gain (dB)"
          Height          =   255
          Left            =   120
-         TabIndex        =   35
+         TabIndex        =   47
          Top             =   1200
          Width           =   975
       End
@@ -449,7 +449,7 @@ Begin VB.Form MainForm
          Caption         =   "Frequency (MHz)"
          Height          =   255
          Left            =   3120
-         TabIndex        =   33
+         TabIndex        =   45
          Top             =   720
          Width           =   1335
       End
@@ -457,7 +457,7 @@ Begin VB.Form MainForm
          Caption         =   "Channel"
          Height          =   255
          Left            =   120
-         TabIndex        =   31
+         TabIndex        =   43
          Top             =   720
          Width           =   855
       End
@@ -466,7 +466,7 @@ Begin VB.Form MainForm
       Caption         =   "Video format options"
       Height          =   1215
       Left            =   120
-      TabIndex        =   16
+      TabIndex        =   17
       Top             =   2520
       Width           =   6495
       Begin VB.PictureBox Picture2 
@@ -475,14 +475,14 @@ Begin VB.Form MainForm
          Left            =   120
          ScaleHeight     =   255
          ScaleWidth      =   6255
-         TabIndex        =   17
+         TabIndex        =   18
          Top             =   360
          Width           =   6255
          Begin VB.OptionButton BW 
             Caption         =   "Black and white"
             Height          =   195
             Left            =   3840
-            TabIndex        =   21
+            TabIndex        =   22
             Top             =   0
             Width           =   1455
          End
@@ -490,7 +490,7 @@ Begin VB.Form MainForm
             Caption         =   "NTSC"
             Height          =   195
             Left            =   1200
-            TabIndex        =   19
+            TabIndex        =   20
             Top             =   0
             Width           =   855
          End
@@ -498,7 +498,7 @@ Begin VB.Form MainForm
             Caption         =   "PAL"
             Height          =   195
             Left            =   0
-            TabIndex        =   18
+            TabIndex        =   19
             Top             =   0
             Width           =   735
          End
@@ -506,7 +506,7 @@ Begin VB.Form MainForm
             Caption         =   "SECAM"
             Height          =   195
             Left            =   2520
-            TabIndex        =   20
+            TabIndex        =   21
             Top             =   0
             Width           =   855
          End
@@ -514,7 +514,7 @@ Begin VB.Form MainForm
             Caption         =   "MAC"
             Height          =   195
             Left            =   5520
-            TabIndex        =   22
+            TabIndex        =   23
             Top             =   0
             Width           =   735
          End
@@ -523,7 +523,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   5640
          MaxLength       =   6
-         TabIndex        =   25
+         TabIndex        =   26
          Top             =   720
          Width           =   735
       End
@@ -531,7 +531,7 @@ Begin VB.Form MainForm
          Height          =   315
          Left            =   120
          Style           =   2  'Dropdown List
-         TabIndex        =   23
+         TabIndex        =   24
          Top             =   720
          Width           =   3975
       End
@@ -539,7 +539,7 @@ Begin VB.Form MainForm
          Caption         =   "Sample rate (MHz)"
          Height          =   285
          Left            =   4200
-         TabIndex        =   24
+         TabIndex        =   25
          Top             =   720
          Width           =   1455
       End
@@ -555,7 +555,7 @@ Begin VB.Form MainForm
          Caption         =   "Interlaced video"
          Height          =   315
          Left            =   120
-         TabIndex        =   76
+         TabIndex        =   13
          Top             =   1920
          Width           =   1815
       End
@@ -565,7 +565,7 @@ Begin VB.Form MainForm
          Height          =   285
          Left            =   5640
          MaxLength       =   2
-         TabIndex        =   15
+         TabIndex        =   16
          Top             =   1920
          Width           =   735
       End
@@ -574,7 +574,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   315
          Left            =   2880
-         TabIndex        =   13
+         TabIndex        =   14
          Top             =   1920
          Width           =   975
       End
@@ -686,7 +686,7 @@ Begin VB.Form MainForm
          Enabled         =   0   'False
          Height          =   255
          Left            =   4080
-         TabIndex        =   14
+         TabIndex        =   15
          Top             =   1920
          Width           =   1455
       End
@@ -736,10 +736,22 @@ Begin VB.Form MainForm
          Caption         =   "E&xit"
       End
    End
+   Begin VB.Menu TemplateMenu 
+      Caption         =   "&Templates"
+      Begin VB.Menu Astra975Template 
+         Caption         =   "Astra analogue STB (9.75 GHz)..."
+      End
+      Begin VB.Menu Astra10Template 
+         Caption         =   "Astra analogue STB (10 GHz)..."
+      End
+      Begin VB.Menu BSBTemplate 
+         Caption         =   "BSB D-MAC STB..."
+      End
+   End
    Begin VB.Menu settings 
       Caption         =   "&Settings"
       Begin VB.Menu PathSettings 
-         Caption         =   "&Settings..."
+         Caption         =   "&Path settings..."
       End
       Begin VB.Menu bar4 
          Caption         =   "-"
@@ -749,6 +761,9 @@ Begin VB.Form MainForm
       End
       Begin VB.Menu GenerateOnly 
          Caption         =   "Generate syntax only"
+      End
+      Begin VB.Menu ChkRestrictCPUIdleStates 
+         Caption         =   "Restrict CPU idle states"
       End
       Begin VB.Menu bar5 
          Caption         =   "-"
@@ -865,20 +880,13 @@ Dim Interlaced As String
 Dim ShowCardSerial As String
 Dim FindKey As String
 Dim VITS As String
+Dim chid As String
 
 ' Initialise XP-ish window styles
 ' Also initialise a workaround for a bug which causes a VB6 application to crash on exit if
 ' a UserControl is loaded when InitCommonControls is specified.
 Private Declare Function IsUserAnAdmin Lib "shell32" Alias "#680" () As Integer
 Private Declare Function InitCommonControls Lib "comctl32.dll" () As Long
-
-Private Sub ChkVITS_Click()
-    If ChkVITS.Value = vbChecked Then
-        VITS = "--vits"
-    Else
-        VITS = ""
-    End If
-End Sub
 
 Private Sub Form_Initialize()
 ' Don't initialise common controls (for visual styles) on Wine as it doesn't need it.
@@ -909,10 +917,15 @@ End Sub
 
 Private Sub Form_Load()
     If RunningOnWine = False Then
+' Check status of CPU idle state setting
+    If GetSetting(App.EXEName, "Settings", "RestrictCPUIdleStates") = "1" Then ChkRestrictCPUIdleStates.Checked = True
 ' Set default Windows paths here
         DefaultHackTVPath = App.Path
         HackTVEXEName = "hacktv.exe"
     ElseIf RunningOnWine = True Then
+' Hide CPU idle state option
+        ChkRestrictCPUIdleStates.Enabled = False
+        ChkRestrictCPUIdleStates.Visible = False
 ' Set default Wine paths here
         DefaultHackTVPath = "Z:\usr\local\bin"
         DefaultTerminalPath = "Z:\bin"
@@ -1181,6 +1194,59 @@ Private Sub about_Click()
     MsgBox lblDescription, vbInformation, lblTitle
 End Sub
 
+Private Sub ChkVITS_Click()
+    If ChkVITS.Value = vbChecked Then
+        VITS = "--vits"
+    Else
+        VITS = ""
+    End If
+End Sub
+
+Private Sub Astra975Template_Click()
+    Call AstraTemplate(9.75)
+End Sub
+
+Private Sub Astra10Template_Click()
+    Call AstraTemplate(10)
+End Sub
+
+Private Sub AstraTemplate(LocalOscillator As Variant)
+    Dim AstraTemplatePrompt As VbMsgBoxResult
+    AstraTemplatePrompt = MsgBox("This will load template values for an Astra satellite receiver configured for a " & LocalOscillator & " GHz LO LNB." & vbCrLf & "All current settings will be cleared. Do you wish to continue?", vbQuestion + vbYesNo, App.Title)
+    If AstraTemplatePrompt = vbNo Then Exit Sub
+' Clear all current settings
+    Call NewFile_Click
+' Select PAL-FM mode
+    PAL.Value = True
+    VideoFormat.ListIndex = 2
+' Enable pre-emphasis filter and set FM deviation to 16 MHz
+    ChkVideoFilter.Value = vbChecked
+    ChkFMDev.Value = vbChecked
+    fm_deviation.Text = 10
+' Set IF to Sky News
+    If LocalOscillator = 9.75 Then frequency_mhz.Text = 1627
+    If LocalOscillator = 10 Then frequency_mhz.Text = 1377
+    MsgBox "Template values have been loaded. Tune your receiver to Sky News (11.377 GHz) and run hacktv.", vbInformation, App.Title
+End Sub
+
+Private Sub BSBTemplate_Click()
+    Dim BSBTemplatePrompt As VbMsgBoxResult
+    BSBTemplatePrompt = MsgBox("This will load template values for a BSB satellite receiver." & vbCrLf & "All current settings will be cleared. Do you wish to continue?", vbQuestion + vbYesNo, App.Title)
+    If BSBTemplatePrompt = vbNo Then Exit Sub
+' Clear all current settings
+    Call NewFile_Click
+' Select D-MAC FM mode
+    MAC.Value = True
+    VideoFormat.ListIndex = 3
+' Enable pre-emphasis filter and set FM deviation to 16 MHz
+    ChkVideoFilter.Value = vbChecked
+    ChkFMDev.Value = vbChecked
+    fm_deviation.Text = 16
+' Set to Galaxy channel
+    frequency_ch.ListIndex = 1
+    MsgBox "Template values have been loaded. Tune your receiver to the Galaxy channel, or change this in the channel dropdown box.", vbInformation, App.Title
+End Sub
+
 Public Sub RestrictCPUIdleStates(Enable As Boolean)
 ' This sub enables or disables CPU C-states from C2 onwards. Some systems are very aggressive with CPU power
 ' management and this can cause timing issues with hacktv, resulting in choppy video at high sample rates.
@@ -1264,6 +1330,16 @@ Private Sub Encryption_Key_Click()
     Call CheckEncryptionKey
 End Sub
 
+Private Sub ChkRestrictCPUIdleStates_Click()
+    If ChkRestrictCPUIdleStates.Checked = True Then
+        SaveSetting App.EXEName, "Settings", "RestrictCPUIdleStates", CInt(ChkRestrictCPUIdleStates.Checked) + 1
+        ChkRestrictCPUIdleStates.Checked = False
+    Else
+        SaveSetting App.EXEName, "Settings", "RestrictCPUIdleStates", CInt(ChkRestrictCPUIdleStates.Checked) + 1
+        ChkRestrictCPUIdleStates.Checked = True
+    End If
+End Sub
+
 Private Sub UpdateCheck_Click()
 ' Set variables
 Dim DownloadURL As String
@@ -1301,12 +1377,10 @@ If UpdatePrompt = vbNo Then Exit Sub
         MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
         & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
         & "A new version is now available. Please visit the Github page to download.", vbInformation, App.Title
-        ' "Version " & LatestVersion & " is now available. Please visit the Github page to download.", vbInformation, App.Title
     ElseIf LatestVersion <= App.Major & "." & App.Minor Then
         MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
         & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
         & "No updates are available at this time.", vbInformation, App.Title
-        'MsgBox "No updates are available at this time.", vbInformation, App.Title
     End If
 End Sub
 
@@ -2867,10 +2941,12 @@ End Sub
 Private Sub ChkVideoFilter_Click()
     If ChkVideoFilter.Value = vbChecked Then
         filterparam = "--filter"
-        ' Set sample rate to 16 MHz if an FM mode is selected as the filter is designed for 16 MHz only
+        ' Set sample rate to recommended values if an FM mode is selected
         If ChkFMDev.Enabled = True Then
-            If Not MAC.Value = True Then
-                SampleRate.Text = 16
+            If NTSC.Value = True Then
+                SampleRate.Text = 18
+            ElseIf encryptiontype = "--videocrypt" Or encryptiontype = "--videocrypt2" Then
+                SampleRate.Text = 14
             Else
                 SampleRate.Text = 20.25
             End If
@@ -2878,7 +2954,13 @@ Private Sub ChkVideoFilter_Click()
     Else
         filterparam = ""
         ' Set sample rate to back to default if an FM mode is selected
-        If ChkFMDev.Enabled = True Then SampleRate.Text = DefaultSampleRate
+        If ChkFMDev.Enabled = True Then
+            If encryptiontype = "--videocrypt" Or encryptiontype = "--videocrypt2" Then
+                SampleRate.Text = 14
+            Else
+                SampleRate.Text = DefaultSampleRate
+            End If
+        End If
     End If
 End Sub
 
@@ -4676,6 +4758,34 @@ Private Sub CheckAspectRatioScaling()
     End If
 End Sub
 
+Private Sub CheckMACChannelID()
+' Handling for BSB channels
+' If one of the BSB IFs is selected in D-MAC FM mode, send the appropriate channel ID to the receiver so it
+' will display the correct channel name.
+' In version 3.1, we hacked this together using five separate compiled EXEs, but hacktv now supports it
+' natively using the --chid parameter.
+' First, we'll remove the beta reg value from version 3.1 if it exists because we no longer use it
+    If Not GetSetting(App.EXEName, "Settings", "SeparateEXEsForBSB") = "" Then DeleteSetting App.EXEName, "Settings", "SeparateEXEsForBSB"
+' Second, check if D-MAC FM mode is enabled, and if one of the BSB channels has been selected
+    If sys = "dmac-fm" Then
+        If frequency_ch.Text = "4 (Now)" Then
+            chid = "--chid 0x00B1"
+        ElseIf frequency_ch.Text = "8 (Galaxy)" Then
+            chid = "--chid 0x00B2"
+        ElseIf frequency_ch.Text = "12 (Sports Ch)" Then
+            chid = "--chid 0x00B3"
+        ElseIf frequency_ch.Text = "16 (Power St)" Then
+            chid = "--chid 0x00B4"
+        ElseIf frequency_ch.Text = "20 (Movie Ch)" Then
+            chid = "--chid 0x00B5"
+        Else
+            chid = ""
+        End If
+    Else
+        chid = ""
+    End If
+End Sub
+
 Private Sub BtnRun_Click()
     If GenerateOnly.Checked = False Then
 ' If running on Wine, don't check for the presence of hacktv.exe as we don't need it.
@@ -4739,12 +4849,6 @@ Private Sub RunTV()
     Dim runpath As String
     Dim args As String
  
-' Set variables for hard-coded values
-    videomodeargument = "-m"
-    frequencyargument = "-f"
-    samplerateargument = "-s"
-    txgainargument = "-g"
-    
 ' Call each function/sub and check for errors. If no error, then move on.
     If CheckInputSource = False Then Exit Sub
     Call CheckTeletextSource
@@ -4756,38 +4860,17 @@ Private Sub RunTV()
     If CheckOutputLevel = False Then Exit Sub
     If CheckCardNumber = False Then Exit Sub
     Call CheckAspectRatioScaling
-    
-' Special handling for BSB channels
-' This allows us to have five separate hacktv binaries, each one with a different
-' channel ID so the BSB receiver will show the correct channel name.
-    If sys = "dmac-fm" And GetSetting(App.EXEName, "Settings", "SeparateEXEsForBSB", 0) = 1 Then
-        If frequency_ch.Text = "4 (Now)" Then
-            HackTVEXEName = "hacktv-now.exe"
-        ElseIf frequency_ch.Text = "8 (Galaxy)" Then
-            HackTVEXEName = "hacktv-galaxy.exe"
-        ElseIf frequency_ch.Text = "12 (Sports Ch)" Then
-            HackTVEXEName = "hacktv-sports.exe"
-        ElseIf frequency_ch.Text = "16 (Power St)" Then
-            HackTVEXEName = "hacktv-ps.exe"
-        ElseIf frequency_ch.Text = "20 (Movie Ch)" Then
-            HackTVEXEName = "hacktv-movie.exe"
-        Else
-            HackTVEXEName = "hacktv.exe"
-        End If
-    Else
-        HackTVEXEName = "hacktv.exe"
-    End If
-    
+    Call CheckMACChannelID
+        
 ' Combine all parameters into one text field
 ' This doesn't include the filename as we will be trimming later
-    allargs.Text = videomodeargument & Chr(32) & sys & Chr(32) & frequencyargument & Chr(32) _
-    & freq & Chr(32) & samplerateargument & Chr(32) & sr & Chr(32) & SubtitlesParam & Chr(32) _
-    & TxtSubtitleIndex.Text & Chr(32) & txgainargument & Chr(32) & txgain.Text & Chr(32) & nicamstatus _
-    & Chr(32) & audiostatus & Chr(32) & acpstatus & Chr(32) & repeatstatus & Chr(32) & wssstatus _
-    & Chr(32) & encryptiontype & Chr(32) & encryptionkey & Chr(32) & audioencryption & Chr(32) _
-    & TeletextFlag & Chr(32) & teletextsource & Chr(32) & rfAmpFlag & Chr(32) & fmdevargument _
-    & Chr(32) & fmdevvalue & Chr(32) & gammaParam & Chr(32) & gammavalue.Text & Chr(32) _
-    & outputlevelparam & Chr(32) & outputlevelvalue.Text & Chr(32) & filterparam & Chr(32) _
+    allargs.Text = "-m" & Chr(32) & sys & Chr(32) & "-f" & Chr(32) & freq & Chr(32) & "-s" & Chr(32) _
+    & sr & Chr(32) & "-g" & Chr(32) & txgain.Text & Chr(32) & chid & Chr(32) & SubtitlesParam & Chr(32) _
+    & TxtSubtitleIndex.Text & Chr(32) & nicamstatus & Chr(32) & audiostatus & Chr(32) & acpstatus _
+    & Chr(32) & repeatstatus & Chr(32) & wssstatus & Chr(32) & encryptiontype & Chr(32) & encryptionkey _
+    & Chr(32) & audioencryption & Chr(32) & TeletextFlag & Chr(32) & teletextsource & Chr(32) & rfAmpFlag _
+    & Chr(32) & fmdevargument & Chr(32) & fmdevvalue & Chr(32) & gammaParam & Chr(32) & gammavalue.Text _
+    & Chr(32) & outputlevelparam & Chr(32) & outputlevelvalue.Text & Chr(32) & filterparam & Chr(32) _
     & positionparam & Chr(32) & positionValue.Text & Chr(32) & timestampParam & Chr(32) _
     & logoParam & Chr(32) & logoPath & Chr(32) & verboseParam & Chr(32) & EMMParam & Chr(32) _
     & TruncatedCardNumber & Chr(32) & ShowECMParam & Chr(32) & ScalingMode & Chr(32) & Interlaced _
@@ -4807,7 +4890,7 @@ Private Sub RunTV()
         If GenerateOnly.Checked = True Then Exit Sub
 ' Check if the option to restrict CPU C-states is enabled
 ' If it is, then restrict the C-state to C1 before we start
-        If GetSetting(App.EXEName, "Settings", "RestrictCPUIdleStates") = "1" Then Call RestrictCPUIdleStates(True)
+        If ChkRestrictCPUIdleStates.Checked = True Then Call RestrictCPUIdleStates(True)
 ' If running on Windows, check if closeonexit is enabled
 ' If so, change the parameters to run cmd.exe /k first. If disabled, then run hacktv.exe directly.
         If CloseOnExit.Checked = False Then
