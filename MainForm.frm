@@ -1122,17 +1122,17 @@ Private Sub UpdateMRUList(FilePath As String)
         SaveSetting App.Title, "Settings", "File1", FilePath
         Call CheckMRUList
     ElseIf FilePath = ConfigFile4 Then
-        SaveSetting App.Title, "Settings", "File4", ConfigFile3
-        SaveSetting App.Title, "Settings", "File3", ConfigFile2
-        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        If Not ConfigFile3 = "" Then SaveSetting App.Title, "Settings", "File4", ConfigFile3
+        If Not ConfigFile2 = "" Then SaveSetting App.Title, "Settings", "File3", ConfigFile2
+        If Not ConfigFile1 = "" Then SaveSetting App.Title, "Settings", "File2", ConfigFile1
         SaveSetting App.Title, "Settings", "File1", FilePath
         Call CheckMRUList
     ElseIf FilePath = ConfigFile1 Then
         ' No need to do anything
     Else
-        SaveSetting App.Title, "Settings", "File4", ConfigFile3
-        SaveSetting App.Title, "Settings", "File3", ConfigFile2
-        SaveSetting App.Title, "Settings", "File2", ConfigFile1
+        If Not ConfigFile3 = "" Then SaveSetting App.Title, "Settings", "File4", ConfigFile3
+        If Not ConfigFile2 = "" Then SaveSetting App.Title, "Settings", "File3", ConfigFile2
+        If Not ConfigFile1 = "" Then SaveSetting App.Title, "Settings", "File2", ConfigFile1
         SaveSetting App.Title, "Settings", "File1", FilePath
         Call CheckMRUList
     End If
@@ -1787,18 +1787,22 @@ Private Sub OpenFile_Click()
 End Sub
 
 Private Sub file1_Click()
+    ConfigFileName = file1.Caption
     Call CheckSelectedFile(file1.Caption)
 End Sub
 
 Private Sub file2_Click()
+    ConfigFileName = file2.Caption
     Call CheckSelectedFile(file2.Caption)
 End Sub
 
 Private Sub file3_Click()
+    ConfigFileName = file3.Caption
     Call CheckSelectedFile(file3.Caption)
 End Sub
 
 Private Sub file4_Click()
+    ConfigFileName = file4.Caption
     Call CheckSelectedFile(file4.Caption)
 End Sub
 
