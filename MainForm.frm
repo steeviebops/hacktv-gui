@@ -21,12 +21,6 @@ Begin VB.Form MainForm
    MaxButton       =   0   'False
    ScaleHeight     =   7245
    ScaleWidth      =   12015
-   Begin hacktv_gui.NetGrab NetGrab2 
-      Left            =   6480
-      Top             =   6480
-      _ExtentX        =   661
-      _ExtentY        =   661
-   End
    Begin VB.Frame FrmScramblingOptions 
       Caption         =   "Video scrambling options"
       Height          =   1215
@@ -781,9 +775,6 @@ Begin VB.Form MainForm
       Begin VB.Menu HelpIndex 
          Caption         =   "&Index..."
       End
-      Begin VB.Menu UpdateCheck 
-         Caption         =   "Check for updates..."
-      End
       Begin VB.Menu bar2 
          Caption         =   "-"
       End
@@ -1338,56 +1329,6 @@ Private Sub ChkRestrictCPUIdleStates_Click()
         SaveSetting App.EXEName, "Settings", "RestrictCPUIdleStates", CInt(ChkRestrictCPUIdleStates.Checked) + 1
         ChkRestrictCPUIdleStates.Checked = True
     End If
-End Sub
-
-Private Sub UpdateCheck_Click()
-' Set variables
-Dim DownloadURL As String
-    DownloadURL = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/master/hacktv-gui.vbp"
-Dim FilePath As String
-    FilePath = Environ$("temp") & "\update.vbp"
-Dim strText As String
-Dim MajorVersion() As String
-Dim MinorVersion() As String
-Dim LatestVersion As String
-Dim UpdatePrompt As VbMsgBoxResult
-UpdatePrompt = MsgBox("This will check for a new version of the application. We do this by downloading " _
-& "part of the source from Github. No personal information is transmitted." & vbCrLf _
-& "Do you wish to continue?", vbYesNo + vbQuestion, App.Title)
-If UpdatePrompt = vbNo Then Exit Sub
-    NetGrab2.DownloadStart DownloadURL, vbAsyncReadSynchronousDownload
-' Check if file exists
-    If DoesFileExist(FilePath) = False Then
-        MsgBox "Unable to check for updates at this time. Please ensure that you are connected to the internet " _
-        & "and try again.", vbCritical, App.Title
-        Exit Sub
-    End If
-' Open the file we downloaded and load it to a string
-    Open FilePath For Input As #iFileNo
-    strText = Input(LOF(1), #iFileNo)
-    Close #iFileNo
-' Delete the downloaded file as we no longer need it
-    Kill FilePath
-' Check the string for the MajorVer and MinorVer lines, then load their values to arrays
-    Between strText, "MajorVer=", vbLf, MajorVersion
-    Between strText, "MinorVer=", vbLf, MinorVersion
-    LatestVersion = MajorVersion(0) & Chr(46) & MinorVersion(0)
-' If version in VBP file is newer than app version then notify
-    If LatestVersion > App.Major & "." & App.Minor Then
-        MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
-        & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
-        & "A new version is now available. Please visit the Github page to download.", vbInformation, App.Title
-    ElseIf LatestVersion <= App.Major & "." & App.Minor Then
-        MsgBox "Current version: " & App.Major & Chr(46) & App.Minor & vbCrLf _
-        & "Version available on Github: " & LatestVersion & vbCrLf & vbCrLf _
-        & "No updates are available at this time.", vbInformation, App.Title
-    End If
-End Sub
-
-Private Sub NetGrab2_DownloadComplete(ByVal nBytes As Long)
-Dim FilePath As String
-    FilePath = Environ$("temp") & "\update.vbp"
-    Call NetGrab2.SaveAs(FilePath)
 End Sub
 
 Private Sub vc1key_Click()
@@ -3375,7 +3316,7 @@ Private Sub AddSystemAChannels()
 End Sub
 
 Private Sub AddSystemEChannels()
-' Populate frequency_ch with standard French System E VHF channels (F2 to F12, 41.25 to 224.25 MHz)
+' Populate frequency_ch with standard French System E VHF channels (F2 to F12, 52.40 to 212.85 MHz)
 ' We add the frequency (in Hz) as the item data and pass it raw to hacktv
     With frequency_ch
         VHF.Enabled = True
@@ -3386,28 +3327,30 @@ Private Sub AddSystemEChannels()
         '.AddItem "F1"
         '.ItemData(.NewIndex) = "41250000"
         .AddItem "F2"
-        .ItemData(.NewIndex) = "48250000"
+        .ItemData(.NewIndex) = "52400000"
         ' Channel F3 was not part of the official standard but it existed in some form
         '.AddItem "F3"
         '.ItemData(.NewIndex) = "55250000"
         .AddItem "F4"
-        .ItemData(.NewIndex) = "62250000"
+        .ItemData(.NewIndex) = "65550000"
         .AddItem "F5"
-        .ItemData(.NewIndex) = "175250000"
+        .ItemData(.NewIndex) = "164000000"
         .AddItem "F6"
-        .ItemData(.NewIndex) = "182250000"
+        .ItemData(.NewIndex) = "173400000"
         .AddItem "F7"
-        .ItemData(.NewIndex) = "189250000"
+        .ItemData(.NewIndex) = "177150000"
+        .AddItem "F8a"
+        .ItemData(.NewIndex) = "185250000"
         .AddItem "F8"
-        .ItemData(.NewIndex) = "196250000"
+        .ItemData(.NewIndex) = "186550000"
         .AddItem "F9"
-        .ItemData(.NewIndex) = "203250000"
+        .ItemData(.NewIndex) = "190300000"
         .AddItem "F10"
-        .ItemData(.NewIndex) = "210250000"
+        .ItemData(.NewIndex) = "199700000"
         .AddItem "F11"
-        .ItemData(.NewIndex) = "217250000"
+        .ItemData(.NewIndex) = "203450000"
         .AddItem "F12"
-        .ItemData(.NewIndex) = "224250000"
+        .ItemData(.NewIndex) = "212850000"
         .ListIndex = 0
     End With
 End Sub
