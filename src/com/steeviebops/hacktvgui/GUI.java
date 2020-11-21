@@ -226,6 +226,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Initialise Swing components
         initComponents();
+        // Prevent window from being resized below the current size
+        this.setMinimumSize(this.getSize());
         // Set the JarDir variable so we know where we're located
         try {
             // Get the current directory path
@@ -2990,9 +2992,8 @@ public class GUI extends javax.swing.JFrame {
                     System.out.println(ex);
                     return false;
                 }
-                // Use a pattern matcher to retrieve the contents of each
-                // even-numbered line after the last comma. This contains the
-                // channel name.
+                // Use a regex to retrieve the contents of each even-numbered 
+                // line after the last comma. This contains the channel name.
                 Pattern p = Pattern.compile(".*,\\s*(.*)");
                 Matcher m = p.matcher(M3UFile);
                 int a = -1;
@@ -3762,6 +3763,7 @@ public class GUI extends javax.swing.JFrame {
     // the corresponding video format from VideoModeArray.
         Sys = VideoModeArray[cmbVideoFormat.getSelectedIndex()];
         if ((Sys).equals("i") || ((Sys).equals("g"))) {
+            // System I or B/G (625 lines)
             common625Features();
             enableVHF();
             enableUHF();
@@ -3770,6 +3772,7 @@ public class GUI extends javax.swing.JFrame {
             radUHF.doClick();
         }
         else if ((Sys).equals("pal-fm") || (Sys).equals("secam-fm")) {
+            // PAL-FM or SECAM-FM
             common625Features();
             disableVHF();
             disableUHF();
@@ -3781,6 +3784,7 @@ public class GUI extends javax.swing.JFrame {
             radCustom.doClick();
         }
         else if ((Sys).equals("m") || ((Sys).equals("pal-m"))){
+            // System M (525 lines)
             common525Features();
             enableVHF();
             enableUHF();
@@ -3792,6 +3796,7 @@ public class GUI extends javax.swing.JFrame {
             radUHF.doClick();  
         }
         else if ((Sys).equals("ntsc-fm") || (Sys).equals("ntsc-bs") ) {
+            // NTSC-FM
             common525Features();
             disableVHF();
             disableUHF();
@@ -3803,7 +3808,8 @@ public class GUI extends javax.swing.JFrame {
             FMSampleRate = "18";
             radCustom.doClick();
         }
-        else if ((Sys).equals("apollo-fsc-fm") ) { 
+        else if ((Sys).equals("apollo-fsc-fm") ) {
+            // Apollo FSC
             disableVHF();
             disableUHF();
             disableColourControl();
@@ -3813,6 +3819,7 @@ public class GUI extends javax.swing.JFrame {
             radCustom.doClick();
         }
         else if ((Sys).equals("m-cbs405")){
+            // CBS FSC (405 lines)
             enableUHF();
             enableVHF();
             disableColourControl();
@@ -3822,6 +3829,7 @@ public class GUI extends javax.swing.JFrame {
             disableColourControl();
         }
         else if ((Sys).equals("l")){
+            // System L (625 lines)
             common625Features();
             enableUHF();
             enableVHF();
@@ -3830,6 +3838,7 @@ public class GUI extends javax.swing.JFrame {
             radUHF.doClick();  
         }  
         else if ((Sys).equals("d")) {
+            // System D/K (625 lines)
             common625Features();
             disableNICAM();
             NICAMSupported = false;
@@ -3840,6 +3849,7 @@ public class GUI extends javax.swing.JFrame {
             radUHF.doClick();
         }
         else if ((Sys).equals("a")){
+            // System A (405 lines)
             disableUHF();
             enableVHF();
             radVHF.doClick();
@@ -3847,6 +3857,7 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = "6.48";
         } 
         else if ((Sys).equals("e")){
+            // System E (819 lines)
             disableUHF();
             enableVHF();
             radVHF.doClick();
@@ -3854,6 +3865,7 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = "20.475";
         } 
         else if ((Sys).equals("240-am")){
+            // Baird 240 lines
             disableUHF();
             disableVHF();
             radCustom.doClick();
@@ -3861,6 +3873,7 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = "1.992";
         }
         else if ((Sys).equals("30-am")){
+            // Baird 30 lines
             disableUHF();
             disableVHF();
             radCustom.doClick();
@@ -3868,6 +3881,7 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = "0.1005";
         } 
         else if ((Sys).equals("apollo-fm")){
+            // Apollo
             disableUHF();
             disableVHF();
             radCustom.doClick();
@@ -3875,16 +3889,19 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = "2.048";
         }
         else if ((Sys).equals("d2mac-am") || ((Sys).equals("dmac-am"))){
+            // D(2)-MAC AM
             disableFMDeviation();
             disableUHF();
             radCustom.doClick();
         }
-        else if ((Sys).equals("d2mac-fm")){    
+        else if ((Sys).equals("d2mac-fm")){
+            // D2-MAC FM
             enableFMDeviation();
             disableUHF();
             radCustom.doClick();
         }
         else if ((Sys).equals("dmac-fm")){
+            // D-MAC FM
             enableFMDeviation();
             enableUHF();
             radUHF.doClick();
