@@ -1829,7 +1829,7 @@ public class GUI extends javax.swing.JFrame {
 
         helpMenu.setText("Help");
 
-        menuAbout.setText("About...");
+        menuAbout.setText("About");
         menuAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuAboutActionPerformed(evt);
@@ -2215,7 +2215,7 @@ public class GUI extends javax.swing.JFrame {
                     TitleBarChanged = true;
                 }
                 this.setTitle(TitleBar + " - " + SourceFile.getName());
-                // Remove the ... after Save to follow standard UI guidelines
+                // Remove the ellipsis after Save to follow standard UI guidelines
                 menuSave.setText("Save");
                 updateMRUList(SourceFile.toString());
             } else {
@@ -2908,7 +2908,7 @@ public class GUI extends javax.swing.JFrame {
             TitleBarChanged = true;
         }
         this.setTitle(TitleBar + " - " + DestinationFileName.getName());
-       // Remove the ... after Save to follow standard UI guidelines
+       // Remove the ellipsis after Save to follow standard UI guidelines
         menuSave.setText("Save");
         updateMRUList(DestinationFile);
     }
@@ -3123,7 +3123,7 @@ public class GUI extends javax.swing.JFrame {
         if (! chkAudio.isSelected() ) { chkAudio.doClick(); }
         // Restore title bar to default
         if (TitleBarChanged) { this.setTitle(TitleBar); }
-        // Restore ... to Save option
+        // Restore ellipsis to Save option
         if (menuSave.getText() == "Save") { menuSave.setText("Save..."); }
     }
 
