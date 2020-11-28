@@ -54,6 +54,7 @@ import java.util.prefs.Preferences;
 import java.security.CodeSource;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import javax.swing.SwingWorker;
 import java.util.List;
@@ -2943,7 +2944,7 @@ public class GUI extends javax.swing.JFrame {
         Path fd = Paths.get(SourceFile);
         // Check that the file is in the correct format
         try {
-            BufferedReader br2 = new BufferedReader(new FileReader(SourceFile));
+            BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
             LineNumberReader lnr2 = new LineNumberReader(br2);
             String FileContents = lnr2.readLine();
             br2.close();
