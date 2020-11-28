@@ -2966,7 +2966,7 @@ public class GUI extends javax.swing.JFrame {
                 ArrayList <String> PlaylistNamesAL = new ArrayList <> ();
                 PlaylistURLsAL = new ArrayList <> ();
                 try {
-                    BufferedReader br = new BufferedReader(new FileReader(SourceFile));
+                    BufferedReader br = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
                     LineNumberReader lnr = new LineNumberReader(br);
                     /* Increase linecount by one. This is done to ensure that
                      * an M3U file without a newline at the end will still be
