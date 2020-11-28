@@ -4086,6 +4086,8 @@ public class GUI extends javax.swing.JFrame {
     private void disableNICAM() {
         chkNICAM.setEnabled(false);
         chkNICAM.setSelected(false);
+        // Clear NICAMParam as we don't need it if NICAM is not supported anyway
+        NICAMParam = "";
     }
     
     private void enableFMDeviation() {
@@ -5219,10 +5221,10 @@ public class GUI extends javax.swing.JFrame {
         // Configures features supported (or not) by legacy black and white video
         // formats and populates the VideoFormat combobox.
         String[] VideoMode = {
-            "CCIR System A (405 lines, 25 fps), -3.5 MHz AM audio)",
-            "CCIR System E (819 lines, 25 fps), +11.15 MHz AM audio)",
-            "240 lines (mechanical), 25 fps",
-            "30 lines (mechanical), 12.5 fps",
+            "CCIR System A (405 lines, 25 fps, -3.5 MHz AM audio)",
+            "CCIR System E (819 lines, 25 fps, +11.15 MHz AM audio)",
+            "240 lines (Baird mechanical), 25 fps",
+            "30 lines (Baird mechanical), 12.5 fps",
             "Apollo (320 lines, 10 fps, FM)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
