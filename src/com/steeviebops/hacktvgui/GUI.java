@@ -2336,6 +2336,9 @@ public class GUI extends javax.swing.JFrame {
         } else if (ImportedVideoFormat.equals("apollo-fm")) {
             radBW.doClick();
             cmbVideoFormat.setSelectedIndex(4);
+        } else if (ImportedVideoFormat.equals("nbtv-am")) {
+            radBW.doClick();
+            cmbVideoFormat.setSelectedIndex(5);
         // MAC video formats
         } else if (ImportedVideoFormat.equals("d2mac-am")) {
             radMAC.doClick();
@@ -2870,15 +2873,15 @@ public class GUI extends javax.swing.JFrame {
         // Filter
         if (chkVideoFilter.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "filter", 1); }
         // Audio
-        if (chkAudio.isSelected()) {
+        if ( (chkAudio.isSelected()) && (chkAudio.isEnabled()) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "audio", 1);
-        } else {
+        } else if (chkAudio.isEnabled()) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "audio", 0); 
         }
         // NICAM
         if (chkNICAM.isSelected()) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "nicam", 1);
-        } else {
+        } else if ( (!chkNICAM.isSelected()) && (NICAMSupported) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "nicam", 0);
         }
         // Show ECMs
@@ -3851,6 +3854,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else if ((Sys).equals("a")){
             // System A (405 lines)
+            enableAudioOption();
             disableUHF();
             enableVHF();
             radVHF.doClick();
@@ -3859,6 +3863,7 @@ public class GUI extends javax.swing.JFrame {
         } 
         else if ((Sys).equals("e")){
             // System E (819 lines)
+            enableAudioOption();
             disableUHF();
             enableVHF();
             radVHF.doClick();
@@ -3867,6 +3872,7 @@ public class GUI extends javax.swing.JFrame {
         } 
         else if ((Sys).equals("240-am")){
             // Baird 240 lines
+            disableAudioOption();
             disableUHF();
             disableVHF();
             radCustom.doClick();
@@ -3875,6 +3881,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else if ((Sys).equals("30-am")){
             // Baird 30 lines
+            disableAudioOption();
             disableUHF();
             disableVHF();
             radCustom.doClick();
@@ -3883,11 +3890,21 @@ public class GUI extends javax.swing.JFrame {
         } 
         else if ((Sys).equals("apollo-fm")){
             // Apollo
+            enableAudioOption();
             disableUHF();
             disableVHF();
             radCustom.doClick();
             enableFMDeviation();
             DefaultSampleRate = "2.048";
+        } 
+        else if ((Sys).equals("nbtv-am")){
+            // NBTV Club standard
+            disableAudioOption();
+            disableUHF();
+            disableVHF();
+            radCustom.doClick();
+            disableFMDeviation();
+            DefaultSampleRate = "0.1";
         }
         else if ((Sys).equals("d2mac-am") || ((Sys).equals("dmac-am"))){
             // D(2)-MAC AM
@@ -3909,11 +3926,22 @@ public class GUI extends javax.swing.JFrame {
         }
 }
     
+    private void enableAudioOption() {
+        chkAudio.setEnabled(true);
+        if (!chkAudio.isSelected()) chkAudio.doClick();
+    }
+    
+    private void disableAudioOption() {
+        chkAudio.setSelected(false);
+        chkAudio.setEnabled(false);
+        AudioParam = "";
+    }
+    
     private void common625Features() {
     // Configure features common to 625-line modes
-        if (!chkAudio.isEnabled()) { chkAudio.setEnabled(true); }
         enableNICAM();
         NICAMSupported = true;
+        enableAudioOption();
         enableColourControl();
         enableTeletext();
         enableWSS();
@@ -3926,9 +3954,9 @@ public class GUI extends javax.swing.JFrame {
 
     private void common525Features() {
     // Configure features common to 525-line modes
-        if (!chkAudio.isEnabled()) { chkAudio.setEnabled(true); }
         disableNICAM();
         NICAMSupported = false;
+        enableAudioOption();
         disableTeletext();
         disableWSS();
         disableScrambling();
@@ -3939,7 +3967,6 @@ public class GUI extends javax.swing.JFrame {
     
     private void commonBWFeatures() {
     // Configure features common to legacy black and white modes
-        if (!chkAudio.isEnabled()) { chkAudio.setEnabled(true); }
         disableNICAM();
         NICAMSupported = false;
         disableColourControl();
@@ -3953,10 +3980,9 @@ public class GUI extends javax.swing.JFrame {
     
     private void commonMACFeatures() {
     // Configure features common to MAC modes
-        if (chkAudio.isEnabled()) { 
-            if (!chkAudio.isSelected()) { chkAudio.doClick(); }
-            chkAudio.setEnabled(false);
-        }
+        enableAudioOption();
+        chkAudio.setEnabled(false);
+        AudioParam = "";
         disableVHF();
         disableNICAM();
         NICAMSupported = false;
@@ -4590,6 +4616,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
+            // If the txtCardNumber textbox is disabled, return true and exit
+            TruncatedCardNumber = "";
             return true;
         }
     }        
@@ -5226,7 +5254,8 @@ public class GUI extends javax.swing.JFrame {
             "CCIR System E (819 lines, 25 fps, +11.15 MHz AM audio)",
             "240 lines (Baird mechanical), 25 fps",
             "30 lines (Baird mechanical), 12.5 fps",
-            "Apollo (320 lines, 10 fps, FM)"
+            "Apollo (320 lines, 10 fps, FM)",
+            "NBTV Club standard (12.5 fps, 32 lines, no audio)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5236,7 +5265,8 @@ public class GUI extends javax.swing.JFrame {
             "e",
             "240-am",
             "30-am",
-            "apollo-fm"
+            "apollo-fm",
+            "nbtv-am"
         };
         commonBWFeatures();
         cmbVideoFormat.removeAllItems();
