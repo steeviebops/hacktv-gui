@@ -2537,7 +2537,7 @@ public class GUI extends javax.swing.JFrame {
                 cmbScramblingType.setSelectedIndex(5);
             } else if ((ImportedScramblingSystem.equals("d11")) && (Fork.equals("CJ")) ) {
                 cmbScramblingType.setSelectedIndex(6);
-            } else if ((ImportedScramblingSystem.equals("smartcrypt")) && (Fork.equals("CJ")) ) {
+            } else if ((ImportedScramblingSystem.equals("systercnr")) && (Fork.equals("CJ")) ) {
                 cmbScramblingType.setSelectedIndex(7);
             } else {
                 invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
@@ -2594,7 +2594,7 @@ public class GUI extends javax.swing.JFrame {
             cmbScramblingKey1.setSelectedIndex(10);
         } else if ( (ImportedKey.equals("ppv")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(11);
-        // Syster/D11/Smartcrypt
+        // Syster/D11/SysterC&R
         }  else if ( (ImportedScramblingSystem.equals("syster") && 
                 (ImportedKey.equals("")) && (Fork != "CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(0);            
@@ -3372,7 +3372,7 @@ public class GUI extends javax.swing.JFrame {
         ScramblingTypeAL.add("Nagravision Syster");
         if (Fork.equals("CJ")) { 
             ScramblingTypeAL.add("Discret 11");
-            ScramblingTypeAL.add("Smartcrypt");
+            ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
         }
         ScramblingTypeArray = new ArrayList<>();
         ScramblingTypeArray.add("");
@@ -3383,7 +3383,7 @@ public class GUI extends javax.swing.JFrame {
         ScramblingTypeArray.add("--syster");
         if (Fork.equals("CJ")) {
             ScramblingTypeArray.add("--d11");
-            ScramblingTypeArray.add("--smartcrypt");
+            ScramblingTypeArray.add("--systercnr");
         }
         cmbScramblingType.removeAllItems();
         
@@ -3530,10 +3530,10 @@ public class GUI extends javax.swing.JFrame {
             ScramblingKeyArray.add("free");
             ScramblingKeyArray.add("conditional");
         }
-        // Syster, Discret 11 or Smartcrypt
+        // Syster, Discret 11 or SysterC&R
         else if (ScramblingType1.equals("--syster") || 
                 (ScramblingType1.equals("--d11")) || 
-                (ScramblingType1.equals("--smartcrypt")) ) {
+                (ScramblingType1.equals("--systercnr")) ) {
             if (Fork.equals("CJ")) {
             disableScramblingKey2();
                 ScramblingKeyAL.add("Free access (Premiere Germany)");
@@ -3622,7 +3622,7 @@ public class GUI extends javax.swing.JFrame {
                 ((ScramblingType1).equals("--double-cut")) ||
                 ((ScramblingType1).equals("--syster")) ||
                 ((ScramblingType1).equals("--d11")) ||
-                ((ScramblingType1).equals("--smartcrypt")) ) {
+                ((ScramblingType1).equals("--systercnr")) ) {
             chkScrambleAudio.setEnabled(true);
         }
         else {
@@ -4894,7 +4894,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkScrambleAudio.isSelected()) {
             if ( (ScramblingType1.equals("--syster")) ||
                 (ScramblingType1.equals("--d11")) ||
-                (ScramblingType1.equals("--smartcrypt")) ) {
+                (ScramblingType1.equals("--systercnr")) ) {
                 ScrambleAudio = "--systeraudio";
             }
             else if (ScramblingType1.equals("--single-cut") ||
@@ -5255,7 +5255,7 @@ public class GUI extends javax.swing.JFrame {
             "240 lines (Baird mechanical), 25 fps",
             "30 lines (Baird mechanical), 12.5 fps",
             "Apollo (320 lines, 10 fps, FM)",
-            "NBTV Club standard (12.5 fps, 32 lines, no audio)"
+            "NBTV Club standard (32 lines, 12.5 fps, no audio)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
