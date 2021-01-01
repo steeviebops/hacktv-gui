@@ -3005,24 +3005,29 @@ public class GUI extends javax.swing.JFrame {
                 while (m.find()) {
                     a++;
                     b++;
-                    if (a > 1) {
-                        // Check if the current entry matches the previous one.
-                        // If so, add " (Duplicate)" to the name. Swing doesn't
-                        // like having two combobox items with the same name.
-                        if (PlaylistNamesAL.get(b).equals(m.group(1))) {
-                            PlaylistNamesAL.add(m.group(1) + " (Duplicate)");
-                        } else {
-                            PlaylistNamesAL.add(m.group(1));
-                        }
-                    } else {
-                        PlaylistNamesAL.add(m.group(1));
-                    }
+                    PlaylistNamesAL.add(m.group(1));
                 }
                 // Check that we got something, if not then stop.
                 if (PlaylistNamesAL.isEmpty()) {
                     return false;
                 }
                 else {
+                    // Check for duplicate entries in the ArrayList because
+                    // Swing doesn't handle them too well.
+                    // We append the index number as a workaround.
+                    // This could probably be done better.
+                    for (int i = 0, j = 0; i < PlaylistNamesAL.size(); i++) {
+                        if (i != j) {
+                            if ( PlaylistNamesAL.get(j).equals(PlaylistNamesAL.get(i)) ) {
+                                PlaylistNamesAL.set(i, PlaylistNamesAL.get(i) + " #" + i);
+                            }
+                        }
+                        if (i == PlaylistNamesAL.size() -1) {
+                            j++;
+                            if ( j == PlaylistNamesAL.size() ) break;
+                            i = 0;
+                        }
+                    }
                     // Convert ArrayList to an array so we can populate the combobox
                     PlaylistNames = new String[PlaylistNamesAL.size()];
                     for (int i = 0; i < PlaylistNamesAL.size(); i++) {
@@ -4863,7 +4868,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRunActionPerformed
              
     private void menuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAboutActionPerformed
-        JOptionPane.showMessageDialog(null, AppName + " (Java version)\nCreated 2020 by Stephen McGarry.\n" +
+        JOptionPane.showMessageDialog(null, AppName + " (Java version)\nCreated 2020-2021 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2.\n\n" +
                 "https://github.com/steeviebops/jhacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
