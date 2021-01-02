@@ -3343,7 +3343,7 @@ public class GUI extends javax.swing.JFrame {
             chkFMDev.doClick();
             txtFMDev.setText("10");
             // Set IF to Sky News
-            txtFrequency.setText(String.format("%.2f\n",(11.377 - localOscillator) * 1000));
+            txtFrequency.setText(String.format("%.2f",(11.377 - localOscillator) * 1000));
             JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to Sky News"
                     + " (11.377 GHz) and run hacktv.", AppName, JOptionPane.INFORMATION_MESSAGE);            
         }
@@ -4455,12 +4455,12 @@ public class GUI extends javax.swing.JFrame {
             BigDecimal CustomFreq;
             BigDecimal Multiplier = new BigDecimal(1000000);
             String InvalidInput = "Please specify a frequency between 1 MHz and 7250 MHz.";
-            if (isNumeric( txtFrequency.getText())) {
+            if ( (isNumeric( txtFrequency.getText())) && (!txtFrequency.getText().contains(" ")) ){
                 CustomFreq = new BigDecimal(txtFrequency.getText());
                 if ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) {
                     JOptionPane.showMessageDialog(null, InvalidInput, AppName, JOptionPane.WARNING_MESSAGE);
                     tabPane.setSelectedIndex(1);
-                    return false; 
+                    return false;
                 }
                 else {
                     // Multiply the big decimal by 1,000,000 to get the frequency in Hz.
@@ -5639,7 +5639,7 @@ public class GUI extends javax.swing.JFrame {
             // Enable pre-emphasis filter and set FM deviation to 16 MHz
             chkVideoFilter.doClick();
             chkFMDev.doClick();
-            txtFMDev.setText("16");
+            txtFMDev.setText("11");
             // Set IF to Galaxy channel
             cmbChannel.setSelectedIndex(1);
             JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to the Galaxy "
