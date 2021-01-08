@@ -180,6 +180,7 @@ public class GUI extends javax.swing.JFrame {
     String ChIDParam = "";
     String ChID = "";
     String ColourParam = "";
+    String SysterPermTable;
     // End parameter variables
     
     // Main method
@@ -437,10 +438,12 @@ public class GUI extends javax.swing.JFrame {
         chkDeactivateCard = new javax.swing.JCheckBox();
         lblEMMCardNumber = new javax.swing.JLabel();
         txtCardNumber = new javax.swing.JTextField();
-        scramblingOptionsPanel = new javax.swing.JPanel();
         chkShowCardSerial = new javax.swing.JCheckBox();
-        chkScrambleAudio = new javax.swing.JCheckBox();
         chkFindKeys = new javax.swing.JCheckBox();
+        scramblingOptionsPanel = new javax.swing.JPanel();
+        chkScrambleAudio = new javax.swing.JCheckBox();
+        cmbSysterPermTable = new javax.swing.JComboBox<>();
+        lblSysterPermTable = new javax.swing.JLabel();
         chkShowECM = new javax.swing.JCheckBox();
         settingsTab = new javax.swing.JPanel();
         pathPanel = new javax.swing.JPanel();
@@ -1325,7 +1328,7 @@ public class GUI extends javax.swing.JFrame {
 
         lblVC2ScramblingKey.setText("VC2 access type");
 
-        emmPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VideoCrypt EMM options"));
+        emmPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VideoCrypt options"));
 
         chkActivateCard.setText("Activate card");
         chkActivateCard.setEnabled(false);
@@ -1354,50 +1357,11 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout emmPanelLayout = new javax.swing.GroupLayout(emmPanel);
-        emmPanel.setLayout(emmPanelLayout);
-        emmPanelLayout.setHorizontalGroup(
-            emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(emmPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkDeactivateCard)
-                    .addComponent(chkActivateCard)
-                    .addGroup(emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING)))
-                .addContainerGap(138, Short.MAX_VALUE))
-        );
-        emmPanelLayout.setVerticalGroup(
-            emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(emmPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(chkActivateCard)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkDeactivateCard)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblEMMCardNumber)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCardNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        scramblingOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Format-specific options"));
-        scramblingOptionsPanel.setToolTipText("");
-
         chkShowCardSerial.setText("Show card serial");
         chkShowCardSerial.setEnabled(false);
         chkShowCardSerial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowCardSerialActionPerformed(evt);
-            }
-        });
-
-        chkScrambleAudio.setText("Scramble audio");
-        chkScrambleAudio.setEnabled(false);
-        chkScrambleAudio.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkScrambleAudioActionPerformed(evt);
             }
         });
 
@@ -1409,26 +1373,83 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        javax.swing.GroupLayout emmPanelLayout = new javax.swing.GroupLayout(emmPanel);
+        emmPanel.setLayout(emmPanelLayout);
+        emmPanelLayout.setHorizontalGroup(
+            emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emmPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkFindKeys)
+                    .addComponent(chkDeactivateCard)
+                    .addComponent(chkActivateCard)
+                    .addGroup(emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                        .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(chkShowCardSerial))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        emmPanelLayout.setVerticalGroup(
+            emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emmPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(chkActivateCard)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkDeactivateCard)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblEMMCardNumber)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCardNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkShowCardSerial)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkFindKeys)
+                .addContainerGap())
+        );
+
+        scramblingOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Format-specific options"));
+        scramblingOptionsPanel.setToolTipText("");
+
+        chkScrambleAudio.setText("Scramble audio");
+        chkScrambleAudio.setEnabled(false);
+        chkScrambleAudio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkScrambleAudioActionPerformed(evt);
+            }
+        });
+
+        cmbSysterPermTable.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default", "1", "2" }));
+        cmbSysterPermTable.setEnabled(false);
+        cmbSysterPermTable.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cmbSysterPermTableItemStateChanged(evt);
+            }
+        });
+
+        lblSysterPermTable.setText("Syster permutation table");
+        lblSysterPermTable.setEnabled(false);
+
         javax.swing.GroupLayout scramblingOptionsPanelLayout = new javax.swing.GroupLayout(scramblingOptionsPanel);
         scramblingOptionsPanel.setLayout(scramblingOptionsPanelLayout);
         scramblingOptionsPanelLayout.setHorizontalGroup(
             scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkScrambleAudio)
-                    .addComponent(chkShowCardSerial)
-                    .addComponent(chkFindKeys))
-                .addGap(0, 53, Short.MAX_VALUE))
+                    .addComponent(lblSysterPermTable)
+                    .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         scramblingOptionsPanelLayout.setVerticalGroup(
             scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, scramblingOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(chkScrambleAudio)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkShowCardSerial)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkFindKeys)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblSysterPermTable)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1453,7 +1474,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
                         .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addContainerGap())
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
@@ -1505,8 +1526,8 @@ public class GUI extends javax.swing.JFrame {
             scramblingTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(76, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2539,6 +2560,8 @@ public class GUI extends javax.swing.JFrame {
                 cmbScramblingType.setSelectedIndex(6);
             } else if ((ImportedScramblingSystem.equals("systercnr")) && (Fork.equals("CJ")) ) {
                 cmbScramblingType.setSelectedIndex(7);
+            } else if ((ImportedScramblingSystem.equals("systerls+cnr")) && (Fork.equals("CJ")) ) {
+                cmbScramblingType.setSelectedIndex(8);
             } else {
                 invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
                 ImportedScramblingSystem = "";
@@ -2683,6 +2706,16 @@ public class GUI extends javax.swing.JFrame {
         if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "scramble-audio")) {
             chkScrambleAudio.doClick();
         }
+        // Syster permutation table
+        Integer ImportedPermutationTable;
+        if (INIFile.getIntegerFromINI(SourceFile, "hacktv", "permutationtable") != null) {
+            ImportedPermutationTable = INIFile.getIntegerFromINI(SourceFile, "hacktv", "permutationtable");
+            if ( (Fork.equals("CJ")) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
+                if ( (ImportedPermutationTable >= 0 ) &&
+                        (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
+                cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
+            }
+        }   
         // Sample rate (default to 16 MHz if not specified)
         Double ImportedSampleRate;
         if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate")) != null) {
@@ -2826,18 +2859,27 @@ public class GUI extends javax.swing.JFrame {
         // AR Correction
         if (chkARCorrection.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "arcorrection", cmbARCorrection.getSelectedIndex()); }
         // Scrambling
+        // VideoCrypt I+II
         if (cmbScramblingType.getSelectedIndex() == 3) {
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingtype", "videocrypt1+2");
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey", ScramblingKey1);
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey2", ScramblingKey2);
-        } else if ( (ScramblingType1.equals("--single-cut")) || (ScramblingType1.equals("--double-cut")) ) {
+        }
+        // Syster dual mode (line shuffling + cut-and-rotate)
+        else if ( cmbScramblingType.getSelectedIndex() == 8) {
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingtype", "systerls+cnr");
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey", ScramblingKey1);
+        }
+        else if ( (ScramblingType1.equals("--single-cut")) || (ScramblingType1.equals("--double-cut")) ) {
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingtype", ScramblingType1.substring(2));
             if (!ScramblingType2.isEmpty()) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey", ScramblingType2.substring(2) + '\u0020' + ScramblingKey2);
-            } else {
+            }
+            else {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey", "");
             }
-        } else if (cmbScramblingType.getSelectedIndex() != 0) {
+        }
+        else if (cmbScramblingType.getSelectedIndex() != 0) {
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingtype", ScramblingType1.substring(2));
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "scramblingkey", ScramblingKey1);
         }
@@ -2851,7 +2893,8 @@ public class GUI extends javax.swing.JFrame {
             } else if (txtCardNumber.getText().length() == 8) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
             }
-        } else if (chkDeactivateCard.isSelected()) {
+        }
+        else if (chkDeactivateCard.isSelected()) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "emm", 2);
             if (txtCardNumber.getText().length() == 9) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(0, 8));
@@ -2861,6 +2904,10 @@ public class GUI extends javax.swing.JFrame {
             } else if (txtCardNumber.getText().length() == 8) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
             }
+        }
+        // Syster permutation table
+        if ( (cmbSysterPermTable.getSelectedIndex() == 1) || (cmbSysterPermTable.getSelectedIndex() == 2) ) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "permutationtable", cmbSysterPermTable.getSelectedIndex());
         }
         // Show card serial
         if (chkShowCardSerial.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "showserial", 1); }
@@ -3378,6 +3425,7 @@ public class GUI extends javax.swing.JFrame {
         if (Fork.equals("CJ")) { 
             ScramblingTypeAL.add("Discret 11");
             ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
+            ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
         }
         ScramblingTypeArray = new ArrayList<>();
         ScramblingTypeArray.add("");
@@ -3389,6 +3437,7 @@ public class GUI extends javax.swing.JFrame {
         if (Fork.equals("CJ")) {
             ScramblingTypeArray.add("--d11");
             ScramblingTypeArray.add("--systercnr");
+            ScramblingTypeArray.add("--syster");
         }
         cmbScramblingType.removeAllItems();
         
@@ -3528,6 +3577,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // VideoCrypt S
         else if (ScramblingType1.equals("--videocrypts") ) {
+            // Set sample rate to 14 MHz (may not be correct!)
+            txtSampleRate.setText("14");
             disableScramblingKey2();
             ScramblingKeyAL.add("Free access/soft scrambled (no card required)");
             ScramblingKeyAL.add("Conditional access (BBC Select card)");
@@ -3539,8 +3590,10 @@ public class GUI extends javax.swing.JFrame {
         else if (ScramblingType1.equals("--syster") || 
                 (ScramblingType1.equals("--d11")) || 
                 (ScramblingType1.equals("--systercnr")) ) {
+            // Set sample rate to 20 MHz
+            txtSampleRate.setText("20");
             if (Fork.equals("CJ")) {
-            disableScramblingKey2();
+                disableScramblingKey2();
                 ScramblingKeyAL.add("Free access (Premiere Germany)");
                 ScramblingKeyAL.add("Conditional access (Premiere Germany)");
                 ScramblingKeyAL.add("Free access (Canal+ France)");
@@ -3556,9 +3609,9 @@ public class GUI extends javax.swing.JFrame {
             if (Fork.equals("CJ")) {
                 ScramblingKeyArray.add("premiere-fa");
                 ScramblingKeyArray.add("premiere-ca");
-                ScramblingKeyArray.add("cplfa");
                 ScramblingKeyArray.add("cfrfa");
                 ScramblingKeyArray.add("cfrca");
+                ScramblingKeyArray.add("cplfa");
                 ScramblingKeyArray.add("cesfa");
                 ScramblingKeyArray.add("ntvfa");
             }
@@ -3674,6 +3727,19 @@ public class GUI extends javax.swing.JFrame {
         else {
             if ( chkFindKeys.isSelected()) { chkFindKeys.doClick(); }
             chkFindKeys.setEnabled(false);
+        }
+        // Enable permutation table options (Syster-based modes)
+        if ( ((ScramblingType1).equals("--syster")) ||
+                ((ScramblingType1).equals("--systercnr")) &&
+                (Fork == "CJ") ) {
+            lblSysterPermTable.setEnabled(true);
+            cmbSysterPermTable.setEnabled(true);
+            cmbSysterPermTable.setSelectedIndex(0);
+        }
+        else {
+            lblSysterPermTable.setEnabled(false);
+            cmbSysterPermTable.setEnabled(false);
+            cmbSysterPermTable.setSelectedIndex(-1);
         }
         // Enable ECM option and disable ACP (if not a MAC mode)
         if (cmbScramblingType.getSelectedIndex() == 0) {
@@ -4669,6 +4735,7 @@ public class GUI extends javax.swing.JFrame {
         if (!ScramblingType2.isEmpty()) AllArgs.add(ScramblingType2);
         if (!ScramblingKey2.isEmpty()) AllArgs.add(ScramblingKey2);
         if (!ScrambleAudio.isEmpty()) AllArgs.add(ScrambleAudio);
+        if (!SysterPermTable.isEmpty()) AllArgs.add(SysterPermTable);
         if (!TeletextParam.isEmpty()) AllArgs.add(TeletextParam);
         if (!TeletextSource.isEmpty()) AllArgs.add(TeletextSource);
         if (!RFampParam.isEmpty()) AllArgs.add(RFampParam);
@@ -4995,6 +5062,15 @@ public class GUI extends javax.swing.JFrame {
                 if (!cmbScramblingKey2.isEnabled()) {
                     ScramblingType2 = "";
                     ScramblingKey2 = "";
+                }
+                /* If Syster dual mode (line shuffle+cut-and-rotate) is enabled,
+                 * set up CNR as a secondary scrambling type and duplicate the 
+                 * scrambling key to the CNR mode - you can't use different
+                 * access keys simultaneously.
+                 */
+                if ( (ScramblingType1 == "--syster") && (cmbScramblingType.getSelectedIndex() == 8) ) {
+                    ScramblingType2 = "--systercnr";
+                    ScramblingKey2 = ScramblingKey1;                    
                 }
             }
             configureScramblingOptions();
@@ -5757,6 +5833,18 @@ public class GUI extends javax.swing.JFrame {
                 + "You can download it from https://github.com/alirdn/windows-kill/releases/\n"
                 + "Please save it in the same directory as this application and restart.", AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_lblSyntaxOptionDisabledMouseClicked
+
+    private void cmbSysterPermTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbSysterPermTableItemStateChanged
+        if (cmbSysterPermTable.getSelectedIndex() == 1) {
+            SysterPermTable = "--key-table-1";
+        }
+        else if (cmbSysterPermTable.getSelectedIndex() == 2) {
+            SysterPermTable = "--key-table-2";
+        }
+        else {
+            SysterPermTable = "";
+        }
+    }//GEN-LAST:event_cmbSysterPermTableItemStateChanged
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -5811,6 +5899,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbScramblingKey1;
     private javax.swing.JComboBox<String> cmbScramblingKey2;
     private javax.swing.JComboBox<String> cmbScramblingType;
+    private javax.swing.JComboBox<String> cmbSysterPermTable;
     private javax.swing.JComboBox<String> cmbVideoFormat;
     private javax.swing.JComboBox<String> cmbWSS;
     private javax.swing.JFileChooser configFileChooser;
@@ -5841,6 +5930,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblSpecifyLocation;
     private javax.swing.JLabel lblSubtitleIndex;
     private javax.swing.JLabel lblSyntaxOptionDisabled;
+    private javax.swing.JLabel lblSysterPermTable;
     private javax.swing.JLabel lblTeefax;
     private javax.swing.JLabel lblVC2ScramblingKey;
     private javax.swing.JMenuItem menuAbout;
