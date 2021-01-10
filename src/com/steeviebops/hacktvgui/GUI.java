@@ -3721,7 +3721,7 @@ public class GUI extends javax.swing.JFrame {
             lblEMMCardNumber.setEnabled(false);
         }
         // Enable PPV findkey option
-        if ( (ScramblingKey1.equals("--ppv")) ) {
+        if ( (ScramblingKey1.equals("ppv")) ) {
             chkFindKeys.setEnabled(true);
         }
         else {
