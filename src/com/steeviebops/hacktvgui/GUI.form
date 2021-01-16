@@ -966,20 +966,21 @@
                                   <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="txtFrequency" min="-2" pref="112" max="-2" attributes="0"/>
-                                      <Group type="102" attributes="0">
+                                      <Group type="102" alignment="0" attributes="0">
                                           <Group type="103" groupAlignment="0" attributes="0">
                                               <Component id="radVHF" min="-2" max="-2" attributes="0"/>
                                               <Component id="txtGain" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                                              <Component id="cmbChannel" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
                                           </Group>
                                           <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="lblRegion" min="-2" max="-2" attributes="0"/>
                                               <Component id="radCustom" min="-2" max="-2" attributes="0"/>
                                               <Component id="chkAmp" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
-                                      <Component id="cmbChannel" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="135" max="32767" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -996,6 +997,7 @@
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="lblChannel" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="cmbChannel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
@@ -1094,6 +1096,8 @@
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkAmpActionPerformed"/>
                           </Events>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="lblRegion">
                         </Component>
                       </SubComponents>
                     </Container>

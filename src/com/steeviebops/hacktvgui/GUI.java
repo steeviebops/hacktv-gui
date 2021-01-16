@@ -402,6 +402,7 @@ public class GUI extends javax.swing.JFrame {
         txtGain = new javax.swing.JTextField();
         cmbChannel = new javax.swing.JComboBox<>();
         chkAmp = new javax.swing.JCheckBox();
+        lblRegion = new javax.swing.JLabel();
         VBIPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -974,13 +975,14 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(hackrfPanelLayout.createSequentialGroup()
                         .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(radVHF)
-                            .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(23, 23, 23)
                         .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblRegion)
                             .addComponent(radCustom)
-                            .addComponent(chkAmp)))
-                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(135, Short.MAX_VALUE))
+                            .addComponent(chkAmp))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         hackrfPanelLayout.setVerticalGroup(
             hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -993,7 +995,8 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblChannel)
-                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblRegion))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblFrequency)
@@ -4240,6 +4243,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("Western Europe");
     }
 
     private void addSysBVHFChannels() {
@@ -4258,6 +4262,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("Continental Europe");
     }
     
     private void addIrishVHFChannels() {
@@ -4277,6 +4282,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("Ireland (RTE)");
     }
     
     private void addNTSCVHFChannels() {
@@ -4295,6 +4301,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("North/South America (NTSC)");
     }
 
     private void addNTSCUHFChannels() {
@@ -4331,6 +4338,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("North/South America (NTSC)");
     }  
      
     private void addFrenchVHFChannels() {
@@ -4347,7 +4355,8 @@ public class GUI extends javax.swing.JFrame {
         };
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-        cmbChannel.setSelectedIndex(0); 
+        cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("France");
     }
     
     private void addSystemAChannels() {
@@ -4369,7 +4378,8 @@ public class GUI extends javax.swing.JFrame {
         };
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-        cmbChannel.setSelectedIndex(0); 
+        cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("United Kingdom");
     }    
 
     private void addSystemEChannels() {
@@ -4386,7 +4396,8 @@ public class GUI extends javax.swing.JFrame {
         };
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-        cmbChannel.setSelectedIndex(0); 
+        cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("France");
     }  
     
     private void addSystemDRussiaChannels() {
@@ -4406,7 +4417,8 @@ public class GUI extends javax.swing.JFrame {
         };
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-        cmbChannel.setSelectedIndex(0); 
+        cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("Russia");
     }
     
     private void addBSBChannels() {
@@ -4459,7 +4471,8 @@ public class GUI extends javax.swing.JFrame {
         };
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-        cmbChannel.setSelectedIndex(0); 
+        cmbChannel.setSelectedIndex(0);
+        lblRegion.setText("BSB IF");
     }
     
     private boolean checkInputSource() {
@@ -4858,6 +4871,17 @@ public class GUI extends javax.swing.JFrame {
                 // them in the console
                 for (String o : chunks) {
                     txtConsoleOutput.append(o);
+                }
+                /* If an invalid parameter is passed to hacktv, it usually
+                   reponds with its usage message.
+                   Here, we check if the first line of the usage has been
+                   returned. If so, we assume that one of the parameters we fed 
+                   is not supported.
+                */
+                if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
+                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
+                            + " of the selected options. Please update hacktv and try again."
+                            , AppName, JOptionPane.WARNING_MESSAGE);
                 }
             }// End of process
         }; // End of SwingWorker
@@ -5689,6 +5713,7 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(true);
         cmbChannel.setEnabled(false);
         cmbChannel.setSelectedIndex(-1);
+        lblRegion.setText("");
     }//GEN-LAST:event_radCustomActionPerformed
 
     private void menuNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNewActionPerformed
@@ -5923,6 +5948,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblOutputDevice;
+    private javax.swing.JLabel lblRegion;
     private javax.swing.JLabel lblSampleRate;
     private javax.swing.JLabel lblScramblingKey;
     private javax.swing.JLabel lblScramblingSystem;
