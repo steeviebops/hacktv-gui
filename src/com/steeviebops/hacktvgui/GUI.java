@@ -584,6 +584,7 @@ public class GUI extends javax.swing.JFrame {
 
         txtPosition.setEnabled(false);
 
+        cmbLogo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbLogo.setEnabled(false);
         cmbLogo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2030,11 +2031,11 @@ public class GUI extends javax.swing.JFrame {
     private void captainJack() {
         // Enable features supported in Captain Jack's build
         Fork = "CJ";
+        chkLogo.setEnabled(true);
         if ( !radTest.isSelected() ) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
             chkPosition.setEnabled(true);
-            chkLogo.setEnabled(true);
             chkSubtitles.setEnabled(true);
             chkARCorrection.setEnabled(true);
         }
@@ -5611,13 +5612,11 @@ public class GUI extends javax.swing.JFrame {
         if (chkRepeat.isSelected()) chkRepeat.doClick();
         if (chkPosition.isSelected()) chkPosition.doClick();
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
-        if (chkLogo.isSelected()) { chkLogo.doClick(); }
         if (chkInterlace.isSelected()) chkInterlace.doClick();
         if (chkSubtitles.isSelected()) chkSubtitles.doClick();
         chkRepeat.setEnabled(false);
         chkPosition.setEnabled(false);
         chkTimestamp.setEnabled(false);
-        chkLogo.setEnabled(false);
         chkInterlace.setEnabled(false);
         chkSubtitles.setEnabled(false);
         txtSource.setEnabled(false);
@@ -5643,7 +5642,6 @@ public class GUI extends javax.swing.JFrame {
         if (Fork == "CJ") {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
-            chkLogo.setEnabled(true);
             chkARCorrection.setEnabled(true);
         }
     }//GEN-LAST:event_radLocalSourceActionPerformed
