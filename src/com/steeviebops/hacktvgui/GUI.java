@@ -128,6 +128,7 @@ public class GUI extends javax.swing.JFrame {
     ArrayList<String> ScramblingKeyArray;
     ArrayList<String> ScramblingKey2Array;
     String[] LogoArray;
+    String[] TestCardArray;
     
     // Preferences node
     Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
@@ -271,6 +272,8 @@ public class GUI extends javax.swing.JFrame {
         populateCheckboxArray();
         addWSSModes();
         addARCorrectionOptions();
+        addTestCardOptions();
+        addLogoOptions();
         loadPreferences();
         detectFork();
         // Set default values when form loads
@@ -370,6 +373,7 @@ public class GUI extends javax.swing.JFrame {
         chkARCorrection = new javax.swing.JCheckBox();
         cmbARCorrection = new javax.swing.JComboBox<>();
         cmbM3USource = new javax.swing.JComboBox<>();
+        cmbTest = new javax.swing.JComboBox<>();
         VideoFormatPanel = new javax.swing.JPanel();
         cmbVideoFormat = new javax.swing.JComboBox<>();
         radPAL = new javax.swing.JRadioButton();
@@ -608,6 +612,8 @@ public class GUI extends javax.swing.JFrame {
 
         cmbM3USource.setEnabled(false);
 
+        cmbTest.setEnabled(false);
+
         javax.swing.GroupLayout SourcePanelLayout = new javax.swing.GroupLayout(SourcePanel);
         SourcePanel.setLayout(SourcePanelLayout);
         SourcePanelLayout.setHorizontalGroup(
@@ -638,18 +644,23 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkLogo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
                                 .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
-                        .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(SourcePanelLayout.createSequentialGroup()
+                        .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
+                                .addComponent(radLocalSource)
+                                .addGap(39, 39, 39)
+                                .addComponent(radTest)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnSourceBrowse))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
-                        .addComponent(radLocalSource)
-                        .addGap(39, 39, 39)
-                        .addComponent(radTest)))
+                        .addComponent(btnSourceBrowse)))
                 .addContainerGap())
         );
         SourcePanelLayout.setVerticalGroup(
@@ -658,7 +669,8 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(radLocalSource)
-                    .addComponent(radTest))
+                    .addComponent(radTest)
+                    .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnSourceBrowse)
@@ -2025,7 +2037,11 @@ public class GUI extends javax.swing.JFrame {
         }
         else if ( radMAC.isSelected() ) {
             addMACScramblingTypes();
-        }      
+        }
+        if (radTest.isSelected()){
+            cmbTest.setEnabled(false);
+            cmbTest.setSelectedIndex(-1);
+        }
     }
     
     private void captainJack() {
@@ -2045,6 +2061,10 @@ public class GUI extends javax.swing.JFrame {
         else if ( radMAC.isSelected() ) {
             addMACScramblingTypes();
         }
+        if (radTest.isSelected()){
+            cmbTest.setEnabled(true);
+            cmbTest.setSelectedIndex(0);
+        }        
     }
     
     public static boolean isNumeric(String strNum) {
@@ -2290,16 +2310,25 @@ public class GUI extends javax.swing.JFrame {
         String ImportedSource = (INIFile.getStringFromINI(SourceFile, "hacktv", "input", "", true));
         String M3USource = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "m3usource", "", true));
         Integer M3UIndex = (INIFile.getIntegerFromINI(SourceFile, "hacktv-gui3", "m3uindex"));
-        if (ImportedSource.equals("test:colourbars")) {
+        if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
-        } else if (!M3USource.isEmpty()) {
+            if (Fork == "CJ") {
+                for (int i = 0; i <= cmbTest.getItemCount() - 1; i++) {
+                    if ( (TestCardArray[i]).equals(ImportedSource.toLowerCase()) ) {
+                        cmbTest.setSelectedIndex(i);
+                    }
+                }                  
+            }
+        }
+        else if (!M3USource.isEmpty()) {
             File M3UFile = new File(M3USource);
             // If the source is an M3U file...
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             // Spawn M3UHandler using the index value we got above.
             m3uHandler(M3UFile.getAbsolutePath(), M3UIndex);
             txtSource.setText(M3USource);
-        } else {
+        }
+        else {
             txtSource.setText(ImportedSource);
         }
         // Video format
@@ -2483,21 +2512,20 @@ public class GUI extends javax.swing.JFrame {
         }
         // Logo
         if (chkLogo.isEnabled()) {
-            String ImportedLogo = (INIFile.getStringFromINI(SourceFile, "hacktv", "logo", "", true));
-            if (ImportedLogo != "") {
-                File LogoPath = new File(HackTVDirectory + OS_SEP + "resources" +
-                OS_SEP + "logos" + OS_SEP + ImportedLogo);
-                // If a logo is specified, check if it exists first
-                if (LogoPath.exists()) {
-                    chkLogo.doClick();
-                    for (int i = 1; i <= cmbLogo.getItemCount() - 1; i++) {
-                        if (LogoArray[i].equals(ImportedLogo)) {
-                            cmbLogo.setSelectedIndex(i);
-                        }
+            String ImportedLogo = (INIFile.getStringFromINI(SourceFile, "hacktv", "logo", "", true)).toLowerCase();
+            // Check first if the imported string is a .png file.
+            // hacktv now contains its own internal resources so external files
+            // are no longer supported.
+            if (ImportedLogo.endsWith(".png")) {
+                JOptionPane.showMessageDialog(null, 
+                     "hacktv no longer supports external logo files. Logo option disabled.", AppName, JOptionPane.WARNING_MESSAGE);
+            }
+            else if (!ImportedLogo.isBlank()) {
+                for (int i = 0; i <= cmbLogo.getItemCount() - 1; i++) {
+                    if ( (LogoArray[i].toLowerCase()).equals(ImportedLogo) ) {
+                        chkLogo.doClick();
+                        cmbLogo.setSelectedIndex(i);
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null, 
-                            "The file " + ImportedLogo + " could not be found. Logo option disabled.", AppName, JOptionPane.WARNING_MESSAGE);
                 }
             }
         }
@@ -2809,8 +2837,14 @@ public class GUI extends javax.swing.JFrame {
         if (Fork.equals("CJ")) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
         // Input source or test card
         if (radTest.isSelected()) {
-            FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
-        } else if (txtSource.getText().toLowerCase().endsWith(".m3u")) {
+            if (Fork == "CJ") {
+                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", TestCardArray[cmbTest.getSelectedIndex()]);
+            }
+            else {
+                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
+            }
+        }
+        else if (txtSource.getText().toLowerCase().endsWith(".m3u")) {
             int M3UIndex = cmbM3USource.getSelectedIndex();
             FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
@@ -2844,7 +2878,7 @@ public class GUI extends javax.swing.JFrame {
         // Verbose
         if (chkVerbose.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "verbose", 1); }
         // Logo
-        if (chkLogo.isSelected()) { FileContents = INIFile.setINIValue(FileContents, "hacktv", "logo", cmbLogo.getSelectedItem().toString()) ; }
+        if (chkLogo.isSelected()) { FileContents = INIFile.setINIValue(FileContents, "hacktv", "logo", LogoArray[cmbLogo.getSelectedIndex()]) ; }
         // Timestamp
         if (chkTimestamp.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "timestamp", 1); }
         // Interlace
@@ -3836,7 +3870,74 @@ public class GUI extends javax.swing.JFrame {
             ScalingMode = "";
         }
     }
-        
+    
+    private void addLogoOptions() {
+        String[] Logo = {
+            "hacktv",
+            "Cartoon Network",
+            "TV1000",
+            "FilmNet1",
+            "Canal+",
+            "Eurotica",
+            "MTV",
+            "The Adult Channel",
+            "FilmNet"
+        };
+        LogoArray = new String[] {
+            "hacktv",
+            "cartoonnetwork",
+            "tv1000",
+            "filmnet1",
+            "canal+",
+            "eurotica",
+            "mtv",
+            "tac",
+            "filmnet"
+        };
+        cmbLogo.removeAllItems();
+        cmbLogo.setModel(new DefaultComboBoxModel<>(Logo));
+        cmbLogo.setSelectedIndex(-1);
+    }
+    
+    private void checkLogo() {
+        // Populate logo parameters if enabled
+        if (chkLogo.isSelected()) {
+            LogoParam = "--logo";
+            LogoFileName = LogoArray[cmbLogo.getSelectedIndex()];
+        }
+            else {
+            LogoParam = "";
+            LogoFileName = "";
+        }        
+    }
+    
+    private void addTestCardOptions() {
+        String[] TestCard = {
+            "Colour bars",
+            "Philips PM5544",
+            "UEIT (Soviet)",
+            "FuBK"
+        };
+        TestCardArray = new String[] {
+            "test:colourbars",
+            "test:pm5544",
+            "test:ueitm",
+            "test:fubk"
+        };
+        cmbTest.removeAllItems();
+        cmbTest.setModel(new DefaultComboBoxModel<>(TestCard));
+        cmbTest.setSelectedIndex(-1);
+    }
+    
+    private void checkTestCard() {
+        if (cmbTest.isEnabled()) {
+            InputSource = TestCardArray[cmbTest.getSelectedIndex()];
+        }
+        else if (radTest.isSelected()) {
+            InputSource = "test:colourbars";
+        }
+    }    
+    
     private void checkVideoFormat() {
     // Here, we read the selected combobox index and use that number to get
     // the corresponding video format from VideoModeArray.
@@ -4705,7 +4806,7 @@ public class GUI extends javax.swing.JFrame {
             TruncatedCardNumber = "";
             return true;
         }
-    }        
+    }
     
     private void runHackTV() {
         // Call each method and check its response. If false, then stop.
@@ -4722,22 +4823,23 @@ public class GUI extends javax.swing.JFrame {
         checkTeletextSource();        
         checkWSS();
         checkARCorrectionOptions();
+        checkTestCard();
+        checkLogo();
         // Add all possible parameters to an arraylist to feed to ProcessBuilder
-        // Mandatory values first
         AllArgs.add(HackTVPath);
         AllArgs.add("-m");
         AllArgs.add(Sys);
-        AllArgs.add("-s");
-        AllArgs.add(Integer.toString(SampleRate));
         AllArgs.add("-f");
         AllArgs.add(Long.toString(Frequency));
+        AllArgs.add("-s");
+        AllArgs.add(Integer.toString(SampleRate));
+        if (!SubtitlesParam.isEmpty()) AllArgs.add(SubtitlesParam);
+        if (!txtSubtitleIndex.getText().isEmpty()) AllArgs.add(txtSubtitleIndex.getText());
         AllArgs.add("-g");
         AllArgs.add(txtGain.getText());
         // Optional values second, see if they're defined first before adding
         if (!ChIDParam.isEmpty()) {AllArgs.add(ChIDParam);}
         if (!ChID.isEmpty()) {AllArgs.add(ChID);}
-        if (!SubtitlesParam.isEmpty()) AllArgs.add(SubtitlesParam);
-        if (!txtSubtitleIndex.getText().isEmpty()) AllArgs.add(txtSubtitleIndex.getText());
         if (!AudioParam.isEmpty()) AllArgs.add(AudioParam);
         if (!NICAMParam.isEmpty()) AllArgs.add(NICAMParam);
         if (!ACPParam.isEmpty()) AllArgs.add(ACPParam);
@@ -4779,7 +4881,7 @@ public class GUI extends javax.swing.JFrame {
         if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
             // card or a HTTP stream.
-            if ( (InputSource.contains("test:colourbars")) ||
+            if ( (InputSource.contains("test:")) ||
                 (InputSource.startsWith("http")) ) {
                 AllArgs.add(InputSource);
             }
@@ -5495,50 +5597,8 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkLogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLogoActionPerformed
         if (chkLogo.isSelected()) {
-            LogoParam = "--logo";
             cmbLogo.setEnabled(true);
-            // Error message string
-            String NoPNGFilesFound = "No PNG files were found in resources"
-            + OS_SEP + "logos, or the directory was not found.";
-            /* Now, we will attempt to populate cmbLogo with PNG files from the
-            path specified below. This path is hard-coded into hacktv and
-            cannot be changed without editing the source.
-            */
-            File LogoDir = new File (HackTVDirectory + OS_SEP + "resources" + OS_SEP + "logos");
-            if (!LogoDir.isDirectory()) {
-                // Deselect the logo checkbox and show an error message.
-                chkLogo.doClick();
-                JOptionPane.showMessageDialog(null, NoPNGFilesFound, AppName,
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            // Create a FilenameFilter to include .png files only
-            FilenameFilter filter = new FilenameFilter() {
-                @Override
-                public boolean accept(File LogoDir, String name) {
-                    return name.endsWith(".png");
-                }
-            };
-            // Get directory contents with filter applied
-            LogoArray = LogoDir.list(filter);
-            // Rearrange in alphabetical order
-            Arrays.sort(LogoArray);
-            // Clear combobox
-            cmbLogo.removeAllItems();
-            /* Attempt to populate combobox with filenames from the array above.
-            If the array is empty, an IllegalArgumentException will be
-            thrown so we need to catch this and return an error message.
-            */
-            try {
-                cmbLogo.setModel(new DefaultComboBoxModel<>(LogoArray));
-                cmbLogo.setSelectedIndex(0);
-            }
-            catch (IllegalArgumentException ex) {
-                // Deselect the logo checkbox and show an error message.
-                chkLogo.doClick();
-                JOptionPane.showMessageDialog(null, NoPNGFilesFound, AppName,
-                    JOptionPane.WARNING_MESSAGE);
-            }
+            cmbLogo.setSelectedIndex(0);
         }
         else {
             // Disable the cmbLogo combobox and clear its variables
@@ -5622,13 +5682,17 @@ public class GUI extends javax.swing.JFrame {
         txtSource.setEnabled(false);
         btnSourceBrowse.setEnabled(false);
         txtSource.setText("");
-        InputSource = "test:colourbars";
         if (chkARCorrection.isSelected()) { chkARCorrection.doClick(); }
         chkARCorrection.setEnabled(false);
         if ( cmbM3USource.isVisible() ) {
             cmbM3USource.setVisible(false);
             cmbM3USource.setEnabled(false);
             txtSource.setVisible(true);
+        }
+        // Enable test card dropdown
+        if (Fork == "CJ") {
+            cmbTest.setEnabled(true);
+            cmbTest.setSelectedIndex(0);
         }
     }//GEN-LAST:event_radTestActionPerformed
 
@@ -5643,6 +5707,9 @@ public class GUI extends javax.swing.JFrame {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
             chkARCorrection.setEnabled(true);
+            // Disable test card dropdown
+            cmbTest.setSelectedIndex(-1);
+            cmbTest.setEnabled(false);
         }
     }//GEN-LAST:event_radLocalSourceActionPerformed
 
@@ -5923,6 +5990,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbScramblingKey2;
     private javax.swing.JComboBox<String> cmbScramblingType;
     private javax.swing.JComboBox<String> cmbSysterPermTable;
+    private javax.swing.JComboBox<String> cmbTest;
     private javax.swing.JComboBox<String> cmbVideoFormat;
     private javax.swing.JComboBox<String> cmbWSS;
     private javax.swing.JFileChooser configFileChooser;
