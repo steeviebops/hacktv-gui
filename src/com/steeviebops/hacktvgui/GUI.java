@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.math.BigDecimal;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.FilenameFilter;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.Path;
@@ -55,7 +54,6 @@ import java.security.CodeSource;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import javax.swing.SwingWorker;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -139,6 +137,18 @@ public class GUI extends javax.swing.JFrame {
     // Boolean to determine if hacktv is running or not
     boolean Running;
     
+    // Boolean to determine if a config file is in the process of loading
+    boolean HTVLoadInProgress = false;
+    
+    // Video line count. At the moment, we just use this for enabling/disabling
+    // the test card dropdown, supported on 625 only.
+    int Lines;  
+    
+    // Integer to save the previously selected item in the VideoFormat combobox.
+    // Used to revert back if a baseband mode is selected on an unsupported SDR.
+    int PreviousIndex = 0;
+    boolean Baseband;
+    
     // Declare variables used for storing parameters
     ArrayList<String> AllArgs = new ArrayList<>();
     String InputSource = "";
@@ -181,7 +191,11 @@ public class GUI extends javax.swing.JFrame {
     String ChIDParam = "";
     String ChID = "";
     String ColourParam = "";
-    String SysterPermTable;
+    String SysterPermTable = "";
+    String OutputDevice = "";
+    String AntennaParam = "";
+    String AntennaName = "";
+    String FileType = "";
     // End parameter variables
     
     // Main method
@@ -274,6 +288,7 @@ public class GUI extends javax.swing.JFrame {
         addARCorrectionOptions();
         addTestCardOptions();
         addLogoOptions();
+        addOutputDevices();
         loadPreferences();
         detectFork();
         // Set default values when form loads
@@ -349,6 +364,9 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
         });
+        outputFileChooser = outputFileChooser = new JFileChooser();
+        outputFileChooser.setCurrentDirectory(new File(UserHomeDir));
+        ;
         containerPanel = new javax.swing.JPanel();
         consoleOutputPanel = new javax.swing.JPanel();
         consoleScrollPane = new javax.swing.JScrollPane();
@@ -395,7 +413,7 @@ public class GUI extends javax.swing.JFrame {
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
         cmbOutputDevice = new javax.swing.JComboBox<>();
-        hackrfPanel = new javax.swing.JPanel();
+        rfPanel = new javax.swing.JPanel();
         radCustom = new javax.swing.JRadioButton();
         radVHF = new javax.swing.JRadioButton();
         radUHF = new javax.swing.JRadioButton();
@@ -406,7 +424,12 @@ public class GUI extends javax.swing.JFrame {
         txtGain = new javax.swing.JTextField();
         cmbChannel = new javax.swing.JComboBox<>();
         chkAmp = new javax.swing.JCheckBox();
-        lblRegion = new javax.swing.JLabel();
+        lblAntennaName = new javax.swing.JLabel();
+        txtAntennaName = new javax.swing.JTextField();
+        cmbFileType = new javax.swing.JComboBox<>();
+        lblFileType = new javax.swing.JLabel();
+        lblOutputDevice2 = new javax.swing.JLabel();
+        txtOutputDevice = new javax.swing.JTextField();
         VBIPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -912,12 +935,14 @@ public class GUI extends javax.swing.JFrame {
         FrequencyPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Frequency and TX options"));
 
         lblOutputDevice.setText("Output device");
-        lblOutputDevice.setEnabled(false);
 
-        cmbOutputDevice.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "hackrf", "soapysdr", "fl2k", "File" }));
-        cmbOutputDevice.setEnabled(false);
+        cmbOutputDevice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbOutputDeviceActionPerformed(evt);
+            }
+        });
 
-        hackrfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("HackRF options"));
+        rfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("RF options"));
 
         BandButtonGroup.add(radCustom);
         radCustom.setText("Custom");
@@ -971,56 +996,82 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout hackrfPanelLayout = new javax.swing.GroupLayout(hackrfPanel);
-        hackrfPanel.setLayout(hackrfPanelLayout);
-        hackrfPanelLayout.setHorizontalGroup(
-            hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(hackrfPanelLayout.createSequentialGroup()
+        lblAntennaName.setText("Antenna name");
+
+        cmbFileType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "uint8", "int8", "uint16", "int16", "int32", "float" }));
+        cmbFileType.setSelectedIndex(-1);
+
+        lblFileType.setText("File type");
+
+        javax.swing.GroupLayout rfPanelLayout = new javax.swing.GroupLayout(rfPanel);
+        rfPanel.setLayout(rfPanelLayout);
+        rfPanelLayout.setHorizontalGroup(
+            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(rfPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(radUHF)
                     .addComponent(lblFrequency)
                     .addComponent(lblGain)
                     .addComponent(lblChannel))
                 .addGap(24, 24, 24)
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(hackrfPanelLayout.createSequentialGroup()
-                        .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(radVHF)
-                            .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(23, 23, 23)
-                        .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblRegion)
-                            .addComponent(radCustom)
-                            .addComponent(chkAmp))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(radVHF)
+                    .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblAntennaName)
+                            .addComponent(lblFileType))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtAntennaName)
+                            .addGroup(rfPanelLayout.createSequentialGroup()
+                                .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkAmp)
+                            .addComponent(radCustom))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
-        hackrfPanelLayout.setVerticalGroup(
-            hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, hackrfPanelLayout.createSequentialGroup()
+        rfPanelLayout.setVerticalGroup(
+            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rfPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(radCustom)
                     .addComponent(radUHF)
                     .addComponent(radVHF))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblChannel)
-                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblRegion))
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblAntennaName)
+                        .addComponent(txtAntennaName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblChannel)
+                        .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblFrequency)
-                    .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblFileType)
+                        .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblFrequency)
+                        .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(hackrfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblGain)
                     .addComponent(chkAmp))
                 .addContainerGap())
         );
+
+        lblOutputDevice2.setText("Serial number (optional)");
 
         javax.swing.GroupLayout FrequencyPanelLayout = new javax.swing.GroupLayout(FrequencyPanel);
         FrequencyPanel.setLayout(FrequencyPanelLayout);
@@ -1031,8 +1082,12 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(lblOutputDevice)
                 .addGap(18, 18, 18)
                 .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(hackrfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(lblOutputDevice2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtOutputDevice)
+                .addContainerGap())
+            .addComponent(rfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         FrequencyPanelLayout.setVerticalGroup(
             FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1040,9 +1095,11 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblOutputDevice)
-                    .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblOutputDevice2)
+                    .addComponent(txtOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(hackrfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         VBIPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VBI options"));
@@ -1131,13 +1188,13 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkGamma)
                     .addComponent(chkVerbose)
-                    .addComponent(chkOutputLevel))
-                .addGap(64, 64, 64)
+                    .addComponent(chkOutputLevel)
+                    .addComponent(chkGamma))
+                .addGap(18, 18, 18)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         AdditionalOptionsPanelLayout.setVerticalGroup(
@@ -1146,7 +1203,6 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkGamma)
                     .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOutputLevel)
                     .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1543,7 +1599,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(76, Short.MAX_VALUE))
+                .addContainerGap(78, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2253,18 +2309,22 @@ public class GUI extends javax.swing.JFrame {
                         + "(3.0 or later) to convert the file to the current format.", AppName, JOptionPane.INFORMATION_MESSAGE);
             } else if ( FileContents.contains("[hacktv]") ) {
                 // This is OK, continue opening this file
-                openConfigFile(SourceFile.toString());
-                // Display the opened filename in the title bar
-                // Back up the original title once
-                if (!TitleBarChanged) { 
-                    TitleBar = this.getTitle();
-                    TitleBarChanged = true;
+                HTVLoadInProgress = true;
+                if (openConfigFile(SourceFile.toString())) {
+                    // Display the opened filename in the title bar
+                    // Back up the original title once
+                    if (!TitleBarChanged) {
+                        TitleBar = this.getTitle();
+                        TitleBarChanged = true;
+                    }
+                    this.setTitle(TitleBar + " - " + SourceFile.getName());
+                    // Remove the ellipsis after Save to follow standard UI guidelines
+                    menuSave.setText("Save");
+                    updateMRUList(SourceFile.toString());                    
                 }
-                this.setTitle(TitleBar + " - " + SourceFile.getName());
-                // Remove the ellipsis after Save to follow standard UI guidelines
-                menuSave.setText("Save");
-                updateMRUList(SourceFile.toString());
-            } else {
+                HTVLoadInProgress = false;
+            }
+            else {
                 // No idea what we've read here, so stop
                 JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.ERROR_MESSAGE);                           
             }
@@ -2274,7 +2334,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void openConfigFile(String SourceFile) {
+    private boolean openConfigFile(String SourceFile) {
         /**
          * HTV configuration file loader.
          * 
@@ -2300,12 +2360,34 @@ public class GUI extends javax.swing.JFrame {
         }
         // Reset all controls
         resetAllControls();
-        // Output device. We don't support this as of yet but it is here for future reference
-        String ImportedOutputDevice = (INIFile.getStringFromINI(SourceFile, "hacktv", "output", "hackrf", false));
-        if ((!ImportedOutputDevice.isEmpty()) && (!ImportedOutputDevice.contains("hackrf"))) {
-            JOptionPane.showMessageDialog(null, "This application only supports output to HackRF devices at present. " +
-                "Support for the syntax used by other SDRs may be added in a future release.", AppName, JOptionPane.WARNING_MESSAGE);
+        /* Output device (case sensitive)
+           For this, we look for hackrf, soapysdr or fl2k. A null value will be
+           interpreted as hackrf. Anything other than these values is handled
+           as an output file.
+         */
+        String ImportedOutputDevice = (INIFile.getStringFromINI(SourceFile, "hacktv", "output", "hackrf", true));
+        if ((ImportedOutputDevice.isEmpty()) || (ImportedOutputDevice.toLowerCase().startsWith("hackrf"))) {
+            cmbOutputDevice.setSelectedIndex(0);
+            if (ImportedOutputDevice.contains(":")) {
+                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
+            }
         }
+        else if (ImportedOutputDevice.toLowerCase().startsWith("soapysdr")) {
+            cmbOutputDevice.setSelectedIndex(1);
+            if (ImportedOutputDevice.contains(":")) {
+                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
+            }
+        }
+        else if (ImportedOutputDevice.toLowerCase().startsWith("fl2k")) {
+            cmbOutputDevice.setSelectedIndex(2);
+            if (ImportedOutputDevice.contains(":")) {
+                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
+            }
+        }
+        else {
+            cmbOutputDevice.setSelectedIndex(3);
+            txtOutputDevice.setText(ImportedOutputDevice);
+        }        
         // Input source or test card
         String ImportedSource = (INIFile.getStringFromINI(SourceFile, "hacktv", "input", "", true));
         String M3USource = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "m3usource", "", true));
@@ -2313,11 +2395,16 @@ public class GUI extends javax.swing.JFrame {
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
             if (Fork == "CJ") {
-                for (int i = 0; i <= cmbTest.getItemCount() - 1; i++) {
-                    if ( (TestCardArray[i]).equals(ImportedSource.toLowerCase()) ) {
-                        cmbTest.setSelectedIndex(i);
-                    }
-                }                  
+                ImportedSource = ImportedSource.toLowerCase().split(":")[1];
+                if (ImportedSource.equals("pm5544")) {
+                    cmbTest.setSelectedIndex(1);
+                }
+                else if (ImportedSource.equals("ueitm")) {
+                    cmbTest.setSelectedIndex(2);
+                }
+                else if (ImportedSource.equals("fubk")) {
+                    cmbTest.setSelectedIndex(3);
+                }
             }
         }
         else if (!M3USource.isEmpty()) {
@@ -2333,147 +2420,229 @@ public class GUI extends javax.swing.JFrame {
         }
         // Video format
         String ImportedVideoFormat = (INIFile.getStringFromINI(SourceFile, "hacktv", "mode", "", false));
-        // PAL video formats
-        if (ImportedVideoFormat.equals("i")) {
-            radPAL.doClick();
-            cmbVideoFormat.setSelectedIndex(0);
-        } else if ((ImportedVideoFormat.equals("b")) ||
-            (ImportedVideoFormat.equals("g"))) {
-            radPAL.doClick();
-            cmbVideoFormat.setSelectedIndex(1);
-        } else if (ImportedVideoFormat.equals("pal-fm")) {
-            radPAL.doClick();
-            cmbVideoFormat.setSelectedIndex(2);
-        } else if (ImportedVideoFormat.equals("pal-m")) {
-            radPAL.doClick();
-            cmbVideoFormat.setSelectedIndex(3);
-        // NTSC video formats
-        } else if (ImportedVideoFormat.equals("m")) {
-            radNTSC.doClick();
-            cmbVideoFormat.setSelectedIndex(0);
-        } else if (ImportedVideoFormat.equals("ntsc-fm")) {
-            radNTSC.doClick();
-            cmbVideoFormat.setSelectedIndex(1);
-        } else if (ImportedVideoFormat.equals("ntsc-bs")) {
-            radNTSC.doClick();
-            cmbVideoFormat.setSelectedIndex(2);
-        } else if (ImportedVideoFormat.equals("apollo-fsc-fm")) {
-            radNTSC.doClick();
-            cmbVideoFormat.setSelectedIndex(3);
-        } else if (ImportedVideoFormat.equals("m-cbs405")) {
-            radNTSC.doClick();
-            cmbVideoFormat.setSelectedIndex(4);
-        // SECAM video formats
-        } else if (ImportedVideoFormat.equals("l")) {
-            radSECAM.doClick();
-            cmbVideoFormat.setSelectedIndex(0);
-        } else if ((ImportedVideoFormat.equals("d")) ||
-            (ImportedVideoFormat.equals("k"))) {
-            radSECAM.doClick();
-            cmbVideoFormat.setSelectedIndex(1);
-        } else if (ImportedVideoFormat.equals("secam-fm")) {
-            radSECAM.doClick();
-            cmbVideoFormat.setSelectedIndex(2);
-        // Legacy black and white video formats
-        } else if (ImportedVideoFormat.equals("a")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(0);
-        } else if (ImportedVideoFormat.equals("e")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(1);
-        } else if (ImportedVideoFormat.equals("240-am")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(2);
-        } else if (ImportedVideoFormat.equals("30-am")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(3);
-        } else if (ImportedVideoFormat.equals("apollo-fm")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(4);
-        } else if (ImportedVideoFormat.equals("nbtv-am")) {
-            radBW.doClick();
-            cmbVideoFormat.setSelectedIndex(5);
-        // MAC video formats
-        } else if (ImportedVideoFormat.equals("d2mac-am")) {
-            radMAC.doClick();
-            cmbVideoFormat.setSelectedIndex(0);
-        } else if (ImportedVideoFormat.equals("d2mac-fm")) {
-            radMAC.doClick();
-            cmbVideoFormat.setSelectedIndex(1);
-        } else if (ImportedVideoFormat.equals("dmac-am")) {
-            radMAC.doClick();
-            cmbVideoFormat.setSelectedIndex(2);
-        } else if (ImportedVideoFormat.equals("dmac-fm")) {
-            radMAC.doClick();
-            cmbVideoFormat.setSelectedIndex(3);
-        // Unknown
-        } else {
-            invalidConfigFileValue("video format", ImportedVideoFormat);
-            resetAllControls();
-            return;
+        switch (ImportedVideoFormat) {
+            // PAL video formats
+            case "i":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(0);
+                break;
+            case "b":
+            case "g":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(1);
+                break;
+            case "pal-fm":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(2);
+                break;
+            case "pal-m":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
+            // NTSC video formats
+            case "m":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(0);
+                break;
+            case "ntsc-fm":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(1);
+                break;
+            case "ntsc-bs":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(2);
+                break;
+            case "apollo-fsc-fm":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
+            case "m-cbs405":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(4);
+                break;
+            // SECAM video formats
+            case "l":
+                radSECAM.doClick();
+                cmbVideoFormat.setSelectedIndex(0);
+                break;
+            case "d":
+            case "k":
+                radSECAM.doClick();
+                cmbVideoFormat.setSelectedIndex(1);
+                break;
+            case "secam-fm":
+                radSECAM.doClick();
+                cmbVideoFormat.setSelectedIndex(2);
+                break;
+            // Legacy black and white video formats
+            case "a":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(0);
+                break;
+            case "e":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(1);
+                break;
+            case "240-am":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(2);
+                break;
+            case "30-am":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
+            case "apollo-fm":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(4);
+                break;
+            case "nbtv-am":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(5);
+                break;
+            // MAC video formats
+            case "d2mac-am":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(0);
+                break;
+            case "d2mac-fm":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(1);
+                break;
+            case "dmac-am":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(2);
+                break;
+            case "dmac-fm":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
+            // Baseband video formats
+            case "pal":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(4);
+                break; 
+            case "525pal":
+                radPAL.doClick();
+                cmbVideoFormat.setSelectedIndex(5);
+                break;
+            case "ntsc":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(5);
+                break; 
+            case "cbs405":
+                radNTSC.doClick();
+                cmbVideoFormat.setSelectedIndex(6);
+                break;
+            case "secam":
+                radSECAM.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
+            case "405":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(6);
+                break;
+            case "819":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(7);
+                break;
+            case "240":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(8);
+                break;
+            case "30":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(9);
+                break;
+            case "apollo":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(10);
+                break;
+            case "nbtv":
+                radBW.doClick();
+                cmbVideoFormat.setSelectedIndex(11);
+                break;
+            case "d2mac":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(4);
+                break;
+            case "dmac":
+                radMAC.doClick();
+                cmbVideoFormat.setSelectedIndex(5);
+                break;
+            // Unknown
+            default:
+                invalidConfigFileValue("video format", ImportedVideoFormat);
+                resetAllControls();
+                return false;
         }
         // Frequency or channel number
-        // Return a value of -250 if the value is null so we can handle it
-        String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
-        String ImportedChannel = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "channel", "", true));
-        Double ImportedFrequency;
-        if (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency") != null) {
-            ImportedFrequency = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency"));
-        } else {
-            ImportedFrequency = Double.parseDouble("-250");
-        }
-        if ((ImportedChannel.isEmpty()) && (ImportedFrequency == -250)) {
-            JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, AppName, JOptionPane.WARNING_MESSAGE);
-            resetAllControls();
-            return;
-        } else if (ImportedChannel.isEmpty()) {
-            radCustom.doClick();
-            Double Freq = ImportedFrequency / 1000000;
-            txtFrequency.setText(Double.toString(Freq).replace(".0",".00"));
-        } else {
-            // Try to find the channel name by trying UHF first
-            Boolean ChannelFound = false;
-            radUHF.doClick();
-            for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
-                if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
-                    cmbChannel.setSelectedIndex(i);
-                    ChannelFound = true;
-                }
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            // Return a value of -250 if the value is null so we can handle it
+            String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
+            String ImportedChannel = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "channel", "", true));
+            Double ImportedFrequency;
+            if (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency") != null) {
+                ImportedFrequency = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency"));
+            } else {
+                ImportedFrequency = Double.parseDouble("-250");
             }
-            // If not found, try VHF
-            if (!ChannelFound) {
-                radVHF.doClick();
+            if ((ImportedChannel.isEmpty()) && (ImportedFrequency == -250)) {
+                JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, AppName, JOptionPane.WARNING_MESSAGE);
+                resetAllControls();
+                return false;
+            } else if (ImportedChannel.isEmpty()) {
+                radCustom.doClick();
+                Double Freq = ImportedFrequency / 1000000;
+                txtFrequency.setText(Double.toString(Freq).replace(".0",".00"));
+            } else {
+                // Try to find the channel name by trying UHF first
+                Boolean ChannelFound = false;
+                radUHF.doClick();
                 for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
                     if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
                         cmbChannel.setSelectedIndex(i);
                         ChannelFound = true;
                     }
                 }
-            }
-            // If still not found, generate an error and use the frequency instead of the channel
-            if (!ChannelFound) {
-                if (ImportedFrequency != -250) {
-                    radCustom.doClick();
-                    Double Freq = Double.valueOf(ImportedFrequency) / 1000000;
-                    txtFrequency.setText(Double.toString(Freq).replace(".0",""));
-                    invalidConfigFileValue("channel", ImportedChannel);
-                } else {
-                    // If not found, and the frequency is also blank, abort
-                    JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, AppName, JOptionPane.WARNING_MESSAGE);
-                    resetAllControls();
-                    return;
+                // If not found, try VHF
+                if (!ChannelFound) {
+                    radVHF.doClick();
+                    for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
+                        if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
+                            cmbChannel.setSelectedIndex(i);
+                            ChannelFound = true;
+                        }
+                    }
                 }
+                // If still not found, generate an error and use the frequency instead of the channel
+                if (!ChannelFound) {
+                    if (ImportedFrequency != -250) {
+                        radCustom.doClick();
+                        Double Freq = ImportedFrequency / 1000000;
+                        txtFrequency.setText(Double.toString(Freq).replace(".0",""));
+                        invalidConfigFileValue("channel", ImportedChannel);
+                    } else {
+                        // If not found, and the frequency is also blank, abort
+                        JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, AppName, JOptionPane.WARNING_MESSAGE);
+                        resetAllControls();
+                        return false;
+                    }
+                }  
             }
         }
         // Gain
         if (INIFile.getIntegerFromINI(SourceFile, "hacktv", "gain") != null) {
             txtGain.setText(INIFile.getIntegerFromINI(SourceFile, "hacktv", "gain").toString());
-        } else {
+        }
+        // If value is null and output device is hackrf or soapysdr, set gain to zero
+        else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             txtGain.setText("0");
         }
         // Amp
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "amp")) {
-            chkAmp.doClick();
+        if (cmbOutputDevice.getSelectedIndex() == 0) {
+            if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "amp")) {
+                chkAmp.doClick();
+            }            
         }
         // FM deviation
         if ((chkFMDev.isEnabled()) && (INIFile.getDoubleFromINI(SourceFile, "hacktv", "deviation") != null)) {
@@ -2801,7 +2970,40 @@ public class GUI extends javax.swing.JFrame {
                     (INIFile.getBooleanFromINI(SourceFile, "hacktv", "nocolor")) ){
                 chkColour.doClick();
             }
-        }        
+        }
+        // SoapySDR antenna name
+        if (cmbOutputDevice.getSelectedIndex() == 1) {
+            txtAntennaName.setText(INIFile.getStringFromINI(SourceFile, "hacktv", "antennaname", "", false));
+        }
+        // Output file type
+        if (cmbOutputDevice.getSelectedIndex() == 3) {
+            switch (INIFile.getStringFromINI(SourceFile, "hacktv", "filetype", "", false)) {
+                case "uint8":
+                    cmbFileType.setSelectedIndex(0);
+                    break;
+                case "int8":
+                    cmbFileType.setSelectedIndex(1);
+                    break;
+                case "uint16":
+                    cmbFileType.setSelectedIndex(2);
+                    break;
+                case "int16":
+                    cmbFileType.setSelectedIndex(3);
+                    break;
+                case "int32":
+                    cmbFileType.setSelectedIndex(4);
+                    break;
+                case "float":
+                    cmbFileType.setSelectedIndex(5);
+                    break;
+                default:
+                    cmbFileType.setSelectedIndex(3);
+                    break;
+            }
+        }
+        // This must be the last line in this method, it confirms that 
+        // everything ran as planned.
+        return true;
     }
     
     private void invalidConfigFileValue (String settingName, String value) {
@@ -2835,9 +3037,46 @@ public class GUI extends javax.swing.JFrame {
         String FileContents = "[hacktv]\n[hacktv-gui3]\n";
         // Save current fork if applicable
         if (Fork.equals("CJ")) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
+        // Output device
+        switch (cmbOutputDevice.getSelectedIndex()) {
+            case 0:
+                if (txtOutputDevice.getText().isBlank()) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "hackrf");
+                }
+                else {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "hackrf" + ":" + txtOutputDevice.getText());
+                }
+                break;
+            case 1:
+                if (txtOutputDevice.getText().isBlank()) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "soapysdr");
+                }
+                else {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "soapysdr" + ":" + txtOutputDevice.getText());
+                }
+                break;
+            case 2:
+                if (txtOutputDevice.getText().isBlank()) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "fl2k");
+                }
+                else {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "fl2k" + ":" + txtOutputDevice.getText());
+                }                
+                break;
+            case 3:
+                if (txtOutputDevice.getText().isBlank()) {
+                    JOptionPane.showMessageDialog(null, "Please select an output file or change the output device.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", txtOutputDevice.getText());
+                }                
+                break;
+            default:
+                break;
+        }      
         // Input source or test card
         if (radTest.isSelected()) {
-            if (Fork == "CJ") {
+            if ((Fork == "CJ") && (Lines == 625)) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", TestCardArray[cmbTest.getSelectedIndex()]);
             }
             else {
@@ -2855,14 +3094,16 @@ public class GUI extends javax.swing.JFrame {
         // Video format/mode
         FileContents = INIFile.setINIValue(FileContents, "hacktv", "mode", Sys);
         // Frequency and channel
-        if (!radCustom.isSelected()) { 
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) && (!radCustom.isSelected()) ) { 
             FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
+            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);
         }
-        FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);
         // Sample rate
         FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
         // Gain
-        FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
+        }
         // RF Amp
         if (chkAmp.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "amp", 1); }
         // Output level
@@ -2889,7 +3130,7 @@ public class GUI extends javax.swing.JFrame {
         } else if (!txtTeletextSource.getText().isEmpty()) {
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "teletext", txtTeletextSource.getText());
         }
-        /** WSS
+        /* WSS
          * We increase the value by one, because zero is interpreted as "option disabled" while 1 is
          * interpreted as "auto". We will subtract this again when opening.
         */
@@ -2981,7 +3222,16 @@ public class GUI extends javax.swing.JFrame {
         // Disable colour
         if (chkColour.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1); }
         // MAC channel ID
-        if (chkMacChId.isSelected()) { FileContents = INIFile.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText()); }  
+        if (chkMacChId.isSelected()) { FileContents = INIFile.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText()); }
+        // SoapySDR antenna name
+        if (cmbOutputDevice.getSelectedIndex() == 1) {
+            if (!txtAntennaName.getText().isBlank())
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "antennaname", txtAntennaName.getText());
+        }
+        // Output file type
+        if (cmbOutputDevice.getSelectedIndex() == 3) {
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "filetype", cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
+        }
         // Commit to disk
         try {
             FileWriter fw = new FileWriter(DestinationFileName);
@@ -3155,7 +3405,7 @@ public class GUI extends javax.swing.JFrame {
     
     private int countLines(File file) throws IOException {
         // By fhucho at https://stackoverflow.com/questions/1277880/how-can-i-get-the-count-of-line-in-a-file-in-an-efficient-way
-        int lines = 0;
+        int l = 0;
 
         FileInputStream fis = new FileInputStream(file);
         byte[] buffer = new byte[8];
@@ -3163,13 +3413,13 @@ public class GUI extends javax.swing.JFrame {
 
         while ((read = fis.read(buffer)) != -1) {
             for (int i = 0; i < read; i++) {
-                if (buffer[i] == '\n') lines++;
+                if (buffer[i] == '\n') l++;
             }
         }
 
         fis.close();
 
-        return lines;
+        return l;
     }
     
     private void resetM3UItems(boolean LoadSuccessful) {
@@ -3206,6 +3456,11 @@ public class GUI extends javax.swing.JFrame {
         else {
             txtSource.setText("");
         }
+        // If a baseband mode is selected, reset the video format to zero to 
+        // avoid unnecessary error messages.
+        if (!radCustom.isEnabled()) cmbVideoFormat.setSelectedIndex(0);
+        // Reset output device to HackRF
+        cmbOutputDevice.setSelectedIndex(0);
         // Select default radio buttons and comboboxes
         radLocalSource.doClick();
         radPAL.doClick();
@@ -3936,169 +4191,310 @@ public class GUI extends javax.swing.JFrame {
         else if (radTest.isSelected()) {
             InputSource = "test:colourbars";
         }
-    }    
+    }
+    
+    private void addOutputDevices() {
+        String[] od = {
+            "HackRF",
+            "SoapySDR",
+            "FL2000",
+            "File"
+        };
+        cmbOutputDevice.removeAllItems();
+        cmbOutputDevice.setModel(new DefaultComboBoxModel<>(od));
+        cmbOutputDevice.setSelectedIndex(0);
+    }
+    
+    private void enableRFOptions() {
+        txtGain.setText("0");
+        txtGain.setEnabled(true);
+        lblGain.setEnabled(true);
+        radCustom.setEnabled(true);
+        txtFrequency.setEnabled(true);
+        txtFrequency.setEditable(false);
+        lblChannel.setEnabled(true);
+        lblFrequency.setEnabled(true);
+        rfPanel.setEnabled(true);
+    }
+    
+    private void disableRFOptions() {
+        txtGain.setText("");
+        txtGain.setEnabled(false);
+        lblGain.setEnabled(false);
+        radUHF.setEnabled(false);
+        radVHF.setEnabled(false);
+        radCustom.setEnabled(false);
+        BandButtonGroup.clearSelection();
+        cmbChannel.setEnabled(false);
+        cmbChannel.setSelectedIndex(-1);
+        lblChannel.setEnabled(false);
+        lblFrequency.setEnabled(false);
+        txtFrequency.setText("");
+        txtFrequency.setEnabled(false);
+        // lblRegion.setText("");
+        if (chkAmp.isSelected()) chkAmp.doClick();
+        chkAmp.setEnabled(false);
+        lblAntennaName.setEnabled(false);
+        txtAntennaName.setText("");
+        txtAntennaName.setEnabled(false);
+    }
     
     private void checkVideoFormat() {
     // Here, we read the selected combobox index and use that number to get
     // the corresponding video format from VideoModeArray.
         Sys = VideoModeArray[cmbVideoFormat.getSelectedIndex()];
-        if ((Sys).equals("i") || ((Sys).equals("g"))) {
-            // System I or B/G (625 lines)
-            common625Features();
-            enableVHF();
-            enableUHF();
-            disableFMDeviation();
-            DefaultSampleRate = "16";
-            radUHF.doClick();
-        }
-        else if ((Sys).equals("pal-fm") || (Sys).equals("secam-fm")) {
-            // PAL-FM or SECAM-FM
-            common625Features();
-            disableVHF();
-            disableUHF();
-            disableNICAM();
-            NICAMSupported = false;
-            enableFMDeviation();
-            DefaultSampleRate = "16";
-            FMSampleRate = "20.25";
-            radCustom.doClick();
-        }
-        else if ((Sys).equals("m") || ((Sys).equals("pal-m"))){
-            // System M (525 lines)
-            common525Features();
-            enableVHF();
-            enableUHF();
-            disableNICAM();
-            NICAMSupported = false;
-            enableColourControl();
-            disableFMDeviation();
-            DefaultSampleRate = "13.5";
-            radUHF.doClick();  
-        }
-        else if ((Sys).equals("ntsc-fm") || (Sys).equals("ntsc-bs") ) {
-            // NTSC-FM
-            common525Features();
-            disableVHF();
-            disableUHF();
-            disableNICAM();
-            NICAMSupported = false;
-            enableColourControl();
-            enableFMDeviation();
-            DefaultSampleRate = "13.5";
-            FMSampleRate = "18";
-            radCustom.doClick();
-        }
-        else if ((Sys).equals("apollo-fsc-fm") ) {
-            // Apollo FSC
-            disableVHF();
-            disableUHF();
-            disableColourControl();
-            enableFMDeviation();
-            DefaultSampleRate = "13.5";
-            FMSampleRate = "18";
-            radCustom.doClick();
-        }
-        else if ((Sys).equals("m-cbs405")){
-            // CBS FSC (405 lines)
-            enableUHF();
-            enableVHF();
-            disableColourControl();
-            DefaultSampleRate = "18.954";
-            disableFMDeviation();
-            radUHF.doClick();  
-            disableColourControl();
-        }
-        else if ((Sys).equals("l")){
-            // System L (625 lines)
-            common625Features();
-            enableUHF();
-            enableVHF();
-            DefaultSampleRate = "16";
-            disableFMDeviation();
-            radUHF.doClick();  
-        }  
-        else if ((Sys).equals("d")) {
-            // System D/K (625 lines)
-            common625Features();
-            disableNICAM();
-            NICAMSupported = false;
-            enableVHF();
-            enableUHF();
-            disableFMDeviation();
-            DefaultSampleRate = "16";
-            radUHF.doClick();
-        }
-        else if ((Sys).equals("a")){
-            // System A (405 lines)
-            enableAudioOption();
-            disableUHF();
-            enableVHF();
-            radVHF.doClick();
-            disableFMDeviation();
-            DefaultSampleRate = "6.48";
-        } 
-        else if ((Sys).equals("e")){
-            // System E (819 lines)
-            enableAudioOption();
-            disableUHF();
-            enableVHF();
-            radVHF.doClick();
-            disableFMDeviation();
-            DefaultSampleRate = "20.475";
-        } 
-        else if ((Sys).equals("240-am")){
-            // Baird 240 lines
-            disableAudioOption();
-            disableUHF();
-            disableVHF();
-            radCustom.doClick();
-            disableFMDeviation();
-            DefaultSampleRate = "1.992";
-        }
-        else if ((Sys).equals("30-am")){
-            // Baird 30 lines
-            disableAudioOption();
-            disableUHF();
-            disableVHF();
-            radCustom.doClick();
-            disableFMDeviation();
-            DefaultSampleRate = "0.1005";
-        } 
-        else if ((Sys).equals("apollo-fm")){
-            // Apollo
-            enableAudioOption();
-            disableUHF();
-            disableVHF();
-            radCustom.doClick();
-            enableFMDeviation();
-            DefaultSampleRate = "2.048";
-        } 
-        else if ((Sys).equals("nbtv-am")){
-            // NBTV Club standard
-            disableAudioOption();
-            disableUHF();
-            disableVHF();
-            radCustom.doClick();
-            disableFMDeviation();
-            DefaultSampleRate = "0.1";
-        }
-        else if ((Sys).equals("d2mac-am") || ((Sys).equals("dmac-am"))){
-            // D(2)-MAC AM
-            disableFMDeviation();
-            disableUHF();
-            radCustom.doClick();
-        }
-        else if ((Sys).equals("d2mac-fm")){
-            // D2-MAC FM
-            enableFMDeviation();
-            disableUHF();
-            radCustom.doClick();
-        }
-        else if ((Sys).equals("dmac-fm")){
-            // D-MAC FM
-            enableFMDeviation();
-            enableUHF();
-            radUHF.doClick();
+        switch (Sys) {
+            case "i":
+            case "g":
+                // System I or B/G (625 lines)
+                Baseband = false;
+                common625Features();
+                enableVHF();
+                enableUHF();
+                disableFMDeviation();
+                DefaultSampleRate = "16";
+                radUHF.doClick();
+                break;
+            case "pal-fm":
+            case "secam-fm":
+                // PAL-FM or SECAM-FM
+                Baseband = false;
+                common625Features();
+                disableVHF();
+                disableUHF();
+                disableNICAM();
+                NICAMSupported = false;
+                enableFMDeviation();
+                DefaultSampleRate = "16";
+                FMSampleRate = "20.25";
+                radCustom.doClick();
+                break;
+            case "m":
+            case "pal-m":
+                // System M (525 lines) with NTSC or PAL colour
+                Baseband = false;
+                common525Features();
+                enableVHF();
+                enableUHF();
+                disableNICAM();
+                NICAMSupported = false;
+                enableColourControl();
+                disableFMDeviation();
+                DefaultSampleRate = "13.5";
+                radUHF.doClick();
+                break;
+            case "ntsc-fm":
+            case "ntsc-bs":
+                // NTSC-FM (with analogue or BS audio)
+                Baseband = false;
+                common525Features();
+                disableVHF();
+                disableUHF();
+                disableNICAM();
+                NICAMSupported = false;
+                enableColourControl();
+                enableFMDeviation();
+                DefaultSampleRate = "13.5";
+                FMSampleRate = "18";
+                radCustom.doClick();
+                break;
+            case "apollo-fsc-fm":
+                // Apollo field sequential color
+                Baseband = false;
+                Lines = 525;
+                disableVHF();
+                disableUHF();
+                disableColourControl();
+                enableFMDeviation();
+                DefaultSampleRate = "13.5";
+                FMSampleRate = "18";
+                radCustom.doClick();
+                break;
+            case "m-cbs405":
+                // CBS field sequential color (405 lines)
+                Baseband = false;
+                Lines = 405;
+                enableUHF();
+                enableVHF();
+                disableColourControl();
+                DefaultSampleRate = "18.954";
+                disableFMDeviation();
+                radUHF.doClick();
+                disableColourControl();
+                break;
+            case "l":
+                // System L (625 lines)
+                Baseband = false;
+                common625Features();
+                enableUHF();
+                enableVHF();
+                DefaultSampleRate = "16";
+                disableFMDeviation();
+                radUHF.doClick();
+                break;
+            case "d":
+                // System D/K (625 lines)
+                Baseband = false;
+                common625Features();
+                disableNICAM();
+                NICAMSupported = false;
+                enableVHF();
+                enableUHF();
+                disableFMDeviation();
+                DefaultSampleRate = "16";
+                radUHF.doClick();
+                break;
+            case "a":
+                // System A (405 lines)
+                Baseband = false;
+                Lines = 405;
+                enableAudioOption();
+                disableUHF();
+                enableVHF();
+                radVHF.doClick();
+                disableFMDeviation();
+                DefaultSampleRate = "6.48";
+                break;
+            case "e":
+                // System E (819 lines)
+                Baseband = false;
+                Lines = 819;
+                enableAudioOption();
+                disableUHF();
+                enableVHF();
+                radVHF.doClick();
+                disableFMDeviation();
+                DefaultSampleRate = "20.475";
+                break;
+            case "240-am":
+                // Baird 240 lines
+                Baseband = false;
+                Lines = 240;
+                disableAudioOption();
+                disableUHF();
+                disableVHF();
+                radCustom.doClick();
+                disableFMDeviation();
+                DefaultSampleRate = "1.992";
+                break;
+            case "30-am":
+                // Baird 30 lines
+                Baseband = false;
+                Lines = 30;
+                disableAudioOption();
+                disableUHF();
+                disableVHF();
+                radCustom.doClick();
+                disableFMDeviation();
+                DefaultSampleRate = "0.1005";
+                break;
+            case "apollo-fm":
+                // Apollo
+                Baseband = false;
+                Lines = 320;
+                enableAudioOption();
+                disableUHF();
+                disableVHF();
+                radCustom.doClick();
+                enableFMDeviation();
+                DefaultSampleRate = "2.048";
+                break;
+            case "nbtv-am":
+                // NBTV Club standard
+                Baseband = false;
+                Lines = 32;
+                disableAudioOption();
+                disableUHF();
+                disableVHF();
+                radCustom.doClick();
+                disableFMDeviation();
+                DefaultSampleRate = "0.1";
+                break;
+            case "d2mac-am":
+            case "dmac-am":
+                Baseband = false;
+                // D(2)-MAC AM
+                disableFMDeviation();
+                disableUHF();
+                radCustom.doClick();
+                break;
+            case "d2mac-fm":
+                Baseband = false;
+                // D2-MAC FM
+                enableFMDeviation();
+                disableUHF();
+                radCustom.doClick();
+                break;
+            case "dmac-fm":
+                Baseband = false;
+                // D-MAC FM
+                enableFMDeviation();
+                enableUHF();
+                radUHF.doClick();
+                break;
+            case "pal":
+            case "secam":
+                // 625 baseband (PAL or SECAM)
+                common625Features();
+                commonBasebandFeatures();
+                DefaultSampleRate = "16";
+                break;
+            case "525pal":
+            case "ntsc":
+                // 525 baseband (NTSC or PAL)
+                common525Features();
+                commonBasebandFeatures();
+                DefaultSampleRate = "13.5";
+                break;                
+            case "d2mac":
+            case "dmac":
+                // MAC baseband
+                commonBasebandFeatures();
+                break;
+            case "405":
+                // 405 line baseband
+                Lines = 405;
+                commonBasebandFeatures();
+                DefaultSampleRate = "6.48";
+                break;
+            case "819":
+                // 819 line baseband
+                Lines = 819;
+                commonBasebandFeatures();
+                DefaultSampleRate = "20.475";
+                break;
+            case "240":
+                // Baird 240 lines baseband
+                Lines = 240;
+                commonBasebandFeatures();
+                DefaultSampleRate = "1.992";
+                break;
+            case "30":
+                // Baird 30 lines baseband
+                Lines = 30;
+                commonBasebandFeatures();
+                DefaultSampleRate = "0.1005";
+                break;
+            case "nbtv":
+                // NBTV Club baseband
+                Lines = 32;
+                commonBasebandFeatures();
+                DefaultSampleRate = "0.1";
+                break;
+            case "apollo":
+                // Apollo baseband
+                Lines = 320;
+                commonBasebandFeatures();
+                DefaultSampleRate = "2.048";
+                break;
+            case "cbs405":
+                // CBS FSC baseband
+                Lines = 405;
+                commonBasebandFeatures();
+                DefaultSampleRate = "18.954";
+                break;
+            default:
+                break;
         }
 }
     
@@ -4115,6 +4511,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void common625Features() {
     // Configure features common to 625-line modes
+        Lines = 625;
         enableNICAM();
         NICAMSupported = true;
         enableAudioOption();
@@ -4130,6 +4527,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void common525Features() {
     // Configure features common to 525-line modes
+        Lines = 525;
         disableNICAM();
         NICAMSupported = false;
         enableAudioOption();
@@ -4156,6 +4554,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void commonMACFeatures() {
     // Configure features common to MAC modes
+        Lines = 625;
         enableAudioOption();
         chkAudio.setEnabled(false);
         AudioParam = "";
@@ -4173,12 +4572,39 @@ public class GUI extends javax.swing.JFrame {
         DefaultSampleRate = "20.25";          
     }
     
+    private void commonBasebandFeatures() {
+    // Configure features common to baseband modes
+        if ( (cmbOutputDevice.getSelectedIndex() == 2) ||
+                (cmbOutputDevice.getSelectedIndex() == 3) ) {
+            Baseband = true;
+            disableRFOptions();
+            disableFMDeviation();
+            disableAudioOption();
+            disableNICAM();
+            NICAMSupported = false;
+            if (chkVideoFilter.isSelected()) chkVideoFilter.doClick();
+            chkVideoFilter.setEnabled(false);            
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "This mode is not supported by the selected output device.", AppName, JOptionPane.WARNING_MESSAGE);
+            cmbVideoFormat.setSelectedIndex(PreviousIndex);
+        }
+    }
+    
     private void enableUHF() {
-        radUHF.setEnabled(true);
+        // Only enable if output device is hackrf or soapysdr
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            if (!radCustom.isEnabled()) enableRFOptions();
+            radUHF.setEnabled(true);
+        }
     }
     
     private void enableVHF() {
-        radVHF.setEnabled(true);
+        // Only enable if output device is hackrf or soapysdr
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            if (!radCustom.isEnabled()) enableRFOptions();
+            radVHF.setEnabled(true);
+        }
     }    
 
     private void disableUHF() {
@@ -4345,7 +4771,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("Western Europe");
+        // lblRegion.setText("Western Europe");
     }
 
     private void addSysBVHFChannels() {
@@ -4364,7 +4790,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("Continental Europe");
+        // lblRegion.setText("Continental Europe");
     }
     
     private void addIrishVHFChannels() {
@@ -4384,7 +4810,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("Ireland (RTE)");
+        // lblRegion.setText("Ireland (RTE)");
     }
     
     private void addNTSCVHFChannels() {
@@ -4403,7 +4829,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("North/South America (NTSC)");
+        // lblRegion.setText("North/South America (NTSC)");
     }
 
     private void addNTSCUHFChannels() {
@@ -4440,7 +4866,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("North/South America (NTSC)");
+        // lblRegion.setText("North/South America (NTSC)");
     }  
      
     private void addFrenchVHFChannels() {
@@ -4458,7 +4884,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("France");
+        // lblRegion.setText("France");
     }
     
     private void addSystemAChannels() {
@@ -4481,7 +4907,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("United Kingdom");
+        // lblRegion.setText("United Kingdom");
     }    
 
     private void addSystemEChannels() {
@@ -4499,7 +4925,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("France");
+        // lblRegion.setText("France");
     }  
     
     private void addSystemDRussiaChannels() {
@@ -4520,7 +4946,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("Russia");
+        // lblRegion.setText("Russia");
     }
     
     private void addBSBChannels() {
@@ -4574,7 +5000,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        lblRegion.setText("BSB IF");
+        // lblRegion.setText("BSB IF");
     }
     
     private boolean checkInputSource() {
@@ -4678,23 +5104,15 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean checkGamma() {
-        String InvalidGamma = "Gamma should be between 0.0 and 1.0.";
+        String InvalidGamma = "Gamma should be a decimal value.";
         if (chkGamma.isSelected()) {
-            if (isNumeric(txtGamma.getText())) {
-                Double Gamma = Double.parseDouble(txtGamma.getText());
-                if ( (Gamma >= 0.0) && (Gamma <= 1.0) ) {
-                    return true; 
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, InvalidGamma, AppName, JOptionPane.WARNING_MESSAGE);
-                    tabPane.setSelectedIndex(1);
-                    return false;    
-                }
-            }
-            else {
+            if (!isNumeric(txtGamma.getText())) {
                 JOptionPane.showMessageDialog(null, InvalidGamma, AppName, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
                 return false;
+            }
+            else {
+                return true;
             }
         }
         else {
@@ -4703,23 +5121,15 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean checkOutputLevel() {
-        String InvalidOutputLevel = "Output level should be between 0.0 and 1.0.";
+        String InvalidOutputLevel = "Output level should be a decimal value.";
         if (chkOutputLevel.isSelected()) {
-            if (isNumeric(txtOutputLevel.getText())) {
-                Double OutputLevel  = Double.parseDouble(txtOutputLevel.getText());
-                if ( (OutputLevel >= 0.0) && (OutputLevel <= 1.0) ) {
-                    return true; 
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, InvalidOutputLevel, AppName, JOptionPane.WARNING_MESSAGE);
-                    tabPane.setSelectedIndex(1);
-                    return false;    
-                }
-            }
-            else {
+            if (!isNumeric(txtOutputLevel.getText())) {
                 JOptionPane.showMessageDialog(null, InvalidOutputLevel, AppName, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
-                return false;
+                return false;    
+            }
+            else {
+                return true;
             }
         }
         else {
@@ -4728,6 +5138,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean checkGain() {
+        // Only check gain if the text field is enabled
+        if (!txtGain.isEnabled()) return true;
         String InvalidGain = "Gain should be between 0 and 47 dB.";
         if (isNumeric(txtGain.getText())) {
             int Gain = Integer.parseInt(txtGain.getText());
@@ -4808,17 +5220,116 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
+    private void checkTestCardStatus() {
+        if ( (!cmbTest.isEnabled()) && (Fork == "CJ") && (Lines == 625) && (HTVLoadInProgress == false) ) {
+            // Enable cmbTest (test card dropdown)
+            cmbTest.setEnabled(true);
+            cmbTest.setSelectedIndex(0);
+        }
+        else if (HTVLoadInProgress == true) {
+            // Do nothing so we don't interrupt the file loading process
+        }
+        else if ((cmbTest.isEnabled()) && (Fork == "CJ") && (Lines == 625) ) {
+            // Do nothing if cmbTest is already enabled on a 625-line mode.
+            // This prevents the test card from resetting back to bars when
+            // changing video modes.
+        }
+        else {
+            // Disable cmbTest
+            cmbTest.setEnabled(false);
+            cmbTest.setSelectedIndex(-1);
+        }
+    }
+    
+    private boolean checkOutputDevice() {
+        // Reset SoapySDR and file parameters
+        AntennaParam = "";
+        AntennaName = "";
+        FileType = "";
+        switch (cmbOutputDevice.getSelectedIndex()) {
+            case 3:
+                // If File is selected, check if the path is blank
+                if (txtOutputDevice.getText().isBlank()) {
+                    JOptionPane.showMessageDialog(null, "Please select an output file or change the output device.", AppName, JOptionPane.WARNING_MESSAGE);
+                    tabPane.setSelectedIndex(1);
+                    return false;
+                }
+                // Do not allow file output to go to the console.
+                // Bad things will happen, such as hanging the GUI and consuming large amounts of RAM!
+                else if ( (txtOutputDevice.getText().equals("-")) ||
+                        (txtOutputDevice.getText().equals("/dev/stdout")) ||
+                        (txtOutputDevice.getText().equals("/dev/stderr")) ||
+                        (txtOutputDevice.getText().toLowerCase().equals("con")) ) {
+                    JOptionPane.showMessageDialog(null, "Outputting to the console is not supported.", AppName, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    if (RunningOnWindows) {
+                        // Add quotes on Windows systems to handle paths with white spaces
+                        OutputDevice = "-o" + '\"' + txtOutputDevice.getText()+ '\"';
+                    }
+                    else {
+                        // Don't add quotes on Unix systems as this just messes things up
+                        OutputDevice = "-o" + txtOutputDevice.getText();
+                    }
+                    if (cmbFileType.getSelectedIndex() != 3) {
+                        FileType = "-t" + cmbFileType.getItemAt(cmbFileType.getSelectedIndex());
+                    }
+                    return true;
+                }
+            case 2:
+                // fl2k
+                if (!txtOutputDevice.getText().isBlank()) {
+                    OutputDevice = "-ofl2k" + ":" + txtOutputDevice.getText();
+                }
+                else {
+                    OutputDevice = "-ofl2k";
+                }
+                return true;
+            case 1:
+                // SoapySDR
+                if (!txtAntennaName.getText().isBlank()) {
+                    AntennaParam = "--antenna";
+                    AntennaName = txtAntennaName.getText();
+                }
+                else {
+                    AntennaParam = "";
+                    AntennaName = "";
+                }
+                if (!txtOutputDevice.getText().isBlank()) {
+                    OutputDevice = "-osoapysdr" + ":" + txtOutputDevice.getText();
+                }
+                else {
+                    OutputDevice = "-osoapysdr";
+                }
+                return true;
+            case 0:
+                // HackRF
+                if (!txtOutputDevice.getText().isBlank()) {
+                    OutputDevice = "-ohackrf"  + ":" + txtOutputDevice.getText();
+                }
+                else {
+                    OutputDevice = "";
+                }
+                return true;
+            default:
+                // This should never run
+                return false;
+        }
+    }
+    
     private void runHackTV() {
         // Call each method and check its response. If false, then stop.
-        if (!checkInputSource()) { return; }
-        if (!checkCustomFrequency()) { return; }
-        if (!checkFMDeviation()) { return; }
-        if (!checkGamma()) { return; }
-        if (!checkOutputLevel()) { return; }
-        if (!checkGain()) { return; }
-        if (!checkSampleRate()) { return; }
-        if (!checkMacChId()) { return; }
-        if (!checkCardNumber()) { return; }
+        if (!checkInputSource()) return;
+        if (!checkCustomFrequency()) return;
+        if (!checkFMDeviation()) return;
+        if (!checkGamma()) return;
+        if (!checkOutputLevel()) return;
+        if (!checkGain()) return;
+        if (!checkSampleRate()) return;
+        if (!checkMacChId()) return;
+        if (!checkCardNumber()) return;
+        if (!checkOutputDevice()) return;
         // These methods don't return anything but we do need to check them.
         checkTeletextSource();        
         checkWSS();
@@ -4827,16 +5338,25 @@ public class GUI extends javax.swing.JFrame {
         checkLogo();
         // Add all possible parameters to an arraylist to feed to ProcessBuilder
         AllArgs.add(HackTVPath);
+        if (!OutputDevice.isEmpty()) AllArgs.add(OutputDevice);
         AllArgs.add("-m");
         AllArgs.add(Sys);
-        AllArgs.add("-f");
-        AllArgs.add(Long.toString(Frequency));
-        AllArgs.add("-s");
-        AllArgs.add(Integer.toString(SampleRate));
+        // Only add frequency for HackRF or SoapySDR
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) {
+            AllArgs.add("-f");
+            AllArgs.add(Long.toString(Frequency));
+        }
+        // Add subtitles here, we need to make sure that subtitles is not the last parameter if
+        // no index is specified. Otherwise hacktv reports that no input has been specified.
         if (!SubtitlesParam.isEmpty()) AllArgs.add(SubtitlesParam);
         if (!txtSubtitleIndex.getText().isEmpty()) AllArgs.add(txtSubtitleIndex.getText());
-        AllArgs.add("-g");
-        AllArgs.add(txtGain.getText());
+        AllArgs.add("-s");
+        AllArgs.add(Integer.toString(SampleRate));
+        // Only add gain for HackRF or SoapySDR
+        if (txtGain.isEnabled()) {
+            AllArgs.add("-g");
+            AllArgs.add(txtGain.getText());
+        }
         // Optional values second, see if they're defined first before adding
         if (!ChIDParam.isEmpty()) {AllArgs.add(ChIDParam);}
         if (!ChID.isEmpty()) {AllArgs.add(ChID);}
@@ -4856,6 +5376,8 @@ public class GUI extends javax.swing.JFrame {
         if (!TeletextSource.isEmpty()) AllArgs.add(TeletextSource);
         if (!RFampParam.isEmpty()) AllArgs.add(RFampParam);
         if (!FMDevParam.isEmpty()) AllArgs.add(FMDevParam);
+        if (!AntennaParam.isEmpty()) AllArgs.add(AntennaParam);
+        if (!AntennaName.isEmpty()) AllArgs.add(AntennaName);
         if (chkFMDev.isSelected()) AllArgs.add(Integer.toString(FMDevValue));
         if (!GammaParam.isEmpty()) AllArgs.add(GammaParam);
         if (!txtGamma.getText().isEmpty()) AllArgs.add(txtGamma.getText());
@@ -4877,6 +5399,7 @@ public class GUI extends javax.swing.JFrame {
         if (!FindKey.isEmpty()) AllArgs.add(FindKey);
         if (!VITS.isEmpty()) AllArgs.add(VITS);
         if (!ColourParam.isEmpty()) AllArgs.add(ColourParam);
+        if (!FileType.isEmpty()) AllArgs.add(FileType);
         // Finally, add the source video or test option.
         if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
@@ -5434,7 +5957,9 @@ public class GUI extends javax.swing.JFrame {
             "D2-MAC (625 lines, 25 fps, AM, digital audio)",
             "D2-MAC (625 lines, 25 fps, FM, digital audio)",
             "D-MAC (625 lines, 25 fps, AM, digital audio)",
-            "D-MAC (625 lines, 25 fps, FM, digital audio)"
+            "D-MAC (625 lines, 25 fps, FM, digital audio)",
+            "Baseband D2-MAC (625 lines, 25 fps)",
+            "Baseband D-MAC (625 lines, 25 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5443,7 +5968,9 @@ public class GUI extends javax.swing.JFrame {
             "d2mac-am",
             "d2mac-fm",
             "dmac-am",
-            "dmac-fm"
+            "dmac-fm",
+            "d2mac",
+            "dmac"
         };
         // If scrambling is enabled, disable it first
         cmbScramblingType.setSelectedIndex(0);
@@ -5460,10 +5987,16 @@ public class GUI extends javax.swing.JFrame {
         String[] VideoMode = {
             "CCIR System A (405 lines, 25 fps, -3.5 MHz AM audio)",
             "CCIR System E (819 lines, 25 fps, +11.15 MHz AM audio)",
-            "240 lines (Baird mechanical), 25 fps",
-            "30 lines (Baird mechanical), 12.5 fps",
+            "Baird mechanical (240 lines, 25 fps)",
+            "Baird mechanical (30 lines, 12.5 fps)",
             "Apollo (320 lines, 10 fps, FM)",
-            "NBTV Club standard (32 lines, 12.5 fps, no audio)"
+            "NBTV Club standard (32 lines, 12.5 fps, no audio)",
+            "Baseband 405 lines, 25 fps",
+            "Baseband 819 lines, 25 fps",
+            "Baseband Baird 240 lines, 25 fps",
+            "Baseband Baird 30 lines, 12.5 fps",
+            "Baseband Apollo (320 lines, 10 fps)",
+            "Baseband NBTV Club standard (32 lines, 12.5 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5474,7 +6007,13 @@ public class GUI extends javax.swing.JFrame {
             "240-am",
             "30-am",
             "apollo-fm",
-            "nbtv-am"
+            "nbtv-am",
+            "405",
+            "819",
+            "240",
+            "30",
+            "apollo",
+            "nbtv"
         };
         commonBWFeatures();
         cmbVideoFormat.removeAllItems();
@@ -5489,7 +6028,8 @@ public class GUI extends javax.swing.JFrame {
         String[] VideoMode = {
             "SECAM-L (625 lines, 25 fps, 6.5 MHz AM audio)",
             "SECAM-D/K (625 lines, 25 fps, 6.5 MHz FM audio)",
-            "SECAM-FM (625 lines, 25 fps, 6.5 MHz FM audio)"
+            "SECAM-FM (625 lines, 25 fps, 6.5 MHz FM audio)",
+            "Baseband SECAM (625 lines, 25 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5497,7 +6037,8 @@ public class GUI extends javax.swing.JFrame {
         VideoModeArray = new String[] {
             "l",
             "d",
-            "secam-fm"
+            "secam-fm",
+            "secam"
         };
         cmbVideoFormat.removeAllItems();
         cmbVideoFormat.setModel(new DefaultComboBoxModel<>(VideoMode));
@@ -5513,7 +6054,9 @@ public class GUI extends javax.swing.JFrame {
             "NTSC-FM (525 lines, 29.97 fps, 6.5 MHz FM audio)",
             "NTSC-FM BS (525 lines, 29.97 fps, BS digital audio)",
             "Apollo Field Sequential Color (525 lines, 29.97 fps)",
-            "CBS Field Sequential Color (405 lines, 72 fps)"
+            "CBS Field Sequential Color (405 lines, 72 fps)",
+            "Baseband NTSC (525 lines, 30 fps)",
+            "Baseband CBS FSC (405 lines, 72 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5523,7 +6066,9 @@ public class GUI extends javax.swing.JFrame {
             "ntsc-fm",
             "ntsc-bs",
             "apollo-fsc-fm",
-            "m-cbs405"
+            "m-cbs405",
+            "ntsc",
+            "cbs405"
         };
         cmbVideoFormat.removeAllItems();
         cmbVideoFormat.setModel(new DefaultComboBoxModel<>(VideoMode));
@@ -5538,7 +6083,9 @@ public class GUI extends javax.swing.JFrame {
             "PAL-I (625 lines, 25 fps, 6.0 MHz FM audio)",
             "PAL-B/G (625 lines, 25 fps, 5.5 MHz FM audio)",
             "PAL-FM (625 lines, 25 fps, 6.5 MHz FM audio)",
-            "PAL-M (525 lines, 30 fps, 4.5 MHz FM audio)"
+            "PAL-M (525 lines, 30 fps, 4.5 MHz FM audio)",
+            "Baseband PAL (625 lines, 25 fps)",
+            "Baseband PAL (525 lines, 30 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
         When we read the selected index of the combobox, we will use that index
@@ -5547,7 +6094,9 @@ public class GUI extends javax.swing.JFrame {
             "i",
             "g",
             "pal-fm",
-            "pal-m"
+            "pal-m",
+            "pal",
+            "525pal"
         };
         cmbVideoFormat.removeAllItems();
         cmbVideoFormat.setModel(new DefaultComboBoxModel<>(VideoMode));
@@ -5558,7 +6107,15 @@ public class GUI extends javax.swing.JFrame {
     private void cmbVideoFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbVideoFormatActionPerformed
         if (cmbVideoFormat.getSelectedIndex() != -1) {
             checkVideoFormat();
+            /* Save the currently selected item into PreviousIndex.
+               We can use this to revert the change if an unsupported mode is
+               selected later.
+            */
+            PreviousIndex = cmbVideoFormat.getSelectedIndex();
+            // Set sample rate
             txtSampleRate.setText(DefaultSampleRate);
+            // If test card is selected, see if the selected mode is 625 or not
+            if (radTest.isSelected()) checkTestCardStatus();
         }
     }//GEN-LAST:event_cmbVideoFormatActionPerformed
 
@@ -5690,7 +6247,7 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setVisible(true);
         }
         // Enable test card dropdown
-        if (Fork == "CJ") {
+        if ((Fork == "CJ") && (Lines == 625)) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
@@ -5716,11 +6273,9 @@ public class GUI extends javax.swing.JFrame {
     private void chkAmpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAmpActionPerformed
         if (chkAmp.isSelected()) {
             RFampParam = "--amp";
-            //lblAmpWarning.setVisible(true);
         }
         else {
             RFampParam = "";
-            //lblAmpWarning.setVisible(false);
         }
     }//GEN-LAST:event_chkAmpActionPerformed
 
@@ -5778,7 +6333,7 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(true);
         cmbChannel.setEnabled(false);
         cmbChannel.setSelectedIndex(-1);
-        lblRegion.setText("");
+        // lblRegion.setText("");
     }//GEN-LAST:event_radCustomActionPerformed
 
     private void menuNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNewActionPerformed
@@ -5935,6 +6490,87 @@ public class GUI extends javax.swing.JFrame {
             SysterPermTable = "";
         }
     }//GEN-LAST:event_cmbSysterPermTableItemStateChanged
+
+    private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
+        String VideoFormatChanged = "The selected video format has been changed because this output device does not support it. Please select another format.";
+        if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
+        switch(cmbOutputDevice.getSelectedIndex()) {
+            // hackrf
+            case 0:
+                lblOutputDevice2.setText("Serial number (optional)");
+                OutputDevice = ""; // can also use -ohackrf
+                // If the RF panel is disabled, enable it and call checkVideoFormat
+                // to re-populate the channel options correctly
+                if (!radCustom.isEnabled()) {
+                    // If a baseband mode is selected, reset it to something else
+                    if (Baseband) {
+                        JOptionPane.showMessageDialog(null, VideoFormatChanged, AppName, JOptionPane.INFORMATION_MESSAGE);   
+                        cmbVideoFormat.setSelectedIndex(0);
+                    }
+                    enableRFOptions();
+                    checkVideoFormat();
+                }
+                txtGain.setEnabled(true);
+                txtGain.setText("0");
+                lblGain.setEnabled(true);
+                chkAmp.setEnabled(true);
+                lblAntennaName.setEnabled(false);
+                txtAntennaName.setEnabled(false);
+                txtAntennaName.setText("");
+                lblFileType.setEnabled(false);
+                cmbFileType.setEnabled(false);
+                cmbFileType.setSelectedIndex(-1);
+                break;
+            // soapysdr
+            case 1:
+                lblOutputDevice2.setText("Device options");
+                if (!radCustom.isEnabled()) {
+                    if (Baseband) {
+                        JOptionPane.showMessageDialog(null, VideoFormatChanged, AppName, JOptionPane.INFORMATION_MESSAGE);   
+                        cmbVideoFormat.setSelectedIndex(0);
+                    }
+                    enableRFOptions();
+                    checkVideoFormat();
+                }
+                txtGain.setEnabled(true);
+                txtGain.setText("0");
+                lblGain.setEnabled(true);
+                chkAmp.setEnabled(false);
+                lblAntennaName.setEnabled(true);
+                txtAntennaName.setEnabled(true);
+                lblFileType.setEnabled(false);
+                cmbFileType.setEnabled(false);
+                cmbFileType.setSelectedIndex(-1);
+                break;
+            // fl2k
+            case 2:
+                lblOutputDevice2.setText("Device number (optional)");
+                // fl2k is baseband only for now so disable all RF options
+                disableRFOptions();
+                rfPanel.setEnabled(false);
+                break;
+            // Output to file
+            case 3:
+                lblOutputDevice2.setText("Destination file");
+                disableRFOptions();
+                rfPanel.setEnabled(true);
+                lblFileType.setEnabled(true);
+                cmbFileType.setEnabled(true);
+                cmbFileType.setSelectedIndex(3);
+                // Opens the save file dialogue, but only if selected by the user
+                if (HTVLoadInProgress == false) {
+                    int result = outputFileChooser.showSaveDialog(this);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        SelectedFile = outputFileChooser.getSelectedFile();
+                        txtOutputDevice.setText(SelectedFile.toString());
+                    }
+                }
+                break;
+            default:
+                System.out.println("Output device error");
+                break;
+        }
+    }//GEN-LAST:event_cmbOutputDeviceActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -5983,6 +6619,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkWSS;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
+    private javax.swing.JComboBox<String> cmbFileType;
     private javax.swing.JComboBox<String> cmbLogo;
     private javax.swing.JComboBox<String> cmbM3USource;
     private javax.swing.JComboBox<String> cmbOutputDevice;
@@ -6001,20 +6638,21 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel emmPanel;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JPanel generalSettingsPanel;
-    private javax.swing.JPanel hackrfPanel;
     private javax.swing.JFileChooser hacktvFileChooser;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JLabel lblAntennaName;
     private javax.swing.JLabel lblChannel;
     private javax.swing.JLabel lblClearAll;
     private javax.swing.JLabel lblClearMRU;
     private javax.swing.JLabel lblDetectedBuikd;
     private javax.swing.JLabel lblDownload;
     private javax.swing.JLabel lblEMMCardNumber;
+    private javax.swing.JLabel lblFileType;
     private javax.swing.JLabel lblFork;
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblOutputDevice;
-    private javax.swing.JLabel lblRegion;
+    private javax.swing.JLabel lblOutputDevice2;
     private javax.swing.JLabel lblSampleRate;
     private javax.swing.JLabel lblScramblingKey;
     private javax.swing.JLabel lblScramblingSystem;
@@ -6039,6 +6677,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuOpen;
     private javax.swing.JMenuItem menuSave;
     private javax.swing.JMenuItem menuSaveAs;
+    private javax.swing.JFileChooser outputFileChooser;
     private javax.swing.JPanel outputTab;
     private javax.swing.JPanel pathPanel;
     private javax.swing.JProgressBar pbTeletext;
@@ -6053,6 +6692,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton radUHF;
     private javax.swing.JRadioButton radVHF;
     private javax.swing.JPanel resetSettingsPanel;
+    private javax.swing.JPanel rfPanel;
     private javax.swing.JPanel scramblingOptionsPanel;
     private javax.swing.JPanel scramblingPanel;
     private javax.swing.JPanel scramblingTab;
@@ -6067,6 +6707,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel teletextTab;
     private javax.swing.JMenu templatesMenu;
     private javax.swing.JTextField txtAllOptions;
+    private javax.swing.JTextField txtAntennaName;
     private javax.swing.JTextField txtCardNumber;
     private javax.swing.JTextArea txtConsoleOutput;
     private javax.swing.JTextField txtFMDev;
@@ -6075,6 +6716,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtGamma;
     private javax.swing.JTextField txtHackTVPath;
     private javax.swing.JTextField txtMacChId;
+    private javax.swing.JTextField txtOutputDevice;
     private javax.swing.JTextField txtOutputLevel;
     private javax.swing.JTextField txtPosition;
     private javax.swing.JTextField txtSampleRate;

@@ -206,6 +206,11 @@
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="hacktvFileChooser = new JFileChooser();&#xa;hacktvFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa;hacktvFileChooser.setFileFilter(new FileFilter() {&#xa;    @Override&#xa;    public boolean accept(File file) {&#xa;// always accept directories&#xa;if (file.isDirectory())&#xa;    return true;&#xa;// but only files with specific name&#xa;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;    return file.getName().equals(&quot;hacktv&quot;);&#xa;}&#xa;else {&#xa;    return file.getName().equals(&quot;hacktv.exe&quot;);&#xa;}&#xa;    }&#xa;    @Override&#xa;    public String getDescription() {&#xa;&#x9;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv)&quot;;&#xa;&#x9;} else {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv.exe)&quot;;&#xa;&#x9;}&#xa;    }&#xa;});"/>
       </AuxValues>
     </Component>
+    <Component class="javax.swing.JFileChooser" name="outputFileChooser">
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="outputFileChooser = new JFileChooser();&#xa;outputFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa;"/>
+      </AuxValues>
+    </Component>
     <Container class="javax.swing.JPanel" name="containerPanel">
 
       <Layout>
@@ -922,21 +927,27 @@
                               <Component id="lblOutputDevice" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="cmbOutputDevice" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="lblOutputDevice2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="txtOutputDevice" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
-                          <Component id="hackrfPanel" alignment="0" max="32767" attributes="0"/>
+                          <Component id="rfPanel" alignment="0" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="lblOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="cmbOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblOutputDevice2" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="hackrfPanel" min="-2" max="-2" attributes="0"/>
+                              <Component id="rfPanel" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -945,30 +956,26 @@
                     <Component class="javax.swing.JLabel" name="lblOutputDevice">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Output device"/>
-                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbOutputDevice">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="4">
-                            <StringItem index="0" value="hackrf"/>
-                            <StringItem index="1" value="soapysdr"/>
-                            <StringItem index="2" value="fl2k"/>
-                            <StringItem index="3" value="File"/>
-                          </StringArray>
+                          <StringArray count="0"/>
                         </Property>
-                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbOutputDeviceActionPerformed"/>
+                      </Events>
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                       </AuxValues>
                     </Component>
-                    <Container class="javax.swing.JPanel" name="hackrfPanel">
+                    <Container class="javax.swing.JPanel" name="rfPanel">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="HackRF options"/>
+                            <TitledBorder title="RF options"/>
                           </Border>
                         </Property>
                       </Properties>
@@ -986,22 +993,36 @@
                                   </Group>
                                   <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtFrequency" min="-2" pref="112" max="-2" attributes="0"/>
+                                      <Component id="radVHF" min="-2" max="-2" attributes="0"/>
+                                      <Component id="txtGain" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                                      <Component id="cmbChannel" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                                      <Component id="txtFrequency" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="0" attributes="0">
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="radVHF" min="-2" max="-2" attributes="0"/>
-                                              <Component id="txtGain" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
-                                              <Component id="cmbChannel" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                                              <Component id="lblAntennaName" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblFileType" alignment="0" min="-2" max="-2" attributes="0"/>
                                           </Group>
-                                          <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="lblRegion" min="-2" max="-2" attributes="0"/>
-                                              <Component id="radCustom" min="-2" max="-2" attributes="0"/>
-                                              <Component id="chkAmp" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtAntennaName" max="32767" attributes="0"/>
+                                              <Group type="102" attributes="0">
+                                                  <Component id="cmbFileType" min="-2" max="-2" attributes="0"/>
+                                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                              </Group>
                                           </Group>
                                       </Group>
+                                      <Group type="102" attributes="0">
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="chkAmp" min="-2" max="-2" attributes="0"/>
+                                              <Component id="radCustom" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      </Group>
                                   </Group>
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -1015,15 +1036,26 @@
                                       <Component id="radVHF" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="lblChannel" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cmbChannel" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblRegion" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                          <Component id="lblAntennaName" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtAntennaName" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="lblChannel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="cmbChannel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="lblFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="txtFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                          <Component id="lblFileType" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="cmbFileType" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="lblFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
@@ -1118,10 +1150,45 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkAmpActionPerformed"/>
                           </Events>
                         </Component>
-                        <Component class="javax.swing.JLabel" name="lblRegion">
+                        <Component class="javax.swing.JLabel" name="lblAntennaName">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="Antenna name"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JTextField" name="txtAntennaName">
+                        </Component>
+                        <Component class="javax.swing.JComboBox" name="cmbFileType">
+                          <Properties>
+                            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                              <StringArray count="6">
+                                <StringItem index="0" value="uint8"/>
+                                <StringItem index="1" value="int8"/>
+                                <StringItem index="2" value="uint16"/>
+                                <StringItem index="3" value="int16"/>
+                                <StringItem index="4" value="int32"/>
+                                <StringItem index="5" value="float"/>
+                              </StringArray>
+                            </Property>
+                            <Property name="selectedIndex" type="int" value="-1"/>
+                          </Properties>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                          </AuxValues>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="lblFileType">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="File type"/>
+                          </Properties>
                         </Component>
                       </SubComponents>
                     </Container>
+                    <Component class="javax.swing.JLabel" name="lblOutputDevice2">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Serial number (optional)"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JTextField" name="txtOutputDevice">
+                    </Component>
                   </SubComponents>
                 </Container>
                 <Container class="javax.swing.JPanel" name="VBIPanel">
@@ -1219,14 +1286,14 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="chkGamma" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkOutputLevel" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkVerbose" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkOutputLevel" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkGamma" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="64" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="txtOutputLevel" min="-2" pref="64" max="-2" attributes="0"/>
                                   <Component id="txtGamma" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <Component id="txtOutputLevel" min="-2" pref="64" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -1239,7 +1306,6 @@
                                   <Component id="chkGamma" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtGamma" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="chkOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1517,7 +1583,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" max="32767" attributes="0"/>
-                          <EmptySpace pref="76" max="32767" attributes="0"/>
+                          <EmptySpace pref="78" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
