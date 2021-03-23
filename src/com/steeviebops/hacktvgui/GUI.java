@@ -196,6 +196,9 @@ public class GUI extends javax.swing.JFrame {
     String AntennaParam = "";
     String AntennaName = "";
     String FileType = "";
+    String VolumeParam = "";
+    String VolumeValue = "";
+    String DownmixParam = "";
     // End parameter variables
     
     // Main method
@@ -441,6 +444,9 @@ public class GUI extends javax.swing.JFrame {
         chkOutputLevel = new javax.swing.JCheckBox();
         txtOutputLevel = new javax.swing.JTextField();
         chkVerbose = new javax.swing.JCheckBox();
+        chkVolume = new javax.swing.JCheckBox();
+        chkDownmix = new javax.swing.JCheckBox();
+        txtVolume = new javax.swing.JTextField();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -535,7 +541,7 @@ public class GUI extends javax.swing.JFrame {
         consoleOutputPanel.setLayout(consoleOutputPanelLayout);
         consoleOutputPanelLayout.setHorizontalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
         );
         consoleOutputPanelLayout.setVerticalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -654,7 +660,7 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
                                 .addComponent(lblSubtitleIndex)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -667,7 +673,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkLogo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
                                 .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -679,7 +685,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
-                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 363, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -849,14 +855,14 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(chkAudio)
                                     .addComponent(chkNICAM)
                                     .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 107, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
                                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(chkFMDev)
                                     .addComponent(chkMacChId)
                                     .addComponent(lblSampleRate))
                                 .addGap(44, 44, 44))
                             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
-                                .addComponent(chkVideoFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                .addComponent(chkVideoFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                                 .addComponent(radPAL)
@@ -1140,7 +1146,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
                     .addComponent(chkVITS))
-                .addContainerGap(134, Short.MAX_VALUE))
+                .addContainerGap(146, Short.MAX_VALUE))
         );
         VBIPanelLayout.setVerticalGroup(
             VBIPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1181,20 +1187,45 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkVolume.setText("Adjust volume");
+        chkVolume.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkVolumeActionPerformed(evt);
+            }
+        });
+
+        chkDownmix.setText("Downmix 5.1 audio to 2.0");
+        chkDownmix.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkDownmixActionPerformed(evt);
+            }
+        });
+
+        txtVolume.setEnabled(false);
+
         javax.swing.GroupLayout AdditionalOptionsPanelLayout = new javax.swing.GroupLayout(AdditionalOptionsPanel);
         AdditionalOptionsPanel.setLayout(AdditionalOptionsPanelLayout);
         AdditionalOptionsPanelLayout.setHorizontalGroup(
             AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkVerbose)
-                    .addComponent(chkOutputLevel)
-                    .addComponent(chkGamma))
+                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(chkGamma, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkOutputLevel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkVerbose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
+                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtOutputLevel)
+                    .addComponent(txtGamma, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(chkDownmix)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         AdditionalOptionsPanelLayout.setVerticalGroup(
@@ -1202,10 +1233,13 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkGamma)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkVolume)
+                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOutputLevel)
-                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkDownmix))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVerbose))
         );
@@ -1266,7 +1300,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(chkTeletext)
                         .addGap(286, 286, 286))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
-                        .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)
+                        .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
@@ -1559,7 +1593,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(cmbScramblingKey1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbScramblingType, 0, 369, Short.MAX_VALUE))
-                        .addGap(0, 10, Short.MAX_VALUE))))
+                        .addGap(0, 22, Short.MAX_VALUE))))
         );
         scramblingPanelLayout.setVerticalGroup(
             scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1629,7 +1663,7 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pathPanelLayout.createSequentialGroup()
-                        .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                        .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnHackTVPath))
                     .addGroup(pathPanelLayout.createSequentialGroup()
@@ -2053,41 +2087,20 @@ public class GUI extends javax.swing.JFrame {
     private void fsphil() {
         // Disable features unsupported in fsphil's build
         Fork = "";
-        if ( chkTimestamp.isSelected() ) {
-            chkTimestamp.doClick();
-            chkTimestamp.setEnabled(false);
-        }
-        else {
-            chkTimestamp.setEnabled(false);
-        }
-        if ( chkLogo.isSelected() ) {
-            chkLogo.doClick();
-            chkLogo.setEnabled(false);
-        }
-        else {
-            chkLogo.setEnabled(false);
-        }
-        if ( chkSubtitles.isSelected() ) {
-            chkSubtitles.doClick();
-            chkSubtitles.setEnabled(false);
-        }
-        else {
-            chkSubtitles.setEnabled(false);
-        }
-        if ( chkARCorrection.isSelected() ) {
-            chkARCorrection.doClick();
-            chkARCorrection.setEnabled(false);
-        }
-        else {
-            chkARCorrection.setEnabled(false);
-        }
-        if ( chkPosition.isSelected() ) {
-            chkPosition.doClick();
-            chkPosition.setEnabled(false);
-        }
-        else {
-            chkPosition.setEnabled(false);
-        }
+        if (chkTimestamp.isSelected()) chkTimestamp.doClick();
+        if (chkLogo.isSelected()) chkLogo.doClick();
+        if (chkSubtitles.isSelected()) chkSubtitles.doClick();
+        if (chkARCorrection.isSelected()) chkARCorrection.doClick();
+        if (chkPosition.isSelected()) chkPosition.doClick();
+        if (chkVolume.isSelected()) chkVolume.doClick();
+        if (chkDownmix.isSelected()) chkDownmix.doClick();
+        chkTimestamp.setEnabled(false);
+        chkLogo.setEnabled(false);
+        chkSubtitles.setEnabled(false);
+        chkARCorrection.setEnabled(false);
+        chkPosition.setEnabled(false);
+        chkVolume.setEnabled(false);
+        chkDownmix.setEnabled(false);
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
             addPALScramblingTypes();
         }
@@ -2110,6 +2123,8 @@ public class GUI extends javax.swing.JFrame {
             chkPosition.setEnabled(true);
             chkSubtitles.setEnabled(true);
             chkARCorrection.setEnabled(true);
+            chkVolume.setEnabled(true);
+            chkDownmix.setEnabled(true);
         }
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
             addPALScramblingTypes();
@@ -5318,6 +5333,21 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
+    private boolean checkVolume() {
+        // Only check volume if the text field is enabled
+        if (!txtVolume.isEnabled()) return true;
+        String InvalidVolume = "Volume should be a numeric or decimal value.";
+        if (isNumeric(txtVolume.getText())) {
+            VolumeParam = "--volume";
+            return true;
+        }
+        else {
+            JOptionPane.showMessageDialog(null, InvalidVolume, AppName, JOptionPane.WARNING_MESSAGE);
+            tabPane.setSelectedIndex(1);
+            return false;
+        }
+    }
+    
     private void runHackTV() {
         // Call each method and check its response. If false, then stop.
         if (!checkInputSource()) return;
@@ -5330,6 +5360,7 @@ public class GUI extends javax.swing.JFrame {
         if (!checkMacChId()) return;
         if (!checkCardNumber()) return;
         if (!checkOutputDevice()) return;
+        if (!checkVolume()) return;
         // These methods don't return anything but we do need to check them.
         checkTeletextSource();        
         checkWSS();
@@ -5400,6 +5431,9 @@ public class GUI extends javax.swing.JFrame {
         if (!VITS.isEmpty()) AllArgs.add(VITS);
         if (!ColourParam.isEmpty()) AllArgs.add(ColourParam);
         if (!FileType.isEmpty()) AllArgs.add(FileType);
+        if (!VolumeParam.isEmpty()) AllArgs.add(VolumeParam);
+        if (!txtVolume.getText().isEmpty()) AllArgs.add(txtVolume.getText());
+        if (!DownmixParam.isEmpty()) AllArgs.add(DownmixParam);
         // Finally, add the source video or test option.
         if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
@@ -6231,11 +6265,15 @@ public class GUI extends javax.swing.JFrame {
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkInterlace.isSelected()) chkInterlace.doClick();
         if (chkSubtitles.isSelected()) chkSubtitles.doClick();
+        if (chkDownmix.isSelected()) chkDownmix.doClick();
+        if (chkVolume.isSelected()) chkVolume.doClick();
         chkRepeat.setEnabled(false);
         chkPosition.setEnabled(false);
         chkTimestamp.setEnabled(false);
         chkInterlace.setEnabled(false);
         chkSubtitles.setEnabled(false);
+        chkDownmix.setEnabled(false);
+        chkVolume.setEnabled(false);
         txtSource.setEnabled(false);
         btnSourceBrowse.setEnabled(false);
         txtSource.setText("");
@@ -6264,6 +6302,8 @@ public class GUI extends javax.swing.JFrame {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
             chkARCorrection.setEnabled(true);
+            chkVolume.setEnabled(true);
+            chkDownmix.setEnabled(true);
             // Disable test card dropdown
             cmbTest.setSelectedIndex(-1);
             cmbTest.setEnabled(false);
@@ -6571,6 +6611,27 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
     }//GEN-LAST:event_cmbOutputDeviceActionPerformed
+
+    private void chkVolumeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVolumeActionPerformed
+        if (chkVolume.isSelected()) {
+            txtVolume.setEnabled(true);
+            VolumeParam = "--volume";
+        }
+        else {
+            txtVolume.setEnabled(false);
+            txtVolume.setText("");
+            VolumeParam = "";
+        }
+    }//GEN-LAST:event_chkVolumeActionPerformed
+
+    private void chkDownmixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDownmixActionPerformed
+        if (chkDownmix.isSelected()) {
+            DownmixParam = "--downmix";
+        }
+        else {
+            DownmixParam = "";
+        }
+    }//GEN-LAST:event_chkDownmixActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -6596,6 +6657,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkAudio;
     private javax.swing.JCheckBox chkColour;
     private javax.swing.JCheckBox chkDeactivateCard;
+    private javax.swing.JCheckBox chkDownmix;
     private javax.swing.JCheckBox chkFMDev;
     private javax.swing.JCheckBox chkFindKeys;
     private javax.swing.JCheckBox chkGamma;
@@ -6616,6 +6678,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVITS;
     private javax.swing.JCheckBox chkVerbose;
     private javax.swing.JCheckBox chkVideoFilter;
+    private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
@@ -6723,6 +6786,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtSource;
     private javax.swing.JTextField txtSubtitleIndex;
     private javax.swing.JTextField txtTeletextSource;
+    private javax.swing.JTextField txtVolume;
     // End of variables declaration//GEN-END:variables
     // Checkbox array for the File > New option
     private javax.swing.JCheckBox[] CheckBoxes;
