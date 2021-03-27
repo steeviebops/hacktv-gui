@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Stephen McGarry
+ * Copyright (C) 2021 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -199,6 +199,7 @@ public class GUI extends javax.swing.JFrame {
     String VolumeParam = "";
     String VolumeValue = "";
     String DownmixParam = "";
+    String TeletextSubtitlesParam = "";
     // End parameter variables
     
     // Main method
@@ -264,7 +265,7 @@ public class GUI extends javax.swing.JFrame {
             RunningOnWindows = true;
             DefaultHackTVPath = System.getProperty("user.dir") + OS_SEP + "hacktv.exe";
             // Does windows-kill.exe exist in the current directory?
-            if ( !Files.exists(Path.of(JarDir + "\\windows-kill.exe")) ) {
+            if ( !Files.exists(Path.of(JarDir + "/windows-kill.exe")) ) {
                 // Enable the "Generate syntax only" option and prevent it from
                 // being disabled, because windows-kill.exe is missing
                 chkSyntaxOnly.doClick();
@@ -431,6 +432,7 @@ public class GUI extends javax.swing.JFrame {
         txtAntennaName = new javax.swing.JTextField();
         cmbFileType = new javax.swing.JComboBox<>();
         lblFileType = new javax.swing.JLabel();
+        lblRegion = new javax.swing.JLabel();
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
         VBIPanel = new javax.swing.JPanel();
@@ -452,6 +454,9 @@ public class GUI extends javax.swing.JFrame {
         chkTeletext = new javax.swing.JCheckBox();
         txtTeletextSource = new javax.swing.JTextField();
         btnTeletextBrowse = new javax.swing.JButton();
+        chkTextSubtitles = new javax.swing.JCheckBox();
+        lblTextSubtitleIndex = new javax.swing.JLabel();
+        txtTextSubtitleIndex = new javax.swing.JTextField();
         downloadPanel = new javax.swing.JPanel();
         btnTeefax = new javax.swing.JButton();
         btnSpark = new javax.swing.JButton();
@@ -665,16 +670,16 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(chkPosition)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(chkLogo)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
+                                .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(cmbARCorrection, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(chkLogo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
-                                .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(chkPosition)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
@@ -1009,6 +1014,8 @@ public class GUI extends javax.swing.JFrame {
 
         lblFileType.setText("File type");
 
+        lblRegion.setText("Region");
+
         javax.swing.GroupLayout rfPanelLayout = new javax.swing.GroupLayout(rfPanel);
         rfPanel.setLayout(rfPanelLayout);
         rfPanelLayout.setHorizontalGroup(
@@ -1039,10 +1046,12 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(rfPanelLayout.createSequentialGroup()
-                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkAmp)
-                            .addComponent(radCustom))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(chkAmp)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addComponent(radCustom)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblRegion)))
                 .addContainerGap())
         );
         rfPanelLayout.setVerticalGroup(
@@ -1052,7 +1061,8 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(radCustom)
                     .addComponent(radUHF)
-                    .addComponent(radVHF))
+                    .addComponent(radVHF)
+                    .addComponent(lblRegion))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1265,7 +1275,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1289,20 +1299,42 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkTextSubtitles.setText("Subtitles (page 888)");
+        chkTextSubtitles.setEnabled(false);
+        chkTextSubtitles.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkTextSubtitlesActionPerformed(evt);
+            }
+        });
+
+        lblTextSubtitleIndex.setText("Subtitle index (optional)");
+        lblTextSubtitleIndex.setEnabled(false);
+
+        txtTextSubtitleIndex.setEnabled(false);
+
         javax.swing.GroupLayout teletextPanelLayout = new javax.swing.GroupLayout(teletextPanel);
         teletextPanel.setLayout(teletextPanelLayout);
         teletextPanelLayout.setHorizontalGroup(
             teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, teletextPanelLayout.createSequentialGroup()
+            .addGroup(teletextPanelLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addComponent(chkTeletext)
-                        .addGap(286, 286, 286))
+                        .addGap(286, 396, Short.MAX_VALUE))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
-                        .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(teletextPanelLayout.createSequentialGroup()
+                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(teletextPanelLayout.createSequentialGroup()
+                                .addComponent(chkTextSubtitles)
+                                .addGap(18, 18, 18)
+                                .addComponent(lblTextSubtitleIndex)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtTextSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         teletextPanelLayout.setVerticalGroup(
@@ -1314,6 +1346,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnTeletextBrowse)
                     .addComponent(txtTeletextSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkTextSubtitles)
+                    .addComponent(lblTextSubtitleIndex)
+                    .addComponent(txtTextSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1401,7 +1438,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(85, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -1633,7 +1670,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addContainerGap(82, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2149,6 +2186,28 @@ public class GUI extends javax.swing.JFrame {
 	}
 	return true;
     }
+    
+    public static int wildcardFind(String pathToScan, String startsWith, String endsWith) {
+        // Returns the number of files found in a directory with the specified start and end strings
+        // Case insensitive, feed it with lowercase filenames
+        String fileToFilter;
+        File folderToScan = new File(pathToScan);
+        File[] listOfFiles = folderToScan.listFiles();
+        int c = 0;
+        // If the specified directory does not exist, return 0 and stop
+        if (!Files.exists(folderToScan.toPath())) return 0;
+        for (File listOfFile : listOfFiles) {
+            if (listOfFile.isFile()) {
+                fileToFilter = listOfFile.getName();
+                // If a file is found, increment c by one
+                if (fileToFilter.toLowerCase().startsWith(startsWith)
+                        && fileToFilter.toLowerCase().endsWith(endsWith)) {
+                    c = c + 1;
+                }
+            }
+        }
+        return c;
+    }    
     
     private void deleteFSObject(Path pathToBeDeleted) throws IOException {
         // Deletes the path specified to this method
@@ -4246,7 +4305,7 @@ public class GUI extends javax.swing.JFrame {
         lblFrequency.setEnabled(false);
         txtFrequency.setText("");
         txtFrequency.setEnabled(false);
-        // lblRegion.setText("");
+        lblRegion.setText(" ");
         if (chkAmp.isSelected()) chkAmp.doClick();
         chkAmp.setEnabled(false);
         lblAntennaName.setEnabled(false);
@@ -4655,6 +4714,9 @@ public class GUI extends javax.swing.JFrame {
     private void enableTeletext() {
         chkTeletext.setEnabled(true);
         teletextPanel.setEnabled(true);
+        if ((Fork.equals("CJ")) && (radLocalSource.isSelected())) {
+            chkTextSubtitles.setEnabled(true);
+        }
     }  
     
     private void disableTeletext() {
@@ -4663,9 +4725,11 @@ public class GUI extends javax.swing.JFrame {
         } 
         chkTeletext.setEnabled(false);
         teletextPanel.setEnabled(false);
+        if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
+        chkTextSubtitles.setEnabled(false);        
     }
     
-    private void checkTeletextSource() {
+    private boolean checkTeletextSource() {
         if (chkTeletext.isSelected()) {
             if ((txtTeletextSource.getText()).isEmpty()) {
                 // Create a temp directory if it does not exist
@@ -4696,7 +4760,43 @@ public class GUI extends javax.swing.JFrame {
             else {
                 TeletextSource = txtTeletextSource.getText();
             }
-        }   
+        }
+        if (chkTextSubtitles.isSelected()) {
+            String p888err = "This directory contains a teletext file (P888.tti) for page 888. "
+                    + "This could cause hacktv to crash when teletext subtitles are enabled. "
+                    + "Please move or delete this file and try again.";
+            String p888warn = "This directory contains teletext files in the page 800 range. "
+                    + "This could cause subtitles to be unreliable. Please move these files "
+                    + "if you encounter problems.";
+            // If the teletext source is set to SPARK with subtitles enabled, delete their page 888 to avoid issues
+            if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + OS_SEP + "spark")) ) {
+                if ( (Files.exists(Path.of(TempDir + "/spark/P888.tti"))) || (Files.exists(Path.of(TempDir + "/spark/p888.tti"))) ) {
+                    try {
+                        deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
+                    }
+                    catch (IOException ex) {
+                        JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }                    
+                }
+            }
+            // If the teletext source contains a P888.tti file, abort because hacktv will crash.
+            // The latter two if ststements sre to prevent a NPE if an absolute path is specified.
+            else if ( (Files.exists(Path.of(txtTeletextSource.getText() + "/P888.tti"))) || 
+                    (txtTeletextSource.getText().toLowerCase().endsWith("p888.tti")) ||
+                    (txtTeletextSource.getText().toLowerCase().endsWith("p888.ttix")) ) {
+                JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            // If the directory contains any text files in the page 800 range (p8*.tti or p8*.ttix)
+            // generate a warning because this can prevent subtitles from running in real time.
+            if ( (wildcardFind(txtTeletextSource.getText(), "p8", ".tti") > 0) || 
+                    (wildcardFind(txtTeletextSource.getText(), "p8", ".ttix") > 0) ) {
+                JOptionPane.showMessageDialog(null, p888warn, AppName, JOptionPane.WARNING_MESSAGE);
+                return true;
+            }
+        }
+        return true;
     }
     
     private void enableChannelID() {
@@ -4786,7 +4886,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("Western Europe");
+        lblRegion.setText("Western Europe");
     }
 
     private void addSysBVHFChannels() {
@@ -4805,7 +4905,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("Continental Europe");
+        lblRegion.setText("Continental Europe");
     }
     
     private void addIrishVHFChannels() {
@@ -4825,7 +4925,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("Ireland (RTE)");
+        lblRegion.setText("Ireland (RTE)");
     }
     
     private void addNTSCVHFChannels() {
@@ -4844,7 +4944,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("North/South America (NTSC)");
+        lblRegion.setText("North/South America (NTSC)");
     }
 
     private void addNTSCUHFChannels() {
@@ -4881,7 +4981,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("North/South America (NTSC)");
+        lblRegion.setText("North/South America (NTSC)");
     }  
      
     private void addFrenchVHFChannels() {
@@ -4899,7 +4999,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("France");
+        lblRegion.setText("France (SECAM)");
     }
     
     private void addSystemAChannels() {
@@ -4922,7 +5022,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("United Kingdom");
+        lblRegion.setText("United Kingdom");
     }    
 
     private void addSystemEChannels() {
@@ -4940,7 +5040,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("France");
+        lblRegion.setText("France (819 line)");
     }  
     
     private void addSystemDRussiaChannels() {
@@ -4961,7 +5061,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("Russia");
+        lblRegion.setText("Russia");
     }
     
     private void addBSBChannels() {
@@ -5015,7 +5115,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.removeAllItems();
         cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
         cmbChannel.setSelectedIndex(0);
-        // lblRegion.setText("BSB IF");
+        lblRegion.setText("BSB IF");
     }
     
     private boolean checkInputSource() {
@@ -5361,8 +5461,8 @@ public class GUI extends javax.swing.JFrame {
         if (!checkCardNumber()) return;
         if (!checkOutputDevice()) return;
         if (!checkVolume()) return;
-        // These methods don't return anything but we do need to check them.
-        checkTeletextSource();        
+        if (!checkTeletextSource()) return;
+        // These methods don't return anything but we do need to check them. 
         checkWSS();
         checkARCorrectionOptions();
         checkTestCard();
@@ -5381,6 +5481,8 @@ public class GUI extends javax.swing.JFrame {
         // no index is specified. Otherwise hacktv reports that no input has been specified.
         if (!SubtitlesParam.isEmpty()) AllArgs.add(SubtitlesParam);
         if (!txtSubtitleIndex.getText().isEmpty()) AllArgs.add(txtSubtitleIndex.getText());
+        if (!TeletextSubtitlesParam.isEmpty()) AllArgs.add(TeletextSubtitlesParam);
+        if (!txtTextSubtitleIndex.getText().isEmpty()) AllArgs.add(txtTextSubtitleIndex.getText());
         AllArgs.add("-s");
         AllArgs.add(Integer.toString(SampleRate));
         // Only add gain for HackRF or SoapySDR
@@ -5433,7 +5535,7 @@ public class GUI extends javax.swing.JFrame {
         if (!FileType.isEmpty()) AllArgs.add(FileType);
         if (!VolumeParam.isEmpty()) AllArgs.add(VolumeParam);
         if (!txtVolume.getText().isEmpty()) AllArgs.add(txtVolume.getText());
-        if (!DownmixParam.isEmpty()) AllArgs.add(DownmixParam);
+        if (!DownmixParam.isEmpty()) AllArgs.add(DownmixParam);        
         // Finally, add the source video or test option.
         if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
@@ -6279,6 +6381,8 @@ public class GUI extends javax.swing.JFrame {
         txtSource.setText("");
         if (chkARCorrection.isSelected()) { chkARCorrection.doClick(); }
         chkARCorrection.setEnabled(false);
+        if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
+        chkTextSubtitles.setEnabled(false);    
         if ( cmbM3USource.isVisible() ) {
             cmbM3USource.setVisible(false);
             cmbM3USource.setEnabled(false);
@@ -6307,6 +6411,9 @@ public class GUI extends javax.swing.JFrame {
             // Disable test card dropdown
             cmbTest.setSelectedIndex(-1);
             cmbTest.setEnabled(false);
+            if (chkTeletext.isEnabled()) {
+                chkTextSubtitles.setEnabled(true);
+            }
         }
     }//GEN-LAST:event_radLocalSourceActionPerformed
 
@@ -6373,7 +6480,7 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(true);
         cmbChannel.setEnabled(false);
         cmbChannel.setSelectedIndex(-1);
-        // lblRegion.setText("");
+        lblRegion.setText(" ");
     }//GEN-LAST:event_radCustomActionPerformed
 
     private void menuNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNewActionPerformed
@@ -6632,6 +6739,22 @@ public class GUI extends javax.swing.JFrame {
             DownmixParam = "";
         }
     }//GEN-LAST:event_chkDownmixActionPerformed
+
+    private void chkTextSubtitlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkTextSubtitlesActionPerformed
+        if (chkTextSubtitles.isSelected()) {
+            lblSubtitleIndex.setEnabled(true);
+            TeletextSubtitlesParam = "--tx-subtitles";
+            txtSubtitleIndex.setEnabled(true);
+            lblTextSubtitleIndex.setEnabled(true);
+            txtTextSubtitleIndex.setEnabled(true); 
+        }
+        else {
+            TeletextSubtitlesParam = "";
+            txtTextSubtitleIndex.setEnabled(false);
+            txtTextSubtitleIndex.setText("");
+            lblTextSubtitleIndex.setEnabled(false);
+        }
+    }//GEN-LAST:event_chkTextSubtitlesActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -6674,6 +6797,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkSubtitles;
     private javax.swing.JCheckBox chkSyntaxOnly;
     private javax.swing.JCheckBox chkTeletext;
+    private javax.swing.JCheckBox chkTextSubtitles;
     private javax.swing.JCheckBox chkTimestamp;
     private javax.swing.JCheckBox chkVITS;
     private javax.swing.JCheckBox chkVerbose;
@@ -6716,6 +6840,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblOutputDevice;
     private javax.swing.JLabel lblOutputDevice2;
+    private javax.swing.JLabel lblRegion;
     private javax.swing.JLabel lblSampleRate;
     private javax.swing.JLabel lblScramblingKey;
     private javax.swing.JLabel lblScramblingSystem;
@@ -6725,6 +6850,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblSyntaxOptionDisabled;
     private javax.swing.JLabel lblSysterPermTable;
     private javax.swing.JLabel lblTeefax;
+    private javax.swing.JLabel lblTextSubtitleIndex;
     private javax.swing.JLabel lblVC2ScramblingKey;
     private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenuItem menuAstra10Template;
@@ -6786,6 +6912,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtSource;
     private javax.swing.JTextField txtSubtitleIndex;
     private javax.swing.JTextField txtTeletextSource;
+    private javax.swing.JTextField txtTextSubtitleIndex;
     private javax.swing.JTextField txtVolume;
     // End of variables declaration//GEN-END:variables
     // Checkbox array for the File > New option

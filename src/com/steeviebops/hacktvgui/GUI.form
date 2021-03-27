@@ -381,18 +381,18 @@
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="chkPosition" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="32767" attributes="0"/>
-                                              <Component id="txtPosition" min="-2" pref="48" max="-2" attributes="0"/>
+                                              <Component id="chkLogo" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace pref="74" max="32767" attributes="0"/>
+                                              <Component id="cmbLogo" min="-2" pref="150" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" attributes="0">
                                               <Component id="cmbARCorrection" min="-2" pref="148" max="-2" attributes="0"/>
                                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="chkLogo" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="74" max="32767" attributes="0"/>
-                                              <Component id="cmbLogo" min="-2" pref="150" max="-2" attributes="0"/>
+                                              <Component id="chkPosition" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace max="32767" attributes="0"/>
+                                              <Component id="txtPosition" min="-2" pref="48" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                   </Group>
@@ -904,7 +904,7 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="22" max="32767" attributes="0"/>
+                          <EmptySpace pref="26" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1015,11 +1015,13 @@
                                           </Group>
                                       </Group>
                                       <Group type="102" attributes="0">
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="chkAmp" min="-2" max="-2" attributes="0"/>
-                                              <Component id="radCustom" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          </Group>
+                                          <Component id="chkAmp" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      </Group>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="radCustom" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="32767" attributes="0"/>
+                                          <Component id="lblRegion" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -1034,6 +1036,7 @@
                                       <Component id="radCustom" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="radUHF" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="radVHF" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -1178,6 +1181,11 @@
                         <Component class="javax.swing.JLabel" name="lblFileType">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="File type"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="lblRegion">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="Region"/>
                           </Properties>
                         </Component>
                       </SubComponents>
@@ -1404,12 +1412,12 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="teletextPanel" max="32767" attributes="0"/>
                               <Component id="downloadPanel" alignment="1" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1420,7 +1428,7 @@
                           <Component id="teletextPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="downloadPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace pref="85" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1438,17 +1446,29 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="1" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
                               <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="chkTeletext" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="286" max="-2" attributes="0"/>
+                                      <EmptySpace min="286" pref="396" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
-                                      <Component id="txtTeletextSource" pref="367" max="32767" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Group type="102" attributes="0">
+                                              <Component id="txtTeletextSource" pref="367" max="32767" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="chkTextSubtitles" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                                              <Component id="lblTextSubtitleIndex" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="txtTextSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          </Group>
+                                      </Group>
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -1464,6 +1484,12 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="btnTeletextBrowse" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtTeletextSource" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="chkTextSubtitles" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblTextSubtitleIndex" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtTextSubtitleIndex" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -1492,6 +1518,26 @@
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTeletextBrowseActionPerformed"/>
                       </Events>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkTextSubtitles">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Subtitles (page 888)"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkTextSubtitlesActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblTextSubtitleIndex">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Subtitle index (optional)"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JTextField" name="txtTextSubtitleIndex">
+                      <Properties>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1619,7 +1665,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" max="32767" attributes="0"/>
-                          <EmptySpace pref="78" max="32767" attributes="0"/>
+                          <EmptySpace pref="82" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
