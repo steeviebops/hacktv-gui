@@ -2357,7 +2357,8 @@ public class GUI extends javax.swing.JFrame {
                     saveConfigFile(SelectedFile);
                 }
             } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, "An error occurred while writing to this file.", AppName, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "An error occurred while writing to this file. "
+                            + "You may not have the correct permissions to write to this location.", AppName, JOptionPane.ERROR_MESSAGE);       
             }
         }    
     }
@@ -3312,7 +3313,9 @@ public class GUI extends javax.swing.JFrame {
             fw.write(FileContents);
             fw.close();
         } catch (IOException e) {
-            System.out.println("An error occurred while writing to this file.");
+            JOptionPane.showMessageDialog(null, "An error occurred while writing to this file. "
+                    + "The file may be read-only or you may not have the correct permissions.", AppName, JOptionPane.ERROR_MESSAGE);
+            return;
         }
         // Display the opened filename in the title bar
         // Back up the original title once
