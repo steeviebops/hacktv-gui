@@ -53,6 +53,7 @@ import java.util.prefs.Preferences;
 import java.security.CodeSource;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import javax.swing.SwingWorker;
 import java.util.List;
@@ -3339,10 +3340,11 @@ public class GUI extends javax.swing.JFrame {
         */
         // Set mouse cursor to busy
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        // Temporarily disable the radio buttons, Browse button and menus
+        // Temporarily disable the radio buttons, Browse and Run buttons, and menus
         btnSourceBrowse.setEnabled(false);
         radLocalSource.setEnabled(false);
         radTest.setEnabled(false);
+        btnRun.setEnabled(false);
         // Hide the source file textbox and show the combobox
         txtSource.setVisible(false);
         cmbM3USource.setVisible(true);
@@ -3357,13 +3359,14 @@ public class GUI extends javax.swing.JFrame {
         cmbM3USource.addItem("Loading playlist file, please wait...");
         // Load source file to path
         Path fd = Paths.get(SourceFile);
-        // Check that the file is in the correct format
+        // Check that the file is in the correct format by loading its first line
         try {
             BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
             LineNumberReader lnr2 = new LineNumberReader(br2);
             String FileContents = lnr2.readLine();
             br2.close();
-            if ( (FileContents == null) || (!FileContents.startsWith("#EXTM3U")) ) {
+            // We use endsWith to avoid problems caused by Unicode BOMs
+            if ( (FileContents == null) || (!FileContents.endsWith("#EXTM3U")) ) {
                 JOptionPane.showMessageDialog(null, "Invalid file format, only Extended M3U files are supported.", AppName, JOptionPane.ERROR_MESSAGE);
                 resetM3UItems(false);
                 return;
@@ -3377,11 +3380,19 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker<Boolean, Void> m3uWorker = new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                String M3UFile = "";
+                String M3UNames = "";
                 ArrayList <String> PlaylistNamesAL = new ArrayList <> ();
                 PlaylistURLsAL = new ArrayList <> ();
                 try {
-                    BufferedReader br = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
+                    // Read source file to a string.
+                    // This allows us to manipulate it if necessary.
+                    Path fn = Path.of(SourceFile);
+                    String fileContents = Files.readString(fn, StandardCharsets.UTF_8); 
+                    // Strip out any blank lines
+                    fileContents = fileContents.replaceAll("(?m)^[ \t]*\r?\n", "");
+                    // Set up a BufferedReader and LineNumberReader to parse
+                    // the string we got above
+                    BufferedReader br = new BufferedReader(new StringReader(fileContents));
                     LineNumberReader lnr = new LineNumberReader(br);
                     /* Increase linecount by one. This is done to ensure that
                      * an M3U file without a newline at the end will still be
@@ -3394,8 +3405,9 @@ public class GUI extends javax.swing.JFrame {
                     for (int i = 1; i <= linecount; i++) {
                         if (i % 2 == 0) {
                             // Read even-numbered lines to the M3UFile string so we can parse it
-                            M3UFile = M3UFile + lnr.readLine() + System.lineSeparator();
-                        } else {
+                            M3UNames = M3UNames + lnr.readLine() + System.lineSeparator();
+                        }
+                        else {
                             // Read odd-numbered lines (URLs) directly to the ArrayList
                             PlaylistURLsAL.add(lnr.readLine());
                         }
@@ -3411,12 +3423,8 @@ public class GUI extends javax.swing.JFrame {
                 // Use a regex to retrieve the contents of each even-numbered 
                 // line after the last comma. This contains the channel name.
                 Pattern p = Pattern.compile(".*,\\s*(.*)");
-                Matcher m = p.matcher(M3UFile);
-                int a = -1;
-                int b = a - 1;
+                Matcher m = p.matcher(M3UNames);
                 while (m.find()) {
-                    a++;
-                    b++;
                     PlaylistNamesAL.add(m.group(1));
                 }
                 // Check that we got something, if not then stop.
@@ -3505,6 +3513,7 @@ public class GUI extends javax.swing.JFrame {
         radLocalSource.setEnabled(true);
         radTest.setEnabled(true);
         btnSourceBrowse.setEnabled(true);
+        btnRun.setEnabled(true);
         fileMenu.setEnabled(true);
         templatesMenu.setEnabled(true);
         if (!LoadSuccessful) {
