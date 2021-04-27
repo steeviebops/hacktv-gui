@@ -2053,7 +2053,8 @@ public class GUI extends javax.swing.JFrame {
             chkShowECM,
             chkColour,
             chkVolume,
-            chkDownmix
+            chkDownmix,
+            chkTextSubtitles
         };
     }
     
@@ -3088,6 +3089,13 @@ public class GUI extends javax.swing.JFrame {
         if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "downmix")) {
             chkDownmix.doClick();
         }
+        // Teletext subtitles
+        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "teletextsubtitles")) {
+            chkTextSubtitles.doClick();
+            if ( (INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex"))));
+            }
+        }
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
         return true;
@@ -3323,6 +3331,11 @@ public class GUI extends javax.swing.JFrame {
         if (chkVolume.isSelected()) FileContents = INIFile.setINIValue(FileContents, "hacktv", "volume", txtVolume.getText());
         // Downmix
         if (chkDownmix.isSelected()) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "downmix", 1);
+        // Teletext subtitles
+        if (chkTextSubtitles.isSelected()) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "teletextsubtitles", 1);
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "teletextsubindex", txtTextSubtitleIndex.getText());
+        }
         // Commit to disk
         try {
             FileWriter fw = new FileWriter(DestinationFileName);
@@ -4758,13 +4771,17 @@ public class GUI extends javax.swing.JFrame {
     
     private boolean checkTeletextSource() {
         if (chkTeletext.isSelected()) {
+            // If the txtTeletextSource field contains quotes, remove them
+            if ((txtTeletextSource.getText()).contains(String.valueOf((char)34))) {
+                System.out.println("blah");
+                txtTeletextSource.setText(txtTeletextSource.getText().replaceAll(String.valueOf((char)34), ""));
+            }
             if ((txtTeletextSource.getText()).isEmpty()) {
                 // Create a temp directory if it does not exist
                 createTempDirectory();
                 // Copy the demo page resource to the temp directory
                 try {
                     copyResource("/com/steeviebops/resources/demo.tti", TempDir.toString() + "/demo.tti", this.getClass());   
-                    txtTeletextSource.setText(TeletextSource);
                     if (RunningOnWindows) {
                         TeletextSource = '\"' + TempDir.toString() + OS_SEP + "demo.tti"+ '\"';
                     }
@@ -4787,40 +4804,40 @@ public class GUI extends javax.swing.JFrame {
             else {
                 TeletextSource = txtTeletextSource.getText();
             }
-        }
-        if (chkTextSubtitles.isSelected()) {
-            String p888err = "This directory contains a teletext file (P888.tti) for page 888. "
-                    + "This could cause hacktv to crash when teletext subtitles are enabled. "
-                    + "Please move or delete this file and try again.";
-            String p888warn = "This directory contains teletext files in the page 800 range. "
-                    + "This could cause subtitles to be unreliable. Please move these files "
-                    + "if you encounter problems.";
-            // If the teletext source is set to SPARK with subtitles enabled, delete their page 888 to avoid issues
-            if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + OS_SEP + "spark")) ) {
-                if ( (Files.exists(Path.of(TempDir + "/spark/P888.tti"))) || (Files.exists(Path.of(TempDir + "/spark/p888.tti"))) ) {
-                    try {
-                        deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
+            if ( (chkTextSubtitles.isSelected()) && (!txtTeletextSource.getText().isBlank()) ) {
+                String p888err = "This directory contains a teletext file (P888.tti) for page 888. "
+                        + "This could cause hacktv to crash when teletext subtitles are enabled. "
+                        + "Please move or delete this file and try again.";
+                String p888warn = "This directory contains teletext files in the page 800 range. "
+                        + "This could cause subtitles to be unreliable. Please move these files "
+                        + "if you encounter problems.";
+                // If the teletext source is set to SPARK with subtitles enabled, delete their page 888 to avoid issues
+                if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + OS_SEP + "spark")) ) {
+                    if ( (Files.exists(Path.of(TempDir + "/spark/P888.tti"))) || (Files.exists(Path.of(TempDir + "/spark/p888.tti"))) ) {
+                        try {
+                            deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
+                        }
+                        catch (IOException ex) {
+                            JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
+                            return false;
+                        }                    
                     }
-                    catch (IOException ex) {
-                        JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
-                        return false;
-                    }                    
                 }
-            }
-            // If the teletext source contains a P888.tti file, abort because hacktv will crash.
-            // The latter two if statements are to prevent a NPE if an absolute path is specified.
-            else if ( (Files.exists(Path.of(txtTeletextSource.getText() + "/P888.tti"))) || 
-                    (txtTeletextSource.getText().toLowerCase().endsWith("p888.tti")) ||
-                    (txtTeletextSource.getText().toLowerCase().endsWith("p888.ttix")) ) {
-                JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-            // If the directory contains any text files in the page 800 range (p8*.tti or p8*.ttix)
-            // generate a warning because this can prevent subtitles from running in real time.
-            if ( (wildcardFind(txtTeletextSource.getText(), "p8", ".tti") > 0) || 
-                    (wildcardFind(txtTeletextSource.getText(), "p8", ".ttix") > 0) ) {
-                JOptionPane.showMessageDialog(null, p888warn, AppName, JOptionPane.WARNING_MESSAGE);
-                return true;
+                // If the teletext source contains a P888.tti file, abort because hacktv will crash.
+                // The latter two if statements are to prevent a NPE if an absolute path is specified.
+                else if ( (Files.exists(Path.of(txtTeletextSource.getText() + "/P888.tti"))) || 
+                        (txtTeletextSource.getText().toLowerCase().endsWith("p888.tti")) ||
+                        (txtTeletextSource.getText().toLowerCase().endsWith("p888.ttix")) ) {
+                    JOptionPane.showMessageDialog(null, p888err, AppName, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                // If the directory contains any text files in the page 800 range (p8*.tti or p8*.ttix)
+                // generate a warning because this can prevent subtitles from running in real time.
+                if ( (wildcardFind(txtTeletextSource.getText(), "p8", ".tti") > 0) || 
+                        (wildcardFind(txtTeletextSource.getText(), "p8", ".ttix") > 0) ) {
+                    JOptionPane.showMessageDialog(null, p888warn, AppName, JOptionPane.WARNING_MESSAGE);
+                    return true;
+                }
             }
         }
         return true;
@@ -6766,9 +6783,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkTextSubtitlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkTextSubtitlesActionPerformed
         if (chkTextSubtitles.isSelected()) {
-            lblSubtitleIndex.setEnabled(true);
             TeletextSubtitlesParam = "--tx-subtitles";
-            txtSubtitleIndex.setEnabled(true);
             lblTextSubtitleIndex.setEnabled(true);
             txtTextSubtitleIndex.setEnabled(true); 
         }
