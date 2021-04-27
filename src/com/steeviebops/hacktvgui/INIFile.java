@@ -114,7 +114,7 @@ public class INIFile {
         // If value is null, return the specified default value instead
         String result = null;
         
-        String regex1 = "(?i)(?<=";
+        String regex1 = "(?i)(?<=\\b";
         String regex2 = "=)[^\r\n]*";
 
         Pattern p = Pattern.compile(regex1 + setting + regex2);
