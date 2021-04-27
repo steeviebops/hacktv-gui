@@ -53,14 +53,13 @@ import java.util.prefs.Preferences;
 import java.security.CodeSource;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import javax.swing.SwingWorker;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.UnsupportedLookAndFeelException;
-import tjacobs.io.DataFetcher;
-import tjacobs.io.DataFetcher.FetcherListener;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
@@ -4793,7 +4792,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             // If the teletext source contains a P888.tti file, abort because hacktv will crash.
-            // The latter two if ststements sre to prevent a NPE if an absolute path is specified.
+            // The latter two if statements are to prevent a NPE if an absolute path is specified.
             else if ( (Files.exists(Path.of(txtTeletextSource.getText() + "/P888.tti"))) || 
                     (txtTeletextSource.getText().toLowerCase().endsWith("p888.tti")) ||
                     (txtTeletextSource.getText().toLowerCase().endsWith("p888.ttix")) ) {
@@ -5607,23 +5606,20 @@ public class GUI extends javax.swing.JFrame {
                     // Get the PID of the process we just started
                     pid = p.pid();
                     // Capture the output
-                    DataFetcher df = new DataFetcher(p.getInputStream(), new byte[1024], 0);
-                    FetcherListener fl = new FetcherListener() {
-                        @Override
-                        public void fetchedAll(byte[] bytes) {}
-                        @Override
-                        public void fetchedMore(byte[] bytes, int start, int end) {
-                            publish(new String (bytes, start, end-start));
-                        }
-                    };
-                    df.addFetcherListener(fl);
-                    new Thread(df).start();
-                    // Wait for process to close
-                    p.waitFor();
-                    
+                    int a;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    while ( (a = br.read()) != -1 ) {
+                        // br.read() returns an integer value 'a' which is the ASCII
+                        // number of a character it has received from the process.
+                        // We convert 'a' to the actual character and publish it.
+                        // When the process has closed, br.read() will return -1
+                        // which will exit this loop.
+                        publish(String.valueOf((char)a));
+                    }
+                    br.close();
                     publish("\nhacktv stopped");
-                    
-                } catch (IOException | InterruptedException ex) {
+                }
+                catch (IOException ex) {
                     JOptionPane.showMessageDialog(null,
                             "An error occurred while attempting to run hacktv", AppName, JOptionPane.ERROR_MESSAGE);
                 }
@@ -5734,7 +5730,7 @@ public class GUI extends javax.swing.JFrame {
              
     private void menuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAboutActionPerformed
         JOptionPane.showMessageDialog(null, AppName + " (Java version)\nCreated 2020-2021 by Stephen McGarry.\n" +
-                "Provided under the terms of the General Public Licence (GPL) v2.\n\n" +
+                "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/jhacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
 
