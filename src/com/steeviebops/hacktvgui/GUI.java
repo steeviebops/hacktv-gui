@@ -2051,7 +2051,9 @@ public class GUI extends javax.swing.JFrame {
             chkScrambleAudio,
             chkFindKeys,
             chkShowECM,
-            chkColour
+            chkColour,
+            chkVolume,
+            chkDownmix
         };
     }
     
@@ -3076,6 +3078,16 @@ public class GUI extends javax.swing.JFrame {
                     break;
             }
         }
+        // Volume
+        String ImportedVolume = (INIFile.getStringFromINI(SourceFile, "hacktv", "volume", "", false));
+        if (!ImportedVolume.isEmpty()) {
+            chkVolume.doClick();
+            txtVolume.setText(ImportedVolume);
+        }
+        // Downmix
+        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "downmix")) {
+            chkDownmix.doClick();
+        }
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
         return true;
@@ -3307,6 +3319,10 @@ public class GUI extends javax.swing.JFrame {
         if (cmbOutputDevice.getSelectedIndex() == 3) {
             FileContents = INIFile.setINIValue(FileContents, "hacktv", "filetype", cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
         }
+        // Volume
+        if (chkVolume.isSelected()) FileContents = INIFile.setINIValue(FileContents, "hacktv", "volume", txtVolume.getText());
+        // Downmix
+        if (chkDownmix.isSelected()) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "downmix", 1);
         // Commit to disk
         try {
             FileWriter fw = new FileWriter(DestinationFileName);
