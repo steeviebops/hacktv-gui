@@ -219,6 +219,13 @@ public class GUI extends javax.swing.JFrame {
      * @param args
      */
     public GUI(String[] args) {
+        // If the emergency reset command is specified, remove all prefs.
+        // This is a safety net, in case any bad preferences prevent us from running.
+        // We handle this as early as possible to ensure it will work correctly.
+        if ((args.length > 0) && (args[0].toLowerCase().equals("reset")) ) {
+            // Reset all preferences and exit
+            resetPreferences(1);
+        }
         // Add a shutdown hook to run exit tasks
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -310,7 +317,8 @@ public class GUI extends javax.swing.JFrame {
             if (args[0].endsWith(".htv")) {
                 SelectedFile = new File(args[0]);
                 checkSelectedFile(SelectedFile);
-            } else {
+            }
+            else {
                 // Otherwise, assume it's a source file and populate the source
                 // text box with it.
                 txtSource.setText(args[0]);
@@ -2068,6 +2076,20 @@ public class GUI extends javax.swing.JFrame {
         txtHackTVPath.setText(HackTVPath);
     }
     
+    private void resetPreferences(int i) {
+        // Delete everything from the preference store and exit immediately.
+        // If i is set to 1, a message will be printed to the console.
+        // This is used for the emergency reset option from the command line.
+        if ( Prefs.get("HackTVPath", null) != null ) Prefs.remove("HackTVPath");
+        if ( Prefs.get("File1", null) != null ) Prefs.remove("File1");
+        if ( Prefs.get("File2", null) != null ) Prefs.remove("File2");
+        if ( Prefs.get("File3", null) != null ) Prefs.remove("File3");
+        if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
+        if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");   
+        if (i == 1) System.out.println("All preferences have been reset to defaults.");
+        System.exit(0);
+    }
+    
     private void detectFork() {
         /*  Loads the hacktv binary into RAM and attempts to find a specified
          *  string to detect what build or fork it is.
@@ -2089,39 +2111,50 @@ public class GUI extends javax.swing.JFrame {
          */
         File f = new File(HackTVPath);
         if (f.length() > 31457280) { 
-            lblFork.setText("Invalid file");
+            lblFork.setText("Invalid file (too large)");
             fsphil();
             return;
         }
-        byte[] EnableEMM = "enableemm".getBytes();
-        byte[] BBCSelect = "BBC Select".getBytes();
-        byte[] bytes = null;
+        // Test the specified file by loading it into memory using a BufferedReader.
+        // This is more memory-efficient than loading the entire file to a byte array.
+        boolean b = false;
         try {
-            bytes = Files.readAllBytes(f.toPath());
-        }
+            String c;
+            BufferedReader br1 = new BufferedReader(new FileReader(HackTVPath));
+            while ((c = br1.readLine()) != null) {
+                if (c.contains("--enableemm")) {
+                    b = true;
+                    lblFork.setText("Captain Jack");
+                    captainJack();
+                }
+                else if (c.contains("Both VC1 and VC2 cannot be used together")) {
+                    b = true;
+                    lblFork.setText("fsphil");
+                    fsphil();
+                }
+                else {
+                    // Clear the line and try another one
+                    c = "";
+                }
+                // If we found a match, stop processing
+                if (b) break;
+            }
+            // We no longer need c so clear it
+            c = null;
+            br1.close();
+            // Run garbage collection to save memory
+            System.gc();
+            }
         catch (IOException ex) {
-            System.out.println(ex);
-        }
-        if (KMPMatch.indexOf(bytes, EnableEMM) > -1) {
-            // We don't need the contents of the byte array anymore so set it
-            // to null and run garbage collection to save memory
-            bytes = null;
-            System.gc();
-            lblFork.setText("Captain Jack");
-            captainJack();
-        }
-        else if (KMPMatch.indexOf(bytes, BBCSelect) > -1) {
-            bytes = null;
-            System.gc();
-            lblFork.setText("fsphil");
+            lblFork.setText("File access error");
             fsphil();
+            return;
+        }
+        if (!b) {
+            lblFork.setText("Invalid file (not hacktv?)");
+            fsphil();
+            return;            
         }        
-        else {
-            bytes = null;
-            System.gc();
-            lblFork.setText("Not found");
-            fsphil();
-        }
     }
 
     private void fsphil() {
@@ -2253,6 +2286,21 @@ public class GUI extends javax.swing.JFrame {
         }        
     }
     
+    private String stripQuotes(String FilePath) {
+        // Bug fix for cases where a path containing quotes is pasted into
+        // the file open prompt. This causes Swing to prepend the current
+        // directory to the path (with the intended file path including
+        // quotes at the end). This can cause things to break badly; if 
+        // this path is saved to the preferences store it can prevent the 
+        // application from opening! So we check for it and strip the path.
+        if (FilePath.contains("\\\"") ) {
+            FilePath = FilePath.substring(FilePath.indexOf("\""));
+        }
+        if (FilePath.startsWith("\"")) FilePath = FilePath.substring(1);
+        if (FilePath.endsWith("\"")) FilePath = FilePath.substring(0, FilePath.length() -1);
+        return FilePath;
+    }
+    
     private void checkMRUList() {
         // Get MRU values and display in the File menu
         String ConfigFile1 = Prefs.get("File1", "");
@@ -2335,10 +2383,9 @@ public class GUI extends javax.swing.JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             // Check if the saved file has a .htv extension or not.
             // If it does not, then append one.
-            if (configFileChooser.getSelectedFile().toString().toLowerCase().endsWith(".htv")) {
-                SelectedFile = configFileChooser.getSelectedFile();
-            } else {
-                SelectedFile = new File(configFileChooser.getSelectedFile().toString() + ".htv");
+            SelectedFile = new File (stripQuotes(configFileChooser.getSelectedFile().toString()));
+            if (!SelectedFile.toString().toLowerCase().endsWith(".htv")) {
+                SelectedFile = new File(SelectedFile + ".htv");
             }
             // Create file
             try {
@@ -5650,7 +5697,7 @@ public class GUI extends javax.swing.JFrame {
                         publish(String.valueOf((char)a));
                     }
                     br.close();
-                    publish("\nhacktv stopped");
+                    publish("\n" + "hacktv stopped");
                 }
                 catch (IOException ex) {
                     JOptionPane.showMessageDialog(null,
@@ -5676,7 +5723,7 @@ public class GUI extends javax.swing.JFrame {
                     txtConsoleOutput.append(o);
                 }
                 /* If an invalid parameter is passed to hacktv, it usually
-                   reponds with its usage message.
+                   responds with its usage message.
                    Here, we check if the first line of the usage has been
                    returned. If so, we assume that one of the parameters we fed 
                    is not supported.
@@ -5952,7 +5999,7 @@ public class GUI extends javax.swing.JFrame {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             SelectedFile = teletextFileChooser.getSelectedFile();
-            txtTeletextSource.setText(SelectedFile.getAbsolutePath());
+            txtTeletextSource.setText(stripQuotes(SelectedFile.getAbsolutePath()));
         }
     }//GEN-LAST:event_btnTeletextBrowseActionPerformed
 
@@ -6385,6 +6432,7 @@ public class GUI extends javax.swing.JFrame {
         int returnVal = sourceFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = sourceFileChooser.getSelectedFile();
+            file = new File (stripQuotes(file.toString()));
             if(file.getAbsolutePath().toLowerCase().endsWith(".m3u")) {
                 // If the source is an M3U file, pass it to the M3U handler
                 txtSource.setText(file.getAbsolutePath());
@@ -6561,7 +6609,7 @@ public class GUI extends javax.swing.JFrame {
         int returnVal = hacktvFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = hacktvFileChooser.getSelectedFile();
-            HackTVPath = file.toString();
+            HackTVPath = stripQuotes(file.toString());
             txtHackTVPath.setText(HackTVPath);
             // Store the specified path.
             Prefs.put("HackTVPath", HackTVPath);
@@ -6578,6 +6626,7 @@ public class GUI extends javax.swing.JFrame {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             SelectedFile = configFileChooser.getSelectedFile();
+            SelectedFile = new File(stripQuotes(SelectedFile.toString()));
             checkSelectedFile(SelectedFile);
         }
     }//GEN-LAST:event_menuOpenActionPerformed
@@ -6640,13 +6689,7 @@ public class GUI extends javax.swing.JFrame {
         int q = JOptionPane.showConfirmDialog(null, "This will remove all of this application's "
                 + "saved settings and exit. Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
-            if ( Prefs.get("HackTVPath", null) != null ) Prefs.remove("HackTVPath");
-            if ( Prefs.get("File1", null) != null ) Prefs.remove("File1");
-            if ( Prefs.get("File2", null) != null ) Prefs.remove("File2");
-            if ( Prefs.get("File3", null) != null ) Prefs.remove("File3");
-            if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
-            if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
-            System.exit(0);
+            resetPreferences(0);
         }
     }//GEN-LAST:event_btnResetAllSettingsActionPerformed
 
