@@ -4297,7 +4297,8 @@ public class GUI extends javax.swing.JFrame {
             "Eurotica",
             "MTV",
             "The Adult Channel",
-            "FilmNet"
+            "FilmNet",
+            "Multichoice"
         };
         LogoArray = new String[] {
             "hacktv",
@@ -4308,7 +4309,8 @@ public class GUI extends javax.swing.JFrame {
             "eurotica",
             "mtv",
             "tac",
-            "filmnet"
+            "filmnet",
+            "multichoice"
         };
         cmbLogo.removeAllItems();
         cmbLogo.setModel(new DefaultComboBoxModel<>(Logo));
