@@ -4003,7 +4003,7 @@ public class GUI extends javax.swing.JFrame {
                 enableScramblingKey2();
                 ScramblingKey2AL.add("Free access/soft scrambled (no card required)");
                 if (Fork == "CJ") {
-                    ScramblingKey2AL.add("Conditional access (Multichoice card)");
+                    ScramblingKey2AL.add("Conditional access (MultiChoice card)");
                 }
                 ScramblingKey2Array = new ArrayList<>();
                 ScramblingKey2Array.add("free");
@@ -4021,7 +4021,7 @@ public class GUI extends javax.swing.JFrame {
             disableScramblingKey2();
             ScramblingKeyAL.add("Free access/soft scrambled (no card required)");
             if (Fork == "CJ") {
-                ScramblingKeyAL.add("Conditional access (Multichoice card)");
+                ScramblingKeyAL.add("Conditional access (MultiChoice card)");
             }
             ScramblingKeyArray = new ArrayList<>();
             ScramblingKeyArray.add("free");
@@ -4298,7 +4298,7 @@ public class GUI extends javax.swing.JFrame {
             "MTV",
             "The Adult Channel",
             "FilmNet",
-            "Multichoice"
+            "MultiChoice"
         };
         LogoArray = new String[] {
             "hacktv",
@@ -5372,12 +5372,10 @@ public class GUI extends javax.swing.JFrame {
          *  number is valid. So we will use it here too.
          *  Issue 07 cards have either 13-digit or 9-digit numbers.
          *  Issue 09 cards are 9-digit only. So we restrict input to these lengths.
-         *  Untested on Multichoice VC2 cards. If you have one, let me know the
-         *  number so I can test it and amend this if necessary.
          *  If an 8-digit number is entered, this is passed to hacktv without
          *  any checks.
          */
-        if (txtCardNumber.isEnabled()) {
+        if ( (txtCardNumber.isEnabled()) && (ScramblingType1 == "--videocrypt") ) {
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
             String InvalidCardNumber = "Card number should be exactly 8, 9 or 13 digits.";
             if (!isNumeric(txtCardNumber.getText())) {
@@ -5420,6 +5418,12 @@ public class GUI extends javax.swing.JFrame {
                 tabPane.setSelectedIndex(3);              
                 return false;
             }
+        }
+        else if ( (txtCardNumber.isEnabled()) && (ScramblingType1 == "--videocrypt2") ) {
+            // Pass the digits unaltered and without Luhn checking for MultiChoice cards
+            // This is temporary until I work out how to handle them
+            TruncatedCardNumber = txtCardNumber.getText();
+            return true;
         }
         else {
             // If the txtCardNumber textbox is disabled, return true and exit
