@@ -2520,15 +2520,21 @@ public class GUI extends javax.swing.JFrame {
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
             if (Fork == "CJ") {
-                ImportedSource = ImportedSource.toLowerCase().split(":")[1];
-                if (ImportedSource.equals("pm5544")) {
-                    cmbTest.setSelectedIndex(1);
-                }
-                else if (ImportedSource.equals("ueitm")) {
-                    cmbTest.setSelectedIndex(2);
-                }
-                else if (ImportedSource.equals("fubk")) {
-                    cmbTest.setSelectedIndex(3);
+                switch (ImportedSource.toLowerCase().split(":")[1]) {
+                    case "pm5544":
+                        cmbTest.setSelectedIndex(1);
+                        break;
+                    case "pm5644":
+                        cmbTest.setSelectedIndex(2);
+                        break;
+                    case "ueitm":
+                        cmbTest.setSelectedIndex(3);
+                        break;
+                    case "fubk":
+                        cmbTest.setSelectedIndex(4);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -4333,12 +4339,14 @@ public class GUI extends javax.swing.JFrame {
         String[] TestCard = {
             "Colour bars",
             "Philips PM5544",
+            "Philips PM5644",
             "UEIT (Soviet)",
             "FuBK"
         };
         TestCardArray = new String[] {
             "test:colourbars",
             "test:pm5544",
+            "test:pm5644",
             "test:ueitm",
             "test:fubk"
         };
