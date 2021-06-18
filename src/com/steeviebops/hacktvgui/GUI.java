@@ -77,8 +77,9 @@ public class GUI extends javax.swing.JFrame {
     // String to set the directory where this application's JAR is located
     String JarDir;
     
-    // Declare a variable for NICAM stereo status
-    Boolean NICAMSupported;
+    // Declare variables for stereo status
+    Boolean NICAMSupported = false;
+    Boolean A2Supported = false;
 
     // Declare a variable to determine the selected fork
     String Fork;
@@ -200,6 +201,7 @@ public class GUI extends javax.swing.JFrame {
     String VolumeValue = "";
     String DownmixParam = "";
     String TeletextSubtitlesParam = "";
+    String A2StereoParam = "";
     // End parameter variables
     
     // Main method
@@ -421,6 +423,7 @@ public class GUI extends javax.swing.JFrame {
         txtFMDev = new javax.swing.JTextField();
         chkVideoFilter = new javax.swing.JCheckBox();
         chkColour = new javax.swing.JCheckBox();
+        chkA2Stereo = new javax.swing.JCheckBox();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -853,6 +856,13 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkA2Stereo.setText("A2 (Zweikanalton) stereo");
+        chkA2Stereo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkA2StereoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout VideoFormatPanelLayout = new javax.swing.GroupLayout(VideoFormatPanel);
         VideoFormatPanel.setLayout(VideoFormatPanelLayout);
         VideoFormatPanelLayout.setHorizontalGroup(
@@ -864,20 +874,6 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
-                                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkAudio)
-                                    .addComponent(chkNICAM)
-                                    .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
-                                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkFMDev)
-                                    .addComponent(chkMacChId)
-                                    .addComponent(lblSampleRate))
-                                .addGap(44, 44, 44))
-                            .addGroup(VideoFormatPanelLayout.createSequentialGroup()
-                                .addComponent(chkVideoFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                                 .addComponent(radPAL)
                                 .addGap(18, 18, Short.MAX_VALUE)
                                 .addComponent(radNTSC)
@@ -885,7 +881,27 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(radSECAM)
                                 .addGap(18, 18, Short.MAX_VALUE)
                                 .addComponent(radBW)
-                                .addGap(18, 18, Short.MAX_VALUE)))
+                                .addGap(18, 18, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, VideoFormatPanelLayout.createSequentialGroup()
+                                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(VideoFormatPanelLayout.createSequentialGroup()
+                                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkAudio)
+                                            .addComponent(chkNICAM)
+                                            .addComponent(chkA2Stereo))
+                                        .addGap(0, 0, Short.MAX_VALUE))
+                                    .addComponent(chkColour, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, VideoFormatPanelLayout.createSequentialGroup()
+                                        .addComponent(chkVideoFilter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                    .addGroup(VideoFormatPanelLayout.createSequentialGroup()
+                                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkFMDev)
+                                            .addComponent(chkMacChId)
+                                            .addComponent(lblSampleRate))
+                                        .addGap(44, 44, 44)))))
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtMacChId, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -917,14 +933,15 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(chkFMDev))
                         .addGap(2, 2, 2)
-                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkColour)
-                            .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(chkMacChId))))
+                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(chkMacChId)
+                            .addComponent(chkA2Stereo)))
                     .addComponent(chkNICAM))
                 .addGap(2, 2, 2)
-                .addComponent(chkVideoFilter)
+                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkVideoFilter)
+                    .addComponent(chkColour))
                 .addContainerGap(13, Short.MAX_VALUE))
         );
 
@@ -3073,6 +3090,10 @@ public class GUI extends javax.swing.JFrame {
         if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "nicam") == false) {
             if (chkNICAM.isSelected() ) { chkNICAM.doClick(); }
         }
+        // A2 Stereo
+        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "a2stereo") == true) {
+            if ( (!chkA2Stereo.isSelected()) && (A2Supported) ) chkA2Stereo.doClick();
+        }
         // ECM
         if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "showecm")) {
             chkShowECM.doClick();
@@ -3357,6 +3378,12 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "nicam", 1);
         } else if ( (!chkNICAM.isSelected()) && (NICAMSupported) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "nicam", 0);
+        }
+        // A2 stereo
+        if (chkA2Stereo.isSelected()) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "a2stereo", 1);
+        } else if ( (!chkA2Stereo.isSelected()) && (A2Supported) ) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "a2stereo", 0);
         }
         // Show ECMs
         if (chkShowECM.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "showecm", 1); }
@@ -4416,10 +4443,27 @@ public class GUI extends javax.swing.JFrame {
         Sys = VideoModeArray[cmbVideoFormat.getSelectedIndex()];
         switch (Sys) {
             case "i":
-            case "g":
-                // System I or B/G (625 lines)
+                // System I (625 lines)
+                // Mono audio at +5.9996 MHz
+                // NICAM stereo supported
                 Baseband = false;
                 common625Features();
+                enableNICAM();
+                disableA2Stereo();
+                enableVHF();
+                enableUHF();
+                disableFMDeviation();
+                DefaultSampleRate = "16";
+                radUHF.doClick();
+                break;
+            case "g":
+                // System B/G (625 lines)
+                // Mono audio at +5.5 MHz
+                // NICAM or A2 stereo supported, but not both at the same time
+                Baseband = false;
+                common625Features();
+                enableNICAM();
+                enableA2Stereo();
                 enableVHF();
                 enableUHF();
                 disableFMDeviation();
@@ -4434,7 +4478,7 @@ public class GUI extends javax.swing.JFrame {
                 disableVHF();
                 disableUHF();
                 disableNICAM();
-                NICAMSupported = false;
+                disableA2Stereo();
                 enableFMDeviation();
                 DefaultSampleRate = "16";
                 FMSampleRate = "20.25";
@@ -4448,7 +4492,7 @@ public class GUI extends javax.swing.JFrame {
                 enableVHF();
                 enableUHF();
                 disableNICAM();
-                NICAMSupported = false;
+                disableA2Stereo();
                 enableColourControl();
                 disableFMDeviation();
                 DefaultSampleRate = "13.5";
@@ -4462,7 +4506,7 @@ public class GUI extends javax.swing.JFrame {
                 disableVHF();
                 disableUHF();
                 disableNICAM();
-                NICAMSupported = false;
+                disableA2Stereo();
                 enableColourControl();
                 enableFMDeviation();
                 DefaultSampleRate = "13.5";
@@ -4497,6 +4541,8 @@ public class GUI extends javax.swing.JFrame {
                 // System L (625 lines)
                 Baseband = false;
                 common625Features();
+                enableNICAM();
+                disableA2Stereo();
                 enableUHF();
                 enableVHF();
                 DefaultSampleRate = "16";
@@ -4504,11 +4550,14 @@ public class GUI extends javax.swing.JFrame {
                 radUHF.doClick();
                 break;
             case "d":
+            case "k":
                 // System D/K (625 lines)
+                // Mono audio at +6.5 MHz
+                // A2 stereo supported
                 Baseband = false;
                 common625Features();
                 disableNICAM();
-                NICAMSupported = false;
+                enableA2Stereo();
                 enableVHF();
                 enableUHF();
                 disableFMDeviation();
@@ -4683,8 +4732,6 @@ public class GUI extends javax.swing.JFrame {
     private void common625Features() {
     // Configure features common to 625-line modes
         Lines = 625;
-        enableNICAM();
-        NICAMSupported = true;
         enableAudioOption();
         enableColourControl();
         enableTeletext();
@@ -4700,7 +4747,7 @@ public class GUI extends javax.swing.JFrame {
     // Configure features common to 525-line modes
         Lines = 525;
         disableNICAM();
-        NICAMSupported = false;
+        disableA2Stereo();
         enableAudioOption();
         disableTeletext();
         disableWSS();
@@ -4713,7 +4760,7 @@ public class GUI extends javax.swing.JFrame {
     private void commonBWFeatures() {
     // Configure features common to legacy black and white modes
         disableNICAM();
-        NICAMSupported = false;
+        disableA2Stereo();
         disableColourControl();
         disableTeletext();
         disableWSS();
@@ -4731,7 +4778,7 @@ public class GUI extends javax.swing.JFrame {
         AudioParam = "";
         disableVHF();
         disableNICAM();
-        NICAMSupported = false;
+        disableA2Stereo();        
         disableColourControl();
         enableTeletext();
         disableWSS();
@@ -4752,7 +4799,7 @@ public class GUI extends javax.swing.JFrame {
             disableFMDeviation();
             disableAudioOption();
             disableNICAM();
-            NICAMSupported = false;
+            disableA2Stereo();
             if (chkVideoFilter.isSelected()) chkVideoFilter.doClick();
             chkVideoFilter.setEnabled(false);            
         }
@@ -4924,16 +4971,31 @@ public class GUI extends javax.swing.JFrame {
     private void enableNICAM() {
         if (chkAudio.isSelected()) {
             chkNICAM.setEnabled(true);
-            chkNICAM.setSelected(true);
+            if (!chkNICAM.isSelected()) chkNICAM.doClick();
+            NICAMSupported = true;
         }
     }
        
     private void disableNICAM() {
         chkNICAM.setEnabled(false);
         chkNICAM.setSelected(false);
+        NICAMSupported = false;
         // Clear NICAMParam as we don't need it if NICAM is not supported anyway
         NICAMParam = "";
     }
+    
+    private void enableA2Stereo() {
+        A2Supported = true;
+        if (chkAudio.isSelected()) {
+            chkA2Stereo.setEnabled(true);
+        }
+    }
+       
+    private void disableA2Stereo() {
+        A2Supported = false;
+        chkA2Stereo.setEnabled(false);
+        chkA2Stereo.setSelected(false);
+    }    
     
     private void enableFMDeviation() {
         chkFMDev.setEnabled(true);
@@ -5600,6 +5662,7 @@ public class GUI extends javax.swing.JFrame {
         if (!ChID.isEmpty()) {AllArgs.add(ChID);}
         if (!AudioParam.isEmpty()) AllArgs.add(AudioParam);
         if (!NICAMParam.isEmpty()) AllArgs.add(NICAMParam);
+        if (!A2StereoParam.isEmpty()) AllArgs.add(A2StereoParam);
         if (!ACPParam.isEmpty()) AllArgs.add(ACPParam);
         if (!RepeatParam.isEmpty()) AllArgs.add(RepeatParam);
         if (!WssParam.isEmpty()) AllArgs.add(WssParam);
@@ -5723,6 +5786,17 @@ public class GUI extends javax.swing.JFrame {
             // Update the GUI from this method.
             @Override
             protected void done() {
+                /* If an invalid parameter is passed to hacktv, it usually
+                   responds with its usage message.
+                   Here, we check if the first line of the usage has been
+                   returned. If so, we assume that one of the parameters we fed 
+                   is not supported.
+                */
+                if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
+                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
+                            + " of the selected options. Please update hacktv and try again."
+                            , AppName, JOptionPane.WARNING_MESSAGE);
+                }
                 // Revert button to say Run instead of Stop
                 changeStopToRun();
                 // Clear the ArrayList so we can run again with a fresh set
@@ -5735,17 +5809,6 @@ public class GUI extends javax.swing.JFrame {
                 // them in the console
                 for (String o : chunks) {
                     txtConsoleOutput.append(o);
-                }
-                /* If an invalid parameter is passed to hacktv, it usually
-                   responds with its usage message.
-                   Here, we check if the first line of the usage has been
-                   returned. If so, we assume that one of the parameters we fed 
-                   is not supported.
-                */
-                if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
-                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
-                            + " of the selected options. Please update hacktv and try again."
-                            , AppName, JOptionPane.WARNING_MESSAGE);
                 }
             }// End of process
         }; // End of SwingWorker
@@ -6165,26 +6228,31 @@ public class GUI extends javax.swing.JFrame {
     private void chkNICAMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkNICAMActionPerformed
         if (chkNICAM.isSelected()) {
             NICAMParam = "";
+            if (chkA2Stereo.isSelected()) chkA2Stereo.doClick();
         }
         else {
             if (NICAMSupported = true) {
-                NICAMParam = "--nonicam";
+                if (!chkA2Stereo.isSelected()) NICAMParam = "--nonicam";
             }
         }
     }//GEN-LAST:event_chkNICAMActionPerformed
 
     private void chkAudioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAudioActionPerformed
         if (chkAudio.isSelected()) {
-            if (NICAMSupported == true) {
+            if (NICAMSupported) {
                 chkNICAM.setEnabled(true);
                 chkNICAM.doClick();
             }
+            if (A2Supported) chkA2Stereo.setEnabled(true);
             AudioParam = "";
         }
         else {
-            chkNICAM.setSelected(false);
+            if (chkNICAM.isSelected()) chkNICAM.doClick();
             chkNICAM.setEnabled(false);
+            if (chkA2Stereo.isSelected()) chkA2Stereo.doClick();
+            chkA2Stereo.setEnabled(false);
             AudioParam = "--noaudio";
+            NICAMParam = "";
         }
     }//GEN-LAST:event_chkAudioActionPerformed
 
@@ -6851,6 +6919,25 @@ public class GUI extends javax.swing.JFrame {
             lblTextSubtitleIndex.setEnabled(false);
         }
     }//GEN-LAST:event_chkTextSubtitlesActionPerformed
+
+    private void chkA2StereoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkA2StereoActionPerformed
+        if (chkA2Stereo.isSelected()) {
+            A2StereoParam = "--a2stereo";
+            if (chkNICAM.isSelected()) {
+                chkNICAM.doClick();
+                NICAMParam = "";
+            }
+            else {
+                NICAMParam = "";
+            }
+        }
+        else {
+            A2StereoParam = "";
+            if ( (chkNICAM.isEnabled()) && (!chkNICAM.isSelected()) ) {
+                NICAMParam = "--nonicam";
+            }
+        }
+    }//GEN-LAST:event_chkA2StereoActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -6869,6 +6956,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnSpark;
     private javax.swing.JButton btnTeefax;
     private javax.swing.JButton btnTeletextBrowse;
+    private javax.swing.JCheckBox chkA2Stereo;
     private javax.swing.JCheckBox chkACP;
     private javax.swing.JCheckBox chkARCorrection;
     private javax.swing.JCheckBox chkActivateCard;
