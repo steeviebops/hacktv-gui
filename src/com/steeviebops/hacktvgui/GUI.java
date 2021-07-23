@@ -56,9 +56,14 @@ import java.awt.HeadlessException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
 import javax.swing.SwingWorker;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class GUI extends javax.swing.JFrame {    
@@ -2079,7 +2084,8 @@ public class GUI extends javax.swing.JFrame {
             chkColour,
             chkVolume,
             chkDownmix,
-            chkTextSubtitles
+            chkTextSubtitles,
+            chkA2Stereo
         };
     }
     
@@ -3615,6 +3621,24 @@ public class GUI extends javax.swing.JFrame {
         return l;
     }
     
+    public Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
+        JarFile jar = null;
+        try {
+            jar = new JarFile(jarFilePath);
+            Enumeration<JarEntry> enumEntries = jar.entries();
+            while (enumEntries.hasMoreElements()) {
+                JarEntry file = (JarEntry) enumEntries.nextElement();
+                if (file.getName().equals(classFilePath.substring(1))) {
+                    long time=file.getTime();
+                    return time==-1?null: new Date(time);
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return null;
+     }      
+    
     private void resetM3UItems(boolean LoadSuccessful) {
         // Reset whatever we changed back to default upon thread exit
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -4004,6 +4028,7 @@ public class GUI extends javax.swing.JFrame {
                 ScramblingKeyAL.add("Pay-per-view mode (Sky 10 card)");
                 ScramblingKeyAL.add("Conditional access (Sky 09 card)");
                 ScramblingKeyAL.add("Conditional access (Sky 07 or 06 card)");
+                ScramblingKeyAL.add("Conditional access (Sky 05 card)");
                 ScramblingKeyAL.add("Conditional access (Sky 02, 03 or 04 card)");
                 ScramblingKeyAL.add("Conditional access (Old Adult Channel card)");
                 ScramblingKeyAL.add("Conditional access (Newer Adult Channel card)");
@@ -4022,6 +4047,7 @@ public class GUI extends javax.swing.JFrame {
                 ScramblingKeyArray.add("sky10ppv");
                 ScramblingKeyArray.add("sky09");
                 ScramblingKeyArray.add("sky07");
+                ScramblingKeyArray.add("sky05");
                 ScramblingKeyArray.add("sky03");
                 ScramblingKeyArray.add("tac1");
                 ScramblingKeyArray.add("tac2");
@@ -5886,7 +5912,24 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRunActionPerformed
              
     private void menuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAboutActionPerformed
-        JOptionPane.showMessageDialog(null, AppName + " (Java version)\nCreated 2020-2021 by Stephen McGarry.\n" +
+        // Get application version by checking the timestamp on the class file
+        String v;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String classFilePath = "/com/steeviebops/hacktvgui/GUI.class";
+            Date date;
+            if (Files.exists(Path.of(System.getProperty("java.class.path")))) {
+                date = getLastUpdatedTime(System.getProperty("java.class.path"), classFilePath);
+                v = "\nCompilation date: " + sdf.format(date);
+            }
+            else {
+                v = "";
+            }
+        }
+        catch (Exception e) {
+              v = "";
+        }
+        JOptionPane.showMessageDialog(null, AppName + " (Java version)" + v + "\nCreated 2020-2021 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/jhacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
