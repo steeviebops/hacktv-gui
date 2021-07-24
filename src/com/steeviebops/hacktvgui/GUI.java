@@ -4029,7 +4029,7 @@ public class GUI extends javax.swing.JFrame {
                 ScramblingKeyAL.add("Conditional access (Sky 09 card)");
                 ScramblingKeyAL.add("Conditional access (Sky 07 or 06 card)");
                 ScramblingKeyAL.add("Conditional access (Sky 05 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 02, 03 or 04 card)");
+                ScramblingKeyAL.add("Conditional access (Sky 04, 03 or 02 card)");
                 ScramblingKeyAL.add("Conditional access (Old Adult Channel card)");
                 ScramblingKeyAL.add("Conditional access (Newer Adult Channel card)");
                 ScramblingKeyAL.add("Conditional access (xtea mode)");
@@ -5574,11 +5574,11 @@ public class GUI extends javax.swing.JFrame {
                 else {
                     if (RunningOnWindows) {
                         // Add quotes on Windows systems to handle paths with white spaces
-                        OutputDevice = "-o" + '\"' + txtOutputDevice.getText()+ '\"';
+                        OutputDevice = '\"' + txtOutputDevice.getText()+ '\"';
                     }
                     else {
                         // Don't add quotes on Unix systems as this just messes things up
-                        OutputDevice = "-o" + txtOutputDevice.getText();
+                        OutputDevice = txtOutputDevice.getText();
                     }
                     if (cmbFileType.getSelectedIndex() != 3) {
                         FileType = "-t" + cmbFileType.getItemAt(cmbFileType.getSelectedIndex());
@@ -5588,10 +5588,10 @@ public class GUI extends javax.swing.JFrame {
             case 2:
                 // fl2k
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "-ofl2k" + ":" + txtOutputDevice.getText();
+                    OutputDevice = "fl2k" + ":" + txtOutputDevice.getText();
                 }
                 else {
-                    OutputDevice = "-ofl2k";
+                    OutputDevice = "fl2k";
                 }
                 return true;
             case 1:
@@ -5605,16 +5605,16 @@ public class GUI extends javax.swing.JFrame {
                     AntennaName = "";
                 }
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "-osoapysdr" + ":" + txtOutputDevice.getText();
+                    OutputDevice = "soapysdr" + ":" + txtOutputDevice.getText();
                 }
                 else {
-                    OutputDevice = "-osoapysdr";
+                    OutputDevice = "soapysdr";
                 }
                 return true;
             case 0:
                 // HackRF
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "-ohackrf"  + ":" + txtOutputDevice.getText();
+                    OutputDevice = "hackrf"  + ":" + txtOutputDevice.getText();
                 }
                 else {
                     OutputDevice = "";
@@ -5662,7 +5662,10 @@ public class GUI extends javax.swing.JFrame {
         checkLogo();
         // Add all possible parameters to an arraylist to feed to ProcessBuilder
         AllArgs.add(HackTVPath);
-        if (!OutputDevice.isEmpty()) AllArgs.add(OutputDevice);
+        if (!OutputDevice.isEmpty()) {
+            AllArgs.add("-o");
+            AllArgs.add(OutputDevice);
+        }
         AllArgs.add("-m");
         AllArgs.add(Sys);
         // Only add frequency for HackRF or SoapySDR
@@ -6854,7 +6857,7 @@ public class GUI extends javax.swing.JFrame {
             // hackrf
             case 0:
                 lblOutputDevice2.setText("Serial number (optional)");
-                OutputDevice = ""; // can also use -ohackrf
+                OutputDevice = ""; // can also use hackrf
                 // If the RF panel is disabled, enable it and call checkVideoFormat
                 // to re-populate the channel options correctly
                 if (!radCustom.isEnabled()) {
