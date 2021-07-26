@@ -2936,107 +2936,30 @@ public class GUI extends javax.swing.JFrame {
                 invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
             }
         }
-        // Scrambling key/viewing card type
-        // Nothing
-        if ( (ImportedScramblingSystem.isEmpty()) /*&& (ImportedKey.isEmpty())*/ ) {
-            // Do nothing
-        // VideoCrypt 1/2/S (including VC1 side of dual VC1/2 mode)    
-        } else if (ImportedKey.equals("free")) {
-            cmbScramblingKey1.setSelectedIndex(0);
-        } else if (ImportedKey.equals("conditional")) {
-            // VC2 conditional mode only supported on Captain Jack fork
-            if ( (ImportedScramblingSystem.equals("videocrypt2")) && (Fork.equals("CJ")) ) {
-                cmbScramblingKey1.setSelectedIndex(1);
-            // VC1 conditional mode only supported on fsphil's build
-            } else if ( (ImportedScramblingSystem.equals("videocrypt")) && (Fork.equals("")) ) {
-                cmbScramblingKey1.setSelectedIndex(1);
-            // VCS conditional mode (supported on both)
-            } else if (ImportedScramblingSystem.equals("videocrypts")) {
-                cmbScramblingKey1.setSelectedIndex(1);
+        // Scrambling key/viewing card type (including VC1 side of dual VC1/2 mode)
+        if ( (!ImportedScramblingSystem.isEmpty()) ) {
+            int k = ScramblingKeyArray.indexOf(ImportedKey.replace("eurocrypt ", ""));
+            if (k == -1) {
+                if (ImportedScramblingSystem != "videocrypt1+2") {
+                    invalidConfigFileValue("access type", ImportedKey);
+                }
+                else {
+                    invalidConfigFileValue("VideoCrypt I scrambling key", ImportedKey);
+                }
             }
-        } else if ( (ImportedKey.equals("sky12")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(1);
-        } else if ( (ImportedKey.equals("sky11")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(2);
-        } else if ( (ImportedKey.equals("sky10")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(3);
-        } else if ( (ImportedKey.equals("sky10ppv")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(4);
-        } else if ( (ImportedKey.equals("sky09")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(5);
-        } else if ( (ImportedKey.equals("sky07")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(6);
-        } else if ( (ImportedKey.equals("sky05")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(7);
-        } else if ( (ImportedKey.equals("sky03")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(8);
-        } else if ( (ImportedKey.equals("tac")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(9);
-        } else if ( (ImportedKey.equals("tac2")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(10);
-        } else if ( (ImportedKey.equals("xtea")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(11);
-        } else if ( (ImportedKey.equals("ppv")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(12);
-        // Syster/D11/SysterC&R
-        }  else if ( (ImportedScramblingSystem.equals("syster") && 
-                (ImportedKey.equals("")) && (Fork != "CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(0);            
-        }  else if ( (ImportedKey.equals("premiere-fa")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(0);            
-        }  else if ( (ImportedKey.equals("premiere-ca")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(1);            
-        }  else if ( (ImportedKey.equals("cfrfa")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(2);            
-        }  else if ( (ImportedKey.equals("cfrca")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(3);            
-        }  else if ( (ImportedKey.equals("cplfa")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(4);            
-        }  else if ( (ImportedKey.equals("cesfa")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(5);            
-        }  else if ( (ImportedKey.equals("ntvfa")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(6);
-        // Eurocrypt            
-        }  else if ( (ImportedKey.equals("")) && (ImportedScramblingSystem.equals("single-cut")) ) {
-            cmbScramblingKey1.setSelectedIndex(0);            
-        }  else if ( (ImportedKey.equals("")) && (ImportedScramblingSystem.equals("double-cut")) ) {
-            cmbScramblingKey1.setSelectedIndex(0);            
-        }  else if (ImportedKey.equals("eurocrypt filmnet")) {
-            cmbScramblingKey1.setSelectedIndex(1); 
-        }  else if (ImportedKey.equals("eurocrypt tv1000")) {
-            cmbScramblingKey1.setSelectedIndex(2); 
-        }  else if (ImportedKey.equals("eurocrypt ctv")) {
-            cmbScramblingKey1.setSelectedIndex(3); 
-        }  else if (ImportedKey.equals("eurocrypt ctvs")) {
-            cmbScramblingKey1.setSelectedIndex(4); 
-        }  else if (ImportedKey.equals("eurocrypt tvplus")) {
-            cmbScramblingKey1.setSelectedIndex(5); 
-        }  else if (ImportedKey.equals("eurocrypt tvs")) {
-            cmbScramblingKey1.setSelectedIndex(6); 
-        }  else if (ImportedKey.equals("eurocrypt rdv")) {
-            cmbScramblingKey1.setSelectedIndex(7); 
-        }  else if (ImportedKey.equals("eurocrypt nrk")) {
-            cmbScramblingKey1.setSelectedIndex(8);             
-        }  else if ( (ImportedKey.equals("cplus")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(9);            
-        }  else if ( (ImportedKey.equals("tv3update")) && (Fork.equals("CJ")) ) {
-            cmbScramblingKey1.setSelectedIndex(10);
-        } else {
-            if ( ImportedScramblingSystem != "videocrypt1+2") {
-                invalidConfigFileValue("scrambling key", ImportedKey);
-            } else {
-                invalidConfigFileValue("VideoCrypt I scrambling key", ImportedKey);
+            else {
+                cmbScramblingKey1.setSelectedIndex(k);
             }
         }
         // VC2 side of dual VC1/2 mode
         if (cmbScramblingType.getSelectedIndex() == 3) {
-            if (ImportedKey2.equals("free")) {
-                cmbScramblingKey2.setSelectedIndex(0);
-            } else if ( (ImportedKey2.equals("conditional")) && (Fork.equals("CJ")) ) {
-                cmbScramblingKey2.setSelectedIndex(1);
-            } else {
+            int k2 = ScramblingKey2Array.indexOf(ImportedKey2); 
+            if (k2 == -1) {
                 invalidConfigFileValue("VideoCrypt II scrambling key", ImportedKey2);
             }
+            else {
+                cmbScramblingKey2.setSelectedIndex(k2);
+            }            
         }
         // EMM
         if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
@@ -3076,16 +2999,7 @@ public class GUI extends javax.swing.JFrame {
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
                 cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
             }
-        }   
-        // Sample rate (default to 16 MHz if not specified)
-        Double ImportedSampleRate;
-        if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate")) != null) {
-            ImportedSampleRate = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate") / 1000000);
-        } else {
-            ImportedSampleRate = Double.parseDouble("16");
-            JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
-        }
-        txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));        
+        }       
         // ACP
         if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "acp")) {
             chkACP.doClick();
@@ -3182,6 +3096,17 @@ public class GUI extends javax.swing.JFrame {
                 txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex"))));
             }
         }
+        // Sample rate (default to 16 MHz if not specified)
+        // Add this last so other changes don't interfere with the value in the
+        // configuration file.
+        Double ImportedSampleRate;
+        if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate")) != null) {
+            ImportedSampleRate = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate") / 1000000);
+        } else {
+            ImportedSampleRate = Double.parseDouble("16");
+            JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
+        }
+        txtSampleRate.setText(ImportedSampleRate.toString().replace(".0","")); 
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
         return true;
@@ -3275,9 +3200,11 @@ public class GUI extends javax.swing.JFrame {
         // Video format/mode
         FileContents = INIFile.setINIValue(FileContents, "hacktv", "mode", Sys);
         // Frequency and channel
-        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) && (!radCustom.isSelected()) ) { 
-            FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
-            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            if (!radCustom.isSelected()) {
+                FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
+            }
+            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);                
         }
         // Sample rate
         FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
@@ -3995,7 +3922,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addScramblingKey() {
-        ArrayList<String> ScramblingKeyAL = new ArrayList<>();
+        ArrayList<String> ScramblingKeyName = new ArrayList<>();
         ArrayList<String> ScramblingKey2AL = new ArrayList<>();    
         // In the clear (no scrambling)
         if (ScramblingType1.isEmpty()) {
@@ -4026,23 +3953,23 @@ public class GUI extends javax.swing.JFrame {
         if (ScramblingType1 == "--videocrypt") {
             // Set sample rate to 14 MHz
             txtSampleRate.setText("14");
-            ScramblingKeyAL.add("Free access/soft scrambled (no card required)");
+            ScramblingKeyName.add("Free access/soft scrambled (no card required)");
             if (Fork == "CJ") {
-                ScramblingKeyAL.add("Conditional access (Sky 12 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 11 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 10 card)");
-                ScramblingKeyAL.add("Pay-per-view mode (Sky 10 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 09 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 07 or 06 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 05 card)");
-                ScramblingKeyAL.add("Conditional access (Sky 04, 03 or 02 card)");
-                ScramblingKeyAL.add("Conditional access (Old Adult Channel card)");
-                ScramblingKeyAL.add("Conditional access (Newer Adult Channel card)");
-                ScramblingKeyAL.add("Conditional access (xtea mode)");
-                ScramblingKeyAL.add("Pay-per-view mode (e.g. phone cards)");
+                ScramblingKeyName.add("Conditional access (Sky 12 card)");
+                ScramblingKeyName.add("Conditional access (Sky 11 card)");
+                ScramblingKeyName.add("Conditional access (Sky 10 card)");
+                ScramblingKeyName.add("Pay-per-view mode (Sky 10 card)");
+                ScramblingKeyName.add("Conditional access (Sky 09 card)");
+                ScramblingKeyName.add("Conditional access (Sky 07 or 06 card)");
+                ScramblingKeyName.add("Conditional access (Sky 05 card)");
+                ScramblingKeyName.add("Conditional access (Sky 04, 03 or 02 card)");
+                ScramblingKeyName.add("Conditional access (Old Adult Channel card)");
+                ScramblingKeyName.add("Conditional access (Newer Adult Channel card)");
+                ScramblingKeyName.add("Conditional access (xtea mode)");
+                ScramblingKeyName.add("Pay-per-view mode (e.g. phone cards)");
             }   
             else if ( cmbScramblingType.getSelectedIndex() == 1 ) {
-                ScramblingKeyAL.add("Conditional access (Sky 11 card)");
+                ScramblingKeyName.add("Conditional access (Sky 11 card)");
             }
             ScramblingKeyArray = new ArrayList<>();
             ScramblingKeyArray.add("free");
@@ -4084,9 +4011,9 @@ public class GUI extends javax.swing.JFrame {
             // Set sample rate to 14 MHz
             txtSampleRate.setText("14");
             disableScramblingKey2();
-            ScramblingKeyAL.add("Free access/soft scrambled (no card required)");
+            ScramblingKeyName.add("Free access/soft scrambled (no card required)");
             if (Fork == "CJ") {
-                ScramblingKeyAL.add("Conditional access (MultiChoice card)");
+                ScramblingKeyName.add("Conditional access (MultiChoice card)");
             }
             ScramblingKeyArray = new ArrayList<>();
             ScramblingKeyArray.add("free");
@@ -4099,8 +4026,8 @@ public class GUI extends javax.swing.JFrame {
             // Set sample rate to 14 MHz (may not be correct!)
             txtSampleRate.setText("14");
             disableScramblingKey2();
-            ScramblingKeyAL.add("Free access/soft scrambled (no card required)");
-            ScramblingKeyAL.add("Conditional access (BBC Select card)");
+            ScramblingKeyName.add("Free access/soft scrambled (no card required)");
+            ScramblingKeyName.add("Conditional access (BBC Select card)");
             ScramblingKeyArray = new ArrayList<>();
             ScramblingKeyArray.add("free");
             ScramblingKeyArray.add("conditional");
@@ -4113,16 +4040,16 @@ public class GUI extends javax.swing.JFrame {
             txtSampleRate.setText("20");
             if (Fork.equals("CJ")) {
                 disableScramblingKey2();
-                ScramblingKeyAL.add("Free access (Premiere Germany)");
-                ScramblingKeyAL.add("Conditional access (Premiere Germany)");
-                ScramblingKeyAL.add("Free access (Canal+ France)");
-                ScramblingKeyAL.add("Conditional access (Canal+ France)");
-                ScramblingKeyAL.add("Free access (Canal+ Poland)");
-                ScramblingKeyAL.add("Free access (Canal+ Spain)");
-                ScramblingKeyAL.add("Free access (HTB+ Russia)");
+                ScramblingKeyName.add("Free access (Premiere Germany)");
+                ScramblingKeyName.add("Conditional access (Premiere Germany)");
+                ScramblingKeyName.add("Free access (Canal+ France)");
+                ScramblingKeyName.add("Conditional access (Canal+ France)");
+                ScramblingKeyName.add("Free access (Canal+ Poland)");
+                ScramblingKeyName.add("Free access (Canal+ Spain)");
+                ScramblingKeyName.add("Free access (HTB+ Russia)");
             }
             else {
-                ScramblingKeyAL.add("Free access");                
+                ScramblingKeyName.add("Free access");                
             }
             ScramblingKeyArray = new ArrayList<>();
             if (Fork.equals("CJ")) {
@@ -4142,18 +4069,18 @@ public class GUI extends javax.swing.JFrame {
         else if ( ScramblingType1.equals("--single-cut") || 
                 (ScramblingType1.equals("--double-cut")) ) {
             disableScramblingKey2();
-            ScramblingKeyAL.add("No conditional access (free)");
-            ScramblingKeyAL.add("EuroCrypt M (FilmNet card)");
-            ScramblingKeyAL.add("EuroCrypt M (TV1000 card)");
-            ScramblingKeyAL.add("EuroCrypt M (CTV card)");
-            ScramblingKeyAL.add("EuroCrypt M (TV Plus card)");
-            ScramblingKeyAL.add("EuroCrypt S2 (TVS Denmark card)");
-            ScramblingKeyAL.add("EuroCrypt S2 (RDV card)");
-            ScramblingKeyAL.add("EuroCrypt S2 (NRK card)");
-            ScramblingKeyAL.add("EuroCrypt S2 (CTV card)");
+            ScramblingKeyName.add("No conditional access (free)");
+            ScramblingKeyName.add("EuroCrypt M (FilmNet card)");
+            ScramblingKeyName.add("EuroCrypt M (TV1000 card)");
+            ScramblingKeyName.add("EuroCrypt M (CTV card)");
+            ScramblingKeyName.add("EuroCrypt M (TV Plus card)");
+            ScramblingKeyName.add("EuroCrypt S2 (TVS Denmark card)");
+            ScramblingKeyName.add("EuroCrypt S2 (RDV card)");
+            ScramblingKeyName.add("EuroCrypt S2 (NRK card)");
+            ScramblingKeyName.add("EuroCrypt S2 (CTV card)");
             if (Fork.equals("CJ")) {
-                ScramblingKeyAL.add("EuroCrypt S2 (Canal+ Nordic card)");
-                ScramblingKeyAL.add("EuroCrypt M (Autoupdate mode - tv3update)");
+                ScramblingKeyName.add("EuroCrypt S2 (Canal+ Nordic card)");
+                ScramblingKeyName.add("EuroCrypt M (Autoupdate mode - tv3update)");
             }
             ScramblingKeyArray = new ArrayList<>();
             ScramblingKeyArray.add("");
@@ -4173,9 +4100,9 @@ public class GUI extends javax.swing.JFrame {
         // End adding scrambling systems above this line
         cmbScramblingKey1.removeAllItems();       
         // Convert to an array so we can populate
-        String[] ScramblingKey = new String[ScramblingKeyAL.size()];
+        String[] ScramblingKey = new String[ScramblingKeyName.size()];
         for(int i = 0; i < ScramblingKey.length; i++) {
-            ScramblingKey[i] = ScramblingKeyAL.get(i);
+            ScramblingKey[i] = ScramblingKeyName.get(i);
         }
         cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(ScramblingKey));
         cmbScramblingKey1.setSelectedIndex(0);
@@ -4774,6 +4701,7 @@ public class GUI extends javax.swing.JFrame {
         enableScrambling();
         addPALScramblingTypes();
         disableChannelID();
+        if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
     }
 
     private void common525Features() {
@@ -4787,7 +4715,8 @@ public class GUI extends javax.swing.JFrame {
         disableScrambling();
         disableACP();
         enableVITS();
-        disableChannelID();    
+        disableChannelID();
+        if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
     }
     
     private void commonBWFeatures() {
@@ -4801,6 +4730,7 @@ public class GUI extends javax.swing.JFrame {
         disableACP();
         disableVITS();
         disableChannelID();
+        if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
     }  
     
     private void commonMACFeatures() {
@@ -4820,6 +4750,7 @@ public class GUI extends javax.swing.JFrame {
         enableScrambling();
         addMACScramblingTypes();
         enableChannelID();
+        if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
         DefaultSampleRate = "20.25";          
     }
     
