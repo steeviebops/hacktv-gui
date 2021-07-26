@@ -2628,6 +2628,10 @@ public class GUI extends javax.swing.JFrame {
                 radSECAM.doClick();
                 cmbVideoFormat.setSelectedIndex(2);
                 break;
+            case "secam-i":
+                radSECAM.doClick();
+                cmbVideoFormat.setSelectedIndex(3);
+                break;
             // Legacy black and white video formats
             case "a":
                 radBW.doClick();
@@ -2689,7 +2693,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
             case "secam":
                 radSECAM.doClick();
-                cmbVideoFormat.setSelectedIndex(3);
+                cmbVideoFormat.setSelectedIndex(4);
                 break;
             case "405":
                 radBW.doClick();
@@ -4471,6 +4475,7 @@ public class GUI extends javax.swing.JFrame {
         Sys = VideoModeArray[cmbVideoFormat.getSelectedIndex()];
         switch (Sys) {
             case "i":
+            case "secam-i":
                 // System I (625 lines)
                 // Mono audio at +5.9996 MHz
                 // NICAM stereo supported
@@ -6379,10 +6384,14 @@ public class GUI extends javax.swing.JFrame {
     private void radSECAMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSECAMActionPerformed
         // Configures features supported (or not) by SECAM video formats and
         // populates the VideoFormat combobox.
+        
+        // SECAM-I was never used in service to my knowledge, but hacktv
+        // supports it so we'll add it too.
         String[] VideoMode = {
             "SECAM-L (625 lines, 25 fps, 6.5 MHz AM audio)",
             "SECAM-D/K (625 lines, 25 fps, 6.5 MHz FM audio)",
             "SECAM-FM (625 lines, 25 fps, 6.5 MHz FM audio)",
+            "SECAM-I (625 lines, 25 fps, 6.0 MHz FM audio)",
             "Baseband SECAM (625 lines, 25 fps)"
         };
         /* Populate VideoModeArray with the parameters for each of the modes above.
@@ -6392,6 +6401,7 @@ public class GUI extends javax.swing.JFrame {
             "l",
             "d",
             "secam-fm",
+            "secam-i",
             "secam"
         };
         cmbVideoFormat.removeAllItems();
@@ -6671,28 +6681,60 @@ public class GUI extends javax.swing.JFrame {
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
         txtFrequency.setEditable(false);
         cmbChannel.setEnabled(true);
-        if ((Sys).equals("i")) { addEuropeUHFChannels(); }
-        if ((Sys).equals("g")) { addEuropeUHFChannels(); }
-        if ((Sys).equals("m")) { addNTSCUHFChannels();}
-        if ((Sys).equals("l")) { addEuropeUHFChannels(); }
-        if ((Sys).equals("d")) { addEuropeUHFChannels(); }
-        if ((Sys).equals("pal-m")) { addNTSCUHFChannels(); }
-        if ((Sys).equals("dmac-fm")) { addBSBChannels(); }
-        if ((Sys).equals("m-cbs405")) { addNTSCUHFChannels(); }
+        switch(Sys) {
+            case "i":
+            case "g":
+            case "l":
+            case "d":
+            case "secam-i":
+                addEuropeUHFChannels();
+                break;
+            case "m":
+            case "pal-m":
+            case "m-cbs405":
+                addNTSCUHFChannels();
+                break;
+            case "dmac-fm":
+                addBSBChannels();
+                break;
+            default:
+                System.err.println("Video mode not defined.");
+                break;
+        }
     }//GEN-LAST:event_radUHFActionPerformed
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
         txtFrequency.setEditable(false);
         cmbChannel.setEnabled(true);
-        if ((Sys).equals("i")) { addIrishVHFChannels(); }
-        if ((Sys).equals("g")) { addSysBVHFChannels(); }
-        if ((Sys).equals("m")) { addNTSCVHFChannels();}
-        if ((Sys).equals("l")) { addFrenchVHFChannels(); }
-        if ((Sys).equals("d")) { addSystemDRussiaChannels(); }
-        if ((Sys).equals("a")) { addSystemAChannels(); }
-        if ((Sys).equals("e")) { addSystemEChannels(); }
-        if ((Sys).equals("pal-m")) { addNTSCVHFChannels(); }
-        if ((Sys).equals("m-cbs405")) { addNTSCVHFChannels(); }
+        switch(Sys) {
+            case "i":
+            case "secam-i":
+                addIrishVHFChannels();
+                break;
+            case "g":
+                addSysBVHFChannels();
+                break;
+            case "m":
+            case "pal-m":
+            case "m-cbs405":
+                addNTSCVHFChannels();
+                break;
+            case "l":
+                addFrenchVHFChannels();
+                break;
+            case "d":
+                addSystemDRussiaChannels();
+                break;
+            case "a":
+                addSystemAChannels();
+                break;
+            case "e":
+                addSystemEChannels();
+                break;
+            default:
+                System.err.println("Video mode not defined.");
+                break;
+        }
     }//GEN-LAST:event_radVHFActionPerformed
 
     private void radCustomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCustomActionPerformed
