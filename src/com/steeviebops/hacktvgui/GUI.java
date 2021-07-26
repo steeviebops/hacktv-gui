@@ -2962,16 +2962,18 @@ public class GUI extends javax.swing.JFrame {
             cmbScramblingKey1.setSelectedIndex(5);
         } else if ( (ImportedKey.equals("sky07")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(6);
-        } else if ( (ImportedKey.equals("sky03")) && (Fork.equals("CJ")) ) {
+        } else if ( (ImportedKey.equals("sky05")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(7);
-        } else if ( (ImportedKey.equals("tac")) && (Fork.equals("CJ")) ) {
+        } else if ( (ImportedKey.equals("sky03")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(8);
-        } else if ( (ImportedKey.equals("tac2")) && (Fork.equals("CJ")) ) {
+        } else if ( (ImportedKey.equals("tac")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(9);
-        } else if ( (ImportedKey.equals("xtea")) && (Fork.equals("CJ")) ) {
+        } else if ( (ImportedKey.equals("tac2")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(10);
-        } else if ( (ImportedKey.equals("ppv")) && (Fork.equals("CJ")) ) {
+        } else if ( (ImportedKey.equals("xtea")) && (Fork.equals("CJ")) ) {
             cmbScramblingKey1.setSelectedIndex(11);
+        } else if ( (ImportedKey.equals("ppv")) && (Fork.equals("CJ")) ) {
+            cmbScramblingKey1.setSelectedIndex(12);
         // Syster/D11/SysterC&R
         }  else if ( (ImportedScramblingSystem.equals("syster") && 
                 (ImportedKey.equals("")) && (Fork != "CJ")) ) {
