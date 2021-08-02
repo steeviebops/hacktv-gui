@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Stephen McGarry
+ * Copyright (C) 2021 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,77 +25,95 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Basic INI file reader/writer.
  * Uses regular expressions to read/write the contents of an INI file.
  * @author Stephen McGarry
+ * 
+ * To use this, provide a string containing the path to your INI file, or a
+ * string containing the contents of a file. The getINIValue function will
+ * detect what you have provided and act accordingly.
+ * 
  */
 
 public class INIFile {
     
-    public static boolean getBooleanFromINI(String fileName, String section, String setting) {
-        String v = getINIValue(fileName, section, setting, "");
-        if ((v.equals("0")) || (v.equals("false"))) {
-            return false;
-        }
-        else if ((v.equals("1")) || (v.equals("true"))) {
-            return true;
-        }
-        else {
-            return false;
+    public static boolean getBooleanFromINI(String input, String section, String setting) {
+        String v = getINIValue(input, section, setting, "");
+        switch (v) {
+            case "0":
+            case "false":
+                return false;
+            case "1":
+            case "true":
+                return true;
+            default:
+                return false;
         }
     }
     
-    public static Integer getIntegerFromINI(String fileName, String section, String setting) {
+    public static Integer getIntegerFromINI(String input, String section, String setting) {
         try {
-            return Integer.parseInt(getINIValue(fileName, section, setting, ""));
+            return Integer.parseInt(getINIValue(input, section, setting, ""));
         }
         catch (NumberFormatException e) {
             return null;
         }
     }
     
-    public static Double getDoubleFromINI(String fileName, String section, String setting) {
+    public static Double getDoubleFromINI(String input, String section, String setting) {
         try {
-            return Double.parseDouble(getINIValue(fileName, section, setting, ""));
+            return Double.parseDouble(getINIValue(input, section, setting, ""));
         }
         catch (NumberFormatException e) {
             return null;
         }
     }    
     
-    public static String getStringFromINI(String fileName, String section, String setting, String defaultValue, Boolean preserveCase) {
+    public static String getStringFromINI(String input, String section, String setting, String defaultValue, Boolean preserveCase) {
         if (!preserveCase) {
-            return getINIValue(fileName, section, setting, defaultValue).toLowerCase();
+            return getINIValue(input, section, setting, defaultValue).toLowerCase();
         }
         else {
-            return (getINIValue(fileName, section, setting, defaultValue)); 
+            return (getINIValue(input, section, setting, defaultValue)); 
         }
     }    
     
-    public static String getINIValue(String fileName, String section, String setting, String defaultValue) {
-        // Load the specified file to a string named fileContents
-        File f = new File(fileName);
+    public static String getINIValue(String input, String section, String setting, String defaultValue) {
         String fileContents;
-        try {
-            fileContents = Files.readString(f.toPath(), StandardCharsets.US_ASCII);
+        // If the input string contains one line, treat it as a file path
+        // Otherwise, treat it as the contents of an INI file
+        long lines = input.chars().filter(x -> x == '\n').count() + 1;
+        if (lines == 1) {
+            // Load the specified file to a string named fileContents
+            File f = new File(input);
+            try {
+                fileContents = Files.readString(f.toPath(), StandardCharsets.US_ASCII);
+            }
+            catch (IOException e) {
+                return defaultValue;
+            }            
         }
-        catch (IOException e) {
-            return defaultValue;
+        else {
+            // Set the fileContents variable to whatever we received from input
+            fileContents = input;
         }
+        // Remove all CR characters
+        fileContents = fileContents.replaceAll("\r\n", "\n");
+        fileContents = fileContents.replaceAll("\r", "\n");
+        // Remove any comment lines so they don't interfere with processing
+        fileContents = Stream.of(fileContents.split("\n"))
+                .filter(s -> !s.contains(";"))
+                .collect(Collectors.joining("\n"));
+        // Remove any white spaces between the setting and value
+        fileContents = fileContents.replaceAll("[^\\S\n]([=])[^\\S\n]", "=");
         // Extract the specified section from fileContents to parsedSection
         String parsedSection = null;
-        String r1 = "(?i)(?<=";
-        String r2;
-        // Check if the file uses Windows or Unix-style line breaks
-        // The second part of the regex varies depending on which it has
-        if (fileContents.contains("\r\n")) {
-            r2 = "\\]\\r\\n)[^\\[]*";
-        }
-        else {
-            r2 = "\\]\\n)[^\\[]*";
-        }
+        String r1 = "(?i)(?<=\\[";
+        String r2 = "\\]\\n)[^\\[]*";
         Pattern pattern = Pattern.compile(r1 + section + r2, Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(fileContents);
         while (matcher.find()) {
@@ -105,17 +123,12 @@ public class INIFile {
         // If the specified section was not found, return the default value
         if (parsedSection == null) return defaultValue;
         
-        // If the section is commented out, return the default value
-        if ( (parsedSection.contains(";" + setting) || 
-                (parsedSection.contains("; " + setting) )) )
-            return defaultValue;
-        
         // Extract the required setting from parsedSection and return its value
         // If value is null, return the specified default value instead
         String result = null;
         
         String regex1 = "(?i)(?<=\\b";
-        String regex2 = "=)[^\r\n]*";
+        String regex2 = "=)[^\n]*";
 
         Pattern p = Pattern.compile(regex1 + setting + regex2);
         Matcher m = p.matcher(parsedSection);
@@ -124,7 +137,9 @@ public class INIFile {
             if (result == null) result = m.group(0);
         }
         if (result != null) {
-            return result;
+            // Return the result, minus any in-line comments and with
+            // leading and/or trailing whitespaces removed.
+            return result.replaceAll(";.*", "").trim();
         }
         else {
             return defaultValue;
@@ -227,7 +242,7 @@ public class INIFile {
         return newContents;
     }
     
-    private static String splitINIfile(String fileContents, String section) {
+    public static String splitINIfile(String fileContents, String section) {
         String selectedSection = null;
         // Extract the specified section from fileContents
         String r1 = "(?i)(\\[";
