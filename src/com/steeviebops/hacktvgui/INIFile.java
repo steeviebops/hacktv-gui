@@ -147,10 +147,17 @@ public class INIFile {
             }
             for (int x = 0; x < sc.length(); x++) {
                 // If 'ps' matches one of the characters in 'sc' but is not a backslash
-                if ((ps.equals(sc.substring(x, x + 1)) && (i != 0)
-                        && (!setting.substring(i - 1, i).equals("\\")) )) {
-                    // Match found, append escape character
-                    setting = setting.replace(ps, "\\" + ps);
+                if ((ps.equals(sc.substring(x, x + 1)) && (i > 0))) {
+                    if (!setting.substring(i - 1, i).equals("\\")) {
+                        // Match found, append escape character
+                        setting = setting.replace(ps, "\\" + ps);
+                    }                    
+                }
+                else if ((ps.equals(sc.substring(x, x + 1)) && (i == 0))) {
+                    if (!setting.substring(i).equals("\\")) {
+                        // Match found, append escape character
+                        setting = setting.replace(ps, "\\" + ps);
+                    }        
                 }
             }
         }
@@ -160,7 +167,7 @@ public class INIFile {
         String result = null;
         
         String regex1 = "(?i)(?<=^";
-        String regex2 = "=)[^\\n]*";
+        String regex2 = "=)[^\n]*";
 
         Pattern p = Pattern.compile(regex1 + setting + regex2, Pattern.MULTILINE);
         Matcher m = p.matcher(parsedSection);
