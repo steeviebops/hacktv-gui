@@ -84,6 +84,12 @@ public class INIFile {
     
     public static String getINIValue(String input, String section, String setting, String defaultValue) {
         String fileContents;
+        // If the setting string contains a backslash or square brackets, abort immediately.
+        if ((setting.contains("\\")) || (setting.contains("[")) || 
+                (setting.contains("]"))) {
+            System.err.println("INI setting cannot contain a backslash or square brackets.");
+            return null;
+        }
         // If the input string contains one line, treat it as a file path
         // Otherwise, treat it as the contents of an INI file
         long lines = input.chars().filter(x -> x == '\n').count() + 1;
@@ -123,14 +129,40 @@ public class INIFile {
         // If the specified section was not found, return the default value
         if (parsedSection == null) return defaultValue;
         
+        /* Check for special characters in the provided setting.
+         * If found, we need to escape them.
+         * We do this by checking for each character in the string 'sc' below.
+         */
+        String ps;
+        String sc = "!@#$%&*()'+,-./:;<=>?^_`{|}";
+        for (int i = 0; i < setting.length(); i++) {
+            if (i != setting.length() - 1) {
+                // Extract a single character from 'settings' to 'ps'
+                ps = setting.substring(i, i + 1);
+            }
+            else {
+                // If we have reached the last character in the sequence, don't
+                // try to read the next one as we'll overflow.
+                ps = setting.substring(i);
+            }
+            for (int x = 0; x < sc.length(); x++) {
+                // If 'ps' matches one of the characters in 'sc' but is not a backslash
+                if ((ps.equals(sc.substring(x, x + 1)) && (i != 0)
+                        && (!setting.substring(i - 1, i).equals("\\")) )) {
+                    // Match found, append escape character
+                    setting = setting.replace(ps, "\\" + ps);
+                }
+            }
+        }
+        
         // Extract the required setting from parsedSection and return its value
         // If value is null, return the specified default value instead
         String result = null;
         
-        String regex1 = "(?i)(?<=\\b";
-        String regex2 = "=)[^\n]*";
+        String regex1 = "(?i)(?<=^";
+        String regex2 = "=)[^\\n]*";
 
-        Pattern p = Pattern.compile(regex1 + setting + regex2);
+        Pattern p = Pattern.compile(regex1 + setting + regex2, Pattern.MULTILINE);
         Matcher m = p.matcher(parsedSection);
 
         while (m.find()) {
