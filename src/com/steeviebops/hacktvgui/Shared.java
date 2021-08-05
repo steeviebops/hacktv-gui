@@ -23,6 +23,7 @@ package com.steeviebops.hacktvgui;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -38,6 +39,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class Shared {
     
@@ -115,25 +118,6 @@ public class Shared {
         if (FilePath.endsWith("\"")) FilePath = FilePath.substring(0, FilePath.length() -1);
         return FilePath;
     }
-
-    public static int countLines(File file) throws IOException {
-        // By fhucho at https://stackoverflow.com/questions/1277880/how-can-i-get-the-count-of-line-in-a-file-in-an-efficient-way
-        int l = 0;
-
-        FileInputStream fis = new FileInputStream(file);
-        byte[] buffer = new byte[8];
-        int read;
-
-        while ((read = fis.read(buffer)) != -1) {
-            for (int i = 0; i < read; i++) {
-                if (buffer[i] == '\n') l++;
-            }
-        }
-
-        fis.close();
-
-        return l;
-    } 
     
     public static Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
         JarFile jar = null;
@@ -153,11 +137,60 @@ public class Shared {
         return null;
      }
 
-    public static void download(String url, String fileName) throws Exception {
+    public static void download(String url, String fileName) throws IOException {
         URLConnection connection = new URL(url).openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
             Files.copy(in, Paths.get(fileName));  
         }
-    }    
+    }
+    
+    // Unzip code courtesy of https://www.baeldung.com/java-compress-and-uncompress
+    
+    public static void UnzipFile(String fileZip, String destination) throws IOException {
+        File destDir = new File(destination);
+        byte[] buffer = new byte[1024];
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
+        ZipEntry zipEntry = zis.getNextEntry();
+        while (zipEntry != null) {
+             File newFile = newFile(destDir, zipEntry);
+             if (zipEntry.isDirectory()) {
+                 if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                     throw new IOException("Failed to create directory " + newFile);
+                 }
+             } else {
+                 // fix for Windows-created archives
+                 File parent = newFile.getParentFile();
+                 if (!parent.isDirectory() && !parent.mkdirs()) {
+                     throw new IOException("Failed to create directory " + parent);
+                 }
+
+                 // write file content
+                 FileOutputStream fos = new FileOutputStream(newFile);
+                 int len;
+                 while ((len = zis.read(buffer)) > 0) {
+                     fos.write(buffer, 0, len);
+                 }
+                 fos.close();
+                 // Reset timestamp to original
+                 newFile.setLastModified(zipEntry.getTime());
+             }
+         zipEntry = zis.getNextEntry();
+        }
+        zis.closeEntry();
+        zis.close();
+    }
+    
+    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+
+        return destFile;
+    }
 }

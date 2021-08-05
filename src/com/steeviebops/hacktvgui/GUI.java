@@ -50,6 +50,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.SwingWorker;
@@ -78,7 +79,7 @@ public class GUI extends javax.swing.JFrame {
     // Strings to set the location and contents of the Modes.ini file
     String ModesFilePath;
     String ModesFile;
-    double ModesFileVersion;
+    String ModesFileVersion;
     String ModesFileLocation;
     
     // Declare variables for stereo status
@@ -118,7 +119,6 @@ public class GUI extends javax.swing.JFrame {
      * FMSampleRate specifies the recommended sample rate for the pre-emphasis filter
      */
     String DefaultSampleRate;
-    String FMSampleRate;
     
     // Declare combobox arrays and ArrayLists
     // These are used to store secondary information (frequencies, parameters, etc)
@@ -288,10 +288,11 @@ public class GUI extends javax.swing.JFrame {
                 chkSyntaxOnly.doClick();
                 chkSyntaxOnly.setEnabled(false);
                 if (Prefs.get("MissingKillWarningShown", null) == null) {
-                    JOptionPane.showMessageDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
-                + "You can download it from https://github.com/alirdn/windows-kill/releases/\n"
-                + "Please save it in the same directory as this application and restart.\n"          
-                            + "This message will only be shown once.", AppName, JOptionPane.WARNING_MESSAGE);
+                int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
+                        + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
+                        + "Would you like to download it now?\n\n"
+                        + "This message will only be shown once.", AppName, JOptionPane.YES_NO_OPTION);
+                    if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
                     Prefs.put("MissingKillWarningShown", "1");
                 }
             } else {
@@ -306,15 +307,20 @@ public class GUI extends javax.swing.JFrame {
         }
         populateCheckboxArray();
         loadPreferences();
+        detectFork();        
         selectModesFile();
         openModesFile();
         populateVideoModes();
         addWSSModes();
         addARCorrectionOptions();
         addTestCardOptions();
-        addLogoOptions();
         addOutputDevices();
-        detectFork();
+        if (Fork.equals("CJ")) {
+            captainJack();
+        }
+        else {
+            fsphil();
+        }
         // Set default values when form loads
         radLocalSource.doClick();
         selectDefaultMode();
@@ -546,7 +552,6 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GUI frontend for hacktv");
-        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/steeviebops/resources/test.gif")).getImage());
 
         teletextFileChooser.setDialogTitle("Select a teletext file or directory");
@@ -1736,18 +1741,14 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(pathPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblSpecifyLocation)
                     .addGroup(pathPanelLayout.createSequentialGroup()
-                        .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnHackTVPath))
-                    .addGroup(pathPanelLayout.createSequentialGroup()
-                        .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblSpecifyLocation)
-                            .addGroup(pathPanelLayout.createSequentialGroup()
-                                .addComponent(lblDetectedBuikd)
-                                .addGap(18, 18, 18)
-                                .addComponent(lblFork)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(lblDetectedBuikd)
+                        .addGap(18, 18, 18)
+                        .addComponent(lblFork))
+                    .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnHackTVPath, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         pathPanelLayout.setVerticalGroup(
@@ -1800,7 +1801,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblClearAll)
                     .addComponent(lblClearMRU))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(167, Short.MAX_VALUE))
         );
         resetSettingsPanelLayout.setVerticalGroup(
             resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1853,18 +1854,17 @@ public class GUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(lblSyntaxOptionDisabled))
                     .addComponent(chkLocalModes))
-                .addContainerGap(203, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
             generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(generalSettingsPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSyntaxOnly)
                     .addComponent(lblSyntaxOptionDisabled))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout settingsTabLayout = new javax.swing.GroupLayout(settingsTab);
@@ -1883,12 +1883,12 @@ public class GUI extends javax.swing.JFrame {
             settingsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(settingsTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(85, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2108,6 +2108,43 @@ public class GUI extends javax.swing.JFrame {
         };
     }
     
+    private void downloadWindowsKill(){
+        // Downloads windows-kill from ElyDotDev (formerly alirdn) on Github
+        try {
+            createTempDirectory();
+            String t = TempDir.toString();
+            String downloadPath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release.zip";
+            String tmpExePath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release" + OS_SEP + "windows-kill.exe";
+            String exePath = JarDir + OS_SEP + "windows-kill.exe";
+            String downloadURL = "https://github.com/ElyDotDev/windows-kill/releases/download/1.1.4/windows-kill_x64_1.1.4_lib_release.zip";
+            // Start download
+            Shared.download(downloadURL, downloadPath);
+            // Unzip what we got to the temp directory
+            Shared.UnzipFile(downloadPath, t);
+            // If windows-kill.exe exists in the temp directory, delete the zip file
+            if (Files.exists(Path.of(tmpExePath))) {
+                Shared.deleteFSObject(Path.of(downloadPath)); 
+                // Move windows-kill.exe from the temp directory to the
+                // working directory
+                Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
+                // Clean up by removing remnants of what we unzipped
+                Shared.deleteFSObject(Path.of(tmpExePath).getParent());
+            }
+            // Remove the syntax-only block
+            if (Files.exists(Path.of(exePath))) {
+                lblSyntaxOptionDisabled.setVisible(false);
+                if (!chkSyntaxOnly.isEnabled()){
+                    chkSyntaxOnly.setEnabled(true);
+                    chkSyntaxOnly.doClick();
+                }
+            }
+        }
+        catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "An error occurred while downloading windows-kill.\n"
+                    + "Please ensure that you have write permissions to the application directory and that you have internet access.", AppName, JOptionPane.ERROR_MESSAGE);
+        }                        
+    }
+    
     private void selectModesFile() {
         if ((Prefs.get("UseLocalModesFile", "0")).equals("1")) {
             if (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) {
@@ -2116,7 +2153,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                ModesFilePath = "/com/steeviebops/resources/Modes.ini";                
+                ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";                
             }
         }
         else if (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) {
@@ -2141,23 +2178,23 @@ public class GUI extends javax.swing.JFrame {
     private void downloadModesFile() {
         createTempDirectory();
         String f = TempDir + OS_SEP + "Modes.ini";
-        String u = "https://raw.githubusercontent.com/steeviebops/jhacktv-gui/main/src/com/steeviebops/resources/Modes.ini";
+        String u = "https://raw.githubusercontent.com/steeviebops/jhacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         try {
             Shared.download(u, f);
             // Use the file we downloaded
             ModesFilePath = f;
         }
-        catch (Exception ex) {
+        catch (IOException ex) {
                 JOptionPane.showMessageDialog(null, "Unable to download the modes file from Github.\n"
                         + "Using embedded copy instead, which may not be up to date.", AppName, JOptionPane.ERROR_MESSAGE);
                 System.out.println("Error downloading modes.ini... " + ex);
                 // Use the embedded copy
-                ModesFilePath = "/com/steeviebops/resources/Modes.ini";
+                ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         }
     } 
     
     private void openModesFile() {
-        if (ModesFilePath == "/com/steeviebops/resources/Modes.ini") {
+        if (ModesFilePath.startsWith("/com/steeviebops/resources/")) {
             // Read the embedded modes.ini to the ModesFile string
             try {
                 InputStream is = getClass().getResourceAsStream(ModesFilePath);
@@ -2190,7 +2227,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 JOptionPane.showMessageDialog(null, "Unable to read the modes file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", AppName, JOptionPane.ERROR_MESSAGE);                
-                ModesFilePath = "/com/steeviebops/resources/Modes.ini";
+                ModesFilePath = "/com/steeviebops/resources/" + getFork() + "Modes.ini";
                 ModesFileLocation = "embedded";
                 openModesFile();
             }
@@ -2242,12 +2279,7 @@ public class GUI extends javax.swing.JFrame {
          */
         
         // Read modes.ini file version
-        try {
-            ModesFileVersion = INIFile.getDoubleFromINI(ModesFile, "Modes.ini", "FileVersion");
-        }
-        catch (Exception ex) {
-            ModesFileVersion = -1.0;
-        }
+        ModesFileVersion = INIFile.getStringFromINI(ModesFile, "Modes.ini", "FileVersion", "unknown", true);
         
         
         String m = INIFile.getStringFromINI(ModesFile, "videomodes", ColourStandard, "", false);
@@ -2265,8 +2297,15 @@ public class GUI extends javax.swing.JFrame {
             // Check if the specified modes are defined, if not, don't add them
             ArrayList <String> ml = new ArrayList <> ();
             for (int i = 0; i < q.length; i++) {
-                String a = INIFile.getStringFromINI(ModesFile, q[i], "name", null, true);
-                if (a != null) ml.add(a);
+                String a = INIFile.getStringFromINI(ModesFile, q[i], "name", "", true);
+                if (!a.isBlank()) {
+                    // Add the friendly name of the mode
+                    ml.add(a);
+                }
+                else {
+                    // Add the mode itself
+                    ml.add("Unnamed mode '" + q[i] + "'");
+                }
             }
             // Convert the ArrayList to an array to populate the combobox
             String[] b = new String[ml.size()];
@@ -2314,11 +2353,11 @@ public class GUI extends javax.swing.JFrame {
         // Check if the specified path does not exist or is a directory
         if (!Files.exists(Path.of(HackTVPath))) {
             lblFork.setText("Not found");
-            fsphil();
+            Fork = "";
             return;
         } else if (Files.isDirectory(Path.of(HackTVPath))) {
             lblFork.setText("Invalid path");
-            fsphil();
+            Fork = "";
             return;            
         }
         /*  Check the size of the specified file.
@@ -2328,7 +2367,7 @@ public class GUI extends javax.swing.JFrame {
         File f = new File(HackTVPath);
         if (f.length() > 31457280) { 
             lblFork.setText("Invalid file (too large)");
-            fsphil();
+            Fork = "";
             return;
         }
         // Test the specified file by loading it into memory using a BufferedReader.
@@ -2341,12 +2380,12 @@ public class GUI extends javax.swing.JFrame {
                 if (c.contains("--enableemm")) {
                     b = true;
                     lblFork.setText("Captain Jack");
-                    captainJack();
+                    Fork = "CJ";
                 }
                 else if (c.contains("Both VC1 and VC2 cannot be used together")) {
                     b = true;
                     lblFork.setText("fsphil");
-                    fsphil();
+                    Fork = "";
                 }
                 else {
                     // Clear the line and try another one
@@ -2363,19 +2402,27 @@ public class GUI extends javax.swing.JFrame {
             }
         catch (IOException ex) {
             lblFork.setText("File access error");
-            fsphil();
+            Fork = "";
             return;
         }
         if (!b) {
             lblFork.setText("Invalid file (not hacktv?)");
-            fsphil();
+            Fork = "";
             return;            
         }        
+    }
+    
+    private String getFork() {
+        if (Fork.equals("CJ")) {
+            return "CaptainJack";
+        }
+        else {
+            return "fsphil";
+        }
     }
 
     private void fsphil() {
         // Disable features unsupported in fsphil's build
-        Fork = "";
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkLogo.isSelected()) chkLogo.doClick();
         if (chkSubtitles.isSelected()) chkSubtitles.doClick();
@@ -2391,7 +2438,7 @@ public class GUI extends javax.swing.JFrame {
         chkVolume.setEnabled(false);
         chkDownmix.setEnabled(false);
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
-            addPALScramblingTypes();
+            add625ScramblingTypes();
         }
         else if ( radMAC.isSelected() ) {
             addMACScramblingTypes();
@@ -2404,8 +2451,8 @@ public class GUI extends javax.swing.JFrame {
     
     private void captainJack() {
         // Enable features supported in Captain Jack's build
-        Fork = "CJ";
         chkLogo.setEnabled(true);
+        addLogoOptions();
         if ( !radTest.isSelected() ) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
@@ -2416,7 +2463,7 @@ public class GUI extends javax.swing.JFrame {
             chkDownmix.setEnabled(true);
         }
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
-            addPALScramblingTypes();
+            add625ScramblingTypes();
         }
         else if ( radMAC.isSelected() ) {
             addMACScramblingTypes();
@@ -2424,7 +2471,7 @@ public class GUI extends javax.swing.JFrame {
         if (radTest.isSelected()){
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
-        }        
+        }
     }
 
     private void createTempDirectory() {
@@ -2862,11 +2909,16 @@ public class GUI extends javax.swing.JFrame {
                      "hacktv no longer supports external logo files. Logo option disabled.", AppName, JOptionPane.WARNING_MESSAGE);
             }
             else if (!ImportedLogo.isBlank()) {
+                boolean logoFound = false;
                 for (int i = 0; i <= cmbLogo.getItemCount() - 1; i++) {
                     if ( (LogoArray[i].toLowerCase()).equals(ImportedLogo) ) {
                         chkLogo.doClick();
                         cmbLogo.setSelectedIndex(i);
+                        logoFound = true;
                     }
+                }
+                if (!logoFound) {
+                    invalidConfigFileValue("logo", ImportedLogo);                
                 }
             }
         }
@@ -3458,14 +3510,7 @@ public class GUI extends javax.swing.JFrame {
                     // the string we got above
                     BufferedReader br = new BufferedReader(new StringReader(fileContents));
                     LineNumberReader lnr = new LineNumberReader(br);
-                    /* Increase linecount by one. This is done to ensure that
-                     * an M3U file without a newline at the end will still be
-                     * parsed correctly. Without this, the last line will not
-                     * get added to the array and will result in an out of 
-                     * bounds exception if selected. Files with a newline are 
-                     * not affected because the extra line is ignored.
-                    */
-                    int linecount = Shared.countLines(fd.toFile()) + 1;
+                    long linecount = fileContents.lines().count();
                     for (int i = 1; i <= linecount; i++) {
                         if (i % 2 == 0) {
                             // Read even-numbered lines to the M3UFile string so we can parse it
@@ -3529,7 +3574,6 @@ public class GUI extends javax.swing.JFrame {
                 status = get();
             }
             catch (InterruptedException | ExecutionException ex) {
-                ex.printStackTrace();
                 status = false;   
             }
             if (status) {
@@ -3623,7 +3667,7 @@ public class GUI extends javax.swing.JFrame {
             txtAllOptions.setText("Downloading index page from " + url);
             Shared.download(url, DownloadPath);
         }
-        catch (Exception ex) {
+        catch (IOException ex) {
             System.out.println(ex);
             JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
                     + "Please ensure that you are connected to the internet and try again.", AppName, JOptionPane.ERROR_MESSAGE);
@@ -3695,7 +3739,7 @@ public class GUI extends javax.swing.JFrame {
                         // Stop when the integer value reaches the size of the teletext array
                         if (j == TeletextLinks.size() ) { return 0; }
                     }
-                    catch (Exception ex) {
+                    catch (IOException ex) {
                         System.out.println(ex);
                         return 2;
                     }
@@ -3832,18 +3876,24 @@ public class GUI extends javax.swing.JFrame {
     }    
     
     private void disableScrambling() {
-        cmbScramblingType.setEnabled(false);
+        ArrayList<String> ScramblingTypeAL = new ArrayList<>();
+        ScramblingTypeAL.add("No scrambling");
+        ScramblingTypeArray = new ArrayList<>();
+        ScramblingTypeArray.add("");
+        cmbScramblingType.removeAllItems();
+        // Convert to an array so we can populate
+        String[] ScramblingType = new String[ScramblingTypeAL.size()];
+        for(int i = 0; i < ScramblingType.length; i++) {
+            ScramblingType[i] = ScramblingTypeAL.get(i);
+        } 
+        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
         cmbScramblingType.setSelectedIndex(0);
+        cmbScramblingType.setEnabled(false);
         lblScramblingSystem.setEnabled(false);
         scramblingPanel.setEnabled(false);
     }      
     
-    private void addPALScramblingTypes() {
-    /* Population of scrambling systems is different to other comboboxes. We 
-       populate an ArrayList and convert it to an Array to populate the 
-       combobox. I chose to do it this way because it saves the need to maintain
-       separate arrays for forks.
-    */
+    private void add625ScramblingTypes() {
         ArrayList<String> ScramblingTypeAL = new ArrayList<>();
         ScramblingTypeAL.add("No scrambling");
         ScramblingTypeAL.add("VideoCrypt I");
@@ -3880,11 +3930,6 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addMACScramblingTypes() {
-    /* Population of scrambling systems is different to other comboboxes. We 
-       populate an ArrayList and convert it to an Array to populate the 
-       combobox. I chose to do it this way because it saves the need to maintain
-       separate arrays for forks.
-    */
         ArrayList<String> ScramblingTypeAL = new ArrayList<>();
         ScramblingTypeAL.add("No scrambling");
         ScramblingTypeAL.add("Single cut");
@@ -3919,8 +3964,6 @@ public class GUI extends javax.swing.JFrame {
             ScramblingKey2 = "";
             configureScramblingOptions();
             if (chkVideoFilter.isSelected()) {
-                if (!FMSampleRate.isEmpty()) txtSampleRate.setText(FMSampleRate);
-            } else {
                 txtSampleRate.setText(DefaultSampleRate);
             }
             return;
@@ -3937,21 +3980,11 @@ public class GUI extends javax.swing.JFrame {
                 // Set sample rate to 14 MHz
                 txtSampleRate.setText("14");
                 disableScramblingKey2();                
-                if (Fork.equals("CJ")) {
-                    sconf = "videocrypt-cj";
-                }
-                else {
-                    sconf = "videocrypt";
-                }
+                sconf = "videocrypt";
                 break;
             case "videocrypt2":
                 disableScramblingKey2();
-                if (Fork.equals("CJ")) {
-                    sconf = "videocrypt2-cj";
-                }
-                else {
-                    sconf = "videocrypt2";
-                }
+                sconf = "videocrypt2";
                 break;
             case "videocrypts":
                 disableScramblingKey2();
@@ -3961,22 +3994,12 @@ public class GUI extends javax.swing.JFrame {
             case "d11":
             case "systercnr":
                 disableScramblingKey2();
-                if (Fork.equals("CJ")) {
-                    sconf = "syster-cj";
-                }
-                else {
-                    sconf = "syster";
-                }
+                sconf = "syster";
                 break;
                 case "single-cut":
                 case "double-cut":
                     disableScramblingKey2();
-                    if (Fork.equals("CJ")) {
-                        sconf = "eurocrypt-cj";
-                    }
-                    else {
-                        sconf = "eurocrypt";
-                    }
+                    sconf = "eurocrypt";
                 default:
                 // This should never run
                 break;
@@ -3984,9 +4007,11 @@ public class GUI extends javax.swing.JFrame {
         // Extract (from ModesFile) the scrambling key section that we need
         String slist = INIFile.splitINIfile(ModesFile, sconf);
         if (slist == null) {
+            ScramblingType1 = "";
+            cmbScramblingType.setSelectedIndex(0);
+            addScramblingKey();
             JOptionPane.showMessageDialog(null, "The scrambling key information in Modes.ini appears to be "
                     + "missing or corrupt for the selected scrambling type.", AppName, JOptionPane.WARNING_MESSAGE);
-            cmbScramblingType.setSelectedIndex(0);
             return;
         }
         // We just want the commands so remove everything after =
@@ -4015,16 +4040,14 @@ public class GUI extends javax.swing.JFrame {
         
         // VC1+2 dual mode    
         if (cmbScramblingType.getSelectedIndex() == 3) {
-            String sconf2;
+            final String sconf2 = "videocrypt2";
             if (Fork.equals("CJ")) {
                 enableScramblingKey1();
                 enableScramblingKey2();
-                sconf2 = "videocrypt2-cj";
             }
             else {
                 disableScramblingKey1();
                 disableScramblingKey2();
-                sconf2 = "videocrypt2";
             }
             cmbScramblingKey2.removeAllItems();
             // Extract (from ModesFile) the VC2 scrambling key section
@@ -4226,32 +4249,30 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addLogoOptions() {
-        String[] Logo = {
-            "hacktv",
-            "Cartoon Network",
-            "TV1000",
-            "FilmNet1",
-            "Canal+",
-            "Eurotica",
-            "MTV",
-            "The Adult Channel",
-            "FilmNet",
-            "MultiChoice"
-        };
-        LogoArray = new String[] {
-            "hacktv",
-            "cartoonnetwork",
-            "tv1000",
-            "filmnet1",
-            "canal+",
-            "eurotica",
-            "mtv",
-            "tac",
-            "filmnet",
-            "multichoice"
-        };
+        // Extract (from ModesFile) the logo list
+        String logos = INIFile.splitINIfile(ModesFile, "logos");
+        if (logos == null) {
+            // If nothing was found, disable the logo options and stop
+            if (chkLogo.isSelected()) chkLogo.doClick();
+            chkLogo.setEnabled(false);
+            return;
+        }
+        // We just want the commands so remove everything after =
+        logos = logos.replaceAll("\\=.*", "");       
+        // Remove commented out lines
+        logos = Stream.of(logos.split("\n"))
+                .filter(f -> !f.contains(";"))
+                .collect(Collectors.joining("\n"));     
+        // Add a headerless string to ChannelArray by splitting off the first line
+        LogoArray = logos.substring(logos.indexOf("\n") +1).split("\\r?\\n");
+        // Populate FrequencyArray by reading ModesFile using what we added
+        // to ChannelArray.
+        String[] LogoNames = new String[LogoArray.length];
+        for (int i = 0; i < LogoArray.length; i++) {
+            LogoNames[i] = (INIFile.getStringFromINI(ModesFile, "logos", LogoArray[i], "", true));
+        }
         cmbLogo.removeAllItems();
-        cmbLogo.setModel(new DefaultComboBoxModel<>(Logo));
+        cmbLogo.setModel(new DefaultComboBoxModel<>(LogoNames));
         cmbLogo.setSelectedIndex(-1);
     }
     
@@ -4360,117 +4381,135 @@ public class GUI extends javax.swing.JFrame {
         else if (radMAC.isSelected()) {
             Mode = MACModeArray[cmbVideoFormat.getSelectedIndex()];
         }
-        try {
+        // Start reading the section we found above, starting with line count
+        if (INIFile.getIntegerFromINI(ModesFile, Mode, "lines") != null) {
             Lines = INIFile.getIntegerFromINI(ModesFile, Mode, "lines");
-            switch (INIFile.getStringFromINI(ModesFile, Mode, "modulation", "", false)) {
-                case "vsb":
-                    Baseband = false;
-                    if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
-                    disableFMDeviation();
-                    break;
-                case "fm":
-                    Baseband = false;
-                    if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
-                    enableFMDeviation();
-                    break;
-                case "baseband":
-                    Baseband = true;
-                    if (!checkBasebandSupport()) return;
-                    break;
-                default:
-                    break;
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Unable to read the \"lines\" value for this mode. "
+                    + "Defaulting to 525.", AppName, JOptionPane.WARNING_MESSAGE);
+            if (cmbVideoFormat.getItemCount() > 1) {
+                cmbVideoFormat.setSelectedIndex(PreviousIndex);                
             }
+            else {
+                // Default to 525 lines so we don't enable 625-specific stuff
+                Lines = 525;
+            }
+        }
+        switch (INIFile.getStringFromINI(ModesFile, Mode, "modulation", "", false)) {
+            case "vsb":
+                Baseband = false;
+                if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
+                disableFMDeviation();
+                break;
+            case "fm":
+                Baseband = false;
+                if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
+                enableFMDeviation();
+                break;
+            case "baseband":
+                Baseband = true;
+                if (!checkBasebandSupport()) return;
+                break;
+            default:
+                JOptionPane.showMessageDialog(null, "No modulation specified, defaulting to VSB.", AppName, JOptionPane.INFORMATION_MESSAGE);
+                Baseband = false;
+                if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
+                disableFMDeviation();
+                break;
+        }
+        if (INIFile.getDoubleFromINI(ModesFile, Mode, "sr") != null) {
             DefaultSampleRate = Double.toString(INIFile.getDoubleFromINI(ModesFile, Mode, "sr") / 1000000).replace(".0", "");
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "colour")) {
-                enableColourControl();
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
+            DefaultSampleRate = "16";
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "colour")) {
+            enableColourControl();
+        }
+        else {
+            disableColourControl();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "audio")) {
+            enableAudioOption();
+        }
+        else {
+            disableAudioOption();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "nicam")) {
+            enableNICAM();
+        }
+        else {
+            disableNICAM();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "a2stereo")) {
+            enableA2Stereo();
+        }
+        else {
+            disableA2Stereo();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "teletext")) {
+            enableTeletext();
+        }
+        else {
+            disableTeletext();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "wss")) {
+            enableWSS();
+        }
+        else {
+            disableWSS();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "vits")) {
+            enableVITS();
+        }
+        else {
+            disableVITS();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "acp")) {
+            enableACP();
+        }
+        else {
+            disableACP();
+        }
+        if (INIFile.getBooleanFromINI(ModesFile, Mode, "scrambling")) {
+            enableScrambling();
+            if ((radPAL.isSelected()) || radSECAM.isSelected() ) {
+                add625ScramblingTypes();
             }
-            else {
-                disableColourControl();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "audio")) {
-                enableAudioOption();
-            }
-            else {
-                disableAudioOption();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "nicam")) {
-                enableNICAM();
-            }
-            else {
-                disableNICAM();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "a2stereo")) {
-                enableA2Stereo();
-            }
-            else {
-                disableA2Stereo();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "teletext")) {
-                enableTeletext();
-            }
-            else {
-                disableTeletext();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "wss")) {
-                enableWSS();
-            }
-            else {
-                disableWSS();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "vits")) {
-                enableVITS();
-            }
-            else {
-                disableVITS();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "acp")) {
-                enableACP();
-            }
-            else {
-                disableACP();
-            }
-            if (INIFile.getBooleanFromINI(ModesFile, Mode, "scrambling")) {
-                enableScrambling();
-                if ((radPAL.isSelected()) || radSECAM.isSelected() ) {
-                    addPALScramblingTypes();
-                }
-                else if (radMAC.isSelected()) {
-                    addMACScramblingTypes();
-                }
-            }
-            else {
-                disableScrambling();
-            }
-            if (radMAC.isSelected()) {
-                enableChannelID();
-                if (chkMacChId.isSelected()) chkMacChId.doClick();
-                chkAudio.setEnabled(false);
-                AudioParam = "";
-            }
-            else {
-                disableChannelID();
-            }
-            if (INIFile.getStringFromINI(ModesFile, Mode, "uhf", "0", false).equals("0")) {
-                disableUHF();
-            }
-            else {
-                enableUHF();
-            }
-            if (INIFile.getStringFromINI(ModesFile, Mode, "vhf", "0", false).equals("0")) {
-                disableVHF();
-            }
-            else {
-                enableVHF();
+            else if (radMAC.isSelected()) {
+                addMACScramblingTypes();
             }
         }
-        catch (NullPointerException ex) {
-            // Exit because we don't know what state we're in
-            JOptionPane.showMessageDialog(null, "An error occurred while attempting to load the specified video mode.\n"
-                    + "This is usually caused by an incomplete or damaged Modes.ini file.\n"
-                    + "The application will now exit.", AppName, JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-            System.exit(1);
+        else {
+            disableScrambling();
         }
+        if (radMAC.isSelected()) {
+            enableChannelID();
+            if (chkMacChId.isSelected()) chkMacChId.doClick();
+            chkAudio.setEnabled(false);
+            AudioParam = "";
+        }
+        else {
+            disableChannelID();
+        }
+        String u = INIFile.getStringFromINI(ModesFile, Mode, "uhf", "0", false);
+        if ( (u.equals("0")) || (u.isBlank())) {
+            disableUHF();
+        }
+        else {
+            enableUHF();
+        }
+        String v = INIFile.getStringFromINI(ModesFile, Mode, "vhf", "0", false);
+        if ( (v.equals("0")) || (v.isBlank()) ) {
+            disableVHF();
+        }
+        else {
+            enableVHF();
+        }
+        // Check if UHF or VHF are enabled. If so, select one (UHF first).
+        // If neither are enabled, select the Custom option.
         if (radUHF.isEnabled()) {
             radUHF.doClick();
         }
@@ -4705,7 +4744,6 @@ public class GUI extends javax.swing.JFrame {
         // pre-emphasis filtering on FM, so change the Filter checkbox
         // description to suit  
         chkVideoFilter.setText("FM video pre-emphasis filter");
-        FMSampleRate = "";
     }
     
     private void disableFMDeviation() {    
@@ -4719,7 +4757,6 @@ public class GUI extends javax.swing.JFrame {
         }
         // Revert Filter checkbox name to VSB-AM
         chkVideoFilter.setText("VSB-AM filter");
-        FMSampleRate = "";
     }
     
     private void populateBandPlan(String band) {
@@ -4775,7 +4812,7 @@ public class GUI extends javax.swing.JFrame {
             // Set region ID if applicable
             lblRegion.setText(INIFile.getStringFromINI(ModesFile, bpname, "region", "", true));            
         }
-        catch (Exception ex) {
+        catch (NullPointerException | IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(null, "An unexpected error occurred while attempting to load "
                     + "the bandplan data for this mode. This may be due to incorrect settings in the Modes.ini file.", AppName, JOptionPane.WARNING_MESSAGE);
             radCustom.doClick();
@@ -5416,15 +5453,10 @@ public class GUI extends javax.swing.JFrame {
                 v = "";
             }
         }
-        catch (Exception e) {
+        catch (NumberFormatException e) {
               v = "";
         }
-        if (ModesFileVersion != -1.0) {
-            mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + Double.toString(ModesFileVersion);
-        }
-        else {
-            mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version unknown";
-        }
+        mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
         JOptionPane.showMessageDialog(null, AppName + " (Java version)" + v + mv + "\n\nCreated 2020-2021 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/jhacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
@@ -5718,16 +5750,14 @@ public class GUI extends javax.swing.JFrame {
     private void chkVideoFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVideoFilterActionPerformed
         if (chkVideoFilter.isSelected()) {
             FilterParam = "--filter";
-            if (!FMSampleRate.isEmpty()) txtSampleRate.setText(FMSampleRate);
         }
         else {
             FilterParam = "";
-            if (!FMSampleRate.isEmpty()) {
-                if ( ScramblingType1.equals("--videocrypt") || ScramblingType1.equals("--videocrypt2") ) {
-                    txtSampleRate.setText("14");
-                } else {
-                    txtSampleRate.setText(DefaultSampleRate);
-                }
+            if ( ScramblingType1.equals("--videocrypt") || ScramblingType1.equals("--videocrypt2") ) {
+                txtSampleRate.setText("14");
+            }
+            else {
+                txtSampleRate.setText(DefaultSampleRate);
             }
         }
     }//GEN-LAST:event_chkVideoFilterActionPerformed
@@ -6145,7 +6175,15 @@ public class GUI extends javax.swing.JFrame {
             // and get its parent directory path
             HackTVDirectory = new File(HackTVPath).getParent();
             // Detect what were provided with
-            detectFork();
+            detectFork();   
+            selectModesFile();
+            openModesFile();
+            if (Fork.equals("CJ")) {
+                captainJack();
+            }
+            else {
+                fsphil();
+            }
         }
     }//GEN-LAST:event_btnHackTVPathActionPerformed
 
@@ -6233,9 +6271,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void lblSyntaxOptionDisabledMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSyntaxOptionDisabledMouseClicked
         // Show a message to explain why the syntax option is disabled
-        JOptionPane.showMessageDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
-                + "You can download it from https://github.com/alirdn/windows-kill/releases/\n"
-                + "Please save it in the same directory as this application and restart.", AppName, JOptionPane.INFORMATION_MESSAGE);
+        int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
+                + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
+                + "Would you like to download it now?", AppName, JOptionPane.YES_NO_OPTION);
+        if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
     }//GEN-LAST:event_lblSyntaxOptionDisabledMouseClicked
 
     private void cmbSysterPermTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbSysterPermTableItemStateChanged
