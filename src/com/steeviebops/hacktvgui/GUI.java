@@ -1746,9 +1746,9 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblDetectedBuikd)
                         .addGap(18, 18, 18)
                         .addComponent(lblFork))
-                    .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+                    .addComponent(txtHackTVPath))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnHackTVPath, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnHackTVPath)
                 .addContainerGap())
         );
         pathPanelLayout.setVerticalGroup(
@@ -2180,6 +2180,8 @@ public class GUI extends javax.swing.JFrame {
         String f = TempDir + OS_SEP + "Modes.ini";
         String u = "https://raw.githubusercontent.com/steeviebops/jhacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         try {
+            // Delete Modes.ini if it already exists
+            if (Files.exists(Path.of(f))) Shared.deleteFSObject(Path.of(f));
             Shared.download(u, f);
             // Use the file we downloaded
             ModesFilePath = f;
@@ -2226,12 +2228,15 @@ public class GUI extends javax.swing.JFrame {
             catch (IOException e) {
                 // Load failed, retry with the embedded file
                 JOptionPane.showMessageDialog(null, "Unable to read the modes file.\n"
-                        + "Retrying with the embedded copy, which may not be up to date.", AppName, JOptionPane.ERROR_MESSAGE);                
+                        + "Retrying with the embedded copy, which may not be up to date.", AppName, JOptionPane.WARNING_MESSAGE);                
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "Modes.ini";
                 ModesFileLocation = "embedded";
                 openModesFile();
+                return;
             }
         }
+        // Read modes.ini file version
+        ModesFileVersion = INIFile.getStringFromINI(ModesFile, "Modes.ini", "FileVersion", "unknown", true);
     }
     
     private void populateVideoModes() {
@@ -2277,10 +2282,6 @@ public class GUI extends javax.swing.JFrame {
          * 0 = return the friendly name of the mode
          * 1 = return the mode parameter used at the command line
          */
-        
-        // Read modes.ini file version
-        ModesFileVersion = INIFile.getStringFromINI(ModesFile, "Modes.ini", "FileVersion", "unknown", true);
-        
         
         String m = INIFile.getStringFromINI(ModesFile, "videomodes", ColourStandard, "", false);
         String[] q;
@@ -5447,7 +5448,12 @@ public class GUI extends javax.swing.JFrame {
             Date date;
             if (Files.exists(Path.of(System.getProperty("java.class.path")))) {
                 date = Shared.getLastUpdatedTime(System.getProperty("java.class.path"), classFilePath);
-                v = "\nCompilation date: " + sdf.format(date);
+                if (date != null) {
+                    v = "\nCompilation date: " + sdf.format(date);
+                }
+                else {
+                    v = "";
+                }
             }
             else {
                 v = "";

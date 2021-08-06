@@ -2066,11 +2066,11 @@
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="lblFork" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="txtHackTVPath" alignment="0" pref="390" max="32767" attributes="0"/>
+                                  <Component id="txtHackTVPath" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnHackTVPath" min="-2" pref="91" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Component id="btnHackTVPath" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
