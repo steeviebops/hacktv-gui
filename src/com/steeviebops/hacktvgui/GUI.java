@@ -135,7 +135,7 @@ public class GUI extends javax.swing.JFrame {
     ArrayList<String> ScramblingKeyArray;
     ArrayList<String> ScramblingKey2Array;
     String[] LogoArray;
-    String[] TestCardArray;
+    String[] TCArray;
     
     // Preferences node
     Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
@@ -1746,9 +1746,9 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblDetectedBuikd)
                         .addGap(18, 18, 18)
                         .addComponent(lblFork))
-                    .addComponent(txtHackTVPath))
+                    .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnHackTVPath)
+                .addComponent(btnHackTVPath, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         pathPanelLayout.setVerticalGroup(
@@ -2654,7 +2654,7 @@ public class GUI extends javax.swing.JFrame {
          * 
          * We read the file as a Windows INI format. The syntax for strings is as follows:
          * 
-         * INIFile.getStringFromINI(SourceFile, "section", "setting", "Default value", Preserve-case?);
+         * INIFile.getStringFromINI(SourceFile, "section", "setting", "Default value", Preserve case?);
          * 
          * The first integer should be set to 0 if a path is specified, otherwise it should be set to 1
          * If the setting is not specified in the file, use the default value specified
@@ -2709,23 +2709,21 @@ public class GUI extends javax.swing.JFrame {
         Integer M3UIndex = (INIFile.getIntegerFromINI(SourceFile, "hacktv-gui3", "m3uindex"));
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
-            if (Fork == "CJ") {
-                switch (ImportedSource.toLowerCase().split(":")[1]) {
-                    case "pm5544":
-                        cmbTest.setSelectedIndex(1);
-                        break;
-                    case "pm5644":
-                        cmbTest.setSelectedIndex(2);
-                        break;
-                    case "ueitm":
-                        cmbTest.setSelectedIndex(3);
-                        break;
-                    case "fubk":
-                        cmbTest.setSelectedIndex(4);
-                        break;
-                    default:
-                        break;
-                }
+            if (Fork.equals("CJ")) {
+                String ImportedTC = ImportedSource.replace("test:", "");
+                boolean TCFound = false;
+                if (!ImportedTC.isEmpty()) {
+                    for (int i = 0; i <= TCArray.length - 1; i++) {
+                        if ( (TCArray[i].toLowerCase()).equals(ImportedTC) ) {
+                            cmbTest.setSelectedIndex(i);
+                            TCFound = true;
+                            break;
+                        }
+                    }
+                    if (!TCFound) {
+                        invalidConfigFileValue("test card", ImportedTC);                
+                    }
+                }                
             }
         }
         else if (!M3USource.isEmpty()) {
@@ -2741,7 +2739,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Video format
         String ImportedVideoFormat = (INIFile.getStringFromINI(SourceFile, "hacktv", "mode", "", false));
-        boolean ModeFound = false;
+        Boolean ModeFound = false;
             for (int i = 0; i < PALModeArray.length; i++) {
                 if (PALModeArray[i].equals(ImportedVideoFormat)) {
                     radPAL.doClick();
@@ -2910,12 +2908,13 @@ public class GUI extends javax.swing.JFrame {
                      "hacktv no longer supports external logo files. Logo option disabled.", AppName, JOptionPane.WARNING_MESSAGE);
             }
             else if (!ImportedLogo.isBlank()) {
-                boolean logoFound = false;
+                Boolean logoFound = false;
                 for (int i = 0; i <= cmbLogo.getItemCount() - 1; i++) {
                     if ( (LogoArray[i].toLowerCase()).equals(ImportedLogo) ) {
                         chkLogo.doClick();
                         cmbLogo.setSelectedIndex(i);
                         logoFound = true;
+                        break;
                     }
                 }
                 if (!logoFound) {
@@ -3253,7 +3252,7 @@ public class GUI extends javax.swing.JFrame {
         // Input source or test card
         if (radTest.isSelected()) {
             if ((Fork == "CJ") && (Lines == 625)) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", TestCardArray[cmbTest.getSelectedIndex()]);
+                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:" + TCArray[cmbTest.getSelectedIndex()]);
             }
             else {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
@@ -3964,9 +3963,7 @@ public class GUI extends javax.swing.JFrame {
             ScramblingKey1 = "";
             ScramblingKey2 = "";
             configureScramblingOptions();
-            if (chkVideoFilter.isSelected()) {
-                txtSampleRate.setText(DefaultSampleRate);
-            }
+            txtSampleRate.setText(DefaultSampleRate);
             return;
         }
         else {
@@ -3984,24 +3981,41 @@ public class GUI extends javax.swing.JFrame {
                 sconf = "videocrypt";
                 break;
             case "videocrypt2":
+                // Set sample rate to 14 MHz
+                txtSampleRate.setText("14");
                 disableScramblingKey2();
                 sconf = "videocrypt2";
                 break;
             case "videocrypts":
                 disableScramblingKey2();
+                // Set sample rate to 17.75 MHz (more accurately 17.734475 but
+                // this is reported by hacktv as unsuitable for 625/50)
+                txtSampleRate.setText("17.75");
                 sconf = "videocrypts";
                 break;
             case "syster":
-            case "d11":
-            case "systercnr":
+                // No specific sample rate required for Syster
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
-                case "single-cut":
-                case "double-cut":
-                    disableScramblingKey2();
-                    sconf = "eurocrypt";
-                default:
+            case "d11":
+                // Set sample rate to 17.75 MHz
+                txtSampleRate.setText("17.75");
+                disableScramblingKey2();
+                sconf = "syster";
+                break;
+            case "systercnr":
+                // Set sample rate to 17.75 MHz (4 x 4.4375, the PAL subcarrier)
+                txtSampleRate.setText("17.75");
+                disableScramblingKey2();
+                sconf = "syster";
+                break;
+            case "single-cut":
+            case "double-cut":
+                disableScramblingKey2();
+                sconf = "eurocrypt";
+                break;
+            default:
                 // This should never run
                 break;
         }
@@ -4264,10 +4278,10 @@ public class GUI extends javax.swing.JFrame {
         logos = Stream.of(logos.split("\n"))
                 .filter(f -> !f.contains(";"))
                 .collect(Collectors.joining("\n"));     
-        // Add a headerless string to ChannelArray by splitting off the first line
+        // Add a headerless string to LogoArray by splitting off the first line
         LogoArray = logos.substring(logos.indexOf("\n") +1).split("\\r?\\n");
-        // Populate FrequencyArray by reading ModesFile using what we added
-        // to ChannelArray.
+        // Populate LogoNames by reading ModesFile using what we added
+        // to LogoArray.
         String[] LogoNames = new String[LogoArray.length];
         for (int i = 0; i < LogoArray.length; i++) {
             LogoNames[i] = (INIFile.getStringFromINI(ModesFile, "logos", LogoArray[i], "", true));
@@ -4290,28 +4304,48 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addTestCardOptions() {
-        String[] TestCard = {
-            "Colour bars",
-            "Philips PM5544",
-            "Philips PM5644",
-            "UEIT (Soviet)",
-            "FuBK"
-        };
-        TestCardArray = new String[] {
-            "test:colourbars",
-            "test:pm5544",
-            "test:pm5644",
-            "test:ueitm",
-            "test:fubk"
-        };
-        cmbTest.removeAllItems();
-        cmbTest.setModel(new DefaultComboBoxModel<>(TestCard));
-        cmbTest.setSelectedIndex(-1);
+        // Extract (from ModesFile) the test card list
+        String testcards = INIFile.splitINIfile(ModesFile, "testcards");
+        if (testcards == null) {
+            // If nothing was found, disable the test card combobox
+            // Use a dummy string to preserve the length of the combobox
+            // This won't be seen as the combobox is disabled
+            String[] TCNames = {"No items found"};
+            System.out.println(TCNames.length);
+            cmbTest.setEnabled(false);
+            cmbTest.removeAllItems();
+            cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
+            cmbTest.setSelectedIndex(-1);
+        }
+        else {
+            // We just want the commands so remove everything after =
+            testcards = testcards.replaceAll("\\=.*", "");       
+            // Remove commented out lines
+            testcards = Stream.of(testcards.split("\n"))
+                    .filter(f -> !f.contains(";"))
+                    .collect(Collectors.joining("\n"));     
+            // Add a headerless string to TCArray by splitting off the first line
+            TCArray = testcards.substring(testcards.indexOf("\n") +1).split("\\r?\\n");
+            // Populate TCNames by reading ModesFile using what we added
+            // to TCArray.
+            String[] TCNames = new String[TCArray.length];
+            for (int i = 0; i < TCArray.length; i++) {
+                TCNames[i] = INIFile.getStringFromINI(ModesFile, "testcards", TCArray[i], "", true);
+            }
+            cmbTest.removeAllItems();
+            cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
+            if (!radTest.isSelected()) {
+                cmbTest.setSelectedIndex(-1);
+            }
+            else {
+                cmbTest.setSelectedIndex(0);
+            }        
+        }
     }
     
     private void checkTestCard() {
         if (cmbTest.isEnabled()) {
-            InputSource = TestCardArray[cmbTest.getSelectedIndex()];
+            InputSource = "test:" + TCArray[cmbTest.getSelectedIndex()];
         }
         else if (radTest.isSelected()) {
             InputSource = "test:colourbars";
@@ -6019,7 +6053,7 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setVisible(true);
         }
         // Enable test card dropdown
-        if ((Fork == "CJ") && (Lines == 625)) {
+        if ((Fork == "CJ") && (Lines == 625) && (cmbTest.getItemCount() > 1)) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
@@ -6190,6 +6224,7 @@ public class GUI extends javax.swing.JFrame {
             else {
                 fsphil();
             }
+            addTestCardOptions();
         }
     }//GEN-LAST:event_btnHackTVPathActionPerformed
 
