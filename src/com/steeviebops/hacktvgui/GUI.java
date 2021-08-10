@@ -1689,10 +1689,10 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(lblVC2ScramblingKey))
                         .addGap(18, 18, 18)
                         .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cmbScramblingKey1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbScramblingKey1, 0, 381, Short.MAX_VALUE)
                             .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cmbScramblingType, 0, 369, Short.MAX_VALUE))
-                        .addGap(0, 22, Short.MAX_VALUE))))
+                            .addComponent(cmbScramblingType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 10, Short.MAX_VALUE))))
         );
         scramblingPanelLayout.setVerticalGroup(
             scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4812,6 +4812,8 @@ public class GUI extends javax.swing.JFrame {
         A2Supported = false;
         chkA2Stereo.setEnabled(false);
         chkA2Stereo.setSelected(false);
+        // Clear A2StereoParam as we don't need it if A2 is not supported anyway
+        A2StereoParam = "";
     }    
     
     private void enableFMDeviation() {
