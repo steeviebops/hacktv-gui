@@ -218,7 +218,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tabPane" min="-2" max="-2" attributes="0"/>
+                              <Component id="tabPane" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <EmptySpace min="-2" pref="170" max="-2" attributes="0"/>
                                   <Component id="btnRun" min="-2" pref="200" max="-2" attributes="0"/>
@@ -340,7 +340,7 @@
                           <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace pref="24" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -647,38 +647,35 @@
                                           </Group>
                                           <Group type="102" alignment="1" attributes="0">
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Group type="102" attributes="0">
-                                                      <Group type="103" groupAlignment="0" attributes="0">
-                                                          <Component id="chkAudio" min="-2" max="-2" attributes="0"/>
-                                                          <Component id="chkNICAM" min="-2" max="-2" attributes="0"/>
-                                                          <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
-                                                      </Group>
-                                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                                  </Group>
-                                                  <Component id="chkColour" alignment="1" max="32767" attributes="0"/>
+                                                  <Component id="chkAudio" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="chkNICAM" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="chkColour" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" pref="118" max="32767" attributes="0"/>
                                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                  <Group type="102" alignment="1" attributes="0">
-                                                      <Component id="chkVideoFilter" max="32767" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                  </Group>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
-                                                          <Component id="chkFMDev" min="-2" max="-2" attributes="0"/>
-                                                          <Component id="chkMacChId" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="chkPixelRate" min="-2" max="-2" attributes="0"/>
                                                           <Component id="lblSampleRate" min="-2" max="-2" attributes="0"/>
                                                       </Group>
-                                                      <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
+                                                      <EmptySpace min="-2" pref="74" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Group type="102" attributes="0">
+                                                      <Group type="103" groupAlignment="0" attributes="0">
+                                                          <Component id="chkVideoFilter" alignment="1" max="32767" attributes="0"/>
+                                                          <Component id="chkFMDev" min="-2" max="-2" attributes="0"/>
+                                                      </Group>
+                                                      <EmptySpace max="-2" attributes="0"/>
                                                   </Group>
                                               </Group>
                                           </Group>
                                       </Group>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="txtFMDev" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="txtMacChId" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="txtPixelRate" alignment="1" max="32767" attributes="0"/>
                                           <Component id="txtSampleRate" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="radMAC" alignment="1" min="-2" max="-2" attributes="0"/>
+                                          <Component id="radMAC" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="txtFMDev" alignment="1" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -689,7 +686,7 @@
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="radPAL" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="radNTSC" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -705,18 +702,18 @@
                                   <Component id="chkAudio" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtSampleRate" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="txtFMDev" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          <Component id="chkFMDev" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtPixelRate" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="chkPixelRate" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="txtMacChId" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          <Component id="chkMacChId" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkA2Stereo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="chkFMDev" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtFMDev" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <Component id="chkNICAM" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -726,7 +723,7 @@
                                   <Component id="chkVideoFilter" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkColour" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="13" max="32767" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -827,35 +824,15 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkNICAMActionPerformed"/>
                       </Events>
                     </Component>
-                    <Component class="javax.swing.JCheckBox" name="chkMacChId">
+                    <Component class="javax.swing.JCheckBox" name="chkPixelRate">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Override MAC channel ID"/>
-                        <Property name="enabled" type="boolean" value="false"/>
+                        <Property name="text" type="java.lang.String" value="Pixel rate (MHz)"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkMacChIdActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkPixelRateActionPerformed"/>
                       </Events>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="txtMacChId">
-                      <Properties>
-                        <Property name="enabled" type="boolean" value="false"/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyPressed"/>
-                        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyReleased"/>
-                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyTyped"/>
-                      </Events>
-                    </Component>
-                    <Component class="javax.swing.JCheckBox" name="chkFMDev">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="FM deviation (MHz)"/>
-                        <Property name="enabled" type="boolean" value="false"/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkFMDevActionPerformed"/>
-                      </Events>
-                    </Component>
-                    <Component class="javax.swing.JTextField" name="txtFMDev">
+                    <Component class="javax.swing.JTextField" name="txtPixelRate">
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
@@ -883,6 +860,20 @@
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkA2StereoActionPerformed"/>
                       </Events>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkFMDev">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="FM deviation (MHz)"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkFMDevActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JTextField" name="txtFMDev">
+                      <Properties>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -918,9 +909,9 @@
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="26" max="32767" attributes="0"/>
+                          <EmptySpace pref="21" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -960,7 +951,7 @@
                                   <Component id="lblOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="cmbOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblOutputDevice2" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="txtOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtOutputDevice" alignment="3" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="rfPanel" min="-2" max="-2" attributes="0"/>
@@ -1251,7 +1242,7 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkACP" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="chkVITS" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -1310,28 +1301,35 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="chkGamma" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="chkOutputLevel" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="chkVerbose" alignment="0" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="txtOutputLevel" max="32767" attributes="0"/>
-                                  <Component id="txtGamma" pref="64" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="chkGamma" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="chkOutputLevel" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="-2" pref="66" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" attributes="0">
+                                          <Component id="txtOutputLevel" min="-2" pref="61" max="-2" attributes="0"/>
+                                          <Component id="txtGamma" min="-2" pref="61" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="chkMacChId" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
+                                      <Component id="txtMacChId" min="-2" pref="61" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
                                       <Component id="chkVolume" min="-2" pref="141" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
                                       <Component id="txtVolume" min="-2" pref="64" max="-2" attributes="0"/>
                                   </Group>
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                                      <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
-                                  </Group>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1344,13 +1342,18 @@
                                   <Component id="chkVolume" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtVolume" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="chkOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkDownmix" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="chkMacChId" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkVerbose" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtMacChId" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1384,7 +1387,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkVerbose">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Enable verbose output"/>
+                        <Property name="text" type="java.lang.String" value="Verbose output"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkVerboseActionPerformed"/>
@@ -1406,10 +1409,29 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDownmixActionPerformed"/>
                       </Events>
                     </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkMacChId">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Override MAC channel ID"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkMacChIdActionPerformed"/>
+                      </Events>
+                    </Component>
                     <Component class="javax.swing.JTextField" name="txtVolume">
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                    </Component>
+                    <Component class="javax.swing.JTextField" name="txtMacChId">
+                      <Properties>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyPressed"/>
+                        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyReleased"/>
+                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyTyped"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1499,7 +1521,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="btnTeletextBrowse" min="-2" max="-2" attributes="0"/>
-                                  <Component id="txtTeletextSource" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtTeletextSource" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -2034,12 +2056,12 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pathPanel" min="-2" pref="111" max="-2" attributes="0"/>
+                          <Component id="pathPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="85" max="32767" attributes="0"/>
+                          <EmptySpace pref="80" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2066,10 +2088,10 @@
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="lblFork" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="txtHackTVPath" alignment="0" pref="390" max="32767" attributes="0"/>
+                                  <Component id="txtHackTVPath" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnHackTVPath" min="-2" pref="91" max="-2" attributes="0"/>
+                              <Component id="btnHackTVPath" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -2081,7 +2103,7 @@
                               <Component id="lblSpecifyLocation" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnHackTVPath" max="32767" attributes="0"/>
+                                  <Component id="btnHackTVPath" max="-2" attributes="0"/>
                                   <Component id="txtHackTVPath" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
@@ -2265,7 +2287,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkLocalModes">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Always use local copy of Modes.ini"/>
+                        <Property name="text" type="java.lang.String" value="Always use local copy of Modes.ini (restart required)"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLocalModesActionPerformed"/>

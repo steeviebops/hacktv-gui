@@ -164,6 +164,7 @@ public class GUI extends javax.swing.JFrame {
     String Mode = "";
     long Frequency;
     int SampleRate;
+    int PixelRate;
     String SubtitlesParam = "";
     String AudioParam = "";
     String NICAMParam = "";
@@ -247,9 +248,10 @@ public class GUI extends javax.swing.JFrame {
         if (System.getProperty("os.name").contains("Linux")) {
             try {
                 // Use Metal L&F on all Linux distros
-                // Comment out the next line if you want to use GTK+ on
+                // Comment out the next two lines if you want to use GTK+ on
                 // supported desktop environments but it doesn't look great
                 // in my opinion.
+                UIManager.put("swing.boldMetal", false);
                 UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
                   System.out.println(ex);
@@ -434,13 +436,13 @@ public class GUI extends javax.swing.JFrame {
         txtSampleRate = new javax.swing.JTextField();
         chkAudio = new javax.swing.JCheckBox();
         chkNICAM = new javax.swing.JCheckBox();
-        chkMacChId = new javax.swing.JCheckBox();
-        txtMacChId = new javax.swing.JTextField();
-        chkFMDev = new javax.swing.JCheckBox();
-        txtFMDev = new javax.swing.JTextField();
+        chkPixelRate = new javax.swing.JCheckBox();
+        txtPixelRate = new javax.swing.JTextField();
         chkVideoFilter = new javax.swing.JCheckBox();
         chkColour = new javax.swing.JCheckBox();
         chkA2Stereo = new javax.swing.JCheckBox();
+        chkFMDev = new javax.swing.JCheckBox();
+        txtFMDev = new javax.swing.JTextField();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -476,7 +478,9 @@ public class GUI extends javax.swing.JFrame {
         chkVerbose = new javax.swing.JCheckBox();
         chkVolume = new javax.swing.JCheckBox();
         chkDownmix = new javax.swing.JCheckBox();
+        chkMacChId = new javax.swing.JCheckBox();
         txtVolume = new javax.swing.JTextField();
+        txtMacChId = new javax.swing.JTextField();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -828,36 +832,14 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        chkMacChId.setText("Override MAC channel ID");
-        chkMacChId.setEnabled(false);
-        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
+        chkPixelRate.setText("Pixel rate (MHz)");
+        chkPixelRate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkMacChIdActionPerformed(evt);
+                chkPixelRateActionPerformed(evt);
             }
         });
 
-        txtMacChId.setEnabled(false);
-        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyPressed(evt);
-            }
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyReleased(evt);
-            }
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyTyped(evt);
-            }
-        });
-
-        chkFMDev.setText("FM deviation (MHz)");
-        chkFMDev.setEnabled(false);
-        chkFMDev.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkFMDevActionPerformed(evt);
-            }
-        });
-
-        txtFMDev.setEnabled(false);
+        txtPixelRate.setEnabled(false);
 
         chkVideoFilter.setText("VSB-AM filter");
         chkVideoFilter.addActionListener(new java.awt.event.ActionListener() {
@@ -880,6 +862,16 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkFMDev.setText("FM deviation (MHz)");
+        chkFMDev.setEnabled(false);
+        chkFMDev.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkFMDevActionPerformed(evt);
+            }
+        });
+
+        txtFMDev.setEnabled(false);
+
         javax.swing.GroupLayout VideoFormatPanelLayout = new javax.swing.GroupLayout(VideoFormatPanel);
         VideoFormatPanel.setLayout(VideoFormatPanelLayout);
         VideoFormatPanelLayout.setHorizontalGroup(
@@ -901,35 +893,33 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(18, 18, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, VideoFormatPanelLayout.createSequentialGroup()
                                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(VideoFormatPanelLayout.createSequentialGroup()
-                                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(chkAudio)
-                                            .addComponent(chkNICAM)
-                                            .addComponent(chkA2Stereo))
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addComponent(chkColour, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(chkAudio)
+                                    .addComponent(chkNICAM)
+                                    .addComponent(chkA2Stereo)
+                                    .addComponent(chkColour))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 118, Short.MAX_VALUE)
                                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, VideoFormatPanelLayout.createSequentialGroup()
-                                        .addComponent(chkVideoFilter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(chkFMDev)
-                                            .addComponent(chkMacChId)
+                                            .addComponent(chkPixelRate)
                                             .addComponent(lblSampleRate))
-                                        .addGap(44, 44, 44)))))
+                                        .addGap(74, 74, 74))
+                                    .addGroup(VideoFormatPanelLayout.createSequentialGroup()
+                                        .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(chkFMDev))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))))
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtMacChId, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(radMAC, javax.swing.GroupLayout.Alignment.TRAILING))))
+                            .addComponent(radMAC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
         VideoFormatPanelLayout.setVerticalGroup(
             VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(radPAL)
                     .addComponent(radNTSC)
@@ -943,23 +933,23 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblSampleRate)
                     .addComponent(chkAudio)
                     .addComponent(txtSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(2, 2, 2)
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkFMDev))
+                            .addComponent(txtPixelRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(chkPixelRate))
                         .addGap(2, 2, 2)
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkMacChId)
-                            .addComponent(chkA2Stereo)))
+                            .addComponent(chkA2Stereo)
+                            .addComponent(chkFMDev)
+                            .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(chkNICAM))
                 .addGap(2, 2, 2)
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkVideoFilter)
                     .addComponent(chkColour))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout sourceTabLayout = new javax.swing.GroupLayout(sourceTab);
@@ -980,7 +970,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source and video mode", sourceTab);
@@ -1155,7 +1145,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblOutputDevice)
                     .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblOutputDevice2)
-                    .addComponent(txtOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtOutputDevice))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -1208,7 +1198,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkACP)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVITS))
         );
 
@@ -1232,7 +1222,7 @@ public class GUI extends javax.swing.JFrame {
 
         txtOutputLevel.setEnabled(false);
 
-        chkVerbose.setText("Enable verbose output");
+        chkVerbose.setText("Verbose output");
         chkVerbose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVerboseActionPerformed(evt);
@@ -1253,7 +1243,28 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkMacChId.setText("Override MAC channel ID");
+        chkMacChId.setEnabled(false);
+        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMacChIdActionPerformed(evt);
+            }
+        });
+
         txtVolume.setEnabled(false);
+
+        txtMacChId.setEnabled(false);
+        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyTyped(evt);
+            }
+        });
 
         javax.swing.GroupLayout AdditionalOptionsPanelLayout = new javax.swing.GroupLayout(AdditionalOptionsPanel);
         AdditionalOptionsPanel.setLayout(AdditionalOptionsPanelLayout);
@@ -1262,23 +1273,28 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(chkGamma, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkOutputLevel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkVerbose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtOutputLevel)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
+                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
+                        .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkGamma)
+                            .addComponent(chkOutputLevel))
+                        .addGap(66, 66, 66)
+                        .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18))
+                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
+                        .addComponent(chkMacChId)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)))
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkVerbose)
+                    .addComponent(chkDownmix)
                     .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
                         .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(chkDownmix)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         AdditionalOptionsPanelLayout.setVerticalGroup(
             AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1288,12 +1304,16 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(chkVolume)
                     .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOutputLevel)
                     .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(chkDownmix))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkVerbose))
+                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkMacChId)
+                    .addComponent(chkVerbose)
+                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         javax.swing.GroupLayout outputTabLayout = new javax.swing.GroupLayout(outputTab);
@@ -1315,9 +1335,9 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(5, 5, 5)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1387,7 +1407,7 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnTeletextBrowse)
-                    .addComponent(txtTeletextSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTeletextSource))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkTextSubtitles)
@@ -1746,9 +1766,9 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblDetectedBuikd)
                         .addGap(18, 18, 18)
                         .addComponent(lblFork))
-                    .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+                    .addComponent(txtHackTVPath))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnHackTVPath, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnHackTVPath)
                 .addContainerGap())
         );
         pathPanelLayout.setVerticalGroup(
@@ -1758,7 +1778,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(lblSpecifyLocation)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnHackTVPath)
                     .addComponent(txtHackTVPath))
                 .addGap(10, 10, 10)
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1835,7 +1855,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        chkLocalModes.setText("Always use local copy of Modes.ini");
+        chkLocalModes.setText("Always use local copy of Modes.ini (restart required)");
         chkLocalModes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkLocalModesActionPerformed(evt);
@@ -1883,12 +1903,12 @@ public class GUI extends javax.swing.JFrame {
             settingsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(settingsTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(85, Short.MAX_VALUE))
+                .addContainerGap(80, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2104,7 +2124,8 @@ public class GUI extends javax.swing.JFrame {
             chkVolume,
             chkDownmix,
             chkTextSubtitles,
-            chkA2Stereo
+            chkA2Stereo,
+            chkPixelRate
         };
     }
     
@@ -2199,11 +2220,17 @@ public class GUI extends javax.swing.JFrame {
         if (ModesFilePath.startsWith("/com/steeviebops/resources/")) {
             // Read the embedded modes.ini to the ModesFile string
             try {
-                InputStream is = getClass().getResourceAsStream(ModesFilePath);
-                ModesFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                ModesFileLocation = "embedded";
+                if (getClass().getResourceAsStream(ModesFilePath) != null) {
+                    InputStream is = getClass().getResourceAsStream(ModesFilePath);
+                    ModesFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    ModesFileLocation = "embedded";
+                }
+                else {
+                    // getResourceAsStream returned null, throw an exception to avoid NPE
+                    throw new FileSystemNotFoundException("Unable to open embedded resource " + ModesFilePath);
+                }
             }
-            catch (IOException | FileSystemNotFoundException | NullPointerException ex) {
+            catch (IOException | FileSystemNotFoundException ex) {
                 // No modes file to load, we cannot continue
                 JOptionPane.showMessageDialog(null, "Critical error, unable to read the embedded modes file.\n"
                         + "The application will now exit.", AppName, JOptionPane.ERROR_MESSAGE);
@@ -3165,6 +3192,13 @@ public class GUI extends javax.swing.JFrame {
                 txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex"))));
             }
         }
+        // Pixel rate
+        Double ImportedPixelRate;
+        if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "pixelrate")) != null) {
+            if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+            ImportedPixelRate = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "pixelrate") / 1000000);
+            txtPixelRate.setText(ImportedPixelRate.toString().replace(".0","")); 
+        }
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
@@ -3277,6 +3311,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Sample rate
         FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
+        // Pixel rate
+        FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
@@ -3964,6 +4000,7 @@ public class GUI extends javax.swing.JFrame {
             ScramblingKey2 = "";
             configureScramblingOptions();
             txtSampleRate.setText(DefaultSampleRate);
+            if (chkPixelRate.isSelected()) chkPixelRate.doClick();
             return;
         }
         else {
@@ -3975,38 +4012,43 @@ public class GUI extends javax.swing.JFrame {
         String sconf = ScramblingTypeArray.get(cmbScramblingType.getSelectedIndex()).substring(2);
         switch (sconf) {
             case "videocrypt":
-                // Set sample rate to 14 MHz
-                txtSampleRate.setText("14");
+                // Set pixel rate to 14 MHz
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("14");
                 disableScramblingKey2();                
                 sconf = "videocrypt";
                 break;
             case "videocrypt2":
-                // Set sample rate to 14 MHz
-                txtSampleRate.setText("14");
+                // Set pixel rate to 14 MHz
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("14");
                 disableScramblingKey2();
                 sconf = "videocrypt2";
                 break;
             case "videocrypts":
                 disableScramblingKey2();
-                // Set sample rate to 17.75 MHz (more accurately 17.734475 but
+                // Set pixel rate to 17.75 MHz (more accurately 17.734475 but
                 // this is reported by hacktv as unsuitable for 625/50)
-                txtSampleRate.setText("17.75");
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("17.75");
                 sconf = "videocrypts";
                 break;
             case "syster":
-                // No specific sample rate required for Syster
+                // No pixel sample rate required for Syster
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
             case "d11":
-                // Set sample rate to 17.75 MHz
-                txtSampleRate.setText("17.75");
+                // Set pixel rate to 17.75 MHz
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("17.75");
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
             case "systercnr":
-                // Set sample rate to 17.75 MHz (4 x 4.4375, the PAL subcarrier)
-                txtSampleRate.setText("17.75");
+                // Set pixel rate to 17.75 MHz
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("17.75");
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
@@ -4311,7 +4353,6 @@ public class GUI extends javax.swing.JFrame {
             // Use a dummy string to preserve the length of the combobox
             // This won't be seen as the combobox is disabled
             String[] TCNames = {"No items found"};
-            System.out.println(TCNames.length);
             cmbTest.setEnabled(false);
             cmbTest.removeAllItems();
             cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
@@ -4837,7 +4878,12 @@ public class GUI extends javax.swing.JFrame {
             // to ChannelArray.
             FrequencyArray = new int[ChannelArray.length];
             for (int i = 0; i < ChannelArray.length; i++) {
-                FrequencyArray[i] = (INIFile.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]));
+                if (INIFile.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]) != null) {
+                    FrequencyArray[i] = INIFile.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]);
+                }
+                else {
+                    throw new IllegalArgumentException("Invalid data returned from Modes.ini, section name: " + bpname);
+                }
             }
             // Enable cmbChannel and populate it with the contents of ChannelArray
             cmbChannel.setEnabled(true);       
@@ -4847,7 +4893,8 @@ public class GUI extends javax.swing.JFrame {
             // Set region ID if applicable
             lblRegion.setText(INIFile.getStringFromINI(ModesFile, bpname, "region", "", true));            
         }
-        catch (NullPointerException | IllegalArgumentException ex) {
+        catch (IllegalArgumentException ex) {
+            System.err.println(ex);
             JOptionPane.showMessageDialog(null, "An unexpected error occurred while attempting to load "
                     + "the bandplan data for this mode. This may be due to incorrect settings in the Modes.ini file.", AppName, JOptionPane.WARNING_MESSAGE);
             radCustom.doClick();
@@ -4865,14 +4912,14 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    private boolean checkInputSource() {
+    private boolean checkInput() {
         if (radLocalSource.isSelected()) {
             if (cmbM3USource.isVisible()) {
                 InputSource = PlaylistURLsAL.get(cmbM3USource.getSelectedIndex());
                 return true;
             }
             else if (!txtSource.getText().isBlank()) { 
-                InputSource = txtSource.getText();
+                InputSource = txtSource.getText().replace("\"", "");
                 return true;
             }
             else {
@@ -4894,11 +4941,29 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             JOptionPane.showMessageDialog(null, "Please specify a valid sample rate in MHz.", AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(0);
+            tabPane.setSelectedIndex(0);
             return false;
         }
     }
     
+    private boolean checkPixelRate() {
+        if (chkPixelRate.isSelected()) {
+            try {
+                Double PR = Double.parseDouble(txtPixelRate.getText());
+                PixelRate = (int) (PR * 1000000);
+                return true;
+            }
+            catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(null, "Please specify a valid pixel rate in MHz.", AppName, JOptionPane.WARNING_MESSAGE);
+                tabPane.setSelectedIndex(0);
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+   
     private boolean checkFMDeviation() {
         if (chkFMDev.isSelected()) {
             if (Shared.isNumeric(txtFMDev.getText())) {
@@ -5201,13 +5266,14 @@ public class GUI extends javax.swing.JFrame {
     
     private void runHackTV() {
         // Call each method and check its response. If false, then stop.
-        if (!checkInputSource()) return;
+        if (!checkInput()) return;
         if (!checkCustomFrequency()) return;
         if (!checkFMDeviation()) return;
         if (!checkGamma()) return;
         if (!checkOutputLevel()) return;
         if (!checkGain()) return;
         if (!checkSampleRate()) return;
+        if (!checkPixelRate()) return;
         if (!checkMacChId()) return;
         if (!checkCardNumber()) return;
         if (!checkOutputDevice()) return;
@@ -5239,6 +5305,10 @@ public class GUI extends javax.swing.JFrame {
         if (!txtTextSubtitleIndex.getText().isEmpty()) AllArgs.add(txtTextSubtitleIndex.getText());
         AllArgs.add("-s");
         AllArgs.add(Integer.toString(SampleRate));
+        if (chkPixelRate.isSelected()) {
+            AllArgs.add("--pixelrate");
+            AllArgs.add(Integer.toString(PixelRate));
+        }
         // Only add gain for HackRF or SoapySDR
         if (txtGain.isEnabled()) {
             AllArgs.add("-g");
@@ -5794,7 +5864,8 @@ public class GUI extends javax.swing.JFrame {
         else {
             FilterParam = "";
             if ( ScramblingType1.equals("--videocrypt") || ScramblingType1.equals("--videocrypt2") ) {
-                txtSampleRate.setText("14");
+                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                txtPixelRate.setText("14");
             }
             else {
                 txtSampleRate.setText(DefaultSampleRate);
@@ -5802,17 +5873,16 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkVideoFilterActionPerformed
 
-    private void chkFMDevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFMDevActionPerformed
-        if (chkFMDev.isSelected()) {
-            txtFMDev.setEnabled(true);
-            FMDevParam = "--deviation";
+    private void chkPixelRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPixelRateActionPerformed
+        if (chkPixelRate.isSelected()) {
+            txtPixelRate.setEnabled(true);
+            txtPixelRate.setText(txtSampleRate.getText());
         }
         else {
-            txtFMDev.setText("");
-            txtFMDev.setEnabled(false);
-            FMDevParam = "";
+            txtPixelRate.setText("");
+            txtPixelRate.setEnabled(false);
         }
-    }//GEN-LAST:event_chkFMDevActionPerformed
+    }//GEN-LAST:event_chkPixelRateActionPerformed
 
     private void txtMacChIdKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMacChIdKeyTyped
         if(txtMacChId.getText().length()>=4) {
@@ -6473,6 +6543,18 @@ public class GUI extends javax.swing.JFrame {
             Prefs.put("UseLocalModesFile", "0");
         }
     }//GEN-LAST:event_chkLocalModesActionPerformed
+
+    private void chkFMDevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFMDevActionPerformed
+        if (chkFMDev.isSelected()) {
+            txtFMDev.setEnabled(true);
+            FMDevParam = "--deviation";
+        }
+        else {
+            txtFMDev.setText("");
+            txtFMDev.setEnabled(false);
+            FMDevParam = "";
+        }
+    }//GEN-LAST:event_chkFMDevActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -6509,6 +6591,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkMacChId;
     private javax.swing.JCheckBox chkNICAM;
     private javax.swing.JCheckBox chkOutputLevel;
+    private javax.swing.JCheckBox chkPixelRate;
     private javax.swing.JCheckBox chkPosition;
     private javax.swing.JCheckBox chkRepeat;
     private javax.swing.JCheckBox chkScrambleAudio;
@@ -6627,6 +6710,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtMacChId;
     private javax.swing.JTextField txtOutputDevice;
     private javax.swing.JTextField txtOutputLevel;
+    private javax.swing.JTextField txtPixelRate;
     private javax.swing.JTextField txtPosition;
     private javax.swing.JTextField txtSampleRate;
     private javax.swing.JTextField txtSource;
