@@ -740,7 +740,7 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnSourceBrowse)
-                    .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSource)
                     .addComponent(cmbM3USource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 9, Short.MAX_VALUE)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -2199,7 +2199,7 @@ public class GUI extends javax.swing.JFrame {
     private void downloadModesFile() {
         createTempDirectory();
         String f = TempDir + OS_SEP + "Modes.ini";
-        String u = "https://raw.githubusercontent.com/steeviebops/jhacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
+        String u = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         try {
             // Delete Modes.ini if it already exists
             if (Files.exists(Path.of(f))) Shared.deleteFSObject(Path.of(f));
@@ -2389,11 +2389,11 @@ public class GUI extends javax.swing.JFrame {
             return;            
         }
         /*  Check the size of the specified file.
-         *  If larger than 30MB, call the fsphil method and don't go any further.
-         *  This is for security reasons and to avoid memory leaks.
+         *  If larger than 100MB, call the fsphil method and don't go any further.
+         *  This is to avoid memory leaks or hangs by loading a bad file.
          */
         File f = new File(HackTVPath);
-        if (f.length() > 31457280) { 
+        if (f.length() > 104857600) {
             lblFork.setText("Invalid file (too large)");
             Fork = "";
             return;
@@ -2437,7 +2437,7 @@ public class GUI extends javax.swing.JFrame {
             lblFork.setText("Invalid file (not hacktv?)");
             Fork = "";
             return;            
-        }        
+        }     
     }
     
     private String getFork() {
@@ -4012,16 +4012,16 @@ public class GUI extends javax.swing.JFrame {
         String sconf = ScramblingTypeArray.get(cmbScramblingType.getSelectedIndex()).substring(2);
         switch (sconf) {
             case "videocrypt":
-                // Set pixel rate to 14 MHz
+                // Set pixel rate to 28 MHz (multiples of 14 are OK)
                 if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("14");
+                txtPixelRate.setText("28");
                 disableScramblingKey2();                
                 sconf = "videocrypt";
                 break;
             case "videocrypt2":
-                // Set pixel rate to 14 MHz
+                // Set pixel rate to 28 MHz (multiples of 14 are OK)
                 if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("14");
+                txtPixelRate.setText("28");
                 disableScramblingKey2();
                 sconf = "videocrypt2";
                 break;
@@ -5571,7 +5571,7 @@ public class GUI extends javax.swing.JFrame {
         mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
         JOptionPane.showMessageDialog(null, AppName + " (Java version)" + v + mv + "\n\nCreated 2020-2021 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
-                "https://github.com/steeviebops/jhacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
+                "https://github.com/steeviebops/hacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
 
     private void menuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExitActionPerformed
