@@ -2642,16 +2642,11 @@ public class GUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.ERROR_MESSAGE);  
                 return;
             }
-            /* Check the file to see if it's in the correct format.
-               We no longer support the legacy format used by 2.x and earlier.*/
-            if ( (FileContents.contains("[hacktv-gui]")) || (FileContents.contains("hacktv-gui configuration file")) ) {
-                JOptionPane.showMessageDialog(null, "This file was created in an older version of the application.\n"
-                    + "This Java version no longer supports this format. Please use the Windows VB6 version "
-                        + "(3.0 or later) to convert the file to the current format.", AppName, JOptionPane.INFORMATION_MESSAGE);
-            } else if ( FileContents.contains("[hacktv]") ) {
+            // Check the file to see if it's in the correct format.
+            if ( FileContents.contains("[hacktv]") ) {
                 // This is OK, continue opening this file
                 HTVLoadInProgress = true;
-                if (openConfigFile(SourceFile.toString())) {
+                if (openConfigFile(SourceFile)) {
                     // Display the opened filename in the title bar
                     // Back up the original title once
                     if (!TitleBarChanged) {
@@ -2675,22 +2670,27 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private boolean openConfigFile(String SourceFile) {
+    private boolean openConfigFile(File SourceFile) throws IOException {
         /**
          * HTV configuration file loader.
          * 
          * We read the file as a Windows INI format. The syntax for strings is as follows:
          * 
-         * INIFile.getStringFromINI(SourceFile, "section", "setting", "Default value", Preserve case?);
+         * INIFile.getStringFromINI(source file or string, "section", "setting", "Default value", Preserve case?);
          * 
-         * The first integer should be set to 0 if a path is specified, otherwise it should be set to 1
+         * If the first parameter is a single line string, it's treated as a file path
+         * Otherwise, it's treated as the contents of the file
+         * 
          * If the setting is not specified in the file, use the default value specified
+         * 
          * If preserve-case is set to true, the value is returned as-is
          * If false, it is converted to lower case so we can manage it more easily
          * At present, we enable case-sensitivity for file and channel names only
          */
+        // Load the file to a string
+        String f = Files.readString(SourceFile.toPath());
         // Check that the fork value matches the one we're using
-        String ImportedFork = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "fork", "", false));
+        String ImportedFork = INIFile.getStringFromINI(f, "hacktv-gui3", "fork", "", false);
         String WrongFork = "This file was created with a different fork of " +
             "hacktv. We will attempt to process the file but some options " +
             "may not be available.";
@@ -2707,7 +2707,7 @@ public class GUI extends javax.swing.JFrame {
            interpreted as hackrf. Anything other than these values is handled
            as an output file.
          */
-        String ImportedOutputDevice = (INIFile.getStringFromINI(SourceFile, "hacktv", "output", "hackrf", true));
+        String ImportedOutputDevice = INIFile.getStringFromINI(f, "hacktv", "output", "hackrf", true);
         if ((ImportedOutputDevice.isEmpty()) || (ImportedOutputDevice.toLowerCase().startsWith("hackrf"))) {
             cmbOutputDevice.setSelectedIndex(0);
             if (ImportedOutputDevice.contains(":")) {
@@ -2731,9 +2731,9 @@ public class GUI extends javax.swing.JFrame {
             txtOutputDevice.setText(ImportedOutputDevice);
         }        
         // Input source or test card
-        String ImportedSource = (INIFile.getStringFromINI(SourceFile, "hacktv", "input", "", true));
-        String M3USource = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "m3usource", "", true));
-        Integer M3UIndex = (INIFile.getIntegerFromINI(SourceFile, "hacktv-gui3", "m3uindex"));
+        String ImportedSource = INIFile.getStringFromINI(f, "hacktv", "input", "", true);
+        String M3USource = (INIFile.getStringFromINI(f, "hacktv-gui3", "m3usource", "", true));
+        Integer M3UIndex = (INIFile.getIntegerFromINI(f, "hacktv-gui3", "m3uindex"));
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
             if (Fork.equals("CJ")) {
@@ -2765,10 +2765,18 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setText(ImportedSource);
         }
         // Video format
-        String ImportedVideoFormat = (INIFile.getStringFromINI(SourceFile, "hacktv", "mode", "", false));
+        String ImportedVideoMode = INIFile.getStringFromINI(f, "hacktv", "mode", "", false);
         Boolean ModeFound = false;
             for (int i = 0; i < PALModeArray.length; i++) {
-                if (PALModeArray[i].equals(ImportedVideoFormat)) {
+                // Check if the mode we imported is in the PAL mode array
+                if (PALModeArray[i].equals(ImportedVideoMode)) {
+                    radPAL.doClick();
+                    cmbVideoFormat.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+                // Check the 'alt' value to see if we find a match there
+                else if (checkAltModeNames(PALModeArray[i], ImportedVideoMode)) {
                     radPAL.doClick();
                     cmbVideoFormat.setSelectedIndex(i);
                     ModeFound = true;
@@ -2776,47 +2784,72 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             if (!ModeFound) {
+                // Check the NTSC mode array, and so on...
                 for (int i = 0; i < NTSCModeArray.length; i++) {
-                    if (NTSCModeArray[i].equals(ImportedVideoFormat)) {
+                    if (NTSCModeArray[i].equals(ImportedVideoMode)) {
                         radNTSC.doClick();
                         cmbVideoFormat.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
-                }                
+                    else if (checkAltModeNames(NTSCModeArray[i], ImportedVideoMode)) {
+                            radNTSC.doClick();
+                            cmbVideoFormat.setSelectedIndex(i);
+                            ModeFound = true;
+                            break;
+                    }
+                }      
             }
             if (!ModeFound) {
                 for (int i = 0; i < SECAMModeArray.length; i++) {
-                    if (SECAMModeArray[i].equals(ImportedVideoFormat)) {
+                    if (SECAMModeArray[i].equals(ImportedVideoMode)) {
                         radSECAM.doClick();
                         cmbVideoFormat.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
-                }                
+                    else if (checkAltModeNames(SECAMModeArray[i], ImportedVideoMode)) {
+                        radSECAM.doClick();
+                        cmbVideoFormat.setSelectedIndex(i);
+                        ModeFound = true;
+                        break;
+                    }
+                }
             }
             if (!ModeFound) {
                 for (int i = 0; i < OtherModeArray.length; i++) {
-                    if (OtherModeArray[i].equals(ImportedVideoFormat)) {
+                    if (OtherModeArray[i].equals(ImportedVideoMode)) {
                         radBW.doClick();
                         cmbVideoFormat.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
-                }                
+                    else if (checkAltModeNames(OtherModeArray[i], ImportedVideoMode)) {
+                        radBW.doClick();
+                        cmbVideoFormat.setSelectedIndex(i);
+                        ModeFound = true;
+                        break;
+                    }
+                }
             }
             if (!ModeFound) {
                 for (int i = 0; i < MACModeArray.length; i++) {
-                    if (MACModeArray[i].equals(ImportedVideoFormat)) {
+                    if (MACModeArray[i].equals(ImportedVideoMode)) {
                         radMAC.doClick();
                         cmbVideoFormat.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
-                }                
+                    else if (checkAltModeNames(MACModeArray[i], ImportedVideoMode)) {
+                        radMAC.doClick();
+                        cmbVideoFormat.setSelectedIndex(i);
+                        ModeFound = true;
+                        break;
+                    }
+                }
             }
             if (!ModeFound) {
-               invalidConfigFileValue("video format", ImportedVideoFormat);
+               invalidConfigFileValue("video mode", ImportedVideoMode);
                resetAllControls();
                return false;
             }
@@ -2824,10 +2857,10 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             // Return a value of -250 if the value is null so we can handle it
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
-            String ImportedChannel = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "channel", "", true));
+            String ImportedChannel = INIFile.getStringFromINI(f, "hacktv-gui3", "channel", "", true);
             Double ImportedFrequency;
-            if (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency") != null) {
-                ImportedFrequency = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "frequency"));
+            if (INIFile.getDoubleFromINI(f, "hacktv", "frequency") != null) {
+                ImportedFrequency = INIFile.getDoubleFromINI(f, "hacktv", "frequency");
             } else {
                 ImportedFrequency = Double.parseDouble("-250");
             }
@@ -2876,8 +2909,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Gain
-        if (INIFile.getIntegerFromINI(SourceFile, "hacktv", "gain") != null) {
-            txtGain.setText(INIFile.getIntegerFromINI(SourceFile, "hacktv", "gain").toString());
+        if (INIFile.getIntegerFromINI(f, "hacktv", "gain") != null) {
+            txtGain.setText(INIFile.getIntegerFromINI(f, "hacktv", "gain").toString());
         }
         // If value is null and output device is hackrf or soapysdr, set gain to zero
         else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -2885,48 +2918,48 @@ public class GUI extends javax.swing.JFrame {
         }
         // Amp
         if (cmbOutputDevice.getSelectedIndex() == 0) {
-            if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "amp")) {
+            if (INIFile.getBooleanFromINI(f, "hacktv", "amp")) {
                 chkAmp.doClick();
             }            
         }
         // FM deviation
-        if ((chkFMDev.isEnabled()) && (INIFile.getDoubleFromINI(SourceFile, "hacktv", "deviation") != null)) {
-            Double ImportedDeviation = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "deviation") / 1000000);
+        if ((chkFMDev.isEnabled()) && (INIFile.getDoubleFromINI(f, "hacktv", "deviation") != null)) {
+            Double ImportedDeviation = (INIFile.getDoubleFromINI(f, "hacktv", "deviation") / 1000000);
             chkFMDev.doClick();
             txtFMDev.setText(ImportedDeviation.toString().replace(".0",""));
         }
         // Output level
-        String ImportedLevel = (INIFile.getStringFromINI(SourceFile, "hacktv", "level", "", false));
+        String ImportedLevel = INIFile.getStringFromINI(f, "hacktv", "level", "", false);
         if (!ImportedLevel.isEmpty()) {
             chkOutputLevel.doClick();
             txtOutputLevel.setText(ImportedLevel);
         }
         // Gamma
-        String ImportedGamma = (INIFile.getStringFromINI(SourceFile, "hacktv", "gamma", "", false));
+        String ImportedGamma = INIFile.getStringFromINI(f, "hacktv", "gamma", "", false);
         if (!ImportedGamma.isEmpty()) {
             chkGamma.doClick();
             txtGamma.setText(ImportedGamma);
         }
         // Repeat
         if (chkRepeat.isEnabled()) {
-            if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "repeat")) {
+            if (INIFile.getBooleanFromINI(f, "hacktv", "repeat")) {
                 chkRepeat.doClick();
             }
         }
         // Position
         if (chkPosition.isEnabled()) {
-            if (INIFile.getIntegerFromINI(SourceFile, "hacktv", "position") != null) {
+            if (INIFile.getIntegerFromINI(f, "hacktv", "position") != null) {
                 chkPosition.doClick();
-                txtPosition.setText(INIFile.getIntegerFromINI(SourceFile, "hacktv", "position").toString());
+                txtPosition.setText(INIFile.getIntegerFromINI(f, "hacktv", "position").toString());
             }
         }
         // Verbose mode
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "verbose")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "verbose")) {
             chkVerbose.doClick();
         }
         // Logo
         if (chkLogo.isEnabled()) {
-            String ImportedLogo = (INIFile.getStringFromINI(SourceFile, "hacktv", "logo", "", true)).toLowerCase();
+            String ImportedLogo = INIFile.getStringFromINI(f, "hacktv", "logo", "", true).toLowerCase();
             // Check first if the imported string is a .png file.
             // hacktv now contains its own internal resources so external files
             // are no longer supported.
@@ -2951,16 +2984,16 @@ public class GUI extends javax.swing.JFrame {
         }
         // Timestamp
         if (chkTimestamp.isEnabled()) {
-            if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "timestamp")) {
+            if (INIFile.getBooleanFromINI(f, "hacktv", "timestamp")) {
                 chkTimestamp.doClick();
             }
         }
         // Interlace
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "interlace")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "interlace")) {
             chkTimestamp.doClick();
         }
         // Teletext
-        String ImportedTeletext = (INIFile.getStringFromINI(SourceFile, "hacktv", "teletext", "", true));
+        String ImportedTeletext = INIFile.getStringFromINI(f, "hacktv", "teletext", "", true);
         if (!ImportedTeletext.isEmpty()) {
             chkTeletext.doClick();
             if (ImportedTeletext.toLowerCase().startsWith("raw:")) {
@@ -2970,8 +3003,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // WSS
-        if ((INIFile.getIntegerFromINI(SourceFile, "hacktv", "wss")) != null) {
-            Integer ImportedWSS = (INIFile.getIntegerFromINI(SourceFile, "hacktv", "wss"));
+        if ((INIFile.getIntegerFromINI(f, "hacktv", "wss")) != null) {
+            Integer ImportedWSS = (INIFile.getIntegerFromINI(f, "hacktv", "wss"));
             // Only accept values between 1 and 5
             if ((ImportedWSS > 0) && (ImportedWSS <= 5)) {
                 chkWSS.doClick();
@@ -2985,16 +3018,16 @@ public class GUI extends javax.swing.JFrame {
          * Otherwise, check the option and process it as normal
          */
         if (chkARCorrection.isEnabled()) {
-            if ((INIFile.getIntegerFromINI(SourceFile, "hacktv", "arcorrection")) != null) {
-                Integer ImportedAR = (INIFile.getIntegerFromINI(SourceFile, "hacktv", "arcorrection"));
+            if ((INIFile.getIntegerFromINI(f, "hacktv", "arcorrection")) != null) {
+                Integer ImportedAR = (INIFile.getIntegerFromINI(f, "hacktv", "arcorrection"));
                 chkARCorrection.doClick();
                 cmbARCorrection.setSelectedIndex(ImportedAR);
             }
         }
         // Scrambling system
-        String ImportedScramblingSystem = (INIFile.getStringFromINI(SourceFile, "hacktv", "scramblingtype", "", false));
-        String ImportedKey = (INIFile.getStringFromINI(SourceFile, "hacktv", "scramblingkey", "", false));
-        String ImportedKey2 = (INIFile.getStringFromINI(SourceFile, "hacktv", "scramblingkey2", "", false));
+        String ImportedScramblingSystem = INIFile.getStringFromINI(f, "hacktv", "scramblingtype", "", false);
+        String ImportedKey = INIFile.getStringFromINI(f, "hacktv", "scramblingkey", "", false);
+        String ImportedKey2 = INIFile.getStringFromINI(f, "hacktv", "scramblingkey2", "", false);
         if ((radPAL.isSelected()) || radSECAM.isSelected()) {
             if (ImportedScramblingSystem.isEmpty()) {
                 cmbScramblingType.setSelectedIndex(0);
@@ -3059,15 +3092,15 @@ public class GUI extends javax.swing.JFrame {
         }
         // EMM
         if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
-            if ((INIFile.getIntegerFromINI(SourceFile, "hacktv", "emm")) != null) {
-                Integer ImportedEMM = (INIFile.getIntegerFromINI(SourceFile, "hacktv", "emm"));
+            if ((INIFile.getIntegerFromINI(f, "hacktv", "emm")) != null) {
+                Integer ImportedEMM = (INIFile.getIntegerFromINI(f, "hacktv", "emm"));
                 String ImportedCardNumber;
                 String Imported13Prefix;
                 if ( (ImportedEMM.equals(1)) || (ImportedEMM.equals(2)) ){
                     if (ImportedEMM.equals(1)) { chkActivateCard.doClick() ;}
                     if (ImportedEMM.equals(2)) { chkDeactivateCard.doClick() ;}
-                    ImportedCardNumber = (INIFile.getStringFromINI(SourceFile, "hacktv", "cardnumber", "", false));
-                    Imported13Prefix = (INIFile.getStringFromINI(SourceFile, "hacktv-gui3", "13digitprefix", "", false));
+                    ImportedCardNumber = INIFile.getStringFromINI(f, "hacktv", "cardnumber", "", false);
+                    Imported13Prefix = INIFile.getStringFromINI(f, "hacktv-gui3", "13digitprefix", "", false);
                     // The ImportedCardNumber value only contains 8 digits of the card number
                     // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
                     txtCardNumber.setText(Imported13Prefix + ImportedCardNumber + Luhn.CalculateLuhnCheckDigit(ImportedCardNumber));
@@ -3075,21 +3108,21 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Show card serial
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "showserial")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "showserial")) {
             chkShowCardSerial.doClick();
         }
         // Brute force PPV key
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "findkey")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "findkey")) {
             chkFindKeys.doClick();
         }
         // Scramble audio
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "scramble-audio")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "scramble-audio")) {
             chkScrambleAudio.doClick();
         }
         // Syster permutation table
         Integer ImportedPermutationTable;
-        if (INIFile.getIntegerFromINI(SourceFile, "hacktv", "permutationtable") != null) {
-            ImportedPermutationTable = INIFile.getIntegerFromINI(SourceFile, "hacktv", "permutationtable");
+        if (INIFile.getIntegerFromINI(f, "hacktv", "permutationtable") != null) {
+            ImportedPermutationTable = INIFile.getIntegerFromINI(f, "hacktv", "permutationtable");
             if ( (Fork.equals("CJ")) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
@@ -3097,42 +3130,42 @@ public class GUI extends javax.swing.JFrame {
             }
         }       
         // ACP
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "acp")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "acp")) {
             chkACP.doClick();
         }
         // Filter
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "filter")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "filter")) {
             chkVideoFilter.doClick();
         }
         // Audio
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "audio") == false) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "audio") == false) {
             if (chkAudio.isSelected() ) { chkAudio.doClick(); }
         }
         // NICAM
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "nicam") == false) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "nicam") == false) {
             if (chkNICAM.isSelected() ) { chkNICAM.doClick(); }
         }
         // A2 Stereo
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "a2stereo") == true) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "a2stereo") == true) {
             if ( (!chkA2Stereo.isSelected()) && (A2Supported) ) chkA2Stereo.doClick();
         }
         // ECM
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "showecm")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "showecm")) {
             chkShowECM.doClick();
         }
         // VITS
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "vits")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "vits")) {
             chkVITS.doClick();
         }
         // Subtitles
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "subtitles")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "subtitles")) {
             chkSubtitles.doClick();
-            if ( (INIFile.getIntegerFromINI(SourceFile, "hacktv", "subtitleindex")) != null ) {
-                txtSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(SourceFile, "hacktv", "subtitleindex"))));
+            if ( (INIFile.getIntegerFromINI(f, "hacktv", "subtitleindex")) != null ) {
+                txtSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(f, "hacktv", "subtitleindex"))));
             }
         }
         // MAC channel ID
-        String ImportedChID = (INIFile.getStringFromINI(SourceFile, "hacktv", "chid", "", true));
+        String ImportedChID = INIFile.getStringFromINI(f, "hacktv", "chid", "", true);
         if (!ImportedChID.isEmpty()) {
             if (!chkMacChId.isSelected()) chkMacChId.doClick();
             txtMacChId.setText(ImportedChID);
@@ -3140,18 +3173,18 @@ public class GUI extends javax.swing.JFrame {
         // Disable colour
         if (chkColour.isEnabled()) {
             // Accept both UK and US English spelling
-            if ( (INIFile.getBooleanFromINI(SourceFile, "hacktv", "nocolour")) ||
-                    (INIFile.getBooleanFromINI(SourceFile, "hacktv", "nocolor")) ){
+            if ( (INIFile.getBooleanFromINI(f, "hacktv", "nocolour")) ||
+                    (INIFile.getBooleanFromINI(f, "hacktv", "nocolor")) ){
                 chkColour.doClick();
             }
         }
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
-            txtAntennaName.setText(INIFile.getStringFromINI(SourceFile, "hacktv", "antennaname", "", false));
+            txtAntennaName.setText(INIFile.getStringFromINI(f, "hacktv", "antennaname", "", false));
         }
         // Output file type
         if (cmbOutputDevice.getSelectedIndex() == 3) {
-            switch (INIFile.getStringFromINI(SourceFile, "hacktv", "filetype", "", false)) {
+            switch (INIFile.getStringFromINI(f, "hacktv", "filetype", "", false)) {
                 case "uint8":
                     cmbFileType.setSelectedIndex(0);
                     break;
@@ -3176,35 +3209,35 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Volume
-        String ImportedVolume = (INIFile.getStringFromINI(SourceFile, "hacktv", "volume", "", false));
+        String ImportedVolume = INIFile.getStringFromINI(f, "hacktv", "volume", "", false);
         if (!ImportedVolume.isEmpty()) {
             chkVolume.doClick();
             txtVolume.setText(ImportedVolume);
         }
         // Downmix
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "downmix")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "downmix")) {
             chkDownmix.doClick();
         }
         // Teletext subtitles
-        if (INIFile.getBooleanFromINI(SourceFile, "hacktv", "teletextsubtitles")) {
+        if (INIFile.getBooleanFromINI(f, "hacktv", "teletextsubtitles")) {
             chkTextSubtitles.doClick();
-            if ( (INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex")) != null ) {
-                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(SourceFile, "hacktv", "teletextsubindex"))));
+            if ( (INIFile.getIntegerFromINI(f, "hacktv", "teletextsubindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(f, "hacktv", "teletextsubindex"))));
             }
         }
         // Pixel rate
         Double ImportedPixelRate;
-        if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "pixelrate")) != null) {
+        if ((INIFile.getDoubleFromINI(f, "hacktv", "pixelrate")) != null) {
             if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-            ImportedPixelRate = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "pixelrate") / 1000000);
+            ImportedPixelRate = (INIFile.getDoubleFromINI(f, "hacktv", "pixelrate") / 1000000);
             txtPixelRate.setText(ImportedPixelRate.toString().replace(".0","")); 
         }
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
         Double ImportedSampleRate;
-        if ((INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate")) != null) {
-            ImportedSampleRate = (INIFile.getDoubleFromINI(SourceFile, "hacktv", "samplerate") / 1000000);
+        if ((INIFile.getDoubleFromINI(f, "hacktv", "samplerate")) != null) {
+            ImportedSampleRate = (INIFile.getDoubleFromINI(f, "hacktv", "samplerate") / 1000000);
         } else {
             ImportedSampleRate = Double.parseDouble("16");
             JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
@@ -3213,6 +3246,18 @@ public class GUI extends javax.swing.JFrame {
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
         return true;
+    }
+    
+    private boolean checkAltModeNames(String modeToCheck, String alt) {
+        /*
+         * Modes.ini now supports an alt (meaning 'alternative') setting, which
+         * can be used to report a second option that represents that mode.
+         * This is used by B/G and D/K so both options are accepted.
+         *
+         * For example, checkAltModeNames("g", "b") will check if section 'g'
+         * contains an alt value of 'b' and return true if it finds it.
+         */
+        return (INIFile.getStringFromINI(ModesFile, modeToCheck, "alt", "", false).equals(alt));
     }
     
     private void invalidConfigFileValue (String settingName, String value) {

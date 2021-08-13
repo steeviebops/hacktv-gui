@@ -84,10 +84,10 @@ public class INIFile {
     
     public static String getINIValue(String input, String section, String setting, String defaultValue) {
         String fileContents;
-        // If the setting string contains a backslash or square brackets, abort immediately.
+        // If the setting string contains a backslash, square brackets or equals, abort immediately.
         if ((setting.contains("\\")) || (setting.contains("[")) || 
-                (setting.contains("]"))) {
-            System.err.println("INI setting cannot contain a backslash or square brackets.");
+                (setting.contains("]")) || (setting.contains("=")) ) {
+            System.err.println("INI setting cannot contain a backslash, square brackets or equals symbol.");
             return null;
         }
         // If the input string contains one line, treat it as a file path
@@ -134,7 +134,7 @@ public class INIFile {
          * We do this by checking for each character in the string 'sc' below.
          */
         String ps;
-        String sc = "!@#$%&*()'+,-./:;<=>?^_`{|}";
+        String sc = "!@#$%&*()'+,-./:;<>?^_`{|}";
         for (int i = 0; i < setting.length(); i++) {
             if (i != setting.length() - 1) {
                 // Extract a single character from 'settings' to 'ps'
