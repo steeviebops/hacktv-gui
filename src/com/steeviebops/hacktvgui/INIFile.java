@@ -97,7 +97,7 @@ public class INIFile {
             // Load the specified file to a string named fileContents
             File f = new File(input);
             try {
-                fileContents = Files.readString(f.toPath(), StandardCharsets.US_ASCII);
+                fileContents = Files.readString(f.toPath(), StandardCharsets.UTF_8);
             }
             catch (IOException e) {
                 return defaultValue;
@@ -223,14 +223,20 @@ public class INIFile {
          * 
          */
         
-        String newContents = "";
+        // If a blank string was specified, add the section provided to
+        // create the contents of a new "file"
+        if (fileContents.isBlank()) fileContents = "[" + section + "]\n";
+        
+        // Remove any CR characters
+        fileContents = fileContents.replaceAll("\r\n", "\n");
+        fileContents = fileContents.replaceAll("\r", "\n");
 
         // Retrieve the requested section
         String selectedSection = splitINIfile(fileContents, section);
         
         // Retrieve all INI section names
-        String r = "((?i)\\[.*\\])";
-        Pattern p = Pattern.compile(r);
+        String r = "^\\[[^\\]\\n]+]";
+        Pattern p = Pattern.compile(r, Pattern.MULTILINE);
         Matcher m = p.matcher(fileContents);
         // Add the results to an ArrayList so we can read it later
         ArrayList <String> iniSectionNames = new ArrayList<>();
@@ -241,12 +247,7 @@ public class INIFile {
         // Retrieve all sections, including data
         ArrayList <String> allSections = new ArrayList<>();
         for (int i = 0; i < iniSectionNames.size(); i++) {
-            if (iniSectionNames.get(i).contains("-")) {
-                allSections.add(splitINIfile(fileContents, iniSectionNames.get(i).replace("-", "\\-")));
-            }
-            else {
-                allSections.add(splitINIfile(fileContents, iniSectionNames.get(i)));
-            }
+            allSections.add(splitINIfile(fileContents, iniSectionNames.get(i)));
         }
         
         // Query the first ArrayList for the specified section
@@ -265,17 +266,13 @@ public class INIFile {
             }
         }
         
-        // Merge all sections
+        // Merge all sections to a string named newContents
+        String newContents = "";
         for (int i = 0; i < allSections.size(); i++) {
-            newContents = newContents + allSections.get(i);
+            newContents = newContents + allSections.get(i).replace("\n\n", "\n");
         }
-        // Make it look nicer
-        if (newContents.contains("\n" + "\n" + "[")) {
-            // Do nothing
-        }
-        else if (newContents.contains("\n" + "[")) {
-            newContents = newContents.replace("\n" + "[", "\n" + "\n" + "[");
-        }
+        // Make it look nicer by adding an empty line betwen sections
+        newContents = newContents.replaceAll("\n\\[", "\n\n\\[");
         
         // Return changes
         return newContents;
@@ -284,20 +281,8 @@ public class INIFile {
     public static String splitINIfile(String fileContents, String section) {
         String selectedSection = null;
         // Extract the specified section from fileContents
-        String r1 = "(?i)(\\[";
-        String r2;
-        /**
-         * The regex here is different and returns three groups
-         * 0 returns the whole file
-         * 1 returns the selected section name
-         * 2 returns the selected section's contents without the name
-         */
-        if (fileContents.contains("\r\n")) {
-            r2 = "\\]\\r\\n)((?<=\\]\\r\\n)[^\\[]*)";
-        }
-        else {
-            r2 = "\\]\\n)((?<=\\]\\n)[^\\[]*)";
-        }
+        String r1 = "^\\[";
+        String r2 = "](?:\\n(?:[^\\[\\n].*)?)*";
         Pattern p1 = Pattern.compile(r1 + section + r2, Pattern.MULTILINE);
         Matcher m1 = p1.matcher(fileContents);
         // Add the result to a string
