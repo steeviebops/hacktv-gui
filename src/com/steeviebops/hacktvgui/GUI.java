@@ -48,6 +48,7 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.swing.JComboBox;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class GUI extends javax.swing.JFrame {    
@@ -103,8 +105,8 @@ public class GUI extends javax.swing.JFrame {
     // Declare variables used for path resolution
     String HackTVPath;
     String HackTVDirectory;
-    String DefaultHackTVPath;
-    String OS_SEP;
+    final String DefaultHackTVPath;
+    final String OS_SEP;
 
     // Declare variable for the title bar display
     String TitleBar;
@@ -136,6 +138,7 @@ public class GUI extends javax.swing.JFrame {
     ArrayList<String> ScramblingKey2Array;
     String[] LogoArray;
     String[] TCArray;
+    ArrayList<String> PlaylistAL = new ArrayList<>();
     
     // Preferences node
     Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
@@ -221,7 +224,9 @@ public class GUI extends javax.swing.JFrame {
             // Use the Mac menu bar
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
-	GUI mainForm = new GUI(args);		
+	GUI mainForm = new GUI(args);
+        // Prevent window from being resized below the current size
+        mainForm.setMinimumSize(mainForm.getSize());
 	mainForm.setVisible(true);
     }
     
@@ -266,8 +271,6 @@ public class GUI extends javax.swing.JFrame {
         }
         // Initialise Swing components
         initComponents();
-        // Prevent window from being resized below the current size
-        this.setMinimumSize(this.getSize());
         // Set the JarDir variable so we know where we're located
         try {
             // Get the current directory path
@@ -425,24 +428,12 @@ public class GUI extends javax.swing.JFrame {
         cmbARCorrection = new javax.swing.JComboBox<>();
         cmbM3USource = new javax.swing.JComboBox<>();
         cmbTest = new javax.swing.JComboBox<>();
-        VideoFormatPanel = new javax.swing.JPanel();
-        cmbVideoFormat = new javax.swing.JComboBox<>();
-        radPAL = new javax.swing.JRadioButton();
-        radNTSC = new javax.swing.JRadioButton();
-        radSECAM = new javax.swing.JRadioButton();
-        radBW = new javax.swing.JRadioButton();
-        radMAC = new javax.swing.JRadioButton();
-        lblSampleRate = new javax.swing.JLabel();
-        txtSampleRate = new javax.swing.JTextField();
-        chkAudio = new javax.swing.JCheckBox();
-        chkNICAM = new javax.swing.JCheckBox();
-        chkPixelRate = new javax.swing.JCheckBox();
-        txtPixelRate = new javax.swing.JTextField();
-        chkVideoFilter = new javax.swing.JCheckBox();
-        chkColour = new javax.swing.JCheckBox();
-        chkA2Stereo = new javax.swing.JCheckBox();
-        chkFMDev = new javax.swing.JCheckBox();
-        txtFMDev = new javax.swing.JTextField();
+        playlistScrollPane = new javax.swing.JScrollPane();
+        lstPlaylist = new javax.swing.JList<>();
+        btnAdd = new javax.swing.JButton();
+        btnRemove = new javax.swing.JButton();
+        btnPlaylistDown = new javax.swing.JButton();
+        btnPlaylistUp = new javax.swing.JButton();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -465,6 +456,25 @@ public class GUI extends javax.swing.JFrame {
         lblRegion = new javax.swing.JLabel();
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
+        VideoFormatPanel = new javax.swing.JPanel();
+        cmbVideoFormat = new javax.swing.JComboBox<>();
+        radPAL = new javax.swing.JRadioButton();
+        radNTSC = new javax.swing.JRadioButton();
+        radSECAM = new javax.swing.JRadioButton();
+        radBW = new javax.swing.JRadioButton();
+        radMAC = new javax.swing.JRadioButton();
+        lblSampleRate = new javax.swing.JLabel();
+        txtSampleRate = new javax.swing.JTextField();
+        chkAudio = new javax.swing.JCheckBox();
+        chkNICAM = new javax.swing.JCheckBox();
+        chkPixelRate = new javax.swing.JCheckBox();
+        txtPixelRate = new javax.swing.JTextField();
+        chkVideoFilter = new javax.swing.JCheckBox();
+        chkColour = new javax.swing.JCheckBox();
+        chkA2Stereo = new javax.swing.JCheckBox();
+        chkFMDev = new javax.swing.JCheckBox();
+        txtFMDev = new javax.swing.JTextField();
+        PlaybackTab = new javax.swing.JPanel();
         VBIPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -557,6 +567,8 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GUI frontend for hacktv");
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/steeviebops/resources/test.gif")).getImage());
+
+        sourceFileChooser.setMultiSelectionEnabled(true);
 
         teletextFileChooser.setDialogTitle("Select a teletext file or directory");
         teletextFileChooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_AND_DIRECTORIES);
@@ -656,6 +668,11 @@ public class GUI extends javax.swing.JFrame {
 
         cmbLogo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbLogo.setEnabled(false);
+        cmbLogo.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbLogoMouseWheelMoved(evt);
+            }
+        });
         cmbLogo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbLogoActionPerformed(evt);
@@ -675,10 +692,63 @@ public class GUI extends javax.swing.JFrame {
         });
 
         cmbARCorrection.setEnabled(false);
+        cmbARCorrection.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbARCorrectionMouseWheelMoved(evt);
+            }
+        });
 
         cmbM3USource.setEnabled(false);
 
         cmbTest.setEnabled(false);
+        cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbTestMouseWheelMoved(evt);
+            }
+        });
+
+        lstPlaylist.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                lstPlaylistFocusGained(evt);
+            }
+        });
+        lstPlaylist.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                lstPlaylistValueChanged(evt);
+            }
+        });
+        playlistScrollPane.setViewportView(lstPlaylist);
+
+        btnAdd.setText("Add");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        btnRemove.setText("Remove");
+        btnRemove.setEnabled(false);
+        btnRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveActionPerformed(evt);
+            }
+        });
+
+        btnPlaylistDown.setText("˅");
+        btnPlaylistDown.setEnabled(false);
+        btnPlaylistDown.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPlaylistDownActionPerformed(evt);
+            }
+        });
+
+        btnPlaylistUp.setText("˄");
+        btnPlaylistUp.setEnabled(false);
+        btnPlaylistUp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPlaylistUpActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout SourcePanelLayout = new javax.swing.GroupLayout(SourcePanel);
         SourcePanel.setLayout(SourcePanelLayout);
@@ -686,8 +756,8 @@ public class GUI extends javax.swing.JFrame {
             SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SourcePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
+                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkRepeat)
                             .addComponent(chkTimestamp)
@@ -712,7 +782,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(chkPosition)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(SourcePanelLayout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
                                 .addComponent(radLocalSource)
@@ -726,7 +796,15 @@ public class GUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnSourceBrowse)))
+                        .addComponent(btnSourceBrowse))
+                    .addGroup(SourcePanelLayout.createSequentialGroup()
+                        .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(btnPlaylistUp, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnPlaylistDown, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         SourcePanelLayout.setVerticalGroup(
@@ -740,9 +818,21 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnSourceBrowse)
-                    .addComponent(txtSource)
-                    .addComponent(cmbM3USource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 9, Short.MAX_VALUE)
+                    .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(txtSource, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(cmbM3USource, javax.swing.GroupLayout.Alignment.LEADING)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SourcePanelLayout.createSequentialGroup()
+                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnPlaylistUp, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnPlaylistDown, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(playlistScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkRepeat)
                     .addComponent(chkSubtitles)
@@ -765,8 +855,222 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        javax.swing.GroupLayout sourceTabLayout = new javax.swing.GroupLayout(sourceTab);
+        sourceTab.setLayout(sourceTabLayout);
+        sourceTabLayout.setHorizontalGroup(
+            sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(sourceTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(SourcePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        sourceTabLayout.setVerticalGroup(
+            sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(sourceTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        tabPane.addTab("Source", sourceTab);
+
+        FrequencyPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Frequency and TX options"));
+
+        lblOutputDevice.setText("Output device");
+
+        cmbOutputDevice.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbOutputDeviceMouseWheelMoved(evt);
+            }
+        });
+        cmbOutputDevice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbOutputDeviceActionPerformed(evt);
+            }
+        });
+
+        rfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("RF options"));
+
+        BandButtonGroup.add(radCustom);
+        radCustom.setText("Custom");
+        radCustom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radCustomActionPerformed(evt);
+            }
+        });
+
+        BandButtonGroup.add(radVHF);
+        radVHF.setText("VHF");
+        radVHF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radVHFActionPerformed(evt);
+            }
+        });
+
+        BandButtonGroup.add(radUHF);
+        radUHF.setText("UHF");
+        radUHF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radUHFActionPerformed(evt);
+            }
+        });
+
+        lblChannel.setText("Channel");
+
+        txtFrequency.setEditable(false);
+        txtFrequency.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFrequencyKeyTyped(evt);
+            }
+        });
+
+        lblFrequency.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblFrequency.setText("Frequency (MHz)");
+
+        lblGain.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblGain.setText("TX gain (dB)");
+
+        cmbChannel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbChannelMouseWheelMoved(evt);
+            }
+        });
+        cmbChannel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbChannelActionPerformed(evt);
+            }
+        });
+
+        chkAmp.setText("TX RF amplifier");
+        chkAmp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkAmpActionPerformed(evt);
+            }
+        });
+
+        lblAntennaName.setText("Antenna name");
+
+        cmbFileType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "uint8", "int8", "uint16", "int16", "int32", "float" }));
+        cmbFileType.setSelectedIndex(-1);
+        cmbFileType.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbFileTypeMouseWheelMoved(evt);
+            }
+        });
+
+        lblFileType.setText("File type");
+
+        lblRegion.setText("Region");
+
+        javax.swing.GroupLayout rfPanelLayout = new javax.swing.GroupLayout(rfPanel);
+        rfPanel.setLayout(rfPanelLayout);
+        rfPanelLayout.setHorizontalGroup(
+            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(rfPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(radUHF)
+                    .addComponent(lblFrequency)
+                    .addComponent(lblGain)
+                    .addComponent(lblChannel))
+                .addGap(24, 24, 24)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(radVHF)
+                    .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblAntennaName)
+                            .addComponent(lblFileType))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtAntennaName)
+                            .addGroup(rfPanelLayout.createSequentialGroup()
+                                .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 100, Short.MAX_VALUE))))
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addComponent(chkAmp)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(rfPanelLayout.createSequentialGroup()
+                        .addComponent(radCustom)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblRegion)))
+                .addContainerGap())
+        );
+        rfPanelLayout.setVerticalGroup(
+            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rfPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(radCustom)
+                    .addComponent(radUHF)
+                    .addComponent(radVHF)
+                    .addComponent(lblRegion))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblAntennaName)
+                        .addComponent(txtAntennaName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblChannel)
+                        .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblFileType)
+                        .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblFrequency)
+                        .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblGain)
+                    .addComponent(chkAmp))
+                .addContainerGap())
+        );
+
+        lblOutputDevice2.setText("Serial number (optional)");
+
+        javax.swing.GroupLayout FrequencyPanelLayout = new javax.swing.GroupLayout(FrequencyPanel);
+        FrequencyPanel.setLayout(FrequencyPanelLayout);
+        FrequencyPanelLayout.setHorizontalGroup(
+            FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FrequencyPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblOutputDevice)
+                .addGap(18, 18, 18)
+                .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(lblOutputDevice2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtOutputDevice)
+                .addContainerGap())
+            .addComponent(rfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        FrequencyPanelLayout.setVerticalGroup(
+            FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FrequencyPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblOutputDevice)
+                    .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblOutputDevice2)
+                    .addComponent(txtOutputDevice))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
         VideoFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video format options"));
 
+        cmbVideoFormat.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbVideoFormatMouseWheelMoved(evt);
+            }
+        });
         cmbVideoFormat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbVideoFormatActionPerformed(evt);
@@ -952,203 +1256,28 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout sourceTabLayout = new javax.swing.GroupLayout(sourceTab);
-        sourceTab.setLayout(sourceTabLayout);
-        sourceTabLayout.setHorizontalGroup(
-            sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(sourceTabLayout.createSequentialGroup()
+        javax.swing.GroupLayout outputTabLayout = new javax.swing.GroupLayout(outputTab);
+        outputTab.setLayout(outputTabLayout);
+        outputTabLayout.setHorizontalGroup(
+            outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(outputTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(SourcePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(VideoFormatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(VideoFormatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(FrequencyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        sourceTabLayout.setVerticalGroup(
-            sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(sourceTabLayout.createSequentialGroup()
+        outputTabLayout.setVerticalGroup(
+            outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, outputTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
-        );
-
-        tabPane.addTab("Source and video mode", sourceTab);
-
-        FrequencyPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Frequency and TX options"));
-
-        lblOutputDevice.setText("Output device");
-
-        cmbOutputDevice.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbOutputDeviceActionPerformed(evt);
-            }
-        });
-
-        rfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("RF options"));
-
-        BandButtonGroup.add(radCustom);
-        radCustom.setText("Custom");
-        radCustom.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radCustomActionPerformed(evt);
-            }
-        });
-
-        BandButtonGroup.add(radVHF);
-        radVHF.setText("VHF");
-        radVHF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radVHFActionPerformed(evt);
-            }
-        });
-
-        BandButtonGroup.add(radUHF);
-        radUHF.setText("UHF");
-        radUHF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radUHFActionPerformed(evt);
-            }
-        });
-
-        lblChannel.setText("Channel");
-
-        txtFrequency.setEditable(false);
-        txtFrequency.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtFrequencyKeyTyped(evt);
-            }
-        });
-
-        lblFrequency.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblFrequency.setText("Frequency (MHz)");
-
-        lblGain.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblGain.setText("TX gain (dB)");
-
-        cmbChannel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbChannelActionPerformed(evt);
-            }
-        });
-
-        chkAmp.setText("TX RF amplifier");
-        chkAmp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkAmpActionPerformed(evt);
-            }
-        });
-
-        lblAntennaName.setText("Antenna name");
-
-        cmbFileType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "uint8", "int8", "uint16", "int16", "int32", "float" }));
-        cmbFileType.setSelectedIndex(-1);
-
-        lblFileType.setText("File type");
-
-        lblRegion.setText("Region");
-
-        javax.swing.GroupLayout rfPanelLayout = new javax.swing.GroupLayout(rfPanel);
-        rfPanel.setLayout(rfPanelLayout);
-        rfPanelLayout.setHorizontalGroup(
-            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(rfPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radUHF)
-                    .addComponent(lblFrequency)
-                    .addComponent(lblGain)
-                    .addComponent(lblChannel))
-                .addGap(24, 24, 24)
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radVHF)
-                    .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(23, 23, 23)
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(rfPanelLayout.createSequentialGroup()
-                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblAntennaName)
-                            .addComponent(lblFileType))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtAntennaName)
-                            .addGroup(rfPanelLayout.createSequentialGroup()
-                                .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(rfPanelLayout.createSequentialGroup()
-                        .addComponent(chkAmp)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(rfPanelLayout.createSequentialGroup()
-                        .addComponent(radCustom)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblRegion)))
-                .addContainerGap())
-        );
-        rfPanelLayout.setVerticalGroup(
-            rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rfPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radCustom)
-                    .addComponent(radUHF)
-                    .addComponent(radVHF)
-                    .addComponent(lblRegion))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblAntennaName)
-                        .addComponent(txtAntennaName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblChannel)
-                        .addComponent(cmbChannel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblFileType)
-                        .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblFrequency)
-                        .addComponent(txtFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtGain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblGain)
-                    .addComponent(chkAmp))
-                .addContainerGap())
+                .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        lblOutputDevice2.setText("Serial number (optional)");
-
-        javax.swing.GroupLayout FrequencyPanelLayout = new javax.swing.GroupLayout(FrequencyPanel);
-        FrequencyPanel.setLayout(FrequencyPanelLayout);
-        FrequencyPanelLayout.setHorizontalGroup(
-            FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(FrequencyPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblOutputDevice)
-                .addGap(18, 18, 18)
-                .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblOutputDevice2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtOutputDevice)
-                .addContainerGap())
-            .addComponent(rfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        FrequencyPanelLayout.setVerticalGroup(
-            FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(FrequencyPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(FrequencyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblOutputDevice)
-                    .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblOutputDevice2)
-                    .addComponent(txtOutputDevice))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+        tabPane.addTab("Output", outputTab);
 
         VBIPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VBI options"));
 
@@ -1174,6 +1303,11 @@ public class GUI extends javax.swing.JFrame {
         });
 
         cmbWSS.setEnabled(false);
+        cmbWSS.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbWSSMouseWheelMoved(evt);
+            }
+        });
 
         javax.swing.GroupLayout VBIPanelLayout = new javax.swing.GroupLayout(VBIPanel);
         VBIPanel.setLayout(VBIPanelLayout);
@@ -1292,7 +1426,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkDownmix)
                     .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                         .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
                         .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -1316,31 +1450,28 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
-        javax.swing.GroupLayout outputTabLayout = new javax.swing.GroupLayout(outputTab);
-        outputTab.setLayout(outputTabLayout);
-        outputTabLayout.setHorizontalGroup(
-            outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(outputTabLayout.createSequentialGroup()
+        javax.swing.GroupLayout PlaybackTabLayout = new javax.swing.GroupLayout(PlaybackTab);
+        PlaybackTab.setLayout(PlaybackTabLayout);
+        PlaybackTabLayout.setHorizontalGroup(
+            PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PlaybackTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(FrequencyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(VBIPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(VBIPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        outputTabLayout.setVerticalGroup(
-            outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(outputTabLayout.createSequentialGroup()
+        PlaybackTabLayout.setVerticalGroup(
+            PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PlaybackTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(236, Short.MAX_VALUE))
         );
 
-        tabPane.addTab("Output", outputTab);
+        tabPane.addTab("Playback", PlaybackTab);
 
         teletextPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Teletext options"));
 
@@ -1507,6 +1638,11 @@ public class GUI extends javax.swing.JFrame {
 
         scramblingPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Scrambling options"));
 
+        cmbScramblingType.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbScramblingTypeMouseWheelMoved(evt);
+            }
+        });
         cmbScramblingType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbScramblingTypeActionPerformed(evt);
@@ -1514,6 +1650,11 @@ public class GUI extends javax.swing.JFrame {
         });
 
         cmbScramblingKey1.setEnabled(false);
+        cmbScramblingKey1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbScramblingKey1MouseWheelMoved(evt);
+            }
+        });
         cmbScramblingKey1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbScramblingKey1ActionPerformed(evt);
@@ -1521,6 +1662,11 @@ public class GUI extends javax.swing.JFrame {
         });
 
         cmbScramblingKey2.setEnabled(false);
+        cmbScramblingKey2.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbScramblingKey2MouseWheelMoved(evt);
+            }
+        });
         cmbScramblingKey2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbScramblingKey2ActionPerformed(evt);
@@ -1628,6 +1774,11 @@ public class GUI extends javax.swing.JFrame {
         cmbSysterPermTable.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cmbSysterPermTableItemStateChanged(evt);
+            }
+        });
+        cmbSysterPermTable.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbSysterPermTableMouseWheelMoved(evt);
             }
         });
 
@@ -2501,6 +2652,25 @@ public class GUI extends javax.swing.JFrame {
             cmbTest.setSelectedIndex(0);
         }
     }
+    
+    private void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
+        /*
+         * evt contains the number of clicks from the mouse wheel
+         * A single spin upwards reports -1
+         * A aingle spin downwards reports 1
+         *
+         * jcb is the name of the JComboBox that you want to manipulate
+         */
+        if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
+            if (evt < 0) {
+                int p = evt * evt; // negative * negative = positive
+                if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
+            }
+            else if (evt > 0) {
+                if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
+            }            
+        }
+    }
 
     private void createTempDirectory() {
         // Creates a temp directory for us to use.
@@ -2515,6 +2685,17 @@ public class GUI extends javax.swing.JFrame {
                 resetTeletextButtons();
             }
         }        
+    }
+    
+    private void populatePlaylist() {
+        // Convert PlaylistAL to an array so we can populate lstPlaylist with it
+        String[] pl = new String[PlaylistAL.size()];
+        for(int i = 0; i < pl.length; i++) {
+            pl[i] = PlaylistAL.get(i);
+        }
+        // Populate lstPlaylist using the contents of pl[]
+        lstPlaylist.setListData(pl);
+        //lstPlaylist.repaint();
     }
     
     private void checkMRUList() {
@@ -2630,23 +2811,24 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void checkSelectedFile(File SourceFile) {
-        String FileContents;
+        String f;
         try {
-            // Read the first line of the file using a BufferedReader
-            BufferedReader br1 = new BufferedReader(new FileReader(SourceFile));
-            LineNumberReader lnr1 = new LineNumberReader(br1);
-            FileContents = lnr1.readLine();
-            br1.close();
-            // Check that the file is not empty
-            if (FileContents == null) {
-                JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.ERROR_MESSAGE);  
+            // Check if the file is too large. We really don't need to read
+            // anything larger than a few kilobytes but we'll set it to 1 MB.
+            if (SourceFile.length() < 1048576)  {
+                // Read the file into memory
+                f = Files.readString(SourceFile.toPath(), StandardCharsets.UTF_8);
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.WARNING_MESSAGE);
+                System.err.println("File too large (> 1MB)");
                 return;
             }
             // Check the file to see if it's in the correct format.
-            if ( FileContents.contains("[hacktv]") ) {
+            if ( (INIFile.splitINIfile(f, "hacktv")) != null ) {
                 // This is OK, continue opening this file
                 HTVLoadInProgress = true;
-                if (openConfigFile(SourceFile)) {
+                if (openConfigFile(f)) {
                     // Display the opened filename in the title bar
                     // Back up the original title once
                     if (!TitleBarChanged) {
@@ -2661,16 +2843,21 @@ public class GUI extends javax.swing.JFrame {
                 HTVLoadInProgress = false;
             }
             else {
-                // No idea what we've read here, so stop
-                JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.ERROR_MESSAGE);                           
+                // No idea what we've read here, abort
+                JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.WARNING_MESSAGE);
+                System.err.println("[hacktv] section not found");
             }
-        } catch (IOException ex) {      
-            JOptionPane.showMessageDialog(null, "The specified file could not be found. "
-                    + "It may have been moved or deleted.", AppName, JOptionPane.ERROR_MESSAGE);         
+        } catch (MalformedInputException ex) {
+                JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.WARNING_MESSAGE);
+                System.err.println("The specified file contains invalid data.");
+        } catch (IOException iox) {
+                // File is inaccessible, so stop
+                JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
+                        + "It may have been removed, or you may not have the correct permissions to access it.", AppName, JOptionPane.ERROR_MESSAGE);         
         }
     }
     
-    private boolean openConfigFile(File SourceFile) throws IOException {
+    private boolean openConfigFile(String fileContents) throws IOException {
         /**
          * HTV configuration file loader.
          * 
@@ -2687,10 +2874,8 @@ public class GUI extends javax.swing.JFrame {
          * If false, it is converted to lower case so we can manage it more easily
          * At present, we enable case-sensitivity for file and channel names only
          */
-        // Load the file to a string
-        String f = Files.readString(SourceFile.toPath());
         // Check that the fork value matches the one we're using
-        String ImportedFork = INIFile.getStringFromINI(f, "hacktv-gui3", "fork", "", false);
+        String ImportedFork = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "fork", "", false);
         String WrongFork = "This file was created with a different fork of " +
             "hacktv. We will attempt to process the file but some options " +
             "may not be available.";
@@ -2703,11 +2888,11 @@ public class GUI extends javax.swing.JFrame {
         // Reset all controls
         resetAllControls();
         /* Output device (case sensitive)
-           For this, we look for hackrf, soapysdr or fl2k. A null value will be
+           For this, we look for hackrf, soapysdr or fl2k. An empty value will be
            interpreted as hackrf. Anything other than these values is handled
            as an output file.
          */
-        String ImportedOutputDevice = INIFile.getStringFromINI(f, "hacktv", "output", "hackrf", true);
+        String ImportedOutputDevice = INIFile.getStringFromINI(fileContents, "hacktv", "output", "hackrf", false);
         if ((ImportedOutputDevice.isEmpty()) || (ImportedOutputDevice.toLowerCase().startsWith("hackrf"))) {
             cmbOutputDevice.setSelectedIndex(0);
             if (ImportedOutputDevice.contains(":")) {
@@ -2731,9 +2916,9 @@ public class GUI extends javax.swing.JFrame {
             txtOutputDevice.setText(ImportedOutputDevice);
         }        
         // Input source or test card
-        String ImportedSource = INIFile.getStringFromINI(f, "hacktv", "input", "", true);
-        String M3USource = (INIFile.getStringFromINI(f, "hacktv-gui3", "m3usource", "", true));
-        Integer M3UIndex = (INIFile.getIntegerFromINI(f, "hacktv-gui3", "m3uindex"));
+        String ImportedSource = INIFile.getStringFromINI(fileContents, "hacktv", "input", "", true);
+        String M3USource = (INIFile.getStringFromINI(fileContents, "hacktv-gui3", "m3usource", "", true));
+        Integer M3UIndex = (INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "m3uindex"));
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
             if (Fork.equals("CJ")) {
@@ -2761,11 +2946,23 @@ public class GUI extends javax.swing.JFrame {
             m3uHandler(M3UFile.getAbsolutePath(), M3UIndex);
             txtSource.setText(M3USource);
         }
+        else if (INIFile.getBooleanFromINI(fileContents, "hacktv-gui3", "playlist")) {
+            // Split the [playlist] section from the HTV file.
+            // We then split the section into an array (minus the header) 
+            // and use that to populate PlaylistAL.
+            if (INIFile.splitINIfile(fileContents, "playlist") != null) {
+                String[] pl = INIFile.splitINIfile(fileContents, "playlist").split("\\n");
+                for (int i = 1; i < pl.length; i++) {
+                    PlaylistAL.add(pl[i]);
+                }
+                populatePlaylist();                
+            }
+        }
         else {
             txtSource.setText(ImportedSource);
         }
         // Video format
-        String ImportedVideoMode = INIFile.getStringFromINI(f, "hacktv", "mode", "", false);
+        String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
         Boolean ModeFound = false;
             for (int i = 0; i < PALModeArray.length; i++) {
                 // Check if the mode we imported is in the PAL mode array
@@ -2857,10 +3054,10 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             // Return a value of -250 if the value is null so we can handle it
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
-            String ImportedChannel = INIFile.getStringFromINI(f, "hacktv-gui3", "channel", "", true);
+            String ImportedChannel = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "channel", "", true);
             Double ImportedFrequency;
-            if (INIFile.getDoubleFromINI(f, "hacktv", "frequency") != null) {
-                ImportedFrequency = INIFile.getDoubleFromINI(f, "hacktv", "frequency");
+            if (INIFile.getDoubleFromINI(fileContents, "hacktv", "frequency") != null) {
+                ImportedFrequency = INIFile.getDoubleFromINI(fileContents, "hacktv", "frequency");
             } else {
                 ImportedFrequency = Double.parseDouble("-250");
             }
@@ -2909,8 +3106,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Gain
-        if (INIFile.getIntegerFromINI(f, "hacktv", "gain") != null) {
-            txtGain.setText(INIFile.getIntegerFromINI(f, "hacktv", "gain").toString());
+        if (INIFile.getIntegerFromINI(fileContents, "hacktv", "gain") != null) {
+            txtGain.setText(INIFile.getIntegerFromINI(fileContents, "hacktv", "gain").toString());
         }
         // If value is null and output device is hackrf or soapysdr, set gain to zero
         else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -2918,48 +3115,48 @@ public class GUI extends javax.swing.JFrame {
         }
         // Amp
         if (cmbOutputDevice.getSelectedIndex() == 0) {
-            if (INIFile.getBooleanFromINI(f, "hacktv", "amp")) {
+            if (INIFile.getBooleanFromINI(fileContents, "hacktv", "amp")) {
                 chkAmp.doClick();
             }            
         }
         // FM deviation
-        if ((chkFMDev.isEnabled()) && (INIFile.getDoubleFromINI(f, "hacktv", "deviation") != null)) {
-            Double ImportedDeviation = (INIFile.getDoubleFromINI(f, "hacktv", "deviation") / 1000000);
+        if ((chkFMDev.isEnabled()) && (INIFile.getDoubleFromINI(fileContents, "hacktv", "deviation") != null)) {
+            Double ImportedDeviation = (INIFile.getDoubleFromINI(fileContents, "hacktv", "deviation") / 1000000);
             chkFMDev.doClick();
             txtFMDev.setText(ImportedDeviation.toString().replace(".0",""));
         }
         // Output level
-        String ImportedLevel = INIFile.getStringFromINI(f, "hacktv", "level", "", false);
+        String ImportedLevel = INIFile.getStringFromINI(fileContents, "hacktv", "level", "", false);
         if (!ImportedLevel.isEmpty()) {
             chkOutputLevel.doClick();
             txtOutputLevel.setText(ImportedLevel);
         }
         // Gamma
-        String ImportedGamma = INIFile.getStringFromINI(f, "hacktv", "gamma", "", false);
+        String ImportedGamma = INIFile.getStringFromINI(fileContents, "hacktv", "gamma", "", false);
         if (!ImportedGamma.isEmpty()) {
             chkGamma.doClick();
             txtGamma.setText(ImportedGamma);
         }
         // Repeat
         if (chkRepeat.isEnabled()) {
-            if (INIFile.getBooleanFromINI(f, "hacktv", "repeat")) {
+            if (INIFile.getBooleanFromINI(fileContents, "hacktv", "repeat")) {
                 chkRepeat.doClick();
             }
         }
         // Position
         if (chkPosition.isEnabled()) {
-            if (INIFile.getIntegerFromINI(f, "hacktv", "position") != null) {
+            if (INIFile.getIntegerFromINI(fileContents, "hacktv", "position") != null) {
                 chkPosition.doClick();
-                txtPosition.setText(INIFile.getIntegerFromINI(f, "hacktv", "position").toString());
+                txtPosition.setText(INIFile.getIntegerFromINI(fileContents, "hacktv", "position").toString());
             }
         }
         // Verbose mode
-        if (INIFile.getBooleanFromINI(f, "hacktv", "verbose")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "verbose")) {
             chkVerbose.doClick();
         }
         // Logo
         if (chkLogo.isEnabled()) {
-            String ImportedLogo = INIFile.getStringFromINI(f, "hacktv", "logo", "", true).toLowerCase();
+            String ImportedLogo = INIFile.getStringFromINI(fileContents, "hacktv", "logo", "", true).toLowerCase();
             // Check first if the imported string is a .png file.
             // hacktv now contains its own internal resources so external files
             // are no longer supported.
@@ -2984,16 +3181,16 @@ public class GUI extends javax.swing.JFrame {
         }
         // Timestamp
         if (chkTimestamp.isEnabled()) {
-            if (INIFile.getBooleanFromINI(f, "hacktv", "timestamp")) {
+            if (INIFile.getBooleanFromINI(fileContents, "hacktv", "timestamp")) {
                 chkTimestamp.doClick();
             }
         }
         // Interlace
-        if (INIFile.getBooleanFromINI(f, "hacktv", "interlace")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "interlace")) {
             chkTimestamp.doClick();
         }
         // Teletext
-        String ImportedTeletext = INIFile.getStringFromINI(f, "hacktv", "teletext", "", true);
+        String ImportedTeletext = INIFile.getStringFromINI(fileContents, "hacktv", "teletext", "", true);
         if (!ImportedTeletext.isEmpty()) {
             chkTeletext.doClick();
             if (ImportedTeletext.toLowerCase().startsWith("raw:")) {
@@ -3003,8 +3200,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // WSS
-        if ((INIFile.getIntegerFromINI(f, "hacktv", "wss")) != null) {
-            Integer ImportedWSS = (INIFile.getIntegerFromINI(f, "hacktv", "wss"));
+        if ((INIFile.getIntegerFromINI(fileContents, "hacktv", "wss")) != null) {
+            Integer ImportedWSS = (INIFile.getIntegerFromINI(fileContents, "hacktv", "wss"));
             // Only accept values between 1 and 5
             if ((ImportedWSS > 0) && (ImportedWSS <= 5)) {
                 chkWSS.doClick();
@@ -3018,16 +3215,16 @@ public class GUI extends javax.swing.JFrame {
          * Otherwise, check the option and process it as normal
          */
         if (chkARCorrection.isEnabled()) {
-            if ((INIFile.getIntegerFromINI(f, "hacktv", "arcorrection")) != null) {
-                Integer ImportedAR = (INIFile.getIntegerFromINI(f, "hacktv", "arcorrection"));
+            if ((INIFile.getIntegerFromINI(fileContents, "hacktv", "arcorrection")) != null) {
+                Integer ImportedAR = (INIFile.getIntegerFromINI(fileContents, "hacktv", "arcorrection"));
                 chkARCorrection.doClick();
                 cmbARCorrection.setSelectedIndex(ImportedAR);
             }
         }
         // Scrambling system
-        String ImportedScramblingSystem = INIFile.getStringFromINI(f, "hacktv", "scramblingtype", "", false);
-        String ImportedKey = INIFile.getStringFromINI(f, "hacktv", "scramblingkey", "", false);
-        String ImportedKey2 = INIFile.getStringFromINI(f, "hacktv", "scramblingkey2", "", false);
+        String ImportedScramblingSystem = INIFile.getStringFromINI(fileContents, "hacktv", "scramblingtype", "", false);
+        String ImportedKey = INIFile.getStringFromINI(fileContents, "hacktv", "scramblingkey", "", false);
+        String ImportedKey2 = INIFile.getStringFromINI(fileContents, "hacktv", "scramblingkey2", "", false);
         if ((radPAL.isSelected()) || radSECAM.isSelected()) {
             if (ImportedScramblingSystem.isEmpty()) {
                 cmbScramblingType.setSelectedIndex(0);
@@ -3092,15 +3289,15 @@ public class GUI extends javax.swing.JFrame {
         }
         // EMM
         if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
-            if ((INIFile.getIntegerFromINI(f, "hacktv", "emm")) != null) {
-                Integer ImportedEMM = (INIFile.getIntegerFromINI(f, "hacktv", "emm"));
+            if ((INIFile.getIntegerFromINI(fileContents, "hacktv", "emm")) != null) {
+                Integer ImportedEMM = (INIFile.getIntegerFromINI(fileContents, "hacktv", "emm"));
                 String ImportedCardNumber;
                 String Imported13Prefix;
                 if ( (ImportedEMM.equals(1)) || (ImportedEMM.equals(2)) ){
                     if (ImportedEMM.equals(1)) { chkActivateCard.doClick() ;}
                     if (ImportedEMM.equals(2)) { chkDeactivateCard.doClick() ;}
-                    ImportedCardNumber = INIFile.getStringFromINI(f, "hacktv", "cardnumber", "", false);
-                    Imported13Prefix = INIFile.getStringFromINI(f, "hacktv-gui3", "13digitprefix", "", false);
+                    ImportedCardNumber = INIFile.getStringFromINI(fileContents, "hacktv", "cardnumber", "", false);
+                    Imported13Prefix = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
                     // The ImportedCardNumber value only contains 8 digits of the card number
                     // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
                     txtCardNumber.setText(Imported13Prefix + ImportedCardNumber + Luhn.CalculateLuhnCheckDigit(ImportedCardNumber));
@@ -3108,21 +3305,21 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Show card serial
-        if (INIFile.getBooleanFromINI(f, "hacktv", "showserial")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "showserial")) {
             chkShowCardSerial.doClick();
         }
         // Brute force PPV key
-        if (INIFile.getBooleanFromINI(f, "hacktv", "findkey")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "findkey")) {
             chkFindKeys.doClick();
         }
         // Scramble audio
-        if (INIFile.getBooleanFromINI(f, "hacktv", "scramble-audio")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "scramble-audio")) {
             chkScrambleAudio.doClick();
         }
         // Syster permutation table
         Integer ImportedPermutationTable;
-        if (INIFile.getIntegerFromINI(f, "hacktv", "permutationtable") != null) {
-            ImportedPermutationTable = INIFile.getIntegerFromINI(f, "hacktv", "permutationtable");
+        if (INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable") != null) {
+            ImportedPermutationTable = INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable");
             if ( (Fork.equals("CJ")) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
@@ -3130,42 +3327,42 @@ public class GUI extends javax.swing.JFrame {
             }
         }       
         // ACP
-        if (INIFile.getBooleanFromINI(f, "hacktv", "acp")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "acp")) {
             chkACP.doClick();
         }
         // Filter
-        if (INIFile.getBooleanFromINI(f, "hacktv", "filter")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "filter")) {
             chkVideoFilter.doClick();
         }
         // Audio
-        if (INIFile.getBooleanFromINI(f, "hacktv", "audio") == false) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "audio") == false) {
             if (chkAudio.isSelected() ) { chkAudio.doClick(); }
         }
         // NICAM
-        if (INIFile.getBooleanFromINI(f, "hacktv", "nicam") == false) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "nicam") == false) {
             if (chkNICAM.isSelected() ) { chkNICAM.doClick(); }
         }
         // A2 Stereo
-        if (INIFile.getBooleanFromINI(f, "hacktv", "a2stereo") == true) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "a2stereo") == true) {
             if ( (!chkA2Stereo.isSelected()) && (A2Supported) ) chkA2Stereo.doClick();
         }
         // ECM
-        if (INIFile.getBooleanFromINI(f, "hacktv", "showecm")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "showecm")) {
             chkShowECM.doClick();
         }
         // VITS
-        if (INIFile.getBooleanFromINI(f, "hacktv", "vits")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "vits")) {
             chkVITS.doClick();
         }
         // Subtitles
-        if (INIFile.getBooleanFromINI(f, "hacktv", "subtitles")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "subtitles")) {
             chkSubtitles.doClick();
-            if ( (INIFile.getIntegerFromINI(f, "hacktv", "subtitleindex")) != null ) {
-                txtSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(f, "hacktv", "subtitleindex"))));
+            if ( (INIFile.getIntegerFromINI(fileContents, "hacktv", "subtitleindex")) != null ) {
+                txtSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(fileContents, "hacktv", "subtitleindex"))));
             }
         }
         // MAC channel ID
-        String ImportedChID = INIFile.getStringFromINI(f, "hacktv", "chid", "", true);
+        String ImportedChID = INIFile.getStringFromINI(fileContents, "hacktv", "chid", "", true);
         if (!ImportedChID.isEmpty()) {
             if (!chkMacChId.isSelected()) chkMacChId.doClick();
             txtMacChId.setText(ImportedChID);
@@ -3173,18 +3370,18 @@ public class GUI extends javax.swing.JFrame {
         // Disable colour
         if (chkColour.isEnabled()) {
             // Accept both UK and US English spelling
-            if ( (INIFile.getBooleanFromINI(f, "hacktv", "nocolour")) ||
-                    (INIFile.getBooleanFromINI(f, "hacktv", "nocolor")) ){
+            if ( (INIFile.getBooleanFromINI(fileContents, "hacktv", "nocolour")) ||
+                    (INIFile.getBooleanFromINI(fileContents, "hacktv", "nocolor")) ){
                 chkColour.doClick();
             }
         }
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
-            txtAntennaName.setText(INIFile.getStringFromINI(f, "hacktv", "antennaname", "", false));
+            txtAntennaName.setText(INIFile.getStringFromINI(fileContents, "hacktv", "antennaname", "", false));
         }
         // Output file type
         if (cmbOutputDevice.getSelectedIndex() == 3) {
-            switch (INIFile.getStringFromINI(f, "hacktv", "filetype", "", false)) {
+            switch (INIFile.getStringFromINI(fileContents, "hacktv", "filetype", "", false)) {
                 case "uint8":
                     cmbFileType.setSelectedIndex(0);
                     break;
@@ -3209,35 +3406,41 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Volume
-        String ImportedVolume = INIFile.getStringFromINI(f, "hacktv", "volume", "", false);
+        String ImportedVolume = INIFile.getStringFromINI(fileContents, "hacktv", "volume", "", false);
         if (!ImportedVolume.isEmpty()) {
             chkVolume.doClick();
             txtVolume.setText(ImportedVolume);
         }
         // Downmix
-        if (INIFile.getBooleanFromINI(f, "hacktv", "downmix")) {
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "downmix")) {
             chkDownmix.doClick();
         }
         // Teletext subtitles
-        if (INIFile.getBooleanFromINI(f, "hacktv", "teletextsubtitles")) {
+        if ( (INIFile.getBooleanFromINI(fileContents, "hacktv", "tx-subtitles")) ){
             chkTextSubtitles.doClick();
-            if ( (INIFile.getIntegerFromINI(f, "hacktv", "teletextsubindex")) != null ) {
-                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(f, "hacktv", "teletextsubindex"))));
+            if ( (INIFile.getIntegerFromINI(fileContents, "hacktv", "tx-subindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(fileContents, "hacktv", "tx-subindex"))));
+            }
+        }
+        else if ( (INIFile.getBooleanFromINI(fileContents, "hacktv", "teletextsubtitles")) ){
+            chkTextSubtitles.doClick();
+            if ( (INIFile.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString((INIFile.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex"))));
             }
         }
         // Pixel rate
         Double ImportedPixelRate;
-        if ((INIFile.getDoubleFromINI(f, "hacktv", "pixelrate")) != null) {
+        if ((INIFile.getDoubleFromINI(fileContents, "hacktv", "pixelrate")) != null) {
             if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-            ImportedPixelRate = (INIFile.getDoubleFromINI(f, "hacktv", "pixelrate") / 1000000);
+            ImportedPixelRate = (INIFile.getDoubleFromINI(fileContents, "hacktv", "pixelrate") / 1000000);
             txtPixelRate.setText(ImportedPixelRate.toString().replace(".0","")); 
         }
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
         Double ImportedSampleRate;
-        if ((INIFile.getDoubleFromINI(f, "hacktv", "samplerate")) != null) {
-            ImportedSampleRate = (INIFile.getDoubleFromINI(f, "hacktv", "samplerate") / 1000000);
+        if ((INIFile.getDoubleFromINI(fileContents, "hacktv", "samplerate")) != null) {
+            ImportedSampleRate = (INIFile.getDoubleFromINI(fileContents, "hacktv", "samplerate") / 1000000);
         } else {
             ImportedSampleRate = Double.parseDouble("16");
             JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
@@ -3287,10 +3490,8 @@ public class GUI extends javax.swing.JFrame {
         // Check the frequency to commit it to a variable before we start
         // If invalid, then abort
         if (!checkCustomFrequency()) return;
-        // Write file structure
-        String FileContents = "[hacktv]\n[hacktv-gui3]\n";
-        // Save current fork if applicable
-        if (Fork.equals("CJ")) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
+        // Create a new, empty string to populate the new file with.
+        String FileContents = "";
         // Output device
         switch (cmbOutputDevice.getSelectedIndex()) {
             case 0:
@@ -3298,7 +3499,7 @@ public class GUI extends javax.swing.JFrame {
                     FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "hackrf");
                 }
                 else {
-                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "hackrf" + ":" + txtOutputDevice.getText());
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "hackrf:" + txtOutputDevice.getText());
                 }
                 break;
             case 1:
@@ -3306,7 +3507,7 @@ public class GUI extends javax.swing.JFrame {
                     FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "soapysdr");
                 }
                 else {
-                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "soapysdr" + ":" + txtOutputDevice.getText());
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "soapysdr:" + txtOutputDevice.getText());
                 }
                 break;
             case 2:
@@ -3314,7 +3515,7 @@ public class GUI extends javax.swing.JFrame {
                     FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "fl2k");
                 }
                 else {
-                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "fl2k" + ":" + txtOutputDevice.getText());
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "output", "fl2k:" + txtOutputDevice.getText());
                 }                
                 break;
             case 3:
@@ -3327,23 +3528,31 @@ public class GUI extends javax.swing.JFrame {
                 break;
             default:
                 break;
-        }      
-        // Input source or test card
-        if (radTest.isSelected()) {
-            if ((Fork == "CJ") && (Lines == 625)) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:" + TCArray[cmbTest.getSelectedIndex()]);
-            }
-            else {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
-            }
         }
-        else if (txtSource.getText().toLowerCase().endsWith(".m3u")) {
-            int M3UIndex = cmbM3USource.getSelectedIndex();
-            FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
-            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
-            FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));
-        } else {
-            FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
+        // Save current fork if applicable
+        if (Fork.equals("CJ")) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
+        // Input source or test card
+        if (PlaylistAL.size() > 0) {
+            // We'll populate the playlist section later
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
+        }
+        else {
+            if (radTest.isSelected()) {
+                if ((Fork == "CJ") && (Lines == 625)) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:" + TCArray[cmbTest.getSelectedIndex()]);
+                }
+                else {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
+                }
+            }
+            else if (txtSource.getText().toLowerCase().endsWith(".m3u")) {
+                int M3UIndex = cmbM3USource.getSelectedIndex();
+                FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
+                FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
+                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));
+            } else {
+                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
+            }
         }
         // Video format/mode
         FileContents = INIFile.setINIValue(FileContents, "hacktv", "mode", Mode);
@@ -3355,9 +3564,13 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);                
         }
         // Sample rate
-        FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
+        if (Shared.isNumeric(txtSampleRate.getText())) {
+            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
+        }
         // Pixel rate
-        FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
+        if (Shared.isNumeric(txtPixelRate.getText())) {
+            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
+        }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
@@ -3502,8 +3715,16 @@ public class GUI extends javax.swing.JFrame {
         if (chkDownmix.isSelected()) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "downmix", 1);
         // Teletext subtitles
         if (chkTextSubtitles.isSelected()) {
-            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "teletextsubtitles", 1);
-            FileContents = INIFile.setINIValue(FileContents, "hacktv", "teletextsubindex", txtTextSubtitleIndex.getText());
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "tx-subtitles", 1);
+            FileContents = INIFile.setINIValue(FileContents, "hacktv", "tx-subindex", txtTextSubtitleIndex.getText());
+        }
+        // The playlist doesn't follow a standard INI format. We just dump the
+        // playlist array into the file as-is.
+        if (PlaylistAL.size() > 0) {
+            FileContents = FileContents + "\n[playlist]\n";
+            for (int i = 1; i <= PlaylistAL.size(); i++) {
+                FileContents = FileContents + PlaylistAL.get(i - 1) + "\n";
+            }
         }
         // Commit to disk
         try {
@@ -3556,15 +3777,25 @@ public class GUI extends javax.swing.JFrame {
         cmbM3USource.addItem("Loading playlist file, please wait...");
         // Load source file to path
         Path fd = Paths.get(SourceFile);
-        // Check that the file is in the correct format by loading its first line
         try {
             BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
             LineNumberReader lnr2 = new LineNumberReader(br2);
             String FileContents = lnr2.readLine();
             br2.close();
-            // We use endsWith to avoid problems caused by Unicode BOMs
-            if ( (FileContents == null) || (!FileContents.endsWith("#EXTM3U")) ) {
+            if ( (FileContents == null)) {
                 JOptionPane.showMessageDialog(null, "Invalid file format, only Extended M3U files are supported.", AppName, JOptionPane.ERROR_MESSAGE);
+                resetM3UItems(false);
+                return;
+            }
+            // Check that the file is in the correct format by loading its first line
+            // We use endsWith to avoid problems caused by Unicode BOMs
+            else if (!FileContents.endsWith("#EXTM3U") ) {
+                // Treat the file as a standard text-only platlist and populate
+                String[] pls = Files.readString(fd, StandardCharsets.UTF_8).split("\\n");
+                for (int i = 0; i < pls.length; i++) {
+                    PlaylistAL.add(pls[i]);
+                }
+                populatePlaylist();
                 resetM3UItems(false);
                 return;
             }
@@ -3726,6 +3957,12 @@ public class GUI extends javax.swing.JFrame {
         txtGain.setText("0");
         // Re-enable audio option
         if (! chkAudio.isSelected() ) { chkAudio.doClick(); }
+        // Clear playlist
+        btnRemove.setEnabled(false);
+        btnPlaylistUp.setEnabled(false);
+        btnPlaylistDown.setEnabled(false);
+        PlaylistAL.clear();
+        populatePlaylist();
         // Restore title bar to default
         if (TitleBarChanged) { this.setTitle(TitleBar); }
         // Restore ellipsis to Save option
@@ -4960,6 +5197,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private boolean checkInput() {
+        if (PlaylistAL.size() > 0) return true;
         if (radLocalSource.isSelected()) {
             if (cmbM3USource.isVisible()) {
                 InputSource = PlaylistURLsAL.get(cmbM3USource.getSelectedIndex());
@@ -4988,7 +5226,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             JOptionPane.showMessageDialog(null, "Please specify a valid sample rate in MHz.", AppName, JOptionPane.WARNING_MESSAGE);
-            tabPane.setSelectedIndex(0);
+            tabPane.setSelectedIndex(1);
             return false;
         }
     }
@@ -5002,7 +5240,7 @@ public class GUI extends javax.swing.JFrame {
             }
             catch (NumberFormatException nfe) {
                 JOptionPane.showMessageDialog(null, "Please specify a valid pixel rate in MHz.", AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(0);
+                tabPane.setSelectedIndex(1);
                 return false;
             }
         }
@@ -5020,7 +5258,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 JOptionPane.showMessageDialog(null, "Please specify a valid deviation in MHz.", AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(0);
+                tabPane.setSelectedIndex(1);
                 return false;
             }
         }
@@ -5068,7 +5306,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 JOptionPane.showMessageDialog(null, "Please specify a valid hexadecimal channel ID.", AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(0);
+                tabPane.setSelectedIndex(2);
                 return false;
             }
         }
@@ -5082,7 +5320,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkGamma.isSelected()) {
             if (!Shared.isNumeric(txtGamma.getText())) {
                 JOptionPane.showMessageDialog(null, InvalidGamma, AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(1);
+                tabPane.setSelectedIndex(2);
                 return false;
             }
             else {
@@ -5099,7 +5337,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkOutputLevel.isSelected()) {
             if (!Shared.isNumeric(txtOutputLevel.getText())) {
                 JOptionPane.showMessageDialog(null, InvalidOutputLevel, AppName, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(1);
+                tabPane.setSelectedIndex(2);
                 return false;    
             }
             else {
@@ -5181,7 +5419,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 JOptionPane.showMessageDialog(null, InvalidCardNumber, AppName, JOptionPane.WARNING_MESSAGE);  
-                tabPane.setSelectedIndex(3);              
+                tabPane.setSelectedIndex(4);              
                 return false;
             }
         }
@@ -5306,7 +5544,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             JOptionPane.showMessageDialog(null, InvalidVolume, AppName, JOptionPane.WARNING_MESSAGE);
-            tabPane.setSelectedIndex(1);
+            tabPane.setSelectedIndex(2);
             return false;
         }
     }
@@ -5409,7 +5647,24 @@ public class GUI extends javax.swing.JFrame {
         if (!txtVolume.getText().isEmpty()) AllArgs.add(txtVolume.getText());
         if (!DownmixParam.isEmpty()) AllArgs.add(DownmixParam);        
         // Finally, add the source video or test option.
-        if (RunningOnWindows) {
+        if (PlaylistAL.size() > 0) {
+            InputSource = "";
+            for(int i = 0; i < PlaylistAL.size(); i++) {
+                if ( (PlaylistAL.get(i).contains("test:")) ||
+                    (PlaylistAL.get(i).startsWith("http")) ) {
+                    AllArgs.add(PlaylistAL.get(i));
+                }
+                else {
+                    if (RunningOnWindows) {
+                        AllArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
+                    }
+                    else {
+                        AllArgs.add(PlaylistAL.get(i));
+                    }
+                }   
+            }    
+        }
+        else if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
             // card or a HTTP stream.
             if ( (InputSource.contains("test:")) ||
@@ -5577,9 +5832,9 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRunActionPerformed
         if (!Running) {
-            if ( (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath == "")) ) {
+            if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath == "")) ) {
                 JOptionPane.showMessageDialog(null, "Unable to find hacktv. Please go to the GUI settings tab to add its location.", AppName, JOptionPane.ERROR_MESSAGE);
-                tabPane.setSelectedIndex(4);
+                tabPane.setSelectedIndex(5);
             }
             else {
                 runHackTV();
@@ -6123,21 +6378,33 @@ public class GUI extends javax.swing.JFrame {
     private void btnSourceBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSourceBrowseActionPerformed
         int returnVal = sourceFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = sourceFileChooser.getSelectedFile();
-            file = new File (Shared.stripQuotes(file.toString()));
-            if(file.getAbsolutePath().toLowerCase().endsWith(".m3u")) {
-                // If the source is an M3U file, pass it to the M3U handler
-                txtSource.setText(file.getAbsolutePath());
-                m3uHandler(file.getAbsolutePath(),0);
-            } else if (file.getAbsolutePath().toLowerCase().endsWith(".htv")) {
-                // Don't try to process a file with a .HTV extension
-                JOptionPane.showMessageDialog(null, "Configuration files should be opened from the File menu.", AppName, JOptionPane.WARNING_MESSAGE);    
-            } else {
-                txtSource.setVisible(true);
-                cmbM3USource.setVisible(false);
-                cmbM3USource.setEnabled(false);
-                txtSource.setText(file.getAbsolutePath());
+            File[] f = sourceFileChooser.getSelectedFiles();
+            if (f.length > 1) {
+                for (int i = 0; i < f.length; i++) {
+                    if ( (!f[i].toString().toLowerCase().endsWith(".m3u")) &&
+                           (!f[i].toString().toLowerCase().endsWith(".htv")) ) {
+                        PlaylistAL.add(f[i].toString());
+                    }
+                }
+                populatePlaylist();
             }
+            else {
+                File file = new File (Shared.stripQuotes(f[0].toString()));
+                if(file.getAbsolutePath().toLowerCase().endsWith(".m3u")) {
+                    // If the source is an M3U file, pass it to the M3U handler
+                    txtSource.setText(file.getAbsolutePath());
+                    m3uHandler(file.getAbsolutePath(),0);
+                } else if (file.getAbsolutePath().toLowerCase().endsWith(".htv")) {
+                    // Don't try to process a file with a .HTV extension
+                    JOptionPane.showMessageDialog(null, "Configuration files should be opened from the File menu.", AppName, JOptionPane.WARNING_MESSAGE);    
+                } else {
+                    txtSource.setVisible(true);
+                    cmbM3USource.setVisible(false);
+                    cmbM3USource.setEnabled(false);
+                    txtSource.setText(file.getAbsolutePath());
+                }                
+            }
+
         }
     }//GEN-LAST:event_btnSourceBrowseActionPerformed
 
@@ -6602,18 +6869,210 @@ public class GUI extends javax.swing.JFrame {
             FMDevParam = "";
         }
     }//GEN-LAST:event_chkFMDevActionPerformed
+
+    private void lstPlaylistFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_lstPlaylistFocusGained
+
+    }//GEN-LAST:event_lstPlaylistFocusGained
+
+    private void lstPlaylistValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstPlaylistValueChanged
+        // Is the playlist empty?
+        if (lstPlaylist.getSelectedIndex() == -1) {
+            btnPlaylistUp.setEnabled(false);
+            btnPlaylistDown.setEnabled(false);
+            btnRemove.setEnabled(false);
+        }
+        // Are multiple items selected? If so, disable the up/down buttons
+        else if (lstPlaylist.getSelectedIndices().length > 1) {
+            btnPlaylistUp.setEnabled(false);
+            btnPlaylistDown.setEnabled(false);
+            btnRemove.setEnabled(true);
+        }
+        // Does the playlist contain only one item?
+        else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() == 1) ) {
+            btnPlaylistUp.setEnabled(false);
+            btnPlaylistDown.setEnabled(false);
+            btnRemove.setEnabled(true);
+        }
+        // Is the selected item an intermediate item? (not the first or last)
+        else if ( (lstPlaylist.getSelectedIndex() != 0) && (lstPlaylist.getSelectedIndex() != PlaylistAL.size() - 1) ) {
+            btnPlaylistUp.setEnabled(true);
+            btnPlaylistDown.setEnabled(true);
+            btnRemove.setEnabled(true);
+        }
+        // Is the first item in the playlist selected?
+        else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() > 1) ) {
+            btnPlaylistUp.setEnabled(false);
+            btnPlaylistDown.setEnabled(true);
+            btnRemove.setEnabled(true);
+        }
+        // Is the last item in the playlist selected?
+        else if (lstPlaylist.getSelectedIndex() == PlaylistAL.size() - 1) {
+            btnPlaylistUp.setEnabled(true);
+            btnPlaylistDown.setEnabled(false);
+            btnRemove.setEnabled(true);
+        }
+    }//GEN-LAST:event_lstPlaylistValueChanged
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        if (cmbM3USource.isVisible()) {
+            // Add the URL from the selected M3U item to the playlist
+            PlaylistAL.add(PlaylistURLsAL.get(cmbM3USource.getSelectedIndex()));
+        }
+        else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
+            // Add whatever is in txtSource to PlaylistAL
+            PlaylistAL.add(txtSource.getText());
+        }
+        else if (radTest.isSelected()) {
+            for (int i = 0; i < PlaylistAL.size(); i++) {
+                if (PlaylistAL.get(i).startsWith("test:")) {
+                    JOptionPane.showMessageDialog(null, "Only one test card can be added to the playlist.\n"
+                        + "It should also be placed as the last item in the playlist.", AppName, JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+            if (cmbTest.isEnabled()) {
+                // Add the selected test card
+                PlaylistAL.add("test:" + TCArray[cmbTest.getSelectedIndex()]);
+            }
+            else {
+                // Add the test card
+                PlaylistAL.add("test:colourbars");
+            }
+        }
+        else {
+            btnSourceBrowse.doClick();
+            if (!txtSource.getText().isBlank()) btnAdd.doClick();
+            return;
+        }
+        populatePlaylist();
+        txtSource.setText("");
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+        int[] ia = lstPlaylist.getSelectedIndices();
+        if (ia.length > 1) {
+            // If multiple items are selected, process the selection array in
+            // reverse order and remove the items from the arraylist
+            for (int j = ia.length -1; j >= 0; j--) {
+                PlaylistAL.remove(ia[j]);
+            }
+            // Re-populate the playlist with the new arraylist values
+            populatePlaylist();
+        }
+        else {
+            int i = ia[0];
+            if (i >= 0) {
+                // Remove the selected item from the playlist and re-populate
+                PlaylistAL.remove(i);
+                populatePlaylist();
+                // If the last item in the list was selected, select whatever
+                // was the second from last (and is now last).
+                if (PlaylistAL.size() == i) {
+                    lstPlaylist.setSelectedIndex(i - 1);
+                }
+                // Otherwise, select the item that corresponds to the same index
+                // as the item we removed.
+                else {
+                    lstPlaylist.setSelectedIndex(i);
+                }
+            }
+        }
+    }//GEN-LAST:event_btnRemoveActionPerformed
+
+    private void btnPlaylistUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistUpActionPerformed
+        int i = lstPlaylist.getSelectedIndex();
+        if (i > 0) {
+            PlaylistAL.add(i - 1, PlaylistAL.get(i));
+            PlaylistAL.remove(i + 1);
+            populatePlaylist();
+            lstPlaylist.setSelectedIndex(i - 1);
+            lstPlaylist.ensureIndexIsVisible(lstPlaylist.getSelectedIndex());
+        }
+        btnPlaylistDown.setEnabled(true);
+        if (i == 1) {
+            btnPlaylistUp.setEnabled(false);
+        }
+    }//GEN-LAST:event_btnPlaylistUpActionPerformed
+
+    private void btnPlaylistDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistDownActionPerformed
+        int i = lstPlaylist.getSelectedIndex();
+        if ( (i >= 0) && (i != PlaylistAL.size() - 1) ) {
+            PlaylistAL.add(i + 2, PlaylistAL.get(i));
+            PlaylistAL.remove(i);
+            populatePlaylist();
+            lstPlaylist.setSelectedIndex(i + 1);
+            lstPlaylist.ensureIndexIsVisible(lstPlaylist.getSelectedIndex());
+        }
+        btnPlaylistUp.setEnabled(true);
+        if (i == PlaylistAL.size() - 2) {
+            btnPlaylistDown.setEnabled(false);
+        }
+    }//GEN-LAST:event_btnPlaylistDownActionPerformed
+
+    private void cmbVideoFormatMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbVideoFormatMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbVideoFormat);
+    }//GEN-LAST:event_cmbVideoFormatMouseWheelMoved
+
+    private void cmbWSSMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbWSSMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbWSS);
+    }//GEN-LAST:event_cmbWSSMouseWheelMoved
+
+    private void cmbLogoMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbLogoMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLogo);
+    }//GEN-LAST:event_cmbLogoMouseWheelMoved
+
+    private void cmbARCorrectionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbARCorrectionMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbARCorrection);
+    }//GEN-LAST:event_cmbARCorrectionMouseWheelMoved
+
+    private void cmbOutputDeviceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbOutputDeviceMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbOutputDevice);
+    }//GEN-LAST:event_cmbOutputDeviceMouseWheelMoved
+
+    private void cmbChannelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbChannelMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbChannel);
+    }//GEN-LAST:event_cmbChannelMouseWheelMoved
+
+    private void cmbFileTypeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbFileTypeMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbFileType);
+    }//GEN-LAST:event_cmbFileTypeMouseWheelMoved
+
+    private void cmbScramblingTypeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingTypeMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingType);
+    }//GEN-LAST:event_cmbScramblingTypeMouseWheelMoved
+
+    private void cmbScramblingKey1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingKey1MouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey1);
+    }//GEN-LAST:event_cmbScramblingKey1MouseWheelMoved
+
+    private void cmbScramblingKey2MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingKey2MouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey2);
+    }//GEN-LAST:event_cmbScramblingKey2MouseWheelMoved
+
+    private void cmbSysterPermTableMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbSysterPermTableMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbSysterPermTable);
+    }//GEN-LAST:event_cmbSysterPermTableMouseWheelMoved
+
+    private void cmbTestMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbTestMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbTest);
+    }//GEN-LAST:event_cmbTestMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
     private javax.swing.ButtonGroup BandButtonGroup;
     private javax.swing.JPanel FrequencyPanel;
+    private javax.swing.JPanel PlaybackTab;
     private javax.swing.ButtonGroup SourceButtonGroup;
     private javax.swing.JPanel SourcePanel;
     private javax.swing.JPanel VBIPanel;
     private javax.swing.ButtonGroup VideoFormatButtonGroup;
     private javax.swing.JPanel VideoFormatPanel;
+    private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClearMRUList;
     private javax.swing.JButton btnHackTVPath;
+    private javax.swing.JButton btnPlaylistDown;
+    private javax.swing.JButton btnPlaylistUp;
+    private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnResetAllSettings;
     private javax.swing.JButton btnRun;
     private javax.swing.JButton btnSourceBrowse;
@@ -6702,6 +7161,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblTeefax;
     private javax.swing.JLabel lblTextSubtitleIndex;
     private javax.swing.JLabel lblVC2ScramblingKey;
+    private javax.swing.JList<String> lstPlaylist;
     private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenuItem menuAstra10Template;
     private javax.swing.JMenuItem menuAstra975Template;
@@ -6720,6 +7180,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel outputTab;
     private javax.swing.JPanel pathPanel;
     private javax.swing.JProgressBar pbTeletext;
+    private javax.swing.JScrollPane playlistScrollPane;
     private javax.swing.JRadioButton radBW;
     private javax.swing.JRadioButton radCustom;
     private javax.swing.JRadioButton radLocalSource;
