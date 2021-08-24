@@ -280,6 +280,9 @@ public class INIFile {
     
     public static String splitINIfile(String fileContents, String section) {
         String selectedSection = null;
+        // Remove any CR characters
+        fileContents = fileContents.replace("\r\n", "\n");
+        fileContents = fileContents.replace("\r", "\n");
         // Extract the specified section from fileContents
         String r1 = "^\\[";
         String r2 = "](?:\\n(?:[^\\[\\n].*)?)*";
