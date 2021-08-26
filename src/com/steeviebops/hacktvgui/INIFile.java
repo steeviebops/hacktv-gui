@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 public class INIFile {
     
     public static boolean getBooleanFromINI(String input, String section, String setting) {
-        String v = getINIValue(input, section, setting, "");
+        String v = getINIValue(input, section, setting, "").toLowerCase();
         switch (v) {
             case "0":
             case "false":
