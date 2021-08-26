@@ -221,8 +221,8 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tabPane" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
+                              <Component id="tabPane" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
                                   <EmptySpace min="-2" pref="170" max="-2" attributes="0"/>
                                   <Component id="btnRun" min="-2" pref="200" max="-2" attributes="0"/>
                               </Group>
@@ -243,7 +243,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="tabPane" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="btnRun" min="-2" pref="56" max="-2" attributes="0"/>
                       </Group>
                       <Component id="consoleOutputPanel" max="32767" attributes="0"/>
@@ -412,12 +412,13 @@
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="playlistScrollPane" pref="402" max="32767" attributes="0"/>
-                                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                           <Component id="btnRemove" alignment="1" pref="79" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistUp" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistDown" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnAdd" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="btnPlaylistStart" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -443,14 +444,16 @@
                                   </Group>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="btnAdd" min="-2" pref="45" max="-2" attributes="0"/>
+                                      <Component id="btnAdd" min="-2" pref="32" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="btnRemove" min="-2" pref="45" max="-2" attributes="0"/>
-                                      <EmptySpace max="32767" attributes="0"/>
+                                      <Component id="btnRemove" min="-2" pref="32" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnPlaylistStart" min="-2" pref="32" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
                                       <Component id="btnPlaylistUp" min="-2" pref="45" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
                                       <Component id="btnPlaylistDown" min="-2" pref="45" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="playlistScrollPane" min="-2" pref="211" max="-2" attributes="0"/>
@@ -659,7 +662,6 @@
                             </Property>
                           </Properties>
                           <Events>
-                            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="lstPlaylistFocusGained"/>
                             <EventHandler event="valueChanged" listener="javax.swing.event.ListSelectionListener" parameters="javax.swing.event.ListSelectionEvent" handler="lstPlaylistValueChanged"/>
                           </Events>
                           <AuxValues>
@@ -701,6 +703,15 @@
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPlaylistUpActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnPlaylistStart">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Play first"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPlaylistStartActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>

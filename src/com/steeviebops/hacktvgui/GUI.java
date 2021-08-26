@@ -161,6 +161,9 @@ public class GUI extends javax.swing.JFrame {
     int PreviousIndex = 0;
     boolean Baseband;
     
+    // Start point in playlist
+    int startPoint = 0;
+    
     // Declare variables used for storing parameters
     ArrayList<String> AllArgs = new ArrayList<>();
     String InputSource = "";
@@ -434,6 +437,7 @@ public class GUI extends javax.swing.JFrame {
         btnRemove = new javax.swing.JButton();
         btnPlaylistDown = new javax.swing.JButton();
         btnPlaylistUp = new javax.swing.JButton();
+        btnPlaylistStart = new javax.swing.JButton();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -707,11 +711,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        lstPlaylist.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                lstPlaylistFocusGained(evt);
-            }
-        });
         lstPlaylist.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 lstPlaylistValueChanged(evt);
@@ -747,6 +746,14 @@ public class GUI extends javax.swing.JFrame {
         btnPlaylistUp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPlaylistUpActionPerformed(evt);
+            }
+        });
+
+        btnPlaylistStart.setText("Play first");
+        btnPlaylistStart.setEnabled(false);
+        btnPlaylistStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPlaylistStartActionPerformed(evt);
             }
         });
 
@@ -804,7 +811,8 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(btnRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
                             .addComponent(btnPlaylistUp, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnPlaylistDown, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnPlaylistStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         SourcePanelLayout.setVerticalGroup(
@@ -822,14 +830,16 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(txtSource, javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(cmbM3USource, javax.swing.GroupLayout.Alignment.LEADING)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(SourcePanelLayout.createSequentialGroup()
-                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnPlaylistStart, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnPlaylistUp, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnPlaylistDown, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(playlistScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -2098,7 +2108,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(containerPanelLayout.createSequentialGroup()
                         .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2394,7 +2404,7 @@ public class GUI extends javax.swing.JFrame {
             // Read the modes.ini we specified previously
             File f = new File(ModesFilePath);
             try {
-                ModesFile = Files.readString(f.toPath());
+                ModesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
                 if (ModesFilePath.equals(TempDir + OS_SEP + "Modes.ini")) {
                     ModesFileLocation = "online";
                 }
@@ -2691,11 +2701,17 @@ public class GUI extends javax.swing.JFrame {
         // Convert PlaylistAL to an array so we can populate lstPlaylist with it
         String[] pl = new String[PlaylistAL.size()];
         for(int i = 0; i < pl.length; i++) {
-            pl[i] = PlaylistAL.get(i);
-        }
+            if ((startPoint == i) && (startPoint != 0)) {
+                // Add an asterisk to the start of the string to designate it
+                // as the start point of the playlist
+                pl[i] = "* " + PlaylistAL.get(i);
+            }
+            else {
+                pl[i] = PlaylistAL.get(i);
+            }
+        }               
         // Populate lstPlaylist using the contents of pl[]
         lstPlaylist.setListData(pl);
-        //lstPlaylist.repaint();
     }
     
     private void checkMRUList() {
@@ -2818,6 +2834,8 @@ public class GUI extends javax.swing.JFrame {
             if (SourceFile.length() < 1048576)  {
                 // Read the file into memory
                 f = Files.readString(SourceFile.toPath(), StandardCharsets.UTF_8);
+                // Remove a UTF-8 BOM if it exists
+                f = f.replaceAll("\\A\uFEFF", "");
             }
             else {
                 JOptionPane.showMessageDialog(null, "Invalid configuration file.", AppName, JOptionPane.WARNING_MESSAGE);
@@ -2887,7 +2905,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Reset all controls
         resetAllControls();
-        /* Output device (case sensitive)
+        /* Output device
            For this, we look for hackrf, soapysdr or fl2k. An empty value will be
            interpreted as hackrf. Anything other than these values is handled
            as an output file.
@@ -2954,6 +2972,11 @@ public class GUI extends javax.swing.JFrame {
                 String[] pl = INIFile.splitINIfile(fileContents, "playlist").split("\\n");
                 for (int i = 1; i < pl.length; i++) {
                     PlaylistAL.add(pl[i]);
+                }
+                if ((INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart")) != null) {
+                    startPoint = INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart") - 1;
+                    // Don't accept values lower than one
+                    if (startPoint < 1) startPoint = 0;
                 }
                 populatePlaylist();                
             }
@@ -3535,6 +3558,8 @@ public class GUI extends javax.swing.JFrame {
         if (PlaylistAL.size() > 0) {
             // We'll populate the playlist section later
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
+            // Set start point of playlist
+            if (startPoint != 0) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
         }
         else {
             if (radTest.isSelected()) {
@@ -3728,7 +3753,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Commit to disk
         try {
-            FileWriter fw = new FileWriter(DestinationFileName);
+            FileWriter fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8);
             fw.write(FileContents);
             fw.close();
         } catch (IOException e) {
@@ -3948,6 +3973,8 @@ public class GUI extends javax.swing.JFrame {
         if (!radCustom.isEnabled()) cmbVideoFormat.setSelectedIndex(0);
         // Reset output device to HackRF
         cmbOutputDevice.setSelectedIndex(0);
+        // Reset playlist start point
+        startPoint = 0;
         // Select default radio buttons and comboboxes
         radLocalSource.doClick();
         radPAL.doClick();
@@ -5649,7 +5676,14 @@ public class GUI extends javax.swing.JFrame {
         // Finally, add the source video or test option.
         if (PlaylistAL.size() > 0) {
             InputSource = "";
-            for(int i = 0; i < PlaylistAL.size(); i++) {
+            // Move through PlaylistAL, starting at the value defined by startPoint.
+            // When we reach the end of the array, start again at zero until we
+            // reach PlaylistAL.size() minus one.
+            int i = startPoint;
+            for (int j = 0; j < PlaylistAL.size(); j++) {
+                if ( (i == PlaylistAL.size()) && (startPoint != 0) ) {
+                    i = 0;
+                }
                 if ( (PlaylistAL.get(i).contains("test:")) ||
                     (PlaylistAL.get(i).startsWith("http")) ) {
                     AllArgs.add(PlaylistAL.get(i));
@@ -5661,8 +5695,9 @@ public class GUI extends javax.swing.JFrame {
                     else {
                         AllArgs.add(PlaylistAL.get(i));
                     }
-                }   
-            }    
+                }
+                i++;
+            }
         }
         else if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
@@ -6870,46 +6905,63 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkFMDevActionPerformed
 
-    private void lstPlaylistFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_lstPlaylistFocusGained
-
-    }//GEN-LAST:event_lstPlaylistFocusGained
-
     private void lstPlaylistValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstPlaylistValueChanged
         // Is the playlist empty?
         if (lstPlaylist.getSelectedIndex() == -1) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(false);
+            btnPlaylistStart.setEnabled(false);
         }
         // Are multiple items selected? If so, disable the up/down buttons
         else if (lstPlaylist.getSelectedIndices().length > 1) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
+            btnPlaylistStart.setEnabled(false);
         }
         // Does the playlist contain only one item?
         else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() == 1) ) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
+            btnPlaylistStart.setEnabled(false);
         }
         // Is the selected item an intermediate item? (not the first or last)
         else if ( (lstPlaylist.getSelectedIndex() != 0) && (lstPlaylist.getSelectedIndex() != PlaylistAL.size() - 1) ) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
+            if (lstPlaylist.getSelectedIndex() == startPoint) {
+                btnPlaylistStart.setEnabled(false);
+            }
+            else {
+                btnPlaylistStart.setEnabled(true);
+            }
         }
         // Is the first item in the playlist selected?
         else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() > 1) ) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
+            if (lstPlaylist.getSelectedIndex() == startPoint) {
+                btnPlaylistStart.setEnabled(false);
+            }
+            else {
+                btnPlaylistStart.setEnabled(true);
+            }
         }
         // Is the last item in the playlist selected?
         else if (lstPlaylist.getSelectedIndex() == PlaylistAL.size() - 1) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
+            if (lstPlaylist.getSelectedIndex() == startPoint) {
+                btnPlaylistStart.setEnabled(false);
+            }
+            else {
+                btnPlaylistStart.setEnabled(true);
+            }
         }
     }//GEN-LAST:event_lstPlaylistValueChanged
 
@@ -6954,6 +7006,16 @@ public class GUI extends javax.swing.JFrame {
             // If multiple items are selected, process the selection array in
             // reverse order and remove the items from the arraylist
             for (int j = ia.length -1; j >= 0; j--) {
+                // If the item removed was the start point, reset startPoint to zero
+                if (ia[j] == startPoint) {
+                    startPoint = 0;
+                }                
+                // If the item removed was before the start point, reduce startPoint
+                // by one so the selected item remains selected
+                else if (ia[j] < startPoint) {
+                    startPoint = startPoint - 1;
+                }
+                // Remove the requested item from the arraylist
                 PlaylistAL.remove(ia[j]);
             }
             // Re-populate the playlist with the new arraylist values
@@ -6964,6 +7026,15 @@ public class GUI extends javax.swing.JFrame {
             if (i >= 0) {
                 // Remove the selected item from the playlist and re-populate
                 PlaylistAL.remove(i);
+                // If the item removed was the start point, reset startPoint to zero
+                if (i == startPoint) {
+                    startPoint = 0;
+                }
+                // If the item removed was before the start point, reduce startPoint
+                // by one so the selected item remains selected
+                else if (i < startPoint) {
+                    startPoint = startPoint - 1;
+                }
                 populatePlaylist();
                 // If the last item in the list was selected, select whatever
                 // was the second from last (and is now last).
@@ -6981,6 +7052,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnPlaylistUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistUpActionPerformed
         int i = lstPlaylist.getSelectedIndex();
+        if (i == startPoint) startPoint = startPoint - 1;
         if (i > 0) {
             PlaylistAL.add(i - 1, PlaylistAL.get(i));
             PlaylistAL.remove(i + 1);
@@ -6996,6 +7068,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnPlaylistDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistDownActionPerformed
         int i = lstPlaylist.getSelectedIndex();
+        if (i == startPoint) startPoint = startPoint + 1;
         if ( (i >= 0) && (i != PlaylistAL.size() - 1) ) {
             PlaylistAL.add(i + 2, PlaylistAL.get(i));
             PlaylistAL.remove(i);
@@ -7056,6 +7129,19 @@ public class GUI extends javax.swing.JFrame {
     private void cmbTestMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbTestMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbTest);
     }//GEN-LAST:event_cmbTestMouseWheelMoved
+
+    private void btnPlaylistStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistStartActionPerformed
+        // Don't set a test card as the start point of the playlist.
+        // It never ends, so the playlist becomes pointless.
+        if (PlaylistAL.get(lstPlaylist.getSelectedIndex()).startsWith("test:")) {
+            JOptionPane.showMessageDialog(null, "Test cards cannot be set as the start point of a playlist.", AppName, JOptionPane.WARNING_MESSAGE);
+        }
+        else {
+            // Set the start point
+            startPoint = lstPlaylist.getSelectedIndex();
+            populatePlaylist();
+        }
+    }//GEN-LAST:event_btnPlaylistStartActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -7071,6 +7157,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnClearMRUList;
     private javax.swing.JButton btnHackTVPath;
     private javax.swing.JButton btnPlaylistDown;
+    private javax.swing.JButton btnPlaylistStart;
     private javax.swing.JButton btnPlaylistUp;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnResetAllSettings;
