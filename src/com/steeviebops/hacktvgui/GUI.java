@@ -162,7 +162,7 @@ public class GUI extends javax.swing.JFrame {
     boolean Baseband;
     
     // Start point in playlist
-    int startPoint = 0;
+    int startPoint = -1;
     
     // Declare variables used for storing parameters
     ArrayList<String> AllArgs = new ArrayList<>();
@@ -2701,7 +2701,7 @@ public class GUI extends javax.swing.JFrame {
         // Convert PlaylistAL to an array so we can populate lstPlaylist with it
         String[] pl = new String[PlaylistAL.size()];
         for(int i = 0; i < pl.length; i++) {
-            if ((startPoint == i) && (startPoint != 0)) {
+            if ((startPoint == i) && (startPoint != -1)) {
                 // Add an asterisk to the start of the string to designate it
                 // as the start point of the playlist
                 pl[i] = "* " + PlaylistAL.get(i);
@@ -2976,7 +2976,7 @@ public class GUI extends javax.swing.JFrame {
                 if ((INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart")) != null) {
                     startPoint = INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart") - 1;
                     // Don't accept values lower than one
-                    if (startPoint < 1) startPoint = 0;
+                    if (startPoint < 1) startPoint = -1;
                 }
                 populatePlaylist();                
             }
@@ -3559,7 +3559,7 @@ public class GUI extends javax.swing.JFrame {
             // We'll populate the playlist section later
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
             // Set start point of playlist
-            if (startPoint != 0) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
+            if (startPoint != -1) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
         }
         else {
             if (radTest.isSelected()) {
@@ -3968,13 +3968,13 @@ public class GUI extends javax.swing.JFrame {
         else {
             txtSource.setText("");
         }
-        // If a baseband mode is selected, reset the video format to zero to 
+        // If a baseband mode is selected, reset the video format to zero to
         // avoid unnecessary error messages.
         if (!radCustom.isEnabled()) cmbVideoFormat.setSelectedIndex(0);
         // Reset output device to HackRF
         cmbOutputDevice.setSelectedIndex(0);
         // Reset playlist start point
-        startPoint = 0;
+        startPoint = -1;
         // Select default radio buttons and comboboxes
         radLocalSource.doClick();
         radPAL.doClick();
@@ -5680,6 +5680,7 @@ public class GUI extends javax.swing.JFrame {
             // When we reach the end of the array, start again at zero until we
             // reach PlaylistAL.size() minus one.
             int i = startPoint;
+            if (i == -1) i++;
             for (int j = 0; j < PlaylistAL.size(); j++) {
                 if ( (i == PlaylistAL.size()) && (startPoint != 0) ) {
                     i = 0;
@@ -7002,50 +7003,34 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         int[] ia = lstPlaylist.getSelectedIndices();
-        if (ia.length > 1) {
-            // If multiple items are selected, process the selection array in
-            // reverse order and remove the items from the arraylist
-            for (int j = ia.length -1; j >= 0; j--) {
-                // If the item removed was the start point, reset startPoint to zero
-                if (ia[j] == startPoint) {
-                    startPoint = 0;
-                }                
-                // If the item removed was before the start point, reduce startPoint
-                // by one so the selected item remains selected
-                else if (ia[j] < startPoint) {
-                    startPoint = startPoint - 1;
-                }
-                // Remove the requested item from the arraylist
-                PlaylistAL.remove(ia[j]);
+        // Process the selection array in reverse order and remove the items from the arraylist
+        for (int j = ia.length -1; j >= 0; j--) {
+            // Remove the requested item from the arraylist
+            PlaylistAL.remove(ia[j]);
+            // If the item removed was the start point, or if only one item
+            // is left, reset startPoint to default
+            if ((ia[j] == startPoint) || (PlaylistAL.size() < 2)) {
+                startPoint = -1;
+            }                
+            // If the item removed was before the start point, reduce startPoint
+            // by one so the selected item remains selected
+            else if (ia[j] < startPoint) {
+                startPoint = startPoint - 1;
             }
             // Re-populate the playlist with the new arraylist values
             populatePlaylist();
         }
-        else {
-            int i = ia[0];
-            if (i >= 0) {
-                // Remove the selected item from the playlist and re-populate
-                PlaylistAL.remove(i);
-                // If the item removed was the start point, reset startPoint to zero
-                if (i == startPoint) {
-                    startPoint = 0;
-                }
-                // If the item removed was before the start point, reduce startPoint
-                // by one so the selected item remains selected
-                else if (i < startPoint) {
-                    startPoint = startPoint - 1;
-                }
-                populatePlaylist();
-                // If the last item in the list was selected, select whatever
-                // was the second from last (and is now last).
-                if (PlaylistAL.size() == i) {
-                    lstPlaylist.setSelectedIndex(i - 1);
-                }
-                // Otherwise, select the item that corresponds to the same index
-                // as the item we removed.
-                else {
-                    lstPlaylist.setSelectedIndex(i);
-                }
+        // If only one item was selected...
+        if (ia.length == 1) {
+            // If the last item in the list was selected, select whatever
+            // was the second from last (and is now last).
+            if (PlaylistAL.size() == ia[0]) {
+                lstPlaylist.setSelectedIndex(ia[0] - 1);
+            }
+            // Otherwise, select the item that corresponds to the same index
+            // as the item we removed.
+            else {
+                lstPlaylist.setSelectedIndex(ia[0]);
             }
         }
     }//GEN-LAST:event_btnRemoveActionPerformed
