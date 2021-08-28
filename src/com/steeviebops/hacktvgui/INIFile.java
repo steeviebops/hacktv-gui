@@ -37,6 +37,9 @@ import java.util.stream.Stream;
  * string containing the contents of a file. The getINIValue function will
  * detect what you have provided and act accordingly.
  * 
+ * Comments are allowed on their own lines or in-line with values, but not 
+ * in-line with section names.
+ * 
  */
 
 public class INIFile {
@@ -112,7 +115,7 @@ public class INIFile {
         fileContents = fileContents.replaceAll("\r", "\n");
         // Remove any comment lines so they don't interfere with processing
         fileContents = Stream.of(fileContents.split("\n"))
-                .filter(s -> !s.contains(";"))
+                .filter(s -> !s.startsWith(";"))
                 .collect(Collectors.joining("\n"));
         // Remove any white spaces between the setting and value
         fileContents = fileContents.replaceAll("[^\\S\n]([=])[^\\S\n]", "=");
@@ -134,7 +137,7 @@ public class INIFile {
          * We do this by checking for each character in the string 'sc' below.
          */
         String ps;
-        String sc = "!@#$%&*()'+,-./:;<>?^_`{|}";
+        String sc = "!@#$%&*()'+,-./:<>?^_`{|}";
         for (int i = 0; i < setting.length(); i++) {
             if (i != setting.length() - 1) {
                 // Extract a single character from 'settings' to 'ps'
