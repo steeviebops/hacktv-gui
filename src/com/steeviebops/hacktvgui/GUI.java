@@ -56,6 +56,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.SwingWorker;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,16 +65,16 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
-    String AppName = "hacktv-gui";
+    final String AppName = "hacktv-gui";
     
     // Boolean used for Microsoft Windows detection and handling
-    Boolean RunningOnWindows;
+    final boolean RunningOnWindows;
     
     // Run button text (used for the generate syntax option)
     String RunButtonText;
     
     // Get user's home directory, used for file open dialogues
-    String UserHomeDir = System.getProperty("user.home");
+    final String UserHomeDir = System.getProperty("user.home");
     
     // String to set the directory where this application's JAR is located
     String JarDir;
@@ -85,8 +86,8 @@ public class GUI extends javax.swing.JFrame {
     String ModesFileLocation;
     
     // Declare variables for stereo status
-    Boolean NICAMSupported = false;
-    Boolean A2Supported = false;
+    boolean NICAMSupported = false;
+    boolean A2Supported = false;
 
     // Declare a variable to determine the selected fork
     String Fork;
@@ -99,8 +100,8 @@ public class GUI extends javax.swing.JFrame {
     File SelectedFile;
     Path TempDir;
     String TeletextPath;
-    Boolean DownloadInProgress = false;
-    Boolean DownloadCancelled = false;
+    boolean DownloadInProgress = false;
+    boolean DownloadCancelled = false;
 
     // Declare variables used for path resolution
     String HackTVPath;
@@ -110,7 +111,7 @@ public class GUI extends javax.swing.JFrame {
 
     // Declare variable for the title bar display
     String TitleBar;
-    Boolean TitleBarChanged = false;
+    boolean TitleBarChanged = false;
 
     // Array used for M3U files
     ArrayList<String> PlaylistURLsAL;
@@ -165,7 +166,6 @@ public class GUI extends javax.swing.JFrame {
     int startPoint = -1;
     
     // Declare variables used for storing parameters
-    ArrayList<String> AllArgs = new ArrayList<>();
     String InputSource = "";
     String Mode = "";
     long Frequency;
@@ -438,6 +438,7 @@ public class GUI extends javax.swing.JFrame {
         btnPlaylistDown = new javax.swing.JButton();
         btnPlaylistUp = new javax.swing.JButton();
         btnPlaylistStart = new javax.swing.JButton();
+        chkRandom = new javax.swing.JCheckBox();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -695,6 +696,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        cmbARCorrection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbARCorrection.setEnabled(false);
         cmbARCorrection.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -757,6 +759,9 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkRandom.setText("Randomise playlist");
+        chkRandom.setEnabled(false);
+
         javax.swing.GroupLayout SourcePanelLayout = new javax.swing.GroupLayout(SourcePanel);
         SourcePanel.setLayout(SourcePanelLayout);
         SourcePanelLayout.setHorizontalGroup(
@@ -769,8 +774,8 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(chkRepeat)
                             .addComponent(chkTimestamp)
                             .addComponent(chkInterlace)
-                            .addComponent(chkARCorrection))
-                        .addGap(23, 23, 23)
+                            .addComponent(chkRandom))
+                        .addGap(61, 61, 61)
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
@@ -779,16 +784,17 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(chkLogo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
-                                .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(cmbARCorrection, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkPosition)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SourcePanelLayout.createSequentialGroup()
+                                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkARCorrection)
+                                    .addComponent(chkLogo))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(cmbLogo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cmbARCorrection, 0, 148, Short.MAX_VALUE)))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
@@ -844,24 +850,26 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(playlistScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkRepeat)
                     .addComponent(chkSubtitles)
                     .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSubtitleIndex))
+                    .addComponent(lblSubtitleIndex)
+                    .addComponent(chkRandom))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkInterlace)
                     .addComponent(chkPosition)
-                    .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPosition, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkRepeat))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkTimestamp)
                     .addComponent(chkLogo)
-                    .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbLogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkInterlace))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbARCorrection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkARCorrection))
+                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cmbARCorrection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(chkARCorrection))
+                    .addComponent(chkTimestamp))
                 .addContainerGap())
         );
 
@@ -2286,7 +2294,8 @@ public class GUI extends javax.swing.JFrame {
             chkDownmix,
             chkTextSubtitles,
             chkA2Stereo,
-            chkPixelRate
+            chkPixelRate,
+            chkRandom
         };
     }
     
@@ -2709,9 +2718,17 @@ public class GUI extends javax.swing.JFrame {
             else {
                 pl[i] = PlaylistAL.get(i);
             }
-        }               
+        }
         // Populate lstPlaylist using the contents of pl[]
         lstPlaylist.setListData(pl);
+        // Enable or disable random option
+        if (PlaylistAL.size() > 1) {
+            chkRandom.setEnabled(true);
+        }
+        else {
+            if (chkRandom.isSelected()) chkRandom.doClick();
+            chkRandom.setEnabled(false);
+        }
     }
     
     private void checkMRUList() {
@@ -2978,7 +2995,8 @@ public class GUI extends javax.swing.JFrame {
                     // Don't accept values lower than one
                     if (startPoint < 1) startPoint = -1;
                 }
-                populatePlaylist();                
+                chkRandom.setSelected(INIFile.getBooleanFromINI(fileContents, "hacktv-gui3", "random"));
+                populatePlaylist();
             }
         }
         else {
@@ -2986,7 +3004,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Video format
         String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
-        Boolean ModeFound = false;
+        boolean ModeFound = false;
             for (int i = 0; i < PALModeArray.length; i++) {
                 // Check if the mode we imported is in the PAL mode array
                 if (PALModeArray[i].equals(ImportedVideoMode)) {
@@ -3094,7 +3112,7 @@ public class GUI extends javax.swing.JFrame {
                 txtFrequency.setText(Double.toString(Freq).replace(".0",".00"));
             } else {
                 // Try to find the channel name by trying UHF first
-                Boolean ChannelFound = false;
+                boolean ChannelFound = false;
                 radUHF.doClick();
                 for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
                     if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
@@ -3188,7 +3206,7 @@ public class GUI extends javax.swing.JFrame {
                      "hacktv no longer supports external logo files. Logo option disabled.", AppName, JOptionPane.WARNING_MESSAGE);
             }
             else if (!ImportedLogo.isBlank()) {
-                Boolean logoFound = false;
+                boolean logoFound = false;
                 for (int i = 0; i <= cmbLogo.getItemCount() - 1; i++) {
                     if ( (LogoArray[i].toLowerCase()).equals(ImportedLogo) ) {
                         chkLogo.doClick();
@@ -3560,6 +3578,8 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
             // Set start point of playlist
             if (startPoint != -1) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
+            // Random option
+            if (chkRandom.isSelected()) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "random", 1);
         }
         else {
             if (radTest.isSelected()) {
@@ -4103,35 +4123,37 @@ public class GUI extends javax.swing.JFrame {
                     System.out.println(ex);
                     status = 999;
                 }
-                if (status == 0) {
-                    // All good
-                    txtAllOptions.setText("Done");
-                    txtTeletextSource.setText(TeletextPath);
-                }
-                else if (status == 1) {
-                    // Download cancelled by the user
-                    pbTeletext.setValue(0);
-                    txtAllOptions.setText("Cancelled");
-                }
-                else if (status == 2) {
-                    // The index page was downloaded but a teletext page failed.
-                    // Connection failure?
-                    JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
-                            + "Please ensure that you are connected to the internet and try again.", AppName, JOptionPane.ERROR_MESSAGE);
-                    pbTeletext.setValue(0);
-                    txtAllOptions.setText("Failed");
-                }
-                else if(status == 3) {
-                    // The index page was downloaded but we didn't find anything.
-                    // Most likely means that we need to revise this!
-                    JOptionPane.showMessageDialog(null, "No teletext files were found.", AppName, JOptionPane.ERROR_MESSAGE);
-                    pbTeletext.setValue(0);
-                    txtAllOptions.setText("Failed");
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, "An unknown error has occurred, code " + status, AppName, JOptionPane.ERROR_MESSAGE);
-                    pbTeletext.setValue(0);
-                    txtAllOptions.setText("Failed");
+                switch (status) {
+                    case 0:
+                        // All good
+                        txtAllOptions.setText("Done");
+                        txtTeletextSource.setText(TeletextPath);
+                        break;
+                    case 1:
+                        // Download cancelled by the user
+                        pbTeletext.setValue(0);
+                        txtAllOptions.setText("Cancelled");
+                        break;
+                    case 2:
+                        // The index page was downloaded but a teletext page failed.
+                        // Connection failure?
+                        JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
+                                + "Please ensure that you are connected to the internet and try again.", AppName, JOptionPane.ERROR_MESSAGE);
+                        pbTeletext.setValue(0);
+                        txtAllOptions.setText("Failed");
+                        break;
+                    case 3:
+                        // The index page was downloaded but we didn't find anything.
+                        // Most likely means that we need to revise this!
+                        JOptionPane.showMessageDialog(null, "No teletext files were found.", AppName, JOptionPane.ERROR_MESSAGE);
+                        pbTeletext.setValue(0);
+                        txtAllOptions.setText("Failed");
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(null, "An unknown error has occurred, code " + status, AppName, JOptionPane.ERROR_MESSAGE);
+                        pbTeletext.setValue(0);
+                        txtAllOptions.setText("Failed");
+                        break;
                 }
                 pbTeletext.setValue(0);
                 resetTeletextButtons();
@@ -5577,6 +5599,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void runHackTV() {
+        ArrayList<String> allArgs = new ArrayList<>();
         // Call each method and check its response. If false, then stop.
         if (!checkInput()) return;
         if (!checkCustomFrequency()) return;
@@ -5597,107 +5620,129 @@ public class GUI extends javax.swing.JFrame {
         checkTestCard();
         checkLogo();
         // Add all possible parameters to an arraylist to feed to ProcessBuilder
-        AllArgs.add(HackTVPath);
+        allArgs.add(HackTVPath);
         if (!OutputDevice.isEmpty()) {
-            AllArgs.add("-o");
-            AllArgs.add(OutputDevice);
+            allArgs.add("-o");
+            allArgs.add(OutputDevice);
         }
-        AllArgs.add("-m");
-        AllArgs.add(Mode);
+        allArgs.add("-m");
+        allArgs.add(Mode);
         // Only add frequency for HackRF or SoapySDR
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) {
-            AllArgs.add("-f");
-            AllArgs.add(Long.toString(Frequency));
+            allArgs.add("-f");
+            allArgs.add(Long.toString(Frequency));
         }
         // Add subtitles here, we need to make sure that subtitles is not the last parameter if
         // no index is specified. Otherwise hacktv reports that no input has been specified.
-        if (!SubtitlesParam.isEmpty()) AllArgs.add(SubtitlesParam);
-        if (!txtSubtitleIndex.getText().isEmpty()) AllArgs.add(txtSubtitleIndex.getText());
-        if (!TeletextSubtitlesParam.isEmpty()) AllArgs.add(TeletextSubtitlesParam);
-        if (!txtTextSubtitleIndex.getText().isEmpty()) AllArgs.add(txtTextSubtitleIndex.getText());
-        AllArgs.add("-s");
-        AllArgs.add(Integer.toString(SampleRate));
+        if (!SubtitlesParam.isEmpty()) allArgs.add(SubtitlesParam);
+        if (!txtSubtitleIndex.getText().isEmpty()) allArgs.add(txtSubtitleIndex.getText());
+        if (!TeletextSubtitlesParam.isEmpty()) allArgs.add(TeletextSubtitlesParam);
+        if (!txtTextSubtitleIndex.getText().isEmpty()) allArgs.add(txtTextSubtitleIndex.getText());
+        allArgs.add("-s");
+        allArgs.add(Integer.toString(SampleRate));
         if (chkPixelRate.isSelected()) {
-            AllArgs.add("--pixelrate");
-            AllArgs.add(Integer.toString(PixelRate));
+            allArgs.add("--pixelrate");
+            allArgs.add(Integer.toString(PixelRate));
         }
         // Only add gain for HackRF or SoapySDR
         if (txtGain.isEnabled()) {
-            AllArgs.add("-g");
-            AllArgs.add(txtGain.getText());
+            allArgs.add("-g");
+            allArgs.add(txtGain.getText());
         }
         // Optional values second, see if they're defined first before adding
-        if (!ChIDParam.isEmpty()) {AllArgs.add(ChIDParam);}
-        if (!ChID.isEmpty()) {AllArgs.add(ChID);}
-        if (!AudioParam.isEmpty()) AllArgs.add(AudioParam);
-        if (!NICAMParam.isEmpty()) AllArgs.add(NICAMParam);
-        if (!A2StereoParam.isEmpty()) AllArgs.add(A2StereoParam);
-        if (!ACPParam.isEmpty()) AllArgs.add(ACPParam);
-        if (!RepeatParam.isEmpty()) AllArgs.add(RepeatParam);
-        if (!WssParam.isEmpty()) AllArgs.add(WssParam);
-        if (!WssMode.isEmpty()) AllArgs.add(WssMode);
-        if (!ScramblingType1.isEmpty()) AllArgs.add(ScramblingType1);
-        if (!ScramblingKey1.isEmpty()) AllArgs.add(ScramblingKey1);
-        if (!ScramblingType2.isEmpty()) AllArgs.add(ScramblingType2);
-        if (!ScramblingKey2.isEmpty()) AllArgs.add(ScramblingKey2);
-        if (!ScrambleAudio.isEmpty()) AllArgs.add(ScrambleAudio);
-        if (!SysterPermTable.isEmpty()) AllArgs.add(SysterPermTable);
-        if (!TeletextParam.isEmpty()) AllArgs.add(TeletextParam);
-        if (!TeletextSource.isEmpty()) AllArgs.add(TeletextSource);
-        if (!RFampParam.isEmpty()) AllArgs.add(RFampParam);
-        if (!FMDevParam.isEmpty()) AllArgs.add(FMDevParam);
-        if (!AntennaParam.isEmpty()) AllArgs.add(AntennaParam);
-        if (!AntennaName.isEmpty()) AllArgs.add(AntennaName);
-        if (chkFMDev.isSelected()) AllArgs.add(Integer.toString(FMDevValue));
-        if (!GammaParam.isEmpty()) AllArgs.add(GammaParam);
-        if (!txtGamma.getText().isEmpty()) AllArgs.add(txtGamma.getText());
-        if (!OutputLevelParam.isEmpty()) AllArgs.add(OutputLevelParam);
-        if (!txtOutputLevel.getText().isEmpty()) AllArgs.add(txtOutputLevel.getText());
-        if (!FilterParam.isEmpty()) AllArgs.add(FilterParam);
-        if (!PositionParam.isEmpty()) AllArgs.add(PositionParam);
-        if (!txtPosition.getText().isEmpty()) AllArgs.add(txtPosition.getText());
-        if (!TimestampParam.isEmpty()) AllArgs.add(TimestampParam);
-        if (!LogoParam.isEmpty()) AllArgs.add(LogoParam);
-        if (!LogoFileName.isEmpty()) AllArgs.add(LogoFileName);
-        if (!VerboseParam.isEmpty()) AllArgs.add(VerboseParam);
-        if (!EMMParam.isEmpty()) AllArgs.add(EMMParam);
-        if (!TruncatedCardNumber.isEmpty()) {AllArgs.add(TruncatedCardNumber);}
-        if (!ShowECMParam.isEmpty()) AllArgs.add(ShowECMParam);
-        if (!ScalingMode.isEmpty()) AllArgs.add(ScalingMode);
-        if (!InterlaceParam.isEmpty()) AllArgs.add(InterlaceParam);
-        if (!ShowCardSerial.isEmpty()) AllArgs.add(ShowCardSerial);
-        if (!FindKey.isEmpty()) AllArgs.add(FindKey);
-        if (!VITS.isEmpty()) AllArgs.add(VITS);
-        if (!ColourParam.isEmpty()) AllArgs.add(ColourParam);
-        if (!FileType.isEmpty()) AllArgs.add(FileType);
-        if (!VolumeParam.isEmpty()) AllArgs.add(VolumeParam);
-        if (!txtVolume.getText().isEmpty()) AllArgs.add(txtVolume.getText());
-        if (!DownmixParam.isEmpty()) AllArgs.add(DownmixParam);        
+        if (!ChIDParam.isEmpty()) {allArgs.add(ChIDParam);}
+        if (!ChID.isEmpty()) {allArgs.add(ChID);}
+        if (!AudioParam.isEmpty()) allArgs.add(AudioParam);
+        if (!NICAMParam.isEmpty()) allArgs.add(NICAMParam);
+        if (!A2StereoParam.isEmpty()) allArgs.add(A2StereoParam);
+        if (!ACPParam.isEmpty()) allArgs.add(ACPParam);
+        if (!RepeatParam.isEmpty()) allArgs.add(RepeatParam);
+        if (!WssParam.isEmpty()) allArgs.add(WssParam);
+        if (!WssMode.isEmpty()) allArgs.add(WssMode);
+        if (!ScramblingType1.isEmpty()) allArgs.add(ScramblingType1);
+        if (!ScramblingKey1.isEmpty()) allArgs.add(ScramblingKey1);
+        if (!ScramblingType2.isEmpty()) allArgs.add(ScramblingType2);
+        if (!ScramblingKey2.isEmpty()) allArgs.add(ScramblingKey2);
+        if (!ScrambleAudio.isEmpty()) allArgs.add(ScrambleAudio);
+        if (!SysterPermTable.isEmpty()) allArgs.add(SysterPermTable);
+        if (!TeletextParam.isEmpty()) allArgs.add(TeletextParam);
+        if (!TeletextSource.isEmpty()) allArgs.add(TeletextSource);
+        if (!RFampParam.isEmpty()) allArgs.add(RFampParam);
+        if (!FMDevParam.isEmpty()) allArgs.add(FMDevParam);
+        if (!AntennaParam.isEmpty()) allArgs.add(AntennaParam);
+        if (!AntennaName.isEmpty()) allArgs.add(AntennaName);
+        if (chkFMDev.isSelected()) allArgs.add(Integer.toString(FMDevValue));
+        if (!GammaParam.isEmpty()) allArgs.add(GammaParam);
+        if (!txtGamma.getText().isEmpty()) allArgs.add(txtGamma.getText());
+        if (!OutputLevelParam.isEmpty()) allArgs.add(OutputLevelParam);
+        if (!txtOutputLevel.getText().isEmpty()) allArgs.add(txtOutputLevel.getText());
+        if (!FilterParam.isEmpty()) allArgs.add(FilterParam);
+        if (!PositionParam.isEmpty()) allArgs.add(PositionParam);
+        if (!txtPosition.getText().isEmpty()) allArgs.add(txtPosition.getText());
+        if (!TimestampParam.isEmpty()) allArgs.add(TimestampParam);
+        if (!LogoParam.isEmpty()) allArgs.add(LogoParam);
+        if (!LogoFileName.isEmpty()) allArgs.add(LogoFileName);
+        if (!VerboseParam.isEmpty()) allArgs.add(VerboseParam);
+        if (!EMMParam.isEmpty()) allArgs.add(EMMParam);
+        if (!TruncatedCardNumber.isEmpty()) {allArgs.add(TruncatedCardNumber);}
+        if (!ShowECMParam.isEmpty()) allArgs.add(ShowECMParam);
+        if (!ScalingMode.isEmpty()) allArgs.add(ScalingMode);
+        if (!InterlaceParam.isEmpty()) allArgs.add(InterlaceParam);
+        if (!ShowCardSerial.isEmpty()) allArgs.add(ShowCardSerial);
+        if (!FindKey.isEmpty()) allArgs.add(FindKey);
+        if (!VITS.isEmpty()) allArgs.add(VITS);
+        if (!ColourParam.isEmpty()) allArgs.add(ColourParam);
+        if (!FileType.isEmpty()) allArgs.add(FileType);
+        if (!VolumeParam.isEmpty()) allArgs.add(VolumeParam);
+        if (!txtVolume.getText().isEmpty()) allArgs.add(txtVolume.getText());
+        if (!DownmixParam.isEmpty()) allArgs.add(DownmixParam);        
         // Finally, add the source video or test option.
         if (PlaylistAL.size() > 0) {
             InputSource = "";
-            // Move through PlaylistAL, starting at the value defined by startPoint.
-            // When we reach the end of the array, start again at zero until we
-            // reach PlaylistAL.size() minus one.
-            int i = startPoint;
-            if (i == -1) i++;
-            for (int j = 0; j < PlaylistAL.size(); j++) {
-                if ( (i == PlaylistAL.size()) && (startPoint != 0) ) {
-                    i = 0;
-                }
-                if ( (PlaylistAL.get(i).contains("test:")) ||
-                    (PlaylistAL.get(i).startsWith("http")) ) {
-                    AllArgs.add(PlaylistAL.get(i));
-                }
-                else {
-                    if (RunningOnWindows) {
-                        AllArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
+            if (chkRandom.isSelected()) {
+                // Set the start point as the first item
+                if (startPoint != -1) allArgs.add(PlaylistAL.get(startPoint));
+                new Random().ints(0, PlaylistAL.size())
+                    .distinct()
+                    .limit(PlaylistAL.size())
+                    .forEach(
+                        r -> {
+                            // Add the rest. except for the start point or test cards
+                            if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != startPoint) ) {
+                                if (RunningOnWindows) {
+                                    allArgs.add('\u0022' + PlaylistAL.get(r) + '\u0022');
+                                }
+                                else {
+                                   allArgs.add(PlaylistAL.get(r));
+                                }                                
+                            }
+                        }
+                    );
+            }
+            else {
+                // Move through PlaylistAL, starting at the value defined by startPoint.
+                // When we reach the end of the array, start again at zero until we
+                // reach PlaylistAL.size() minus one.
+                int i = startPoint;
+                if (i == -1) i++;
+                for (int j = 0; j < PlaylistAL.size(); j++) {
+                    if ( (i == PlaylistAL.size()) && (startPoint != 0) ) {
+                        i = 0;
+                    }
+                    if ( (PlaylistAL.get(i).contains("test:")) ||
+                        (PlaylistAL.get(i).startsWith("http")) ) {
+                        allArgs.add(PlaylistAL.get(i));
                     }
                     else {
-                        AllArgs.add(PlaylistAL.get(i));
+                        if (RunningOnWindows) {
+                            allArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
+                        }
+                        else {
+                            allArgs.add(PlaylistAL.get(i));
+                        }
                     }
-                }
-                i++;
+                    i++;
+                }                
             }
         }
         else if (RunningOnWindows) {
@@ -5705,14 +5750,14 @@ public class GUI extends javax.swing.JFrame {
             // card or a HTTP stream.
             if ( (InputSource.contains("test:")) ||
                 (InputSource.startsWith("http")) ) {
-                AllArgs.add(InputSource);
+                allArgs.add(InputSource);
             }
             else {
-                AllArgs.add('\"' + InputSource + '\"');
+                allArgs.add('\"' + InputSource + '\"');
             }
         } else {
             // Don't add quotes on Unix systems as this just messes things up
-            AllArgs.add(InputSource);
+            allArgs.add(InputSource);
         }
         // End add to arraylist
         
@@ -5721,25 +5766,21 @@ public class GUI extends javax.swing.JFrame {
         /* Start a for loop to populate the textbox, using the arraylist size as
            the finish value.
         */
-        for (int i = 1; i < AllArgs.size() ; i++) {
+        for (int i = 1; i < allArgs.size() ; i++) {
             /* Add value 1 (mode) first and then add all other values. I've set 
                it up this way to prevent a leading space from being printed
                in the textbox.
             */
             if (i == 1) { 
-                txtAllOptions.setText(AllArgs.get(i)); 
+                txtAllOptions.setText(allArgs.get(i)); 
             }
             else {
                 txtAllOptions.setText(
-                    txtAllOptions.getText() + '\u0020' + AllArgs.get(i) );
+                    txtAllOptions.getText() + '\u0020' + allArgs.get(i) );
             }
         }
         // If "Generate syntax only" is enabled, stop here
-        if (chkSyntaxOnly.isSelected()) {
-            // Clear the ArrayList so we can run again with a fresh set
-            AllArgs.clear();
-            return;
-        }
+        if (chkSyntaxOnly.isSelected()) return;
         // Change the Run button to say Stop instead
         changeRunToStop();
         // Clear the console
@@ -5749,7 +5790,7 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected Void doInBackground() {
                 // Create process with the ArrayList we populated above
-                ProcessBuilder pb = new ProcessBuilder(AllArgs);
+                ProcessBuilder pb = new ProcessBuilder(allArgs);
                 pb.directory(new File(HackTVDirectory));
                 pb.redirectErrorStream(true);
                 // Try to start the process
@@ -5792,10 +5833,8 @@ public class GUI extends javax.swing.JFrame {
                             + " of the selected options. Please update hacktv and try again."
                             , AppName, JOptionPane.WARNING_MESSAGE);
                 }
-                // Revert button to say Run instead of Stop
-                changeStopToRun();
-                // Clear the ArrayList so we can run again with a fresh set
-                AllArgs.clear();                
+                // Revert button to display Run instead of Stop
+                changeStopToRun();            
             }
             // Update the GUI from this method.
             @Override
@@ -5853,7 +5892,7 @@ public class GUI extends javax.swing.JFrame {
     private void cleanupBeforeExit() {
         // Check if a teletext download is in progress
         // If so, then abort
-        if (DownloadInProgress.equals(true)) { DownloadCancelled = true; }
+        if (DownloadInProgress) { DownloadCancelled = true; }
         // Check if hacktv is running, if so then exit it
         if (Running) stopTV();
         // Delete temp directory and files before exit
@@ -6907,12 +6946,15 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkFMDevActionPerformed
 
     private void lstPlaylistValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstPlaylistValueChanged
+        String playFirst = "Play first";
+        String reset = "Reset";
         // Is the playlist empty?
         if (lstPlaylist.getSelectedIndex() == -1) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(false);
             btnPlaylistStart.setEnabled(false);
+            btnPlaylistStart.setText(playFirst);
         }
         // Are multiple items selected? If so, disable the up/down buttons
         else if (lstPlaylist.getSelectedIndices().length > 1) {
@@ -6920,6 +6962,8 @@ public class GUI extends javax.swing.JFrame {
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
             btnPlaylistStart.setEnabled(false);
+            btnPlaylistStart.setText(playFirst);
+            chkRandom.setEnabled(true);
         }
         // Does the playlist contain only one item?
         else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() == 1) ) {
@@ -6927,42 +6971,51 @@ public class GUI extends javax.swing.JFrame {
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
             btnPlaylistStart.setEnabled(false);
+            btnPlaylistStart.setText(playFirst);
+            if (chkRandom.isSelected()) chkRandom.doClick();
+            chkRandom.setEnabled(false);
         }
         // Is the selected item an intermediate item? (not the first or last)
         else if ( (lstPlaylist.getSelectedIndex() != 0) && (lstPlaylist.getSelectedIndex() != PlaylistAL.size() - 1) ) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
+            btnPlaylistStart.setEnabled(true);
             if (lstPlaylist.getSelectedIndex() == startPoint) {
-                btnPlaylistStart.setEnabled(false);
+                btnPlaylistStart.setText(reset);
             }
             else {
-                btnPlaylistStart.setEnabled(true);
+                btnPlaylistStart.setText(playFirst);
             }
+            chkRandom.setEnabled(true);
         }
         // Is the first item in the playlist selected?
         else if ( (lstPlaylist.getSelectedIndex() == 0) && (PlaylistAL.size() > 1) ) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
+            btnPlaylistStart.setEnabled(true);
             if (lstPlaylist.getSelectedIndex() == startPoint) {
-                btnPlaylistStart.setEnabled(false);
+                btnPlaylistStart.setText(reset);
             }
             else {
-                btnPlaylistStart.setEnabled(true);
+                btnPlaylistStart.setText(playFirst);
             }
+            chkRandom.setEnabled(true);
         }
         // Is the last item in the playlist selected?
         else if (lstPlaylist.getSelectedIndex() == PlaylistAL.size() - 1) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
+            btnPlaylistStart.setEnabled(true);
             if (lstPlaylist.getSelectedIndex() == startPoint) {
-                btnPlaylistStart.setEnabled(false);
+                btnPlaylistStart.setText(reset);
             }
             else {
-                btnPlaylistStart.setEnabled(true);
+                btnPlaylistStart.setText(playFirst);
             }
+            chkRandom.setEnabled(true);
         }
     }//GEN-LAST:event_lstPlaylistValueChanged
 
@@ -6997,8 +7050,17 @@ public class GUI extends javax.swing.JFrame {
             if (!txtSource.getText().isBlank()) btnAdd.doClick();
             return;
         }
+        // Enable or disable random option
+        if (PlaylistAL.size() > 1) {
+            chkRandom.setEnabled(true);
+        }
+        else {
+            if (chkRandom.isSelected()) chkRandom.doClick();
+            chkRandom.setEnabled(false);
+        }
         populatePlaylist();
         txtSource.setText("");
+        lstPlaylist.setSelectedIndex(PlaylistAL.size() -1);
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
@@ -7033,11 +7095,28 @@ public class GUI extends javax.swing.JFrame {
                 lstPlaylist.setSelectedIndex(ia[0]);
             }
         }
+        // If the Remove button has been disabled, highlight the Add button
+        // instead. Otherwise, re-select Remove.
+        if (btnRemove.isEnabled()) {
+            btnRemove.requestFocusInWindow();
+        }
+        else {
+            btnAdd.requestFocusInWindow();
+        }
     }//GEN-LAST:event_btnRemoveActionPerformed
 
     private void btnPlaylistUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistUpActionPerformed
         int i = lstPlaylist.getSelectedIndex();
-        if (i == startPoint) startPoint = startPoint - 1;
+        // If the item above the selected item is the start point, shift the
+        // start point up by one so the selected start point will remain selected
+        if (i - 1 == startPoint) {
+            startPoint = startPoint + 1;
+        }
+        // If the selected item is the start point, shift the start point down
+        // by one so the selected start point will remain selected
+        else if (i == startPoint) {
+            startPoint = startPoint - 1;
+        }
         if (i > 0) {
             PlaylistAL.add(i - 1, PlaylistAL.get(i));
             PlaylistAL.remove(i + 1);
@@ -7046,14 +7125,28 @@ public class GUI extends javax.swing.JFrame {
             lstPlaylist.ensureIndexIsVisible(lstPlaylist.getSelectedIndex());
         }
         btnPlaylistDown.setEnabled(true);
+        
         if (i == 1) {
+            // As we have reached the top of the list, disable the Up button
             btnPlaylistUp.setEnabled(false);
+        }
+        else {
+            btnPlaylistUp.requestFocusInWindow();
         }
     }//GEN-LAST:event_btnPlaylistUpActionPerformed
 
     private void btnPlaylistDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistDownActionPerformed
         int i = lstPlaylist.getSelectedIndex();
-        if (i == startPoint) startPoint = startPoint + 1;
+        // If the item below the selected item is the start point, shift the
+        // start point down by one so the selected start point will remain selected
+        if (i + 1 == startPoint) {
+            startPoint = startPoint - 1;
+        }
+        // If the selected item is the start point, shift the start point up
+        // by one so the selected start point will remain selected
+        else if (i == startPoint) {
+            startPoint = startPoint + 1;
+        }
         if ( (i >= 0) && (i != PlaylistAL.size() - 1) ) {
             PlaylistAL.add(i + 2, PlaylistAL.get(i));
             PlaylistAL.remove(i);
@@ -7063,7 +7156,11 @@ public class GUI extends javax.swing.JFrame {
         }
         btnPlaylistUp.setEnabled(true);
         if (i == PlaylistAL.size() - 2) {
+            // As we have reached the bottom of the list, disable the Down button
             btnPlaylistDown.setEnabled(false);
+        }
+        else {
+            btnPlaylistDown.requestFocusInWindow();
         }
     }//GEN-LAST:event_btnPlaylistDownActionPerformed
 
@@ -7118,14 +7215,23 @@ public class GUI extends javax.swing.JFrame {
     private void btnPlaylistStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistStartActionPerformed
         // Don't set a test card as the start point of the playlist.
         // It never ends, so the playlist becomes pointless.
-        if (PlaylistAL.get(lstPlaylist.getSelectedIndex()).startsWith("test:")) {
+        int s = lstPlaylist.getSelectedIndex();
+        if (PlaylistAL.get(s).startsWith("test:")) {
             JOptionPane.showMessageDialog(null, "Test cards cannot be set as the start point of a playlist.", AppName, JOptionPane.WARNING_MESSAGE);
+        }
+        else if (s == startPoint) {
+            // Reset the start point
+            startPoint = -1;
+            populatePlaylist();
         }
         else {
             // Set the start point
-            startPoint = lstPlaylist.getSelectedIndex();
+            startPoint = s;
             populatePlaylist();
         }
+        // Reselect the item that was selected before the playlist was updated
+        lstPlaylist.setSelectedIndex(s);
+        btnPlaylistStart.requestFocusInWindow();
     }//GEN-LAST:event_btnPlaylistStartActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -7171,6 +7277,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkOutputLevel;
     private javax.swing.JCheckBox chkPixelRate;
     private javax.swing.JCheckBox chkPosition;
+    private javax.swing.JCheckBox chkRandom;
     private javax.swing.JCheckBox chkRepeat;
     private javax.swing.JCheckBox chkScrambleAudio;
     private javax.swing.JCheckBox chkShowCardSerial;

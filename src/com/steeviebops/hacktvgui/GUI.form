@@ -364,9 +364,9 @@
                                           <Component id="chkRepeat" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkTimestamp" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkInterlace" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="chkARCorrection" min="-2" max="-2" attributes="0"/>
+                                          <Component id="chkRandom" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="61" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkSubtitles" min="-2" max="-2" attributes="0"/>
@@ -376,18 +376,20 @@
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="chkLogo" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="74" max="32767" attributes="0"/>
-                                              <Component id="cmbLogo" min="-2" pref="150" max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" attributes="0">
-                                              <Component id="cmbARCorrection" min="-2" pref="148" max="-2" attributes="0"/>
-                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkPosition" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="32767" attributes="0"/>
                                               <Component id="txtPosition" min="-2" pref="48" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="1" attributes="0">
+                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                  <Component id="chkARCorrection" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="chkLogo" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              </Group>
+                                              <EmptySpace max="32767" attributes="0"/>
+                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                  <Component id="cmbLogo" max="32767" attributes="0"/>
+                                                  <Component id="cmbARCorrection" pref="148" max="32767" attributes="0"/>
+                                              </Group>
                                           </Group>
                                       </Group>
                                   </Group>
@@ -460,27 +462,30 @@
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="chkRepeat" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkSubtitles" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtSubtitleIndex" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblSubtitleIndex" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkRandom" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="chkInterlace" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkPosition" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtPosition" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkRepeat" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="chkTimestamp" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkLogo" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="cmbLogo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkInterlace" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="cmbARCorrection" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkARCorrection" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="cmbARCorrection" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="chkARCorrection" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="chkTimestamp" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -612,7 +617,9 @@
                     <Component class="javax.swing.JComboBox" name="cmbARCorrection">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
+                          <StringArray count="1">
+                            <StringItem index="0" value=""/>
+                          </StringArray>
                         </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
@@ -713,6 +720,12 @@
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPlaylistStartActionPerformed"/>
                       </Events>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkRandom">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Randomise playlist"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
