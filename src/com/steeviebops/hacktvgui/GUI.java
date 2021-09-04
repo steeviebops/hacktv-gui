@@ -332,8 +332,6 @@ public class GUI extends javax.swing.JFrame {
         // Set default values when form loads
         radLocalSource.doClick();
         selectDefaultMode();
-        chkAudio.setSelected(true);
-        chkNICAM.setSelected(true);
         cmbM3USource.setVisible(false);
         txtGain.setText("0");
         // End default value load
@@ -1656,6 +1654,7 @@ public class GUI extends javax.swing.JFrame {
 
         scramblingPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Scrambling options"));
 
+        cmbScramblingType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingType.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbScramblingTypeMouseWheelMoved(evt);
@@ -1667,6 +1666,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        cmbScramblingKey1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingKey1.setEnabled(false);
         cmbScramblingKey1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -1679,6 +1679,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        cmbScramblingKey2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingKey2.setEnabled(false);
         cmbScramblingKey2.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -1901,7 +1902,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(82, Short.MAX_VALUE))
+                .addContainerGap(87, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2469,6 +2470,15 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No video systems were found. The Modes.ini file may be invalid or corrupted.\n"
                     + "The application will now exit.", AppName, JOptionPane.ERROR_MESSAGE);
             System.exit(1);
+        }
+        if (chkAudio.isEnabled()) {
+            chkAudio.setSelected(true);
+            if (NICAMSupported) {
+                chkNICAM.setSelected(true);
+            }
+            else if (A2Supported) {
+                chkA2Stereo.setSelected(true);
+            }
         }
     }
     
@@ -5155,9 +5165,9 @@ public class GUI extends javax.swing.JFrame {
         chkVideoFilter.setText("FM video pre-emphasis filter");
     }
     
-    private void disableFMDeviation() {    
+    private void disableFMDeviation() {
+        if (chkFMDev.isSelected()) chkFMDev.doClick();
         chkFMDev.setEnabled(false);
-        chkFMDev.setSelected(false);
         txtFMDev.setText("");
         txtFMDev.setEnabled(false);
         if (chkVideoFilter.isSelected()) {

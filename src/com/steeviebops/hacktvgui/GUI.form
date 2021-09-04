@@ -1858,7 +1858,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" max="32767" attributes="0"/>
-                          <EmptySpace pref="82" max="32767" attributes="0"/>
+                          <EmptySpace pref="87" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1942,7 +1942,9 @@
                     <Component class="javax.swing.JComboBox" name="cmbScramblingType">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
+                          <StringArray count="1">
+                            <StringItem index="0" value=""/>
+                          </StringArray>
                         </Property>
                       </Properties>
                       <Events>
@@ -1956,7 +1958,9 @@
                     <Component class="javax.swing.JComboBox" name="cmbScramblingKey1">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
+                          <StringArray count="1">
+                            <StringItem index="0" value=""/>
+                          </StringArray>
                         </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
@@ -1971,7 +1975,9 @@
                     <Component class="javax.swing.JComboBox" name="cmbScramblingKey2">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
+                          <StringArray count="1">
+                            <StringItem index="0" value=""/>
+                          </StringArray>
                         </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
