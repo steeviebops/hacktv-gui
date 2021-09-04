@@ -31,3 +31,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+src/com/steeviebops/resources/demo.tti
