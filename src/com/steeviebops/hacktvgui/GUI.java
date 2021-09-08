@@ -85,9 +85,10 @@ public class GUI extends javax.swing.JFrame {
     String ModesFileVersion;
     String ModesFileLocation;
     
-    // Declare variables for stereo status
+    // Declare variables for supported features
     boolean NICAMSupported = false;
     boolean A2Supported = false;
+    boolean ACPSupported = false;
 
     // Declare a variable to determine the selected fork
     String Fork;
@@ -4548,9 +4549,11 @@ public class GUI extends javax.swing.JFrame {
         if (cmbScramblingType.getSelectedIndex() == 0) {
             if ( chkShowECM.isSelected() ) { chkShowECM.doClick(); }
             chkShowECM.setEnabled(false);
-            if ((cmbScramblingType.getSelectedIndex() == 0) &&
-                    (!radMAC.isSelected()) ) {
+            if (ACPSupported) {
                 enableACP();
+            }
+            else {
+                disableACP();
             }
         }
         else {
@@ -4885,9 +4888,11 @@ public class GUI extends javax.swing.JFrame {
             disableVITS();
         }
         if (INIFile.getBooleanFromINI(ModesFile, Mode, "acp")) {
+            ACPSupported = true;
             enableACP();
         }
         else {
+            ACPSupported = false;
             disableACP();
         }
         if (INIFile.getBooleanFromINI(ModesFile, Mode, "scrambling")) {
