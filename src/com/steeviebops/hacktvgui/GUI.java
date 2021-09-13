@@ -5351,7 +5351,6 @@ public class GUI extends javax.swing.JFrame {
                         s = get();
                     }
                     catch (InterruptedException | ExecutionException ex) {
-                        ex.printStackTrace();
                         s = "siosjafiosrjfiosmehairlhawev";
                     }
                     if (s == null) {
