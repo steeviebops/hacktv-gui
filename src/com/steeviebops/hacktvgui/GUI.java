@@ -35,7 +35,6 @@ import java.nio.file.Path;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.net.URISyntaxException;
 import javax.swing.JCheckBox;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -43,7 +42,6 @@ import java.io.LineNumberReader;
 import javax.swing.filechooser.FileFilter;
 import java.awt.Cursor;
 import java.util.prefs.Preferences;
-import java.security.CodeSource;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.io.InputStreamReader;
@@ -70,14 +68,11 @@ public class GUI extends javax.swing.JFrame {
     // Boolean used for Microsoft Windows detection and handling
     final boolean RunningOnWindows;
     
-    // Run button text (used for the generate syntax option)
-    String RunButtonText;
-    
     // Get user's home directory, used for file open dialogues
     final String UserHomeDir = System.getProperty("user.home");
     
     // String to set the directory where this application's JAR is located
-    String JarDir;
+    final Path JarDir;
     
     // Strings to set the location and contents of the Modes.ini file
     String ModesFilePath;
@@ -164,7 +159,7 @@ public class GUI extends javax.swing.JFrame {
     boolean Baseband;
     
     // Start point in playlist
-    int startPoint = -1;
+    int StartPoint = -1;
     
     // Declare variables used for storing parameters
     String InputSource = "";
@@ -276,14 +271,7 @@ public class GUI extends javax.swing.JFrame {
         // Initialise Swing components
         initComponents();
         // Set the JarDir variable so we know where we're located
-        try {
-            // Get the current directory path
-            CodeSource codeSource = GUI.class.getProtectionDomain().getCodeSource();
-            File jarFile = new File(codeSource.getLocation().toURI().getPath());
-            JarDir = jarFile.getParentFile().getPath();         
-        } catch (URISyntaxException ex) {
-            System.out.println(ex);
-        }
+        JarDir = Path.of(Shared.getCurrentDirectory());
         // Get OS path separator (e.g. / on Unix and \ on Windows)
         OS_SEP = (System.getProperty("file.separator"));
         // Check operating system and set OS-specific options
@@ -2721,7 +2709,7 @@ public class GUI extends javax.swing.JFrame {
         // Convert PlaylistAL to an array so we can populate lstPlaylist with it
         String[] pl = new String[PlaylistAL.size()];
         for(int i = 0; i < pl.length; i++) {
-            if ((startPoint == i) && (startPoint != -1)) {
+            if ((StartPoint == i) && (StartPoint != -1)) {
                 // Add an asterisk to the start of the string to designate it
                 // as the start point of the playlist
                 pl[i] = "* " + PlaylistAL.get(i);
@@ -3002,9 +2990,9 @@ public class GUI extends javax.swing.JFrame {
                     PlaylistAL.add(pl[i]);
                 }
                 if ((INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart")) != null) {
-                    startPoint = INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart") - 1;
+                    StartPoint = INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart") - 1;
                     // Don't accept values lower than one
-                    if (startPoint < 1) startPoint = -1;
+                    if (StartPoint < 1) StartPoint = -1;
                 }
                 chkRandom.setSelected(INIFile.getBooleanFromINI(fileContents, "hacktv-gui3", "random"));
                 populatePlaylist();
@@ -3588,7 +3576,7 @@ public class GUI extends javax.swing.JFrame {
             // We'll populate the playlist section later
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
             // Set start point of playlist
-            if (startPoint != -1) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
+            if (StartPoint != -1) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", StartPoint + 1);
             // Random option
             if (chkRandom.isSelected()) FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "random", 1);
         }
@@ -4005,7 +3993,7 @@ public class GUI extends javax.swing.JFrame {
         // Reset output device to HackRF
         cmbOutputDevice.setSelectedIndex(0);
         // Reset playlist start point
-        startPoint = -1;
+        StartPoint = -1;
         // Select default radio buttons and comboboxes
         radLocalSource.doClick();
         radPAL.doClick();
@@ -5259,13 +5247,157 @@ public class GUI extends javax.swing.JFrame {
             }
         }
     }
+    
+    private void resetRunButton() {
+        DownloadInProgress = false;
+        btnRun.setText("Run hacktv");
+        btnRun.setEnabled(true);
+        txtConsoleOutput.setText("");
+    }
+    
+    private void youtubedl(String input) {
+        // youtube-dl frontend. Pass the download URL as a string.
+        int q = JOptionPane.showConfirmDialog(null, "This will attempt to use youtube-dl to download the requested video.\n" +
+            "The video file will be saved to the temp folder. Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
+        if (q == JOptionPane.YES_OPTION) {
+            String ytp;
+            String url;
+            createTempDirectory();
+            if (RunningOnWindows) {
+                // Check the JAR directory
+                if (Files.exists(Path.of(JarDir + "/youtube-dl.exe"))) {
+                    ytp = JarDir + "/youtube-dl.exe";
+                }
+                else {
+                    // Hope it can be found in the PATH...
+                    ytp = "youtube-dl.exe";
+                }
+            }
+            else {
+                ytp = "youtube-dl";
+            }
+            // Remove the ytdl: prefix if specified
+            if (input.toLowerCase().startsWith("ytdl:")) {
+                url = input.substring(5);
+            } 
+            else {
+                url = input;
+            }
+            btnRun.setText("Stop download");
+            DownloadInProgress = true;
+            SwingWorker <String, String> runYTDL = new SwingWorker <String, String> () {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ProcessBuilder yt = new ProcessBuilder(ytp, url, "-f bestvideo[protocol!=http_dash_segments]");
+                    yt.directory(TempDir.toFile());
+                    yt.redirectErrorStream(true);
+                    String f = null;
+                    // Try to start the process
+                    try {
+                        Process pr = yt.start();
+                        // Capture the output
+                        String a;
+                        BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                        while ((a = br.readLine()) != null) {
+                            if (DownloadCancelled) {
+                                String l;
+                                if (RunningOnWindows) {
+                                    l = JarDir + "/windows-kill.exe";
+                                }
+                                else {
+                                    l = "kill";
+                                }
+                                ProcessBuilder s = new ProcessBuilder(l, "-2", Long.toString(pr.pid()));
+                                s.start();
+                                DownloadCancelled = false;
+                                // Return a random string that is unlikely to be a real file
+                                return "srilcjdpocjsdpovjcmxpiesghohdj";
+                            }
+                            // Get the destination file name of the downloaded video
+                            else if (a.contains("Destination")) {
+                                Pattern p = Pattern.compile("(?<=Destination: )[^\n]*");
+                                Matcher m = p.matcher(a);
+                                while (m.find()) {
+                                    if (f == null) f = m.group(0);
+                                }
+                            }
+                            else if (a.endsWith("has already been downloaded")) {
+                                // File already exists, extract the file name from the error message
+                                // by removing the [download] prefix and the suffix text above.
+                                f = a.substring(11, a.length() - 28);
+                            }
+                            else {
+                                // Publish the line we received from youtube-dl
+                                publish(a);
+                            }
+                        }
+                        br.close();
+                    }
+                    catch (Exception ex) {
+                        return "siosjafiosrjfiosmehairlhawev";
+                    }
+                    return f;
+                }
+                @Override
+                protected void process(List <String> chunks) {
+                    for (String o: chunks) {
+                        txtAllOptions.setText(o);
+                    }
+                }
+                @Override
+                protected void done() {
+                    String s = null;
+                    try {
+                        s = get();
+                    }
+                    catch (InterruptedException | ExecutionException ex) {
+                        ex.printStackTrace();
+                        s = "siosjafiosrjfiosmehairlhawev";
+                    }
+                    if (s == null) {
+                        // Download failed, don't print anything so we can see what happened
+                        resetRunButton();
+                    }
+                    // Check for the random strings we may have sent above
+                    else if (s == "srilcjdpocjsdpovjcmxpiesghohdj") {
+                        txtAllOptions.setText("Download cancelled");
+                        resetRunButton();
+                    }
+                    else if (s == "siosjafiosrjfiosmehairlhawev") {
+                        txtAllOptions.setText("Download failed");
+                        JOptionPane.showMessageDialog(null, "Unable to run youtube-dl. Please ensure that it is installed in your " +
+                            "system path, or in the same directory as this application.", AppName, JOptionPane.WARNING_MESSAGE);
+                        resetRunButton();
+                    }
+                    else if (Files.exists(Path.of(TempDir + OS_SEP + s))) {
+                        txtAllOptions.setText("File downloaded to \"" + TempDir + OS_SEP + s + "\"");
+                        txtSource.setText(TempDir + OS_SEP + s);
+                        resetRunButton();
+                        // Restart the runHackTV method with the new source file
+                        runHackTV();
+                    }
+                }
+            };
+            runYTDL.execute();
+        }
+    }
 
     private boolean checkInput() {
+        // Skip this method if the playlist is populated
         if (PlaylistAL.size() > 0) return true;
         if (radLocalSource.isSelected()) {
             if (cmbM3USource.isVisible()) {
                 InputSource = PlaylistURLsAL.get(cmbM3USource.getSelectedIndex());
                 return true;
+            }
+            else if ( (txtSource.getText().contains("://youtube.com/")) ||
+                      (txtSource.getText().contains("://www.youtube.com/")) ||
+                      (txtSource.getText().contains("://youtu.be/")) ||
+                      (txtSource.getText().startsWith("ytdl:")) ) {
+                // Invoke the youtube-dl handler
+                youtubedl(txtSource.getText());
+                // Return false as we're going to restart if the download is successful
+                return false;
             }
             else if (!txtSource.getText().isBlank()) { 
                 InputSource = txtSource.getText().replace("\"", "");
@@ -5716,14 +5848,14 @@ public class GUI extends javax.swing.JFrame {
             InputSource = "";
             if (chkRandom.isSelected()) {
                 // Set the start point as the first item
-                if (startPoint != -1) allArgs.add(PlaylistAL.get(startPoint));
+                if (StartPoint != -1) allArgs.add(PlaylistAL.get(StartPoint));
                 new Random().ints(0, PlaylistAL.size())
                     .distinct()
                     .limit(PlaylistAL.size())
                     .forEach(
                         r -> {
                             // Add the rest. except for the start point or test cards
-                            if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != startPoint) ) {
+                            if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != StartPoint) ) {
                                 if (RunningOnWindows) {
                                     allArgs.add('\u0022' + PlaylistAL.get(r) + '\u0022');
                                 }
@@ -5735,13 +5867,13 @@ public class GUI extends javax.swing.JFrame {
                     );
             }
             else {
-                // Move through PlaylistAL, starting at the value defined by startPoint.
+                // Move through PlaylistAL, starting at the value defined by StartPoint.
                 // When we reach the end of the array, start again at zero until we
                 // reach PlaylistAL.size() minus one.
-                int i = startPoint;
+                int i = StartPoint;
                 if (i == -1) i++;
                 for (int j = 0; j < PlaylistAL.size(); j++) {
-                    if ( (i == PlaylistAL.size()) && (startPoint != 0) ) {
+                    if ( (i == PlaylistAL.size()) && (StartPoint != 0) ) {
                         i = 0;
                     }
                     if ( (PlaylistAL.get(i).contains("test:")) ||
@@ -5777,7 +5909,7 @@ public class GUI extends javax.swing.JFrame {
         // End add to arraylist
         
         // Arguments textbox handling - clear it first
-        if (!txtAllOptions.getText().isEmpty()) { txtAllOptions.setText(""); }
+        if (!txtAllOptions.getText().isEmpty()) txtAllOptions.setText("");
         /* Start a for loop to populate the textbox, using the arraylist size as
            the finish value.
         */
@@ -5796,7 +5928,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // If "Generate syntax only" is enabled, stop here
         if (chkSyntaxOnly.isSelected()) return;
-        // Change the Run button to say Stop instead
+        // Change the Run button to display Stop instead
         changeRunToStop();
         // Clear the console
         txtConsoleOutput.setText("");
@@ -5869,7 +6001,7 @@ public class GUI extends javax.swing.JFrame {
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
          *  Under Windows it's not so easy, we need an external helper
          *  application. For this, we use:
-         *  https://github.com/alirdn/windows-kill/releases
+         *  https://github.com/ElyDotDev/windows-kill/releases
          */
         if (RunningOnWindows) {
             try {
@@ -5902,7 +6034,7 @@ public class GUI extends javax.swing.JFrame {
         btnRun.setText("Run hacktv");
         chkSyntaxOnly.setEnabled(true);
         Running = false;
-    }    
+    }
     
     private void cleanupBeforeExit() {
         // Check if a teletext download is in progress
@@ -5915,15 +6047,19 @@ public class GUI extends javax.swing.JFrame {
             try {
                 Shared.deleteFSObject(TempDir.resolve(TempDir));
             } catch (IOException ex) {
-                System.out.println("An error occurred while attempting to delete the temp directory: " + ex);
+                System.err.println("An error occurred while attempting to delete the temp directory: " + ex);
             }
         }
     }
 
     private void btnRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRunActionPerformed
         if (!Running) {
-            if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath == "")) ) {
-                JOptionPane.showMessageDialog(null, "Unable to find hacktv. Please go to the GUI settings tab to add its location.", AppName, JOptionPane.ERROR_MESSAGE);
+            if (DownloadInProgress) {
+                DownloadCancelled = true;
+                btnRun.setEnabled(false);
+            }
+            else if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath == "")) ) {
+                JOptionPane.showMessageDialog(null, "Unable to find hacktv. Please go to the GUI settings tab to add its location.", AppName, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(5);
             }
             else {
@@ -6155,8 +6291,8 @@ public class GUI extends javax.swing.JFrame {
         int result = teletextFileChooser.showOpenDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            SelectedFile = teletextFileChooser.getSelectedFile();
-            txtTeletextSource.setText(Shared.stripQuotes(SelectedFile.getAbsolutePath()));
+            File f = teletextFileChooser.getSelectedFile();
+            txtTeletextSource.setText(Shared.stripQuotes(f.getAbsolutePath()));
         }
     }//GEN-LAST:event_btnTeletextBrowseActionPerformed
 
@@ -6776,11 +6912,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkSyntaxOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSyntaxOnlyActionPerformed
         if (chkSyntaxOnly.isSelected()) {
-            RunButtonText = btnRun.getText();
             btnRun.setText("Generate syntax");
         }
         else {
-            btnRun.setText(RunButtonText);
+            btnRun.setText("Run hacktv");
         }
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
@@ -6874,8 +7009,8 @@ public class GUI extends javax.swing.JFrame {
                 if (HTVLoadInProgress == false) {
                     int result = outputFileChooser.showSaveDialog(this);
                     if (result == JFileChooser.APPROVE_OPTION) {
-                        SelectedFile = outputFileChooser.getSelectedFile();
-                        txtOutputDevice.setText(SelectedFile.toString());
+                        File o = outputFileChooser.getSelectedFile();
+                        txtOutputDevice.setText(o.toString());
                     }
                 }
                 break;
@@ -6996,7 +7131,7 @@ public class GUI extends javax.swing.JFrame {
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
             btnPlaylistStart.setEnabled(true);
-            if (lstPlaylist.getSelectedIndex() == startPoint) {
+            if (lstPlaylist.getSelectedIndex() == StartPoint) {
                 btnPlaylistStart.setText(reset);
             }
             else {
@@ -7010,7 +7145,7 @@ public class GUI extends javax.swing.JFrame {
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
             btnPlaylistStart.setEnabled(true);
-            if (lstPlaylist.getSelectedIndex() == startPoint) {
+            if (lstPlaylist.getSelectedIndex() == StartPoint) {
                 btnPlaylistStart.setText(reset);
             }
             else {
@@ -7024,7 +7159,7 @@ public class GUI extends javax.swing.JFrame {
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
             btnPlaylistStart.setEnabled(true);
-            if (lstPlaylist.getSelectedIndex() == startPoint) {
+            if (lstPlaylist.getSelectedIndex() == StartPoint) {
                 btnPlaylistStart.setText(reset);
             }
             else {
@@ -7038,6 +7173,14 @@ public class GUI extends javax.swing.JFrame {
         if (cmbM3USource.isVisible()) {
             // Add the URL from the selected M3U item to the playlist
             PlaylistAL.add(PlaylistURLsAL.get(cmbM3USource.getSelectedIndex()));
+        }
+        else if ( (txtSource.getText().contains("://youtube.com/")) ||
+                  (txtSource.getText().contains("://www.youtube.com/")) ||
+                  (txtSource.getText().contains("://youtu.be/")) ||
+                  (txtSource.getText().startsWith("ytdl:")) ) {
+            JOptionPane.showMessageDialog(null, "Cannot add this URL to the playlist. "
+                        + "The youtube-dl handler is only supported for single files at present.", AppName, JOptionPane.WARNING_MESSAGE);
+            return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
             // Add whatever is in txtSource to PlaylistAL
@@ -7085,14 +7228,14 @@ public class GUI extends javax.swing.JFrame {
             // Remove the requested item from the arraylist
             PlaylistAL.remove(ia[j]);
             // If the item removed was the start point, or if only one item
-            // is left, reset startPoint to default
-            if ((ia[j] == startPoint) || (PlaylistAL.size() < 2)) {
-                startPoint = -1;
+            // is left, reset StartPoint to default
+            if ((ia[j] == StartPoint) || (PlaylistAL.size() < 2)) {
+                StartPoint = -1;
             }                
-            // If the item removed was before the start point, reduce startPoint
+            // If the item removed was before the start point, reduce StartPoint
             // by one so the selected item remains selected
-            else if (ia[j] < startPoint) {
-                startPoint = startPoint - 1;
+            else if (ia[j] < StartPoint) {
+                StartPoint = StartPoint - 1;
             }
             // Re-populate the playlist with the new arraylist values
             populatePlaylist();
@@ -7124,13 +7267,13 @@ public class GUI extends javax.swing.JFrame {
         int i = lstPlaylist.getSelectedIndex();
         // If the item above the selected item is the start point, shift the
         // start point up by one so the selected start point will remain selected
-        if (i - 1 == startPoint) {
-            startPoint = startPoint + 1;
+        if (i - 1 == StartPoint) {
+            StartPoint = StartPoint + 1;
         }
         // If the selected item is the start point, shift the start point down
         // by one so the selected start point will remain selected
-        else if (i == startPoint) {
-            startPoint = startPoint - 1;
+        else if (i == StartPoint) {
+            StartPoint = StartPoint - 1;
         }
         if (i > 0) {
             PlaylistAL.add(i - 1, PlaylistAL.get(i));
@@ -7154,13 +7297,13 @@ public class GUI extends javax.swing.JFrame {
         int i = lstPlaylist.getSelectedIndex();
         // If the item below the selected item is the start point, shift the
         // start point down by one so the selected start point will remain selected
-        if (i + 1 == startPoint) {
-            startPoint = startPoint - 1;
+        if (i + 1 == StartPoint) {
+            StartPoint = StartPoint - 1;
         }
         // If the selected item is the start point, shift the start point up
         // by one so the selected start point will remain selected
-        else if (i == startPoint) {
-            startPoint = startPoint + 1;
+        else if (i == StartPoint) {
+            StartPoint = StartPoint + 1;
         }
         if ( (i >= 0) && (i != PlaylistAL.size() - 1) ) {
             PlaylistAL.add(i + 2, PlaylistAL.get(i));
@@ -7234,14 +7377,14 @@ public class GUI extends javax.swing.JFrame {
         if (PlaylistAL.get(s).startsWith("test:")) {
             JOptionPane.showMessageDialog(null, "Test cards cannot be set as the start point of a playlist.", AppName, JOptionPane.WARNING_MESSAGE);
         }
-        else if (s == startPoint) {
+        else if (s == StartPoint) {
             // Reset the start point
-            startPoint = -1;
+            StartPoint = -1;
             populatePlaylist();
         }
         else {
             // Set the start point
-            startPoint = s;
+            StartPoint = s;
             populatePlaylist();
         }
         // Reselect the item that was selected before the playlist was updated

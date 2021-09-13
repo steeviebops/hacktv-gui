@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.FileVisitResult;
@@ -35,6 +36,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.CodeSource;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -120,9 +122,8 @@ public class Shared {
     }
     
     public static Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
-        JarFile jar = null;
         try {
-            jar = new JarFile(jarFilePath);
+            JarFile jar = new JarFile(jarFilePath);
             Enumeration<JarEntry> enumEntries = jar.entries();
             while (enumEntries.hasMoreElements()) {
                 JarEntry file = (JarEntry) enumEntries.nextElement();
@@ -192,5 +193,18 @@ public class Shared {
         }
 
         return destFile;
+    }
+    
+    public static String getCurrentDirectory() {
+        try {
+            // Get the current directory path
+            CodeSource codeSource = GUI.class.getProtectionDomain().getCodeSource();
+            File jarFile = new File(codeSource.getLocation().toURI().getPath());
+            return jarFile.getParentFile().getPath();         
+        }
+        catch (URISyntaxException ex) {
+            System.out.println(ex);
+            return "";
+        }        
     }
 }
