@@ -5262,7 +5262,6 @@ public class GUI extends javax.swing.JFrame {
         if (q == JOptionPane.YES_OPTION) {
             String ytp;
             String url;
-            createTempDirectory();
             if (RunningOnWindows) {
                 // Check the JAR directory
                 if (Files.exists(Path.of(JarDir + "/youtube-dl.exe"))) {
@@ -5284,12 +5283,12 @@ public class GUI extends javax.swing.JFrame {
                 url = input;
             }
             btnRun.setText("Stop download");
-            DownloadInProgress = true;
-            SwingWorker <String, String> runYTDL = new SwingWorker <String, String> () {
+            txtAllOptions.setText("Checking URL, please wait...");
+            // Check if the supplied URL is a live stream or not
+            SwingWorker <String, Void> checkYTDL = new SwingWorker <String, Void> () {
                 @Override
                 protected String doInBackground() throws Exception {
-                    ProcessBuilder yt = new ProcessBuilder(ytp, url, "-f bestvideo[protocol!=http_dash_segments]");
-                    yt.directory(TempDir.toFile());
+                    ProcessBuilder yt = new ProcessBuilder(ytp, "-g", url);
                     yt.redirectErrorStream(true);
                     String f = null;
                     // Try to start the process
@@ -5299,87 +5298,141 @@ public class GUI extends javax.swing.JFrame {
                         String a;
                         BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()));
                         while ((a = br.readLine()) != null) {
-                            if (DownloadCancelled) {
-                                String l;
-                                if (RunningOnWindows) {
-                                    l = JarDir + "/windows-kill.exe";
-                                }
-                                else {
-                                    l = "kill";
-                                }
-                                ProcessBuilder s = new ProcessBuilder(l, "-2", Long.toString(pr.pid()));
-                                s.start();
-                                DownloadCancelled = false;
-                                // Return a random string that is unlikely to be a real file
-                                return "srilcjdpocjsdpovjcmxpiesghohdj";
-                            }
-                            // Get the destination file name of the downloaded video
-                            else if (a.contains("Destination")) {
-                                Pattern p = Pattern.compile("(?<=Destination: )[^\n]*");
-                                Matcher m = p.matcher(a);
-                                while (m.find()) {
-                                    if (f == null) f = m.group(0);
-                                }
-                            }
-                            else if (a.endsWith("has already been downloaded")) {
-                                // File already exists, extract the file name from the error message
-                                // by removing the [download] prefix and the suffix text above.
-                                f = a.substring(11, a.length() - 28);
-                            }
-                            else {
-                                // Publish the line we received from youtube-dl
-                                publish(a);
-                            }
+                            f = a;
                         }
                         br.close();
                     }
                     catch (Exception ex) {
-                        return "siosjafiosrjfiosmehairlhawev";
+                        return "";
                     }
                     return f;
                 }
                 @Override
-                protected void process(List <String> chunks) {
-                    for (String o: chunks) {
-                        txtAllOptions.setText(o);
-                    }
-                }
-                @Override
                 protected void done() {
-                    String s = null;
+                    String u;
                     try {
-                        s = get();
+                        u = get();
                     }
-                    catch (InterruptedException | ExecutionException ex) {
-                        s = "siosjafiosrjfiosmehairlhawev";
-                    }
-                    if (s == null) {
-                        // Download failed, don't print anything so we can see what happened
-                        resetRunButton();
-                    }
-                    // Check for the random strings we may have sent above
-                    else if (s == "srilcjdpocjsdpovjcmxpiesghohdj") {
-                        txtAllOptions.setText("Download cancelled");
-                        resetRunButton();
-                    }
-                    else if (s == "siosjafiosrjfiosmehairlhawev") {
-                        txtAllOptions.setText("Download failed");
-                        JOptionPane.showMessageDialog(null, "Unable to run youtube-dl. Please ensure that it is installed in your " +
-                            "system path, or in the same directory as this application.", AppName, JOptionPane.WARNING_MESSAGE);
-                        resetRunButton();
-                    }
-                    else if (Files.exists(Path.of(TempDir + OS_SEP + s))) {
-                        txtAllOptions.setText("File downloaded to \"" + TempDir + OS_SEP + s + "\"");
-                        txtSource.setText(TempDir + OS_SEP + s);
-                        resetRunButton();
-                        // Restart the runHackTV method with the new source file
+                    catch (InterruptedException | ExecutionException e) {
+                        u = "";
                         runHackTV();
+                    }
+                    // If it's a live stream, set the manifest (m3u8) URL as the
+                    // source and restart. We don't need youtube-dl for this.
+                    if ( (u != null) && (u.endsWith(".m3u8")) ) {
+                        txtSource.setText(u);
+                        runHackTV();
+                    }
+                    else {
+                        // Go to the download method
+                        startYTDownload(ytp, url);
                     }
                 }
             };
-            runYTDL.execute();
+            checkYTDL.execute();
         }
     }
+        
+    private void startYTDownload(String ytp, String url) {
+        DownloadInProgress = true;
+        createTempDirectory();
+        if (txtSource.getText().endsWith(".m3u8")) return;
+        // Start the download
+        SwingWorker <String, String> runYTDL = new SwingWorker <String, String> () {
+            @Override
+            protected String doInBackground() throws Exception {
+                ProcessBuilder yt = new ProcessBuilder(ytp, url, "-f bestvideo[protocol!=http_dash_segments]");
+                yt.directory(TempDir.toFile());
+                yt.redirectErrorStream(true);
+                String f = null;
+                // Try to start the process
+                try {
+                    Process pr = yt.start();
+                    // Capture the output
+                    String a;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                    while ((a = br.readLine()) != null) {
+                        if (DownloadCancelled) {
+                            String l;
+                            if (RunningOnWindows) {
+                                l = JarDir + "/windows-kill.exe";
+                            }
+                            else {
+                                l = "kill";
+                            }
+                            ProcessBuilder s = new ProcessBuilder(l, "-2", Long.toString(pr.pid()));
+                            s.start();
+                            DownloadCancelled = false;
+                            // Return a random string that is unlikely to be a real file
+                            return "srilcjdpocjsdpovjcmxpiesghohdj";
+                        }
+                        // Get the destination file name of the downloaded video
+                        else if (a.contains("Destination")) {
+                            Pattern p = Pattern.compile("(?<=Destination: )[^\n]*");
+                            Matcher m = p.matcher(a);
+                            while (m.find()) {
+                                if (f == null) f = m.group(0);
+                            }
+                        }
+                        else if (a.endsWith("has already been downloaded")) {
+                            // File already exists, extract the file name from the error message
+                            // by removing the [download] prefix and the suffix text above.
+                            f = a.substring(11, a.length() - 28);
+                        }
+                        else {
+                            // Publish the line we received from youtube-dl
+                            publish(a);
+                        }
+                    }
+                    br.close();
+                }
+                catch (Exception ex) {
+                    return "siosjafiosrjfiosmehairlhawev";
+                }
+                return f;
+            }
+            @Override
+            protected void process(List <String> chunks) {
+                for (String o: chunks) {
+                    txtAllOptions.setText(o);
+                }
+            }
+            @Override
+            protected void done() {
+                String s = null;
+                try {
+                    s = get();
+                }
+                catch (InterruptedException | ExecutionException ex) {
+                    s = "siosjafiosrjfiosmehairlhawev";
+                }
+                if (s == null) {
+                    // Download failed, don't print anything so we can see what happened
+                    resetRunButton();
+                }
+                // Check for the random strings we may have sent above
+                else if (s == "srilcjdpocjsdpovjcmxpiesghohdj") {
+                    txtAllOptions.setText("Download cancelled");
+                    resetRunButton();
+                }
+                else if (s == "siosjafiosrjfiosmehairlhawev") {
+                    txtAllOptions.setText("Download failed");
+                    JOptionPane.showMessageDialog(null, "Unable to run youtube-dl. Please ensure that it is installed in your " +
+                        "system path, or in the same directory as this application.", AppName, JOptionPane.WARNING_MESSAGE);
+                    resetRunButton();
+                }
+                else if (Files.exists(Path.of(TempDir + OS_SEP + s))) {
+                    txtAllOptions.setText("File downloaded to \"" + TempDir + OS_SEP + s + "\"");
+                    txtSource.setText(TempDir + OS_SEP + s);
+                    resetRunButton();
+                    // Restart the runHackTV method with the new source file
+                    runHackTV();
+                }
+            }
+        };
+        runYTDL.execute();                
+    }
+    
 
     private boolean checkInput() {
         // Skip this method if the playlist is populated
