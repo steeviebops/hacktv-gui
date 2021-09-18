@@ -5341,7 +5341,7 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker <String, String> runYTDL = new SwingWorker <String, String> () {
             @Override
             protected String doInBackground() throws Exception {
-                ProcessBuilder yt = new ProcessBuilder(ytp, url, "-f bestvideo[protocol!=http_dash_segments]");
+                ProcessBuilder yt = new ProcessBuilder(ytp, url);
                 yt.directory(TempDir.toFile());
                 yt.redirectErrorStream(true);
                 String f = null;
