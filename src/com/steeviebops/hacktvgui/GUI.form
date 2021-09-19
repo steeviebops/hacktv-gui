@@ -669,6 +669,7 @@
                             </Property>
                           </Properties>
                           <Events>
+                            <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="lstPlaylistKeyPressed"/>
                             <EventHandler event="valueChanged" listener="javax.swing.event.ListSelectionListener" parameters="javax.swing.event.ListSelectionEvent" handler="lstPlaylistValueChanged"/>
                           </Events>
                           <AuxValues>

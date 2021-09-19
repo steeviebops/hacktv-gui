@@ -44,6 +44,7 @@ import java.awt.Cursor;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.awt.event.KeyEvent;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.MalformedInputException;
@@ -51,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import javax.swing.SwingWorker;
 import java.util.List;
@@ -141,7 +143,8 @@ public class GUI extends javax.swing.JFrame {
     Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
     
     // Process ID, used to gracefully close hacktv via the Stop button
-    long pid;
+    long hpid;
+    long ytpid;
     
     // Boolean to determine if hacktv is running or not
     boolean Running;
@@ -700,6 +703,11 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        lstPlaylist.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                lstPlaylistKeyPressed(evt);
+            }
+        });
         lstPlaylist.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 lstPlaylistValueChanged(evt);
@@ -5248,17 +5256,10 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void resetRunButton() {
-        DownloadInProgress = false;
-        btnRun.setText("Run hacktv");
-        btnRun.setEnabled(true);
-        txtConsoleOutput.setText("");
-    }
-    
     private void youtubedl(String input) {
         // youtube-dl frontend. Pass the download URL as a string.
-        int q = JOptionPane.showConfirmDialog(null, "This will attempt to use youtube-dl to download the requested video.\n" +
-            "The video file will be saved to the temp folder. Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
+        int q = JOptionPane.showConfirmDialog(null, "This will attempt to use youtube-dl to stream the requested video.\n" +
+            "Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
             String ytp;
             String url;
@@ -5282,9 +5283,10 @@ public class GUI extends javax.swing.JFrame {
             else {
                 url = input;
             }
-            btnRun.setText("Stop download");
+            chkSyntaxOnly.setEnabled(false);
+            btnRun.setEnabled(false);
             txtAllOptions.setText("Checking URL, please wait...");
-            // Check if the supplied URL is a live stream or not
+            // Check if the provided URL is a live stream or not
             SwingWorker <String, Void> checkYTDL = new SwingWorker <String, Void> () {
                 @Override
                 protected String doInBackground() throws Exception {
@@ -5302,7 +5304,7 @@ public class GUI extends javax.swing.JFrame {
                         }
                         br.close();
                     }
-                    catch (Exception ex) {
+                    catch (IOException ex) {
                         return "";
                     }
                     return f;
@@ -5315,124 +5317,23 @@ public class GUI extends javax.swing.JFrame {
                     }
                     catch (InterruptedException | ExecutionException e) {
                         u = "";
-                        runHackTV();
+                        runHackTV("");
                     }
                     // If it's a live stream, set the manifest (m3u8) URL as the
                     // source and restart. We don't need youtube-dl for this.
                     if ( (u != null) && (u.endsWith(".m3u8")) ) {
                         txtSource.setText(u);
-                        runHackTV();
+                        runHackTV("");
                     }
                     else {
-                        // Go to the download method
-                        startYTDownload(ytp, url);
+                        runHackTV(ytp);
                     }
+                    btnRun.setEnabled(true);
                 }
             };
             checkYTDL.execute();
         }
     }
-        
-    private void startYTDownload(String ytp, String url) {
-        DownloadInProgress = true;
-        createTempDirectory();
-        if (txtSource.getText().endsWith(".m3u8")) return;
-        // Start the download
-        SwingWorker <String, String> runYTDL = new SwingWorker <String, String> () {
-            @Override
-            protected String doInBackground() throws Exception {
-                ProcessBuilder yt = new ProcessBuilder(ytp, url);
-                yt.directory(TempDir.toFile());
-                yt.redirectErrorStream(true);
-                String f = null;
-                // Try to start the process
-                try {
-                    Process pr = yt.start();
-                    // Capture the output
-                    String a;
-                    BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                    while ((a = br.readLine()) != null) {
-                        if (DownloadCancelled) {
-                            String l;
-                            if (RunningOnWindows) {
-                                l = JarDir + "/windows-kill.exe";
-                            }
-                            else {
-                                l = "kill";
-                            }
-                            ProcessBuilder s = new ProcessBuilder(l, "-2", Long.toString(pr.pid()));
-                            s.start();
-                            DownloadCancelled = false;
-                            // Return a random string that is unlikely to be a real file
-                            return "srilcjdpocjsdpovjcmxpiesghohdj";
-                        }
-                        // Get the destination file name of the downloaded video
-                        else if (a.contains("Destination")) {
-                            Pattern p = Pattern.compile("(?<=Destination: )[^\n]*");
-                            Matcher m = p.matcher(a);
-                            while (m.find()) {
-                                if (f == null) f = m.group(0);
-                            }
-                        }
-                        else if (a.endsWith("has already been downloaded")) {
-                            // File already exists, extract the file name from the error message
-                            // by removing the [download] prefix and the suffix text above.
-                            f = a.substring(11, a.length() - 28);
-                        }
-                        else {
-                            // Publish the line we received from youtube-dl
-                            publish(a);
-                        }
-                    }
-                    br.close();
-                }
-                catch (Exception ex) {
-                    return "siosjafiosrjfiosmehairlhawev";
-                }
-                return f;
-            }
-            @Override
-            protected void process(List <String> chunks) {
-                for (String o: chunks) {
-                    txtAllOptions.setText(o);
-                }
-            }
-            @Override
-            protected void done() {
-                String s = null;
-                try {
-                    s = get();
-                }
-                catch (InterruptedException | ExecutionException ex) {
-                    s = "siosjafiosrjfiosmehairlhawev";
-                }
-                if (s == null) {
-                    // Download failed, don't print anything so we can see what happened
-                    resetRunButton();
-                }
-                // Check for the random strings we may have sent above
-                else if (s == "srilcjdpocjsdpovjcmxpiesghohdj") {
-                    txtAllOptions.setText("Download cancelled");
-                    resetRunButton();
-                }
-                else if (s == "siosjafiosrjfiosmehairlhawev") {
-                    txtAllOptions.setText("Download failed");
-                    JOptionPane.showMessageDialog(null, "Unable to run youtube-dl. Please ensure that it is installed in your " +
-                        "system path, or in the same directory as this application.", AppName, JOptionPane.WARNING_MESSAGE);
-                    resetRunButton();
-                }
-                else if (Files.exists(Path.of(TempDir + OS_SEP + s))) {
-                    txtAllOptions.setText("File downloaded to \"" + TempDir + OS_SEP + s + "\"");
-                    txtSource.setText(TempDir + OS_SEP + s);
-                    resetRunButton();
-                    // Restart the runHackTV method with the new source file
-                    runHackTV();
-                }
-            }
-        };
-        runYTDL.execute();                
-    }
-    
 
     private boolean checkInput() {
         // Skip this method if the playlist is populated
@@ -5797,10 +5698,10 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void runHackTV() {
+    private void runHackTV(String ytdlPath) {
         ArrayList<String> allArgs = new ArrayList<>();
         // Call each method and check its response. If false, then stop.
-        if (!checkInput()) return;
+        if (ytdlPath.isBlank()) if (!checkInput()) return;
         if (!checkCustomFrequency()) return;
         if (!checkFMDeviation()) return;
         if (!checkGamma()) return;
@@ -5944,6 +5845,10 @@ public class GUI extends javax.swing.JFrame {
                 }                
             }
         }
+        else if (!ytdlPath.isBlank()) {
+            // Specify stdIn as the input
+            allArgs.add("-");
+        }
         else if (RunningOnWindows) {
             // If it's a local path, add quotes to it, but don't for the test 
             // card or a HTTP stream.
@@ -5959,23 +5864,24 @@ public class GUI extends javax.swing.JFrame {
             allArgs.add(InputSource);
         }
         // End add to arraylist
-        
-        // Arguments textbox handling - clear it first
-        if (!txtAllOptions.getText().isEmpty()) txtAllOptions.setText("");
-        /* Start a for loop to populate the textbox, using the arraylist size as
-           the finish value.
-        */
-        for (int i = 1; i < allArgs.size() ; i++) {
-            /* Add value 1 (mode) first and then add all other values. I've set 
-               it up this way to prevent a leading space from being printed
-               in the textbox.
+        if (ytdlPath.isBlank()) {
+            // Arguments textbox handling - clear it first
+            if (!txtAllOptions.getText().isEmpty()) txtAllOptions.setText("");
+            /* Start a for loop to populate the textbox, using the arraylist size as
+               the finish value.
             */
-            if (i == 1) { 
-                txtAllOptions.setText(allArgs.get(i)); 
-            }
-            else {
-                txtAllOptions.setText(
-                    txtAllOptions.getText() + '\u0020' + allArgs.get(i) );
+            for (int i = 1; i < allArgs.size() ; i++) {
+                /* Add value 1 (mode) first and then add all other values. I've set 
+                   it up this way to prevent a leading space from being printed
+                   in the textbox.
+                */
+                if (i == 1) { 
+                    txtAllOptions.setText(allArgs.get(i)); 
+                }
+                else {
+                    txtAllOptions.setText(
+                        txtAllOptions.getText() + '\u0020' + allArgs.get(i) );
+                }
             }
         }
         // If "Generate syntax only" is enabled, stop here
@@ -5984,6 +5890,11 @@ public class GUI extends javax.swing.JFrame {
         changeRunToStop();
         // Clear the console
         txtConsoleOutput.setText("");
+        // If a YouTube URL was specified, call its method and then stop
+        if (!ytdlPath.isBlank()) {
+            runYTDLpipe(ytdlPath, allArgs);
+            return;
+        }
         // Spawn a new SwingWorker to run hacktv
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
             @Override
@@ -5996,7 +5907,9 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     Process p = pb.start();
                     // Get the PID of the process we just started
-                    pid = p.pid();
+                    hpid = p.pid();
+                    // Set ytpid to zero as it is not needed
+                    ytpid = 0;
                     // Capture the output
                     int a;
                     BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -6013,7 +5926,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 catch (IOException ex) {
                     JOptionPane.showMessageDialog(null,
-                            "An error occurred while attempting to run hacktv", AppName, JOptionPane.ERROR_MESSAGE);
+                            "An error occurred while attempting to run hacktv.", AppName, JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             } // End doInBackground
@@ -6048,29 +5961,121 @@ public class GUI extends javax.swing.JFrame {
         runTV.execute();
     }
     
-    private void stopTV() {
+    private void runYTDLpipe(String ytp, ArrayList<String> allArgs) {
+        String u;
+        if (txtSource.getText().toLowerCase().startsWith("ytdl:")) {
+            u = txtSource.getText().substring(5);
+        }
+        else {
+            u = txtSource.getText();
+        }
+        // Populate arguments textbox
+        if (RunningOnWindows) {
+            txtAllOptions.setText("youtube-dl.exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
+        }
+        else {
+            txtAllOptions.setText("youtube-dl" + " -q" + " -o" + " - " + u + " | hacktv");
+        }
+        for (int i = 1; i < allArgs.size() ; i++) {
+            txtAllOptions.setText(txtAllOptions.getText() + '\u0020' + allArgs.get(i));
+        }
+        // Spawn a new SwingWorker to run youtube-dl and hacktv
+        SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
+            @Override
+            protected Void doInBackground() {
+                // Create two processes, one for youtube-dl and the other for hacktv
+                List<ProcessBuilder> pb = Arrays.asList(
+                    new ProcessBuilder(ytp, "-q", "-o", "-", u)
+                        // Redirect any youtube-dl errors to the Java console
+                        .redirectError(ProcessBuilder.Redirect.INHERIT),
+                    new ProcessBuilder(allArgs)
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                );
+                try {
+                    // Start the processes using startPipeline, which will pipe
+                    // stdOut of youtube-dl to stdIn of hacktv
+                    List<Process> p = ProcessBuilder.startPipeline(pb);
+                    // Get the youtube-dl process
+                    Process y = (Process) p.get(0);
+                    // Get the hacktv process
+                    Process h = (Process) p.get(1);
+                    // Get the PID of both processes
+                    ytpid = y.pid();
+                    hpid = h.pid();
+                    // Capture the output of hacktv
+                    int a;
+                    try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getInputStream()))) {
+                        while ( (a = br.read()) != -1 ) {
+                            publish(String.valueOf((char)a));
+                        }
+                    }
+                    publish("\n" + "hacktv stopped");
+                    // End youtube-dl if it's still running
+                    if (y.isAlive()) y.destroy();
+                }
+                catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null,
+                            "An error occurred while attempting to run youtube-dl or hacktv.", AppName, JOptionPane.ERROR_MESSAGE);
+                }
+                return null;
+            } // End doInBackground
+            @Override
+            protected void process(List<String> chunks) {
+                // Here we receive the values from publish() and display
+                // them in the console
+                for (String o : chunks) {
+                    txtConsoleOutput.append(o);
+                }
+            }// End of process
+            @Override
+            protected void done() {
+                /* If an invalid parameter is passed to hacktv, it usually
+                   responds with its usage message.
+                   Here, we check if the first line of the usage has been
+                   returned. If so, we assume that one of the parameters we fed 
+                   is not supported.
+                */
+                if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
+                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
+                            + " of the selected options. Please update hacktv and try again."
+                            , AppName, JOptionPane.WARNING_MESSAGE);
+                }
+                // Revert button to display Run instead of Stop
+                changeStopToRun();
+            }// End of done
+        }; // End of SwingWorker
+        runTV.execute();
+    }
+    
+    private void stopTV(long pid) {
         /** To stop hacktv gracefully, it needs to be sent a SIGINT signal.
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
          *  Under Windows it's not so easy, we need an external helper
          *  application. For this, we use:
          *  https://github.com/ElyDotDev/windows-kill/releases
          */
+        // Don't do anything if the PID is zero
+        if (pid == 0) return;
         if (RunningOnWindows) {
             try {
                 // Run windows-kill.exe from this path and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
                     (JarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
                 Process p = StopHackTV.start();
-            } catch (IOException ex)  {
+            }
+            catch (IOException ex)  {
                 System.out.println(ex);
             }
-        } else {
+        }
+        else {
             try {
                 // Run kill and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
                     ("kill", "-2", Long.toString(pid));
                 Process p = StopHackTV.start();                
-            } catch (IOException ex)  {
+            }
+            catch (IOException ex)  {
                 System.out.println(ex);
             }                
         }
@@ -6093,7 +6098,10 @@ public class GUI extends javax.swing.JFrame {
         // If so, then abort
         if (DownloadInProgress) { DownloadCancelled = true; }
         // Check if hacktv is running, if so then exit it
-        if (Running) stopTV();
+        if (Running) {
+            stopTV(hpid);
+            stopTV(ytpid);
+        }
         // Delete temp directory and files before exit
         if (TempDir != null) {
             try {
@@ -6115,10 +6123,11 @@ public class GUI extends javax.swing.JFrame {
                 tabPane.setSelectedIndex(5);
             }
             else {
-                runHackTV();
+                runHackTV("");
             }
         } else {
-            stopTV();
+            stopTV(hpid);
+            stopTV(ytpid);
         }
     }//GEN-LAST:event_btnRunActionPerformed
              
@@ -7443,6 +7452,13 @@ public class GUI extends javax.swing.JFrame {
         lstPlaylist.setSelectedIndex(s);
         btnPlaylistStart.requestFocusInWindow();
     }//GEN-LAST:event_btnPlaylistStartActionPerformed
+
+    private void lstPlaylistKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_lstPlaylistKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
+            btnRemove.doClick();
+            lstPlaylist.requestFocusInWindow();
+        }
+    }//GEN-LAST:event_lstPlaylistKeyPressed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
