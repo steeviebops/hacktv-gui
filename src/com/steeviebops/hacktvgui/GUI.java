@@ -65,157 +65,156 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
-    final String AppName = "hacktv-gui";
+    private final String AppName = "hacktv-gui";
     
     // Boolean used for Microsoft Windows detection and handling
-    final boolean RunningOnWindows;
+    private final boolean RunningOnWindows;
     
     // Get user's home directory, used for file open dialogues
-    final String UserHomeDir = System.getProperty("user.home");
+    private final String UserHomeDir = System.getProperty("user.home");
     
     // String to set the directory where this application's JAR is located
-    final Path JarDir;
+    private final Path JarDir;
     
     // Strings to set the location and contents of the Modes.ini file
-    String ModesFilePath;
-    String ModesFile;
-    String ModesFileVersion;
-    String ModesFileLocation;
+    private String ModesFilePath;
+    private String ModesFile;
+    private String ModesFileVersion;
+    private String ModesFileLocation;
     
     // Declare variables for supported features
-    boolean NICAMSupported = false;
-    boolean A2Supported = false;
-    boolean ACPSupported = false;
+    private boolean NICAMSupported = false;
+    private boolean A2Supported = false;
+    private boolean ACPSupported = false;
 
     // Declare a variable to determine the selected fork
-    String Fork;
+    private String Fork;
 
     // Declare Teletext-related variables that are reused across multiple subs
-    String DownloadURL;
-    String HTMLTempFile;
-    String HTMLFile;
-    String HTMLString;
-    File SelectedFile;
-    Path TempDir;
-    String TeletextPath;
-    boolean DownloadInProgress = false;
-    boolean DownloadCancelled = false;
+    private String DownloadURL;
+    private String HTMLTempFile;
+    private String HTMLFile;
+    private String HTMLString;
+    private File SelectedFile;
+    private Path TempDir;
+    private String TeletextPath;
+    private boolean DownloadInProgress = false;
+    private boolean DownloadCancelled = false;
 
     // Declare variables used for path resolution
-    String HackTVPath;
-    String HackTVDirectory;
-    final String DefaultHackTVPath;
-    final String OS_SEP;
+    private String HackTVPath;
+    private String HackTVDirectory;
+    private final String DefaultHackTVPath;
+    private final String OS_SEP;
 
     // Declare variable for the title bar display
-    String TitleBar;
-    boolean TitleBarChanged = false;
+    private String TitleBar;
+    private boolean TitleBarChanged = false;
 
     // Array used for M3U files
-    ArrayList<String> PlaylistURLsAL;
-    String[] PlaylistNames;
+    private ArrayList<String> PlaylistURLsAL;
+    private String[] PlaylistNames;
 
     /* Declare a variable for storing the default sample rate for the selected video mode
      * This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
      * FMSampleRate specifies the recommended sample rate for the pre-emphasis filter
      */
-    String DefaultSampleRate;
+    private String DefaultSampleRate;
     
     // Declare combobox arrays and ArrayLists
     // These are used to store secondary information (frequencies, parameters, etc)
-    int[] FrequencyArray;
-    String[] PALModeArray;
-    String[] NTSCModeArray;
-    String[] SECAMModeArray;
-    String[] OtherModeArray;
-    String[] MACModeArray;
-    String[] ChannelArray;
-    String[] WSSModeArray;
-    String[] ARCorrectionModeArray;
-    ArrayList<String> ScramblingTypeArray;
-    ArrayList<String> ScramblingKeyArray;
-    ArrayList<String> ScramblingKey2Array;
-    String[] LogoArray;
-    String[] TCArray;
-    ArrayList<String> PlaylistAL = new ArrayList<>();
+    private int[] FrequencyArray;
+    private String[] PALModeArray;
+    private String[] NTSCModeArray;
+    private String[] SECAMModeArray;
+    private String[] OtherModeArray;
+    private String[] MACModeArray;
+    private String[] ChannelArray;
+    private String[] WSSModeArray;
+    private String[] ARCorrectionModeArray;
+    private ArrayList<String> ScramblingTypeArray;
+    private ArrayList<String> ScramblingKeyArray;
+    private ArrayList<String> ScramblingKey2Array;
+    private String[] LogoArray;
+    private String[] TCArray;
+    private ArrayList<String> PlaylistAL = new ArrayList<>();
     
     // Preferences node
-    Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
+    private Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
     
     // Process ID, used to gracefully close hacktv via the Stop button
-    long hpid;
-    long ytpid;
+    private long hpid;
+    private long ytpid;
     
     // Boolean to determine if hacktv is running or not
-    boolean Running;
+    private boolean Running;
     
     // Boolean to determine if a config file is in the process of loading
-    boolean HTVLoadInProgress = false;
+    private boolean HTVLoadInProgress = false;
     
     // Video line count. At the moment, we just use this for enabling/disabling
     // the test card dropdown, supported on 625 only.
-    int Lines;  
+    private int Lines;  
     
     // Integer to save the previously selected item in the VideoFormat combobox.
     // Used to revert back if a baseband mode is selected on an unsupported SDR.
-    int PreviousIndex = 0;
-    boolean Baseband;
+    private int PreviousIndex = 0;
+    private boolean Baseband;
     
     // Start point in playlist
-    int StartPoint = -1;
+    private int StartPoint = -1;
     
     // Declare variables used for storing parameters
-    String InputSource = "";
-    String Mode = "";
-    long Frequency;
-    int SampleRate;
-    int PixelRate;
-    String SubtitlesParam = "";
-    String AudioParam = "";
-    String NICAMParam = "";
-    String ACPParam = "";
-    String RepeatParam = "";
-    String WssParam = "";
-    String WssMode = "";
-    String ScramblingType1 = "";
-    String ScramblingKey1 = "";
-    String ScramblingType2 = "";
-    String ScramblingKey2 = "";
-    String ScrambleAudio = "";
-    String TeletextParam = "";
-    String TeletextSource = "";
-    String RFampParam = "";
-    String FMDevParam = "";
-    int FMDevValue;
-    String GammaParam = "";
-    String OutputLevelParam = "";
-    String FilterParam = "";
-    String PositionParam = "";
-    String TimestampParam = "";
-    String LogoParam = "";
-    String LogoFileName = "";
-    String VerboseParam = "";
-    String EMMParam = "";
-    String TruncatedCardNumber = "";
-    String ShowECMParam = "";
-    String ScalingMode = "";
-    String InterlaceParam = "";
-    String ShowCardSerial = "";
-    String FindKey = "";
-    String VITS = "";
-    String ChIDParam = "";
-    String ChID = "";
-    String ColourParam = "";
-    String SysterPermTable = "";
-    String OutputDevice = "";
-    String AntennaParam = "";
-    String AntennaName = "";
-    String FileType = "";
-    String VolumeParam = "";
-    String VolumeValue = "";
-    String DownmixParam = "";
-    String TeletextSubtitlesParam = "";
-    String A2StereoParam = "";
+    private String InputSource = "";
+    private String Mode = "";
+    private long Frequency;
+    private int SampleRate;
+    private int PixelRate;
+    private String SubtitlesParam = "";
+    private String AudioParam = "";
+    private String NICAMParam = "";
+    private String ACPParam = "";
+    private String RepeatParam = "";
+    private String WssParam = "";
+    private String WssMode = "";
+    private String ScramblingType1 = "";
+    private String ScramblingKey1 = "";
+    private String ScramblingType2 = "";
+    private String ScramblingKey2 = "";
+    private String ScrambleAudio = "";
+    private String TeletextParam = "";
+    private String TeletextSource = "";
+    private String RFampParam = "";
+    private String FMDevParam = "";
+    private int FMDevValue;
+    private String GammaParam = "";
+    private String OutputLevelParam = "";
+    private String FilterParam = "";
+    private String PositionParam = "";
+    private String TimestampParam = "";
+    private String LogoParam = "";
+    private String LogoFileName = "";
+    private String VerboseParam = "";
+    private String EMMParam = "";
+    private String TruncatedCardNumber = "";
+    private String ShowECMParam = "";
+    private String ScalingMode = "";
+    private String InterlaceParam = "";
+    private String ShowCardSerial = "";
+    private String FindKey = "";
+    private String VITS = "";
+    private String ChIDParam = "";
+    private String ChID = "";
+    private String ColourParam = "";
+    private String SysterPermTable = "";
+    private String OutputDevice = "";
+    private String AntennaParam = "";
+    private String AntennaName = "";
+    private String FileType = "";
+    private String VolumeParam = "";
+    private String DownmixParam = "";
+    private String TeletextSubtitlesParam = "";
+    private String A2StereoParam = "";
     // End parameter variables
     
     // Main method
@@ -579,6 +578,7 @@ public class GUI extends javax.swing.JFrame {
         txtConsoleOutput.setRows(5);
         txtConsoleOutput.setWrapStyleWord(true);
         txtConsoleOutput.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtConsoleOutput.addMouseListener(new ContextMenuListener());
         consoleScrollPane.setViewportView(txtConsoleOutput);
 
         javax.swing.GroupLayout consoleOutputPanelLayout = new javax.swing.GroupLayout(consoleOutputPanel);
@@ -609,6 +609,8 @@ public class GUI extends javax.swing.JFrame {
                 radTestActionPerformed(evt);
             }
         });
+
+        txtSource.addMouseListener(new ContextMenuListener());
 
         btnSourceBrowse.setText("Browse...");
         btnSourceBrowse.addActionListener(new java.awt.event.ActionListener() {
@@ -660,6 +662,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtPosition.setEnabled(false);
+        txtPosition.addMouseListener(new ContextMenuListener());
 
         cmbLogo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbLogo.setEnabled(false);
@@ -675,6 +678,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtSubtitleIndex.setEnabled(false);
+        txtSubtitleIndex.addMouseListener(new ContextMenuListener());
 
         lblSubtitleIndex.setText("Index (optional)");
         lblSubtitleIndex.setEnabled(false);
@@ -931,6 +935,7 @@ public class GUI extends javax.swing.JFrame {
         lblChannel.setText("Channel");
 
         txtFrequency.setEditable(false);
+        txtFrequency.addMouseListener(new ContextMenuListener());
         txtFrequency.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtFrequencyKeyTyped(evt);
@@ -942,6 +947,8 @@ public class GUI extends javax.swing.JFrame {
 
         lblGain.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblGain.setText("TX gain (dB)");
+
+        txtGain.addMouseListener(new ContextMenuListener());
 
         cmbChannel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -962,6 +969,8 @@ public class GUI extends javax.swing.JFrame {
         });
 
         lblAntennaName.setText("Antenna name");
+
+        txtAntennaName.addMouseListener(new ContextMenuListener());
 
         cmbFileType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "uint8", "int8", "uint16", "int16", "int32", "float" }));
         cmbFileType.setSelectedIndex(-1);
@@ -1047,6 +1056,8 @@ public class GUI extends javax.swing.JFrame {
         );
 
         lblOutputDevice2.setText("Serial number (optional)");
+
+        txtOutputDevice.addMouseListener(new ContextMenuListener());
 
         javax.swing.GroupLayout FrequencyPanelLayout = new javax.swing.GroupLayout(FrequencyPanel);
         FrequencyPanel.setLayout(FrequencyPanelLayout);
@@ -1134,6 +1145,7 @@ public class GUI extends javax.swing.JFrame {
         lblSampleRate.setText("Sample rate (MHz)");
 
         txtSampleRate.setToolTipText("");
+        txtSampleRate.addMouseListener(new ContextMenuListener());
 
         chkAudio.setText("Audio enabled");
         chkAudio.addActionListener(new java.awt.event.ActionListener() {
@@ -1157,6 +1169,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtPixelRate.setEnabled(false);
+        txtPixelRate.addMouseListener(new ContextMenuListener());
 
         chkVideoFilter.setText("VSB-AM filter");
         chkVideoFilter.addActionListener(new java.awt.event.ActionListener() {
@@ -1188,6 +1201,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtFMDev.setEnabled(false);
+        txtFMDev.addMouseListener(new ContextMenuListener());
 
         javax.swing.GroupLayout VideoFormatPanelLayout = new javax.swing.GroupLayout(VideoFormatPanel);
         VideoFormatPanel.setLayout(VideoFormatPanelLayout);
@@ -1359,6 +1373,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtGamma.setEnabled(false);
+        txtGamma.addMouseListener(new ContextMenuListener());
 
         chkOutputLevel.setText("Output level");
         chkOutputLevel.addActionListener(new java.awt.event.ActionListener() {
@@ -1367,6 +1382,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtOutputLevel.addMouseListener(new ContextMenuListener());
         txtOutputLevel.setEnabled(false);
 
         chkVerbose.setText("Verbose output");
@@ -1399,8 +1415,10 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtVolume.setEnabled(false);
+        txtVolume.addMouseListener(new ContextMenuListener());
 
         txtMacChId.setEnabled(false);
+        txtMacChId.addMouseListener(new ContextMenuListener());
         txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtMacChIdKeyPressed(evt);
@@ -1496,6 +1514,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtTeletextSource.setEnabled(false);
+        txtTeletextSource.addMouseListener(new ContextMenuListener());
 
         btnTeletextBrowse.setText("Browse...");
         btnTeletextBrowse.setEnabled(false);
@@ -1517,6 +1536,7 @@ public class GUI extends javax.swing.JFrame {
         lblTextSubtitleIndex.setEnabled(false);
 
         txtTextSubtitleIndex.setEnabled(false);
+        txtTextSubtitleIndex.addMouseListener(new ContextMenuListener());
 
         javax.swing.GroupLayout teletextPanelLayout = new javax.swing.GroupLayout(teletextPanel);
         teletextPanel.setLayout(teletextPanelLayout);
@@ -1718,6 +1738,7 @@ public class GUI extends javax.swing.JFrame {
         lblEMMCardNumber.setEnabled(false);
 
         txtCardNumber.setEnabled(false);
+        txtCardNumber.addMouseListener(new ContextMenuListener());
         txtCardNumber.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtCardNumberKeyTyped(evt);
@@ -1907,6 +1928,7 @@ public class GUI extends javax.swing.JFrame {
         pathPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Path to hacktv"));
 
         txtHackTVPath.setEditable(false);
+        txtHackTVPath.addMouseListener(new ContextMenuListener());
 
         btnHackTVPath.setText("Browse...");
         btnHackTVPath.addActionListener(new java.awt.event.ActionListener() {
@@ -2088,6 +2110,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtAllOptions.setEditable(false);
+        txtAllOptions.addMouseListener(new ContextMenuListener());
 
         javax.swing.GroupLayout containerPanelLayout = new javax.swing.GroupLayout(containerPanel);
         containerPanel.setLayout(containerPanelLayout);
@@ -2297,6 +2320,40 @@ public class GUI extends javax.swing.JFrame {
         };
     }
     
+    private void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
+        /*
+         * evt contains the number of clicks from the mouse wheel
+         * A single spin upwards reports -1
+         * A aingle spin downwards reports 1
+         *
+         * jcb is the name of the JComboBox that you want to manipulate
+         */
+        if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
+            if (evt < 0) {
+                int p = evt * evt; // negative * negative = positive
+                if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
+            }
+            else if (evt > 0) {
+                if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
+            }            
+        }
+    }
+
+    private void createTempDirectory() {
+        // Creates a temp directory for us to use.
+        // This is deleted on exit so don't save anything useful here!
+        if (TempDir == null) {
+            try {
+                TempDir = Files.createTempDirectory(AppName);
+            }
+            catch (IOException ex) {
+                System.out.println(ex);
+                JOptionPane.showMessageDialog(null, "An error occurred while creating the temp directory.", AppName, JOptionPane.ERROR_MESSAGE);
+                resetTeletextButtons();
+            }
+        }        
+    }
+    
     private void downloadWindowsKill(){
         // Downloads windows-kill from ElyDotDev (formerly alirdn) on Github
         try {
@@ -2331,7 +2388,7 @@ public class GUI extends javax.swing.JFrame {
         catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "An error occurred while downloading windows-kill.\n"
                     + "Please ensure that you have write permissions to the application directory and that you have internet access.", AppName, JOptionPane.ERROR_MESSAGE);
-        }                        
+        }
     }
     
     private void selectModesFile() {
@@ -2677,40 +2734,6 @@ public class GUI extends javax.swing.JFrame {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
-    }
-    
-    private void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
-        /*
-         * evt contains the number of clicks from the mouse wheel
-         * A single spin upwards reports -1
-         * A aingle spin downwards reports 1
-         *
-         * jcb is the name of the JComboBox that you want to manipulate
-         */
-        if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
-            if (evt < 0) {
-                int p = evt * evt; // negative * negative = positive
-                if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
-            }
-            else if (evt > 0) {
-                if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
-            }            
-        }
-    }
-
-    private void createTempDirectory() {
-        // Creates a temp directory for us to use.
-        // This is deleted on exit so don't save anything useful here!
-        if (TempDir == null) {
-            try {
-                TempDir = Files.createTempDirectory(AppName);
-            }
-            catch (IOException ex) {
-                System.out.println(ex);
-                JOptionPane.showMessageDialog(null, "An error occurred while creating the temp directory.", AppName, JOptionPane.ERROR_MESSAGE);
-                resetTeletextButtons();
-            }
-        }        
     }
     
     private void populatePlaylist() {

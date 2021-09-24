@@ -305,6 +305,9 @@
                       <Color id="Default Cursor"/>
                     </Property>
                   </Properties>
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtConsoleOutput.addMouseListener(new ContextMenuListener());"/>
+                  </AuxValues>
                 </Component>
               </SubComponents>
             </Container>
@@ -516,6 +519,9 @@
                       </Events>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtSource">
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtSource.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JButton" name="btnSourceBrowse">
                       <Properties>
@@ -577,6 +583,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtPosition.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbLogo">
                       <Properties>
@@ -599,6 +608,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtSubtitleIndex.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblSubtitleIndex">
                       <Properties>
@@ -975,6 +987,9 @@
                           <Events>
                             <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtFrequencyKeyTyped"/>
                           </Events>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFrequency.addMouseListener(new ContextMenuListener());"/>
+                          </AuxValues>
                         </Component>
                         <Component class="javax.swing.JLabel" name="lblFrequency">
                           <Properties>
@@ -989,6 +1004,9 @@
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtGain">
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtGain.addMouseListener(new ContextMenuListener());"/>
+                          </AuxValues>
                         </Component>
                         <Component class="javax.swing.JComboBox" name="cmbChannel">
                           <Properties>
@@ -1018,6 +1036,9 @@
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtAntennaName">
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtAntennaName.addMouseListener(new ContextMenuListener());"/>
+                          </AuxValues>
                         </Component>
                         <Component class="javax.swing.JComboBox" name="cmbFileType">
                           <Properties>
@@ -1058,6 +1079,9 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtOutputDevice">
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtOutputDevice.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1252,6 +1276,9 @@
                       <Properties>
                         <Property name="toolTipText" type="java.lang.String" value=""/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtSampleRate.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkAudio">
                       <Properties>
@@ -1281,6 +1308,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtPixelRate.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkVideoFilter">
                       <Properties>
@@ -1319,6 +1349,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFMDev.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1527,6 +1560,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtGamma.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkOutputLevel">
                       <Properties>
@@ -1540,6 +1576,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="txtOutputLevel.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkVerbose">
                       <Properties>
@@ -1578,6 +1617,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtVolume.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtMacChId">
                       <Properties>
@@ -1588,6 +1630,9 @@
                         <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyReleased"/>
                         <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtMacChIdKeyTyped"/>
                       </Events>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtMacChId.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1703,6 +1748,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtTeletextSource.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JButton" name="btnTeletextBrowse">
                       <Properties>
@@ -1732,6 +1780,9 @@
                       <Properties>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtTextSubtitleIndex.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -2086,6 +2137,9 @@
                           <Events>
                             <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtCardNumberKeyTyped"/>
                           </Events>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtCardNumber.addMouseListener(new ContextMenuListener());"/>
+                          </AuxValues>
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkShowCardSerial">
                           <Properties>
@@ -2287,6 +2341,9 @@
                       <Properties>
                         <Property name="editable" type="boolean" value="false"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtHackTVPath.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
                     </Component>
                     <Component class="javax.swing.JButton" name="btnHackTVPath">
                       <Properties>
@@ -2477,6 +2534,9 @@
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtAllOptions.addMouseListener(new ContextMenuListener());"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>
