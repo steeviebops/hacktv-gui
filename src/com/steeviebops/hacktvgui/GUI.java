@@ -241,7 +241,7 @@ public class GUI extends javax.swing.JFrame {
         // We handle this as early as possible to ensure it will work correctly.
         if ((args.length > 0) && (args[0].toLowerCase().equals("reset")) ) {
             // Reset all preferences and exit
-            resetPreferences(1);
+            resetPreferences();
         }
         // Add a shutdown hook to run exit tasks
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -260,14 +260,14 @@ public class GUI extends javax.swing.JFrame {
                 UIManager.put("swing.boldMetal", false);
                 UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
-                  System.out.println(ex);
+                  System.err.println(ex);
             }
         } else {
             try {
                 // Use system default L&F on everything else
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
-                System.out.println(ex);
+                System.err.println(ex);
             }
         }
         // Initialise Swing components
@@ -519,6 +519,8 @@ public class GUI extends javax.swing.JFrame {
         chkScrambleAudio = new javax.swing.JCheckBox();
         cmbSysterPermTable = new javax.swing.JComboBox<>();
         lblSysterPermTable = new javax.swing.JLabel();
+        lblECMaturity = new javax.swing.JLabel();
+        cmbECMaturity = new javax.swing.JComboBox<>();
         chkShowECM = new javax.swing.JCheckBox();
         settingsTab = new javax.swing.JPanel();
         pathPanel = new javax.swing.JPanel();
@@ -1822,6 +1824,13 @@ public class GUI extends javax.swing.JFrame {
         lblSysterPermTable.setText("Syster permutation table");
         lblSysterPermTable.setEnabled(false);
 
+        lblECMaturity.setText("EuroCrypt maturity rating");
+        lblECMaturity.setEnabled(false);
+
+        cmbECMaturity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" }));
+        cmbECMaturity.setSelectedIndex(-1);
+        cmbECMaturity.setEnabled(false);
+
         javax.swing.GroupLayout scramblingOptionsPanelLayout = new javax.swing.GroupLayout(scramblingOptionsPanel);
         scramblingOptionsPanel.setLayout(scramblingOptionsPanelLayout);
         scramblingOptionsPanelLayout.setHorizontalGroup(
@@ -1831,7 +1840,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkScrambleAudio)
                     .addComponent(lblSysterPermTable)
-                    .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblECMaturity)
+                    .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(67, Short.MAX_VALUE))
         );
         scramblingOptionsPanelLayout.setVerticalGroup(
@@ -1843,6 +1854,10 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(lblSysterPermTable)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblECMaturity)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2347,7 +2362,7 @@ public class GUI extends javax.swing.JFrame {
                 TempDir = Files.createTempDirectory(AppName);
             }
             catch (IOException ex) {
-                System.out.println(ex);
+                System.err.println(ex);
                 JOptionPane.showMessageDialog(null, "An error occurred while creating the temp directory.", AppName, JOptionPane.ERROR_MESSAGE);
                 resetTeletextButtons();
             }
@@ -2435,7 +2450,7 @@ public class GUI extends javax.swing.JFrame {
         catch (IOException ex) {
                 JOptionPane.showMessageDialog(null, "Unable to download the modes file from Github.\n"
                         + "Using embedded copy instead, which may not be up to date.", AppName, JOptionPane.ERROR_MESSAGE);
-                System.out.println("Error downloading modes.ini... " + ex);
+                System.err.println("Error downloading modes.ini... " + ex);
                 // Use the embedded copy
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         }
@@ -2592,7 +2607,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void resetPreferences(int i) {
+    private void resetPreferences() {
         // Delete everything from the preference store and exit immediately.
         // If i is set to 1, a message will be printed to the console.
         // This is used for the emergency reset option from the command line.
@@ -2603,7 +2618,7 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
         if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown"); 
         if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");   
-        if (i == 1) System.out.println("All preferences have been reset to defaults.");
+        System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
     
@@ -3388,7 +3403,7 @@ public class GUI extends javax.swing.JFrame {
             chkScrambleAudio.doClick();
         }
         // Syster permutation table
-        Integer ImportedPermutationTable;
+        int ImportedPermutationTable;
         if (INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable") != null) {
             ImportedPermutationTable = INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable");
             if ( (Fork.equals("CJ")) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
@@ -3396,7 +3411,15 @@ public class GUI extends javax.swing.JFrame {
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
                 cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
             }
-        }       
+        }    
+        // EuroCrypt maturity rating
+        int ImportedMaturityRating;
+        if (INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-mat-rating") != null) {
+            ImportedMaturityRating = INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-mat-rating");
+            if ( (cmbECMaturity.isEnabled()) && (ImportedMaturityRating >= 0) && (ImportedMaturityRating <= 15) ) {
+                cmbECMaturity.setSelectedIndex(ImportedMaturityRating);
+            }
+        }
         // ACP
         if (INIFile.getBooleanFromINI(fileContents, "hacktv", "acp")) {
             chkACP.doClick();
@@ -3734,6 +3757,10 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbSysterPermTable.getSelectedIndex() == 1) || (cmbSysterPermTable.getSelectedIndex() == 2) ) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "permutationtable", cmbSysterPermTable.getSelectedIndex());
         }
+        // EuroCrypt maturity rating
+        if (cmbECMaturity.getSelectedIndex() > 0) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-mat-rating", cmbECMaturity.getSelectedIndex());
+        }
         // Show card serial
         if (chkShowCardSerial.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "showserial", 1); }
         // Brute force PPV key
@@ -3875,7 +3902,7 @@ public class GUI extends javax.swing.JFrame {
                 return;
             }
         } catch (HeadlessException | IOException ex) {
-            System.out.println(ex);
+            System.err.println(ex);
             resetM3UItems(false);
             return;
         }
@@ -3913,7 +3940,7 @@ public class GUI extends javax.swing.JFrame {
                     // contains the file header
                     PlaylistURLsAL.remove(0);
                 } catch (IOException ex) {
-                    System.out.println(ex);
+                    System.err.println(ex);
                     return false;
                 }
                 // Use a regex to retrieve the contents of each even-numbered 
@@ -4063,7 +4090,7 @@ public class GUI extends javax.swing.JFrame {
             Shared.download(url, DownloadPath);
         }
         catch (IOException ex) {
-            System.out.println(ex);
+            System.err.println(ex);
             JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
                     + "Please ensure that you are connected to the internet and try again.", AppName, JOptionPane.ERROR_MESSAGE);
             txtAllOptions.setText("Cancelled");
@@ -4081,7 +4108,7 @@ public class GUI extends javax.swing.JFrame {
                 HTMLFile = Files.readString(fd);
             }
             catch (IOException ex) {
-                System.out.println(ex);
+                System.err.println(ex);
             }
             // Search the string for the pattern defined in the teletext button
             Pattern pattern = Pattern.compile(HTMLString, Pattern.DOTALL);
@@ -4111,7 +4138,7 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     Shared.deleteFSObject(f.toPath());
                 } catch (IOException ex) {
-                    System.out.println(ex);
+                    System.err.println(ex);
                 }
             }
             // Create temp directory
@@ -4135,7 +4162,7 @@ public class GUI extends javax.swing.JFrame {
                         if (j == TeletextLinks.size() ) { return 0; }
                     }
                     catch (IOException ex) {
-                        System.out.println(ex);
+                        System.err.println(ex);
                         return 2;
                     }
                 }
@@ -4150,7 +4177,7 @@ public class GUI extends javax.swing.JFrame {
                     // Retrieve the status code from doInBackground.
                     status = get();
                 } catch (InterruptedException | ExecutionException ex) {
-                    System.out.println(ex);
+                    System.err.println(ex);
                     status = 999;
                 }
                 switch (status) {
@@ -4511,6 +4538,17 @@ public class GUI extends javax.swing.JFrame {
                 chkScrambleAudio.doClick();
             }
             chkScrambleAudio.setEnabled(false);
+        }
+        // Enable EuroCrypt maturity rating
+        if ((Fork.equals("CJ")) && (ScramblingType2.equals("--eurocrypt"))) {
+            lblECMaturity.setEnabled(true);
+            cmbECMaturity.setEnabled(true);
+            cmbECMaturity.setSelectedIndex(0);
+        }
+        else {
+            lblECMaturity.setEnabled(false);
+            cmbECMaturity.setEnabled(false);
+            cmbECMaturity.setSelectedIndex(-1);
         }
         // Enable card serial option
         if ( ((ScramblingType1).equals("--videocrypt")) || 
@@ -5072,7 +5110,7 @@ public class GUI extends javax.swing.JFrame {
                         TeletextSource = TempDir.toString() + OS_SEP + "demo.tti";
                     }
                 } catch (IOException ex) {
-                    System.out.println("An error occurred while attempting to copy to the temp directory: " + ex);
+                    System.err.println("An error occurred while attempting to copy to the temp directory: " + ex);
                 }
             }
             else if ( (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) && (RunningOnWindows) ) {
@@ -5786,6 +5824,10 @@ public class GUI extends javax.swing.JFrame {
         if (!ScramblingKey1.isEmpty()) allArgs.add(ScramblingKey1);
         if (!ScramblingType2.isEmpty()) allArgs.add(ScramblingType2);
         if (!ScramblingKey2.isEmpty()) allArgs.add(ScramblingKey2);
+        if (cmbECMaturity.getSelectedIndex() > 0) {
+            allArgs.add("--ec-mat-rating");
+            allArgs.add(Integer.toString(cmbECMaturity.getSelectedIndex()));
+        }
         if (!ScrambleAudio.isEmpty()) allArgs.add(ScrambleAudio);
         if (!SysterPermTable.isEmpty()) allArgs.add(SysterPermTable);
         if (!TeletextParam.isEmpty()) allArgs.add(TeletextParam);
@@ -6088,7 +6130,7 @@ public class GUI extends javax.swing.JFrame {
                 Process p = StopHackTV.start();
             }
             catch (IOException ex)  {
-                System.out.println(ex);
+                System.err.println(ex);
             }
         }
         else {
@@ -6099,7 +6141,7 @@ public class GUI extends javax.swing.JFrame {
                 Process p = StopHackTV.start();                
             }
             catch (IOException ex)  {
-                System.out.println(ex);
+                System.err.println(ex);
             }                
         }
     }
@@ -6990,7 +7032,7 @@ public class GUI extends javax.swing.JFrame {
         int q = JOptionPane.showConfirmDialog(null, "This will remove all of this application's "
                 + "saved settings and exit. Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
-            resetPreferences(0);
+            resetPreferences();
         }
     }//GEN-LAST:event_btnResetAllSettingsActionPerformed
 
@@ -7099,7 +7141,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 break;
             default:
-                System.out.println("Output device error");
+                System.err.println("Output device error");
                 break;
         }
     }//GEN-LAST:event_cmbOutputDeviceActionPerformed
@@ -7543,6 +7585,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkWSS;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
+    private javax.swing.JComboBox<String> cmbECMaturity;
     private javax.swing.JComboBox<String> cmbFileType;
     private javax.swing.JComboBox<String> cmbLogo;
     private javax.swing.JComboBox<String> cmbM3USource;
@@ -7570,6 +7613,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblClearMRU;
     private javax.swing.JLabel lblDetectedBuikd;
     private javax.swing.JLabel lblDownload;
+    private javax.swing.JLabel lblECMaturity;
     private javax.swing.JLabel lblEMMCardNumber;
     private javax.swing.JLabel lblFileType;
     private javax.swing.JLabel lblFork;
