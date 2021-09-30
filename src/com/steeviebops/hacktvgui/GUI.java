@@ -46,7 +46,9 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -301,7 +303,10 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             RunningOnWindows = false;
+            // Hide the "why can't I change this option?" message
             lblSyntaxOptionDisabled.setVisible(false);
+            // Hide the Download button on the GUI Settings tab
+            btnDownloadHackTV.setVisible(false);
             DefaultHackTVPath = "/usr/local/bin/hacktv";
         }
         populateCheckboxArray();
@@ -529,6 +534,7 @@ public class GUI extends javax.swing.JFrame {
         lblFork = new javax.swing.JLabel();
         lblSpecifyLocation = new javax.swing.JLabel();
         lblDetectedBuikd = new javax.swing.JLabel();
+        btnDownloadHackTV = new javax.swing.JButton();
         resetSettingsPanel = new javax.swing.JPanel();
         btnResetAllSettings = new javax.swing.JButton();
         btnClearMRUList = new javax.swing.JButton();
@@ -1958,6 +1964,13 @@ public class GUI extends javax.swing.JFrame {
 
         lblDetectedBuikd.setText("Detected build:");
 
+        btnDownloadHackTV.setText("Download...");
+        btnDownloadHackTV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDownloadHackTVActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pathPanelLayout = new javax.swing.GroupLayout(pathPanel);
         pathPanel.setLayout(pathPanelLayout);
         pathPanelLayout.setHorizontalGroup(
@@ -1972,7 +1985,9 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblFork))
                     .addComponent(txtHackTVPath))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnHackTVPath)
+                .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pathPanelLayout.setVerticalGroup(
@@ -1984,10 +1999,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnHackTVPath)
                     .addComponent(txtHackTVPath))
-                .addGap(10, 10, 10)
+                .addGap(6, 6, 6)
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblDetectedBuikd)
-                    .addComponent(lblFork))
+                    .addComponent(lblFork)
+                    .addComponent(btnDownloadHackTV))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2054,8 +2070,8 @@ public class GUI extends javax.swing.JFrame {
         lblSyntaxOptionDisabled.setText("Why can't I change this option?");
         lblSyntaxOptionDisabled.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         lblSyntaxOptionDisabled.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblSyntaxOptionDisabledMouseClicked(evt);
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                lblSyntaxOptionDisabledMouseReleased(evt);
             }
         });
 
@@ -2107,7 +2123,7 @@ public class GUI extends javax.swing.JFrame {
             settingsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(settingsTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2371,39 +2387,78 @@ public class GUI extends javax.swing.JFrame {
     
     private void downloadWindowsKill(){
         // Downloads windows-kill from ElyDotDev (formerly alirdn) on Github
-        try {
-            createTempDirectory();
-            String t = TempDir.toString();
-            String downloadPath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release.zip";
-            String tmpExePath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release" + OS_SEP + "windows-kill.exe";
-            String exePath = JarDir + OS_SEP + "windows-kill.exe";
-            String downloadURL = "https://github.com/ElyDotDev/windows-kill/releases/download/1.1.4/windows-kill_x64_1.1.4_lib_release.zip";
-            // Start download
-            Shared.download(downloadURL, downloadPath);
-            // Unzip what we got to the temp directory
-            Shared.UnzipFile(downloadPath, t);
-            // If windows-kill.exe exists in the temp directory, delete the zip file
-            if (Files.exists(Path.of(tmpExePath))) {
-                Shared.deleteFSObject(Path.of(downloadPath)); 
-                // Move windows-kill.exe from the temp directory to the
-                // working directory
-                Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
-                // Clean up by removing remnants of what we unzipped
-                Shared.deleteFSObject(Path.of(tmpExePath).getParent());
-            }
-            // Remove the syntax-only block
-            if (Files.exists(Path.of(exePath))) {
-                lblSyntaxOptionDisabled.setVisible(false);
-                if (!chkSyntaxOnly.isEnabled()){
-                    chkSyntaxOnly.setEnabled(true);
-                    chkSyntaxOnly.doClick();
+        SwingWorker<String, Void> downloadWorker = new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                try {
+                    createTempDirectory();
+                    String t = TempDir.toString();
+                    String downloadURL = "https://github.com/ElyDotDev/windows-kill/releases/download/1.1.4/windows-kill_x64_1.1.4_lib_release.zip";
+                    String downloadPath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release.zip";
+                    String tmpExePath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release" + OS_SEP + "windows-kill.exe";
+                    String exePath = JarDir + OS_SEP + "windows-kill.exe";
+                    // Start download
+                    Shared.download(downloadURL, downloadPath);
+                    // Unzip what we got to the temp directory
+                    Shared.UnzipFile(downloadPath, t);
+                    // Move windows-kill.exe from the temp directory to the
+                    // working directory
+                    if (Files.exists(Path.of(tmpExePath))) {
+                        Shared.deleteFSObject(Path.of(downloadPath));
+                        Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
+                        // Clean up by removing remnants of what we unzipped
+                        Shared.deleteFSObject(Path.of(tmpExePath).getParent());
+                        return exePath;
+                    }
+                    else {
+                        return null;
+                    }
                 }
-            }
-        }
-        catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "An error occurred while downloading windows-kill.\n"
-                    + "Please ensure that you have write permissions to the application directory and that you have internet access.", AppName, JOptionPane.ERROR_MESSAGE);
-        }
+                catch (IOException ex) {
+                    System.err.println(ex);
+                    var err = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(err));
+                    if (err.toString().contains("CertificateExpiredException")) {
+                        return "CertificateExpiredException";
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            } // End doInBackground()
+            @Override
+            protected void done() {
+                // Retrieve the return value of doInBackground.
+                String exePath;
+                try {
+                    exePath = get();
+                }
+                catch (InterruptedException | ExecutionException ex) {
+                    exePath = null;   
+                }
+                if (exePath != null) {
+                    // Remove the syntax-only block
+                    if (Files.exists(Path.of(exePath))) {
+                        lblSyntaxOptionDisabled.setVisible(false);
+                        if (!chkSyntaxOnly.isEnabled()){
+                            chkSyntaxOnly.setEnabled(true);
+                            chkSyntaxOnly.doClick();
+                        }
+                    }
+                }
+                else if ( (exePath != null) && (exePath.equals("CertificateExpiredException")) ) {
+                        JOptionPane.showMessageDialog(null, "Download failed due to an expired SSL/TLS certificate.\n"
+                                + "Please ensure that your system date is correct. "
+                                + "Otherwise, please try again later.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "An error occurred while downloading windows-kill.\n"
+                            + "Please ensure that you have write permissions to the "
+                            + "application directory and that you have internet access.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
+            } // End done()
+        }; // End SwingWorker
+        downloadWorker.execute();
     }
     
     private void selectModesFile() {
@@ -3865,6 +3920,7 @@ public class GUI extends javax.swing.JFrame {
         radLocalSource.setEnabled(false);
         radTest.setEnabled(false);
         btnRun.setEnabled(false);
+        btnAdd.setEnabled(false);
         // Hide the source file textbox and show the combobox
         txtSource.setVisible(false);
         cmbM3USource.setVisible(true);
@@ -4017,6 +4073,7 @@ public class GUI extends javax.swing.JFrame {
         radTest.setEnabled(true);
         btnSourceBrowse.setEnabled(true);
         btnRun.setEnabled(true);
+        btnAdd.setEnabled(true);
         fileMenu.setEnabled(true);
         templatesMenu.setEnabled(true);
         if (!LoadSuccessful) {
@@ -7045,14 +7102,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
-    private void lblSyntaxOptionDisabledMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSyntaxOptionDisabledMouseClicked
-        // Show a message to explain why the syntax option is disabled
-        int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
-                + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
-                + "Would you like to download it now?", AppName, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
-    }//GEN-LAST:event_lblSyntaxOptionDisabledMouseClicked
-
     private void cmbSysterPermTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbSysterPermTableItemStateChanged
         if (cmbSysterPermTable.getSelectedIndex() == 1) {
             SysterPermTable = "--key-table-1";
@@ -7524,6 +7573,106 @@ public class GUI extends javax.swing.JFrame {
             lstPlaylist.requestFocusInWindow();
         }
     }//GEN-LAST:event_lstPlaylistKeyPressed
+
+    private void btnDownloadHackTVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadHackTVActionPerformed
+        SwingWorker<String, Void> downloadHackTV = new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                try {
+                    createTempDirectory();
+                    String t = TempDir.toString();
+                    String downloadPath = t + OS_SEP + "hacktv.zip";
+                    String tmpExePath = t + OS_SEP + "hacktv.exe";
+                    String exePath = JarDir + OS_SEP + "hacktv.exe";
+                    // Download hacktv.zip from Captain Jack
+                    Shared.download("https://filmnet.plus/hacktv/hacktv.zip", downloadPath);
+                    // Unzip what we got to the temp directory
+                    Shared.UnzipFile(downloadPath, t);
+                    // If hacktv.exe exists in the temp directory, delete the zip
+                    // and attempt to move it to the working directory
+                    if (Files.exists(Path.of(tmpExePath))) {
+                        Shared.deleteFSObject(Path.of(downloadPath));
+                        Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
+                        return exePath;
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                catch (IOException ex) {
+                    System.err.println(ex);
+                    var err = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(err));
+                    if (err.toString().contains("CertificateExpiredException")) {
+                        return "CertificateExpiredException";
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            } // End doInBackground()
+            @Override
+            protected void done() {
+                // Retrieve the return value of doInBackground.
+                String exePath;
+                try {
+                    exePath = get();
+                }
+                catch (InterruptedException | ExecutionException ex) {
+                    exePath = null;   
+                }
+                if (exePath != null) {
+                    // Set location of hacktv so we can find it later
+                    if (Files.exists(Path.of(exePath))) {
+                        HackTVPath = exePath;
+                        txtHackTVPath.setText(exePath);
+                        // Store the specified path in the preferences store.
+                        Prefs.put("HackTVPath", HackTVPath);
+                        // Load the full path to a variable so we can use getParent on it
+                        // and get its parent directory path
+                        HackTVDirectory = new File(HackTVPath).getParent();                    
+                        // Detect what were provided with
+                        detectFork();
+                        selectModesFile();
+                        openModesFile();
+                        if (Fork.equals("CJ")) {
+                            captainJack();
+                        }
+                        else {
+                            fsphil();
+                        }
+                        addTestCardOptions();
+                    }
+                }
+                else if ( (exePath != null) && (exePath.equals("CertificateExpiredException")) ) {
+                        JOptionPane.showMessageDialog(null, "Download failed due to an expired SSL/TLS certificate.\n"
+                                + "Please ensure that your system date is correct. "
+                                + "Otherwise, please try again later.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "An error occurred while downloading hacktv.\n"
+                            + "Please ensure that you have write permissions to the "
+                            + "application directory and that you have internet access.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
+                btnDownloadHackTV.setEnabled(true);
+            } // End done()
+        }; // End SwingWorker
+        int q = JOptionPane.showConfirmDialog(null, "Would you like to download the latest build of hacktv from Captain Jack's repository?\n"
+                + "This requires a working internet connection and will only work if you have write access to the directory where "
+                + "this application is located.", AppName, JOptionPane.YES_NO_OPTION);
+        if (q == JOptionPane.YES_OPTION) {
+            btnDownloadHackTV.setEnabled(false);
+            downloadHackTV.execute();
+        }
+    }//GEN-LAST:event_btnDownloadHackTVActionPerformed
+
+    private void lblSyntaxOptionDisabledMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSyntaxOptionDisabledMouseReleased
+        // Show a message to explain why the syntax option is disabled
+        int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
+                + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
+                + "Would you like to download it now?", AppName, JOptionPane.YES_NO_OPTION);
+        if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
+    }//GEN-LAST:event_lblSyntaxOptionDisabledMouseReleased
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -7537,6 +7686,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel VideoFormatPanel;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClearMRUList;
+    private javax.swing.JButton btnDownloadHackTV;
     private javax.swing.JButton btnHackTVPath;
     private javax.swing.JButton btnPlaylistDown;
     private javax.swing.JButton btnPlaylistStart;

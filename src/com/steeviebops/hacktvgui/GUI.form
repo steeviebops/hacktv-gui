@@ -2317,7 +2317,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pathPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="pathPanel" min="-2" pref="116" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -2352,8 +2352,11 @@
                                   <Component id="txtHackTVPath" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnHackTVPath" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="btnDownloadHackTV" max="32767" attributes="0"/>
+                                  <Component id="btnHackTVPath" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2367,10 +2370,11 @@
                                   <Component id="btnHackTVPath" max="-2" attributes="0"/>
                                   <Component id="txtHackTVPath" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="lblDetectedBuikd" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblFork" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnDownloadHackTV" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -2408,6 +2412,14 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Detected build:"/>
                       </Properties>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnDownloadHackTV">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Download..."/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDownloadHackTVActionPerformed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -2546,7 +2558,7 @@
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblSyntaxOptionDisabledMouseClicked"/>
+                        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblSyntaxOptionDisabledMouseReleased"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkLocalModes">
