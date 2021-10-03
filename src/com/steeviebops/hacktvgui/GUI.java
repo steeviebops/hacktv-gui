@@ -5468,7 +5468,12 @@ public class GUI extends javax.swing.JFrame {
                       (txtSource.getText().contains("://youtu.be/")) ||
                       (txtSource.getText().startsWith("ytdl:")) ) {
                 // Invoke the youtube-dl handler
-                youtubedl(txtSource.getText());
+                if (!chkSyntaxOnly.isSelected()) {
+                    youtubedl(txtSource.getText());
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "youtube-dl is not supported in syntax only mode.", AppName, JOptionPane.WARNING_MESSAGE);
+                }
                 // Return false as we're going to restart if the download is successful
                 return false;
             }
