@@ -129,6 +129,17 @@
             <Property name="text" type="java.lang.String" value="Help"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="menuGithubRepo">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="GitHub repository"/>
+                <Property name="toolTipText" type="java.lang.String" value=""/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuGithubRepoActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="menuAbout">
               <Properties>
                 <Property name="text" type="java.lang.String" value="About"/>
@@ -268,7 +279,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="consoleScrollPane" pref="362" max="32767" attributes="0"/>
+                  <Component id="consoleScrollPane" pref="352" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -340,8 +351,8 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="SourcePanel" max="32767" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="23" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -360,7 +371,7 @@
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -369,11 +380,11 @@
                                           <Component id="chkInterlace" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkRandom" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace pref="61" max="32767" attributes="0"/>
+                                      <EmptySpace pref="66" max="32767" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkSubtitles" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="101" max="32767" attributes="0"/>
+                                              <EmptySpace pref="106" max="32767" attributes="0"/>
                                               <Component id="lblSubtitleIndex" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="separate" max="-2" attributes="0"/>
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
@@ -399,11 +410,8 @@
                                   <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <Component id="playlistScrollPane" pref="402" max="32767" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" attributes="0">
-                                              <Group type="103" groupAlignment="1" attributes="0">
+                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                  <Component id="playlistScrollPane" pref="412" max="32767" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
@@ -412,26 +420,27 @@
                                                       <Component id="cmbTest" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                                   </Group>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="txtSource" pref="367" max="32767" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="cmbM3USource" max="32767" attributes="0"/>
-                                                  </Group>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
+                                          <Group type="102" attributes="0">
+                                              <Component id="txtSource" pref="377" max="32767" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="cmbM3USource" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                                          </Group>
                                       </Group>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="btnSourceBrowse" max="32767" attributes="0"/>
                                           <Component id="btnRemove" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistUp" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistDown" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnAdd" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistStart" max="32767" attributes="0"/>
+                                          <Component id="btnSourceBrowse" alignment="1" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -446,11 +455,9 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="btnSourceBrowse" min="-2" max="-2" attributes="0"/>
-                                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                                      <Component id="txtSource" alignment="0" max="32767" attributes="0"/>
-                                      <Component id="cmbM3USource" alignment="0" max="32767" attributes="0"/>
-                                  </Group>
+                                  <Component id="cmbM3USource" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="txtSource" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="btnSourceBrowse" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -520,19 +527,6 @@
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="radTestActionPerformed"/>
-                      </Events>
-                    </Component>
-                    <Component class="javax.swing.JTextField" name="txtSource">
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtSource.addMouseListener(new ContextMenuListener());"/>
-                      </AuxValues>
-                    </Component>
-                    <Component class="javax.swing.JButton" name="btnSourceBrowse">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Browse..."/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSourceBrowseActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkRepeat">
@@ -646,17 +640,6 @@
                         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                       </AuxValues>
                     </Component>
-                    <Component class="javax.swing.JComboBox" name="cmbM3USource">
-                      <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
-                        <Property name="enabled" type="boolean" value="false"/>
-                      </Properties>
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
-                      </AuxValues>
-                    </Component>
                     <Component class="javax.swing.JComboBox" name="cmbTest">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
@@ -744,6 +727,30 @@
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
+                    <Component class="javax.swing.JTextField" name="txtSource">
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtSource.addMouseListener(new ContextMenuListener());"/>
+                      </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JComboBox" name="cmbM3USource">
+                      <Properties>
+                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                          <StringArray count="0"/>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                      </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnSourceBrowse">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Browse..."/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSourceBrowseActionPerformed"/>
+                      </Events>
+                    </Component>
                   </SubComponents>
                 </Container>
               </SubComponents>
@@ -777,7 +784,7 @@
                           <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="19" max="32767" attributes="0"/>
+                          <EmptySpace pref="32" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -884,7 +891,7 @@
                                               <Component id="txtAntennaName" max="32767" attributes="0"/>
                                               <Group type="102" attributes="0">
                                                   <Component id="cmbFileType" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="0" pref="100" max="32767" attributes="0"/>
+                                                  <EmptySpace min="0" pref="110" max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -1124,7 +1131,7 @@
                                                   <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
                                                   <Component id="chkColour" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" pref="118" max="32767" attributes="0"/>
+                                              <EmptySpace type="unrelated" pref="128" max="32767" attributes="0"/>
                                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -1390,7 +1397,7 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="236" max="32767" attributes="0"/>
+                          <EmptySpace pref="249" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1419,7 +1426,7 @@
                                   <Component id="chkACP" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkVITS" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="146" max="32767" attributes="0"/>
+                              <EmptySpace pref="156" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1518,7 +1525,7 @@
                                   <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="chkVolume" min="-2" pref="141" max="-2" attributes="0"/>
-                                      <EmptySpace pref="30" max="32767" attributes="0"/>
+                                      <EmptySpace pref="40" max="32767" attributes="0"/>
                                       <Component id="txtVolume" min="-2" pref="64" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -1671,7 +1678,7 @@
                           <Component id="teletextPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="downloadPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="85" max="32767" attributes="0"/>
+                          <EmptySpace pref="98" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1694,12 +1701,12 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="chkTeletext" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="286" pref="396" max="32767" attributes="0"/>
+                                      <EmptySpace min="286" pref="406" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <Component id="txtTeletextSource" pref="367" max="32767" attributes="0"/>
+                                              <Component id="txtTeletextSource" pref="377" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
                                           </Group>
@@ -1914,7 +1921,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" max="32767" attributes="0"/>
-                          <EmptySpace pref="87" max="32767" attributes="0"/>
+                          <EmptySpace pref="101" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1958,7 +1965,7 @@
                                           <Component id="cmbScramblingKey2" alignment="0" max="32767" attributes="0"/>
                                           <Component id="cmbScramblingType" alignment="0" max="32767" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="10" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="20" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -2306,7 +2313,7 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
+                      <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="resetSettingsPanel" max="32767" attributes="0"/>
@@ -2370,11 +2377,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="lblSpecifyLocation" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnHackTVPath" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="txtHackTVPath" max="32767" attributes="0"/>
+                                  <Component id="btnHackTVPath" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="lblDetectedBuikd" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblFork" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -2450,7 +2457,7 @@
                                   <Component id="lblClearAll" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblClearMRU" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="167" max="32767" attributes="0"/>
+                              <EmptySpace pref="177" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2523,6 +2530,11 @@
                                       <Component id="lblSyntaxOptionDisabled" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="chkLocalModes" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="lblLookAndFeel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="cmbLookAndFeel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -2537,7 +2549,12 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkLocalModes" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace pref="54" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="lblLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="cmbLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace pref="38" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2572,6 +2589,24 @@
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLocalModesActionPerformed"/>
                       </Events>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblLookAndFeel">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Theme"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JComboBox" name="cmbLookAndFeel">
+                      <Properties>
+                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                          <StringArray count="0"/>
+                        </Property>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbLookAndFeelActionPerformed"/>
+                      </Events>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                      </AuxValues>
                     </Component>
                   </SubComponents>
                 </Container>

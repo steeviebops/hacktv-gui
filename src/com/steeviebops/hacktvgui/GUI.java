@@ -63,6 +63,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class GUI extends javax.swing.JFrame {    
@@ -71,6 +72,9 @@ public class GUI extends javax.swing.JFrame {
     
     // Boolean used for Microsoft Windows detection and handling
     private final boolean RunningOnWindows;
+    
+    // Look and feel arraylist
+    private ArrayList<String> LaFAL;
     
     // Get user's home directory, used for file open dialogues
     private final String UserHomeDir = System.getProperty("user.home");
@@ -253,25 +257,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         // Set look and feel
-        if (System.getProperty("os.name").contains("Linux")) {
-            try {
-                // Use Metal L&F on all Linux distros
-                // Comment out the next two lines if you want to use GTK+ on
-                // supported desktop environments but it doesn't look great
-                // in my opinion.
-                UIManager.put("swing.boldMetal", false);
-                UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
-                  System.err.println(ex);
-            }
-        } else {
-            try {
-                // Use system default L&F on everything else
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
-                System.err.println(ex);
-            }
-        }
+        setLaF();
         // Initialise Swing components
         initComponents();
         // Set the JarDir variable so we know where we're located
@@ -325,6 +311,8 @@ public class GUI extends javax.swing.JFrame {
         else {
             fsphil();
         }
+        // Populate the look and feel combobox
+        populateLaFList();
         // Set default values when form loads
         radLocalSource.doClick();
         selectDefaultMode();
@@ -409,8 +397,6 @@ public class GUI extends javax.swing.JFrame {
         SourcePanel = new javax.swing.JPanel();
         radLocalSource = new javax.swing.JRadioButton();
         radTest = new javax.swing.JRadioButton();
-        txtSource = new javax.swing.JTextField();
-        btnSourceBrowse = new javax.swing.JButton();
         chkRepeat = new javax.swing.JCheckBox();
         chkTimestamp = new javax.swing.JCheckBox();
         chkInterlace = new javax.swing.JCheckBox();
@@ -423,7 +409,6 @@ public class GUI extends javax.swing.JFrame {
         lblSubtitleIndex = new javax.swing.JLabel();
         chkARCorrection = new javax.swing.JCheckBox();
         cmbARCorrection = new javax.swing.JComboBox<>();
-        cmbM3USource = new javax.swing.JComboBox<>();
         cmbTest = new javax.swing.JComboBox<>();
         playlistScrollPane = new javax.swing.JScrollPane();
         lstPlaylist = new javax.swing.JList<>();
@@ -433,6 +418,9 @@ public class GUI extends javax.swing.JFrame {
         btnPlaylistUp = new javax.swing.JButton();
         btnPlaylistStart = new javax.swing.JButton();
         chkRandom = new javax.swing.JCheckBox();
+        txtSource = new javax.swing.JTextField();
+        cmbM3USource = new javax.swing.JComboBox<>();
+        btnSourceBrowse = new javax.swing.JButton();
         outputTab = new javax.swing.JPanel();
         FrequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
@@ -544,6 +532,8 @@ public class GUI extends javax.swing.JFrame {
         chkSyntaxOnly = new javax.swing.JCheckBox();
         lblSyntaxOptionDisabled = new javax.swing.JLabel();
         chkLocalModes = new javax.swing.JCheckBox();
+        lblLookAndFeel = new javax.swing.JLabel();
+        cmbLookAndFeel = new javax.swing.JComboBox<>();
         btnRun = new javax.swing.JButton();
         txtAllOptions = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
@@ -564,6 +554,8 @@ public class GUI extends javax.swing.JFrame {
         menuAstra10Template = new javax.swing.JMenuItem();
         menuBSBTemplate = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
+        menuGithubRepo = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         menuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -593,7 +585,7 @@ public class GUI extends javax.swing.JFrame {
         consoleOutputPanel.setLayout(consoleOutputPanelLayout);
         consoleOutputPanelLayout.setHorizontalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
+            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
         );
         consoleOutputPanelLayout.setVerticalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -615,15 +607,6 @@ public class GUI extends javax.swing.JFrame {
         radTest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radTestActionPerformed(evt);
-            }
-        });
-
-        txtSource.addMouseListener(new ContextMenuListener());
-
-        btnSourceBrowse.setText("Browse...");
-        btnSourceBrowse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSourceBrowseActionPerformed(evt);
             }
         });
 
@@ -706,8 +689,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbM3USource.setEnabled(false);
-
         cmbTest.setEnabled(false);
         cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -769,6 +750,17 @@ public class GUI extends javax.swing.JFrame {
         chkRandom.setText("Randomise playlist");
         chkRandom.setEnabled(false);
 
+        txtSource.addMouseListener(new ContextMenuListener());
+
+        cmbM3USource.setEnabled(false);
+
+        btnSourceBrowse.setText("Browse...");
+        btnSourceBrowse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSourceBrowseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout SourcePanelLayout = new javax.swing.GroupLayout(SourcePanel);
         SourcePanel.setLayout(SourcePanelLayout);
         SourcePanelLayout.setHorizontalGroup(
@@ -782,11 +774,11 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(chkTimestamp)
                             .addComponent(chkInterlace)
                             .addComponent(chkRandom))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
                                 .addComponent(lblSubtitleIndex)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -805,29 +797,28 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SourcePanelLayout.createSequentialGroup()
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
+                                .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
+                                    .addGroup(SourcePanelLayout.createSequentialGroup()
                                         .addComponent(radLocalSource)
                                         .addGap(39, 39, 39)
                                         .addComponent(radTest)
                                         .addGap(18, 18, 18)
                                         .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, SourcePanelLayout.createSequentialGroup()
-                                        .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(SourcePanelLayout.createSequentialGroup()
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(6, 6, 6)))
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnSourceBrowse, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnPlaylistUp, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnPlaylistDown, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnPlaylistStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(btnPlaylistStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnSourceBrowse, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
         SourcePanelLayout.setVerticalGroup(
@@ -840,10 +831,9 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSourceBrowse)
-                    .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(txtSource, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(cmbM3USource, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addComponent(cmbM3USource)
+                    .addComponent(txtSource)
+                    .addComponent(btnSourceBrowse, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(SourcePanelLayout.createSequentialGroup()
@@ -895,8 +885,8 @@ public class GUI extends javax.swing.JFrame {
             sourceTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(SourcePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1022,7 +1012,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtAntennaName)
                             .addGroup(rfPanelLayout.createSequentialGroup()
                                 .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 100, Short.MAX_VALUE))))
+                                .addGap(0, 110, Short.MAX_VALUE))))
                     .addGroup(rfPanelLayout.createSequentialGroup()
                         .addComponent(chkAmp)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -1238,7 +1228,7 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(chkNICAM)
                                     .addComponent(chkA2Stereo)
                                     .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 118, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 128, Short.MAX_VALUE)
                                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1311,7 +1301,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1359,7 +1349,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
                     .addComponent(chkVITS))
-                .addContainerGap(146, Short.MAX_VALUE))
+                .addContainerGap(156, Short.MAX_VALUE))
         );
         VBIPanelLayout.setVerticalGroup(
             VBIPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1467,7 +1457,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkDownmix)
                     .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                         .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
                         .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -1509,7 +1499,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(236, Short.MAX_VALUE))
+                .addContainerGap(249, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1557,11 +1547,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addComponent(chkTeletext)
-                        .addGap(286, 396, Short.MAX_VALUE))
+                        .addGap(286, 406, Short.MAX_VALUE))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(teletextPanelLayout.createSequentialGroup()
-                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
+                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(teletextPanelLayout.createSequentialGroup()
@@ -1674,7 +1664,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(85, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -1903,7 +1893,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(cmbScramblingKey1, 0, 381, Short.MAX_VALUE)
                             .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbScramblingType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 10, Short.MAX_VALUE))))
+                        .addGap(0, 20, Short.MAX_VALUE))))
         );
         scramblingPanelLayout.setVerticalGroup(
             scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1943,7 +1933,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addContainerGap(101, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -1998,10 +1988,10 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(lblSpecifyLocation)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnHackTVPath)
-                    .addComponent(txtHackTVPath))
-                .addGap(6, 6, 6)
+                .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtHackTVPath)
+                    .addComponent(btnHackTVPath))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblDetectedBuikd)
                     .addComponent(lblFork)
@@ -2043,7 +2033,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblClearAll)
                     .addComponent(lblClearMRU))
-                .addContainerGap(167, Short.MAX_VALUE))
+                .addContainerGap(177, Short.MAX_VALUE))
         );
         resetSettingsPanelLayout.setVerticalGroup(
             resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2084,6 +2074,14 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        lblLookAndFeel.setText("Theme");
+
+        cmbLookAndFeel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbLookAndFeelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -2095,7 +2093,11 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(chkSyntaxOnly)
                         .addGap(18, 18, 18)
                         .addComponent(lblSyntaxOptionDisabled))
-                    .addComponent(chkLocalModes))
+                    .addComponent(chkLocalModes)
+                    .addGroup(generalSettingsPanelLayout.createSequentialGroup()
+                        .addComponent(lblLookAndFeel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
@@ -2106,7 +2108,11 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblSyntaxOptionDisabled))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblLookAndFeel)
+                    .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout settingsTabLayout = new javax.swing.GroupLayout(settingsTab);
@@ -2286,6 +2292,16 @@ public class GUI extends javax.swing.JFrame {
 
         helpMenu.setText("Help");
 
+        menuGithubRepo.setText("GitHub repository");
+        menuGithubRepo.setToolTipText("");
+        menuGithubRepo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGithubRepoActionPerformed(evt);
+            }
+        });
+        helpMenu.add(menuGithubRepo);
+        helpMenu.add(jSeparator1);
+
         menuAbout.setText("About");
         menuAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2351,6 +2367,72 @@ public class GUI extends javax.swing.JFrame {
             chkPixelRate,
             chkRandom
         };
+    }
+    
+    private void setLaF() {
+        if (System.getProperty("os.name").contains("Mac")) {
+            // Put app name in the menu bar on MacOS
+            System.setProperty("apple.awt.application.name", "hacktv-gui");
+            // Use the Mac menu bar
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            UIManager.getSystemLookAndFeelClassName();
+        }
+        else {
+            LaFAL = new ArrayList <> ();
+            UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+            for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+                // Get the implementation class for the look and feel
+                LaFAL.add(lookAndFeel.getClassName());
+            }
+            UIManager.put("swing.boldMetal", false);
+            int d;
+            if (System.getProperty("os.name").contains("Windows")) {
+                // Set Windows L&F as default
+                d = 3;
+            }
+            else {
+                // Set Metal as default
+                d = 0;
+            }
+            changeLaF(Prefs.getInt("LookAndFeel", d));            
+        }
+    }
+    
+    private void populateLaFList() {
+        if (System.getProperty("os.name").contains("Mac")) {
+            // Disable this on Mac
+            cmbLookAndFeel.setVisible(false);
+        }
+        else {
+            ArrayList<String> LAF = new ArrayList <> ();
+            UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+            for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+                // Get the name of the look and feel
+                LAF.add(lookAndFeel.getName());
+            }
+            String[] lf = new String[LAF.size()];
+            for(int i = 0; i < LAF.size(); i++) {
+                lf[i] = LAF.get(i);
+            }
+            cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
+            cmbLookAndFeel.setSelectedIndex(Prefs.getInt("LookAndFeel", 0));
+        }
+    }
+    
+    private void changeLaF(int i) {
+        String l = LaFAL.get(i);
+        // Only change L&F if different to the current one
+        if (!l.equals(UIManager.getLookAndFeel().getClass().getName())) {
+            try {
+                UIManager.setLookAndFeel(l);
+                SwingUtilities.updateComponentTreeUI(this);
+                this.pack();
+                Prefs.putInt("LookAndFeel", i);
+            }
+            catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+                System.err.println(ex);
+            }            
+        }
     }
     
     private void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
@@ -2673,8 +2755,9 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("File2", null) != null ) Prefs.remove("File2");
         if ( Prefs.get("File3", null) != null ) Prefs.remove("File3");
         if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
-        if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown"); 
-        if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");   
+        if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
+        if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");
+        if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -6285,7 +6368,7 @@ public class GUI extends javax.swing.JFrame {
               v = "";
         }
         mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
-        JOptionPane.showMessageDialog(null, AppName + " (Java version)" + v + mv + "\n\nCreated 2020-2021 by Stephen McGarry.\n" +
+        JOptionPane.showMessageDialog(null, AppName + v + mv + "\n\nCreated 2020-2021 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
@@ -7680,6 +7763,30 @@ public class GUI extends javax.swing.JFrame {
                 + "Would you like to download it now?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
     }//GEN-LAST:event_lblSyntaxOptionDisabledMouseReleased
+
+    private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
+        String u = "https://github.com/steeviebops/hacktv-gui/";
+        try {
+            ProcessBuilder p;
+            if (System.getProperty("os.name").contains("Windows")) {
+               p = new ProcessBuilder("cmd.exe", "/c", "start", u);
+            }
+            else if (System.getProperty("os.name").contains("Mac")) {
+               p = new ProcessBuilder("open", u);
+            }
+            else {
+               p = new ProcessBuilder("xdg-open", u);
+            }
+            p.start();
+        }
+        catch (IOException e) {
+            System.err.println("Unable to open default browser.");
+        }
+    }//GEN-LAST:event_menuGithubRepoActionPerformed
+
+    private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
+        changeLaF(cmbLookAndFeel.getSelectedIndex());
+    }//GEN-LAST:event_cmbLookAndFeelActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -7745,6 +7852,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbECMaturity;
     private javax.swing.JComboBox<String> cmbFileType;
     private javax.swing.JComboBox<String> cmbLogo;
+    private javax.swing.JComboBox<String> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
     private javax.swing.JComboBox<String> cmbOutputDevice;
     private javax.swing.JComboBox<String> cmbScramblingKey1;
@@ -7764,6 +7872,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel generalSettingsPanel;
     private javax.swing.JFileChooser hacktvFileChooser;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JLabel lblAntennaName;
     private javax.swing.JLabel lblChannel;
     private javax.swing.JLabel lblClearAll;
@@ -7776,6 +7885,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblFork;
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
+    private javax.swing.JLabel lblLookAndFeel;
     private javax.swing.JLabel lblOutputDevice;
     private javax.swing.JLabel lblOutputDevice2;
     private javax.swing.JLabel lblRegion;
@@ -7797,6 +7907,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuBSBTemplate;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem menuExit;
+    private javax.swing.JMenuItem menuGithubRepo;
     private javax.swing.JMenuItem menuMRUFile1;
     private javax.swing.JMenuItem menuMRUFile2;
     private javax.swing.JMenuItem menuMRUFile3;
