@@ -514,6 +514,11 @@ public class GUI extends javax.swing.JFrame {
         lblSysterPermTable = new javax.swing.JLabel();
         lblECMaturity = new javax.swing.JLabel();
         cmbECMaturity = new javax.swing.JComboBox<>();
+        chkECppv = new javax.swing.JCheckBox();
+        txtECprognum = new javax.swing.JTextField();
+        lblECprognum = new javax.swing.JLabel();
+        txtECprogcost = new javax.swing.JTextField();
+        lblECprogcost = new javax.swing.JLabel();
         chkShowECM = new javax.swing.JCheckBox();
         settingsTab = new javax.swing.JPanel();
         pathPanel = new javax.swing.JPanel();
@@ -886,7 +891,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1301,7 +1306,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1499,7 +1504,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(249, Short.MAX_VALUE))
+                .addContainerGap(239, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1664,7 +1669,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(98, Short.MAX_VALUE))
+                .addContainerGap(88, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -1772,15 +1777,15 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkDeactivateCard)
                     .addComponent(chkActivateCard)
                     .addGroup(emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                        .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkShowCardSerial))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         emmPanelLayout.setVerticalGroup(
             emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(emmPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addComponent(chkActivateCard)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkDeactivateCard)
@@ -1792,7 +1797,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkShowCardSerial)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkFindKeys)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         scramblingOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Format-specific options"));
@@ -1829,6 +1834,24 @@ public class GUI extends javax.swing.JFrame {
         cmbECMaturity.setSelectedIndex(-1);
         cmbECMaturity.setEnabled(false);
 
+        chkECppv.setText("EuroCrypt pay-per-view mode");
+        chkECppv.setEnabled(false);
+        chkECppv.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkECppvActionPerformed(evt);
+            }
+        });
+
+        txtECprognum.setEnabled(false);
+
+        lblECprognum.setText("Programme number");
+        lblECprognum.setEnabled(false);
+
+        txtECprogcost.setEnabled(false);
+
+        lblECprogcost.setText("Programme cost");
+        lblECprogcost.setEnabled(false);
+
         javax.swing.GroupLayout scramblingOptionsPanelLayout = new javax.swing.GroupLayout(scramblingOptionsPanel);
         scramblingOptionsPanel.setLayout(scramblingOptionsPanelLayout);
         scramblingOptionsPanelLayout.setHorizontalGroup(
@@ -1836,12 +1859,24 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkScrambleAudio)
-                    .addComponent(lblSysterPermTable)
-                    .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblECMaturity)
-                    .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(67, Short.MAX_VALUE))
+                    .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
+                        .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkECppv)
+                            .addComponent(chkScrambleAudio)
+                            .addComponent(lblSysterPermTable)
+                            .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblECMaturity)
+                            .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 18, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, scramblingOptionsPanelLayout.createSequentialGroup()
+                        .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblECprognum)
+                            .addComponent(lblECprogcost))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtECprogcost)
+                            .addComponent(txtECprognum, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         scramblingOptionsPanelLayout.setVerticalGroup(
             scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1856,6 +1891,16 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(lblECMaturity)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkECppv)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtECprognum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblECprognum))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblECprogcost)
+                    .addComponent(txtECprogcost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1913,10 +1958,10 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkShowECM)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout scramblingTabLayout = new javax.swing.GroupLayout(scramblingTab);
@@ -1933,7 +1978,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(101, Short.MAX_VALUE))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2136,7 +2181,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addContainerGap(70, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2175,7 +2220,7 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(containerPanelLayout.createSequentialGroup()
-                        .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, 473, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -4692,6 +4737,14 @@ public class GUI extends javax.swing.JFrame {
             cmbECMaturity.setEnabled(false);
             cmbECMaturity.setSelectedIndex(-1);
         }
+        // Enable EuroCrypt PPV option
+        if ((Fork.equals("CJ")) && (ScramblingType2.equals("--eurocrypt"))) {
+            chkECppv.setEnabled(true);
+        }
+        else {
+            if (chkECppv.isSelected()) chkECppv.doClick();
+            chkECppv.setEnabled(false);
+        }
         // Enable card serial option
         if ( ((ScramblingType1).equals("--videocrypt")) || 
                 ((ScramblingType1).equals("--videocrypt2")) ) {
@@ -5974,6 +6027,14 @@ public class GUI extends javax.swing.JFrame {
         if (cmbECMaturity.getSelectedIndex() > 0) {
             allArgs.add("--ec-mat-rating");
             allArgs.add(Integer.toString(cmbECMaturity.getSelectedIndex()));
+        }
+        if (chkECppv.isSelected()) {
+            allArgs.add("--ec-ppv");
+            String n = txtECprognum.getText();
+            String c = txtECprogcost.getText();
+            if (n.isEmpty()) n = "0";
+            if (c.isEmpty()) c = "0";
+            allArgs.add(n + "," + c);
         }
         if (!ScrambleAudio.isEmpty()) allArgs.add(ScrambleAudio);
         if (!SysterPermTable.isEmpty()) allArgs.add(SysterPermTable);
@@ -7787,6 +7848,23 @@ public class GUI extends javax.swing.JFrame {
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
         changeLaF(cmbLookAndFeel.getSelectedIndex());
     }//GEN-LAST:event_cmbLookAndFeelActionPerformed
+
+    private void chkECppvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkECppvActionPerformed
+        if (chkECppv.isSelected()) {
+            lblECprognum.setEnabled(true);
+            txtECprognum.setEnabled(true);
+            lblECprogcost.setEnabled(true);
+            txtECprogcost.setEnabled(true);
+        }
+        else {
+            lblECprognum.setEnabled(false);
+            txtECprognum.setText("");
+            txtECprognum.setEnabled(false);
+            lblECprogcost.setEnabled(false);
+            txtECprogcost.setText("");
+            txtECprogcost.setEnabled(false);
+        }
+    }//GEN-LAST:event_chkECppvActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -7821,6 +7899,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkColour;
     private javax.swing.JCheckBox chkDeactivateCard;
     private javax.swing.JCheckBox chkDownmix;
+    private javax.swing.JCheckBox chkECppv;
     private javax.swing.JCheckBox chkFMDev;
     private javax.swing.JCheckBox chkFindKeys;
     private javax.swing.JCheckBox chkGamma;
@@ -7880,6 +7959,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblDetectedBuikd;
     private javax.swing.JLabel lblDownload;
     private javax.swing.JLabel lblECMaturity;
+    private javax.swing.JLabel lblECprogcost;
+    private javax.swing.JLabel lblECprognum;
     private javax.swing.JLabel lblEMMCardNumber;
     private javax.swing.JLabel lblFileType;
     private javax.swing.JLabel lblFork;
@@ -7950,6 +8031,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtAntennaName;
     private javax.swing.JTextField txtCardNumber;
     private javax.swing.JTextArea txtConsoleOutput;
+    private javax.swing.JTextField txtECprogcost;
+    private javax.swing.JTextField txtECprognum;
     private javax.swing.JTextField txtFMDev;
     private javax.swing.JTextField txtFrequency;
     private javax.swing.JTextField txtGain;

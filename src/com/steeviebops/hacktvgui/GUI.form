@@ -253,7 +253,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <Component id="tabPane" min="-2" max="-2" attributes="0"/>
+                          <Component id="tabPane" min="-2" pref="473" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="btnRun" min="-2" pref="56" max="-2" attributes="0"/>
                       </Group>
@@ -352,7 +352,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="23" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -784,7 +784,7 @@
                           <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="32" max="32767" attributes="0"/>
+                          <EmptySpace pref="22" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1397,7 +1397,7 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="249" max="32767" attributes="0"/>
+                          <EmptySpace pref="239" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1678,7 +1678,7 @@
                           <Component id="teletextPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="downloadPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="98" max="32767" attributes="0"/>
+                          <EmptySpace pref="88" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1921,7 +1921,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" max="32767" attributes="0"/>
-                          <EmptySpace pref="101" max="32767" attributes="0"/>
+                          <EmptySpace pref="47" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1992,11 +1992,11 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="chkShowECM" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="emmPanel" max="32767" attributes="0"/>
                                   <Component id="scramblingOptionsPanel" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2086,8 +2086,8 @@
                                       <Component id="chkDeactivateCard" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="chkActivateCard" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                                          <Component id="lblEMMCardNumber" alignment="0" pref="100" max="32767" attributes="0"/>
-                                          <Component id="txtCardNumber" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="lblEMMCardNumber" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="txtCardNumber" alignment="0" min="-2" pref="100" max="-2" attributes="0"/>
                                       </Group>
                                       <Component id="chkShowCardSerial" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
@@ -2098,7 +2098,7 @@
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="chkActivateCard" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="chkDeactivateCard" min="-2" max="-2" attributes="0"/>
@@ -2110,7 +2110,7 @@
                                   <Component id="chkShowCardSerial" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="chkFindKeys" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -2188,13 +2188,30 @@
                               <Group type="102" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="chkScrambleAudio" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblSysterPermTable" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cmbSysterPermTable" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblECMaturity" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cmbECMaturity" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" attributes="0">
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="chkECppv" min="-2" max="-2" attributes="0"/>
+                                              <Component id="chkScrambleAudio" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblSysterPermTable" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="cmbSysterPermTable" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblECMaturity" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="cmbECMaturity" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace min="0" pref="18" max="32767" attributes="0"/>
+                                      </Group>
+                                      <Group type="102" alignment="1" attributes="0">
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="lblECprognum" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblECprogcost" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace max="32767" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                              <Component id="txtECprogcost" max="32767" attributes="0"/>
+                                              <Component id="txtECprognum" pref="48" max="32767" attributes="0"/>
+                                          </Group>
+                                      </Group>
                                   </Group>
-                                  <EmptySpace pref="67" max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -2211,6 +2228,18 @@
                                   <Component id="lblECMaturity" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="cmbECMaturity" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="chkECppv" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="txtECprognum" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblECprognum" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="lblECprogcost" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="txtECprogcost" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                                   <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
@@ -2286,6 +2315,37 @@
                             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                           </AuxValues>
                         </Component>
+                        <Component class="javax.swing.JCheckBox" name="chkECppv">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="EuroCrypt pay-per-view mode"/>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkECppvActionPerformed"/>
+                          </Events>
+                        </Component>
+                        <Component class="javax.swing.JTextField" name="txtECprognum">
+                          <Properties>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="lblECprognum">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="Programme number"/>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JTextField" name="txtECprogcost">
+                          <Properties>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="lblECprogcost">
+                          <Properties>
+                            <Property name="text" type="java.lang.String" value="Programme cost"/>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
+                        </Component>
                       </SubComponents>
                     </Container>
                     <Component class="javax.swing.JCheckBox" name="chkShowECM">
@@ -2333,7 +2393,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="80" max="32767" attributes="0"/>
+                          <EmptySpace pref="70" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
