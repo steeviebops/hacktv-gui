@@ -515,10 +515,10 @@ public class GUI extends javax.swing.JFrame {
         lblECMaturity = new javax.swing.JLabel();
         cmbECMaturity = new javax.swing.JComboBox<>();
         chkECppv = new javax.swing.JCheckBox();
-        txtECprognum = new javax.swing.JTextField();
         lblECprognum = new javax.swing.JLabel();
-        txtECprogcost = new javax.swing.JTextField();
         lblECprogcost = new javax.swing.JLabel();
+        txtECprognum = new javax.swing.JTextField();
+        txtECprogcost = new javax.swing.JTextField();
         chkShowECM = new javax.swing.JCheckBox();
         settingsTab = new javax.swing.JPanel();
         pathPanel = new javax.swing.JPanel();
@@ -659,6 +659,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtPosition.setEnabled(false);
         txtPosition.addMouseListener(new ContextMenuListener());
+        txtPosition.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtPositionKeyTyped(evt);
+            }
+        });
 
         cmbLogo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbLogo.setEnabled(false);
@@ -675,6 +680,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtSubtitleIndex.setEnabled(false);
         txtSubtitleIndex.addMouseListener(new ContextMenuListener());
+        txtSubtitleIndex.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSubtitleIndexKeyTyped(evt);
+            }
+        });
 
         lblSubtitleIndex.setText("Index (optional)");
         lblSubtitleIndex.setEnabled(false);
@@ -891,7 +901,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -954,6 +964,11 @@ public class GUI extends javax.swing.JFrame {
         lblGain.setText("TX gain (dB)");
 
         txtGain.addMouseListener(new ContextMenuListener());
+        txtGain.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtGainKeyTyped(evt);
+            }
+        });
 
         cmbChannel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -1151,6 +1166,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtSampleRate.setToolTipText("");
         txtSampleRate.addMouseListener(new ContextMenuListener());
+        txtSampleRate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSampleRateKeyTyped(evt);
+            }
+        });
 
         chkAudio.setText("Audio enabled");
         chkAudio.addActionListener(new java.awt.event.ActionListener() {
@@ -1175,6 +1195,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtPixelRate.setEnabled(false);
         txtPixelRate.addMouseListener(new ContextMenuListener());
+        txtPixelRate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtPixelRateKeyTyped(evt);
+            }
+        });
 
         chkVideoFilter.setText("VSB-AM filter");
         chkVideoFilter.addActionListener(new java.awt.event.ActionListener() {
@@ -1207,6 +1232,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtFMDev.setEnabled(false);
         txtFMDev.addMouseListener(new ContextMenuListener());
+        txtFMDev.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFMDevKeyTyped(evt);
+            }
+        });
 
         javax.swing.GroupLayout VideoFormatPanelLayout = new javax.swing.GroupLayout(VideoFormatPanel);
         VideoFormatPanel.setLayout(VideoFormatPanelLayout);
@@ -1306,7 +1336,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1365,7 +1395,8 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkACP)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkVITS))
+                .addComponent(chkVITS)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         AdditionalOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Additional options"));
@@ -1379,6 +1410,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtGamma.setEnabled(false);
         txtGamma.addMouseListener(new ContextMenuListener());
+        txtGamma.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtGammaKeyTyped(evt);
+            }
+        });
 
         chkOutputLevel.setText("Output level");
         chkOutputLevel.addActionListener(new java.awt.event.ActionListener() {
@@ -1389,6 +1425,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtOutputLevel.addMouseListener(new ContextMenuListener());
         txtOutputLevel.setEnabled(false);
+        txtOutputLevel.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtOutputLevelKeyTyped(evt);
+            }
+        });
 
         chkVerbose.setText("Verbose output");
         chkVerbose.addActionListener(new java.awt.event.ActionListener() {
@@ -1421,16 +1462,15 @@ public class GUI extends javax.swing.JFrame {
 
         txtVolume.setEnabled(false);
         txtVolume.addMouseListener(new ContextMenuListener());
+        txtVolume.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtVolumeKeyTyped(evt);
+            }
+        });
 
         txtMacChId.setEnabled(false);
         txtMacChId.addMouseListener(new ContextMenuListener());
         txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyPressed(evt);
-            }
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyReleased(evt);
-            }
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtMacChIdKeyTyped(evt);
             }
@@ -1483,7 +1523,8 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkMacChId)
                     .addComponent(chkVerbose)
-                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout PlaybackTabLayout = new javax.swing.GroupLayout(PlaybackTab);
@@ -1493,7 +1534,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(PlaybackTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(VBIPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(VBIPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1504,7 +1545,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(239, Short.MAX_VALUE))
+                .addContainerGap(245, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1542,6 +1583,11 @@ public class GUI extends javax.swing.JFrame {
 
         txtTextSubtitleIndex.setEnabled(false);
         txtTextSubtitleIndex.addMouseListener(new ContextMenuListener());
+        txtTextSubtitleIndex.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtTextSubtitleIndexKeyTyped(evt);
+            }
+        });
 
         javax.swing.GroupLayout teletextPanelLayout = new javax.swing.GroupLayout(teletextPanel);
         teletextPanel.setLayout(teletextPanelLayout);
@@ -1669,7 +1715,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(88, Short.MAX_VALUE))
+                .addContainerGap(110, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -1842,15 +1888,25 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        txtECprognum.setEnabled(false);
-
         lblECprognum.setText("Programme number");
         lblECprognum.setEnabled(false);
 
-        txtECprogcost.setEnabled(false);
-
         lblECprogcost.setText("Programme cost");
         lblECprogcost.setEnabled(false);
+
+        txtECprognum.setEnabled(false);
+        txtECprognum.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtECprognumKeyTyped(evt);
+            }
+        });
+
+        txtECprogcost.setEnabled(false);
+        txtECprogcost.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtECprogcostKeyTyped(evt);
+            }
+        });
 
         javax.swing.GroupLayout scramblingOptionsPanelLayout = new javax.swing.GroupLayout(scramblingOptionsPanel);
         scramblingOptionsPanel.setLayout(scramblingOptionsPanelLayout);
@@ -1859,15 +1915,6 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
-                        .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkECppv)
-                            .addComponent(chkScrambleAudio)
-                            .addComponent(lblSysterPermTable)
-                            .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblECMaturity)
-                            .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 18, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, scramblingOptionsPanelLayout.createSequentialGroup()
                         .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblECprognum)
@@ -1875,7 +1922,18 @@ public class GUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtECprogcost)
-                            .addComponent(txtECprognum, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE))))
+                            .addComponent(txtECprognum, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)))
+                    .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
+                        .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkECppv)
+                            .addComponent(chkScrambleAudio)
+                            .addComponent(lblSysterPermTable)
+                            .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 11, Short.MAX_VALUE))
+                    .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
+                        .addComponent(lblECMaturity)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         scramblingOptionsPanelLayout.setVerticalGroup(
@@ -1888,15 +1946,15 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblECMaturity)
+                .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblECMaturity)
+                    .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkECppv)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtECprognum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblECprognum))
+                    .addComponent(lblECprognum)
+                    .addComponent(txtECprognum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblECprogcost)
@@ -1958,10 +2016,10 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkShowECM)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout scramblingTabLayout = new javax.swing.GroupLayout(scramblingTab);
@@ -1977,8 +2035,8 @@ public class GUI extends javax.swing.JFrame {
             scramblingTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scramblingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(94, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2181,7 +2239,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(70, Short.MAX_VALUE))
+                .addContainerGap(92, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2220,7 +2278,7 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(containerPanelLayout.createSequentialGroup()
-                        .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, 473, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -6484,7 +6542,10 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkShowCardSerialActionPerformed
 
     private void txtCardNumberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCardNumberKeyTyped
-        if(txtCardNumber.getText().length()>=13) {
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+        else if (txtCardNumber.getText().length() >= 13) {
             evt.consume();
         }
     }//GEN-LAST:event_txtCardNumberKeyTyped
@@ -6747,18 +6808,19 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkPixelRateActionPerformed
 
     private void txtMacChIdKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMacChIdKeyTyped
-        if(txtMacChId.getText().length()>=4) {
+        if (txtMacChId.getText().length() >= 4) {
             evt.consume();
         }
+        else {
+            String c = String.valueOf((char)evt.getKeyChar());
+            if (Shared.isHex(c)) {
+                evt.setKeyChar(c.toUpperCase().toCharArray()[0]);
+            }
+            else {
+                evt.consume();
+            }
+        }
     }//GEN-LAST:event_txtMacChIdKeyTyped
-
-    private void txtMacChIdKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMacChIdKeyReleased
-        txtMacChId.setText(txtMacChId.getText().toUpperCase());
-    }//GEN-LAST:event_txtMacChIdKeyReleased
-
-    private void txtMacChIdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMacChIdKeyPressed
-        txtMacChId.setText(txtMacChId.getText().toUpperCase());
-    }//GEN-LAST:event_txtMacChIdKeyPressed
 
     private void chkMacChIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMacChIdActionPerformed
         if (chkMacChId.isSelected()) {
@@ -7865,6 +7927,108 @@ public class GUI extends javax.swing.JFrame {
             txtECprogcost.setEnabled(false);
         }
     }//GEN-LAST:event_chkECppvActionPerformed
+
+    private void txtGammaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtGammaKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtGamma.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtGammaKeyTyped
+
+    private void txtOutputLevelKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtOutputLevelKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtOutputLevel.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtOutputLevelKeyTyped
+
+    private void txtVolumeKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtVolumeKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtVolume.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtVolumeKeyTyped
+
+    private void txtSampleRateKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSampleRateKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtSampleRate.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtSampleRateKeyTyped
+
+    private void txtPixelRateKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPixelRateKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtPixelRate.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtPixelRateKeyTyped
+
+    private void txtFMDevKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFMDevKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtFMDev.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtFMDevKeyTyped
+
+    private void txtGainKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtGainKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtGainKeyTyped
+
+    private void txtSubtitleIndexKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSubtitleIndexKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtSubtitleIndexKeyTyped
+
+    private void txtPositionKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPositionKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtPositionKeyTyped
+
+    private void txtTextSubtitleIndexKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTextSubtitleIndexKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtTextSubtitleIndexKeyTyped
+
+    private void txtECprognumKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtECprognumKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtECprognumKeyTyped
+
+    private void txtECprogcostKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtECprogcostKeyTyped
+        if (!Shared.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtECprogcostKeyTyped
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
