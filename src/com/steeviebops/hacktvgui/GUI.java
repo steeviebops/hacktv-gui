@@ -901,7 +901,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1336,7 +1336,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(50, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1545,7 +1545,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(245, Short.MAX_VALUE))
+                .addContainerGap(251, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1715,7 +1715,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(110, Short.MAX_VALUE))
+                .addContainerGap(116, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -1826,7 +1826,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkShowCardSerial))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(112, Short.MAX_VALUE))
         );
         emmPanelLayout.setVerticalGroup(
             emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1924,12 +1924,14 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtECprogcost)
                             .addComponent(txtECprognum, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)))
                     .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
+                        .addComponent(lblSysterPermTable)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                        .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                         .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkECppv)
-                            .addComponent(chkScrambleAudio)
-                            .addComponent(lblSysterPermTable)
-                            .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 11, Short.MAX_VALUE))
+                            .addComponent(chkScrambleAudio))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                         .addComponent(lblECMaturity)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1942,14 +1944,14 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(chkScrambleAudio)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblSysterPermTable)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSysterPermTable)
+                    .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblECMaturity)
                     .addComponent(cmbECMaturity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(chkECppv)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1984,7 +1986,7 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
                         .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(emmPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
                         .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1996,7 +1998,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(cmbScramblingKey1, 0, 381, Short.MAX_VALUE)
                             .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbScramblingType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 20, Short.MAX_VALUE))))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         scramblingPanelLayout.setVerticalGroup(
             scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2017,7 +2019,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkShowECM)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(emmPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -2036,7 +2038,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(120, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2239,7 +2241,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -4984,7 +4986,7 @@ public class GUI extends javax.swing.JFrame {
         }
         cmbLogo.removeAllItems();
         cmbLogo.setModel(new DefaultComboBoxModel<>(LogoNames));
-        cmbLogo.setSelectedIndex(-1);
+        if (!chkLogo.isSelected()) cmbLogo.setSelectedIndex(-1);
     }
     
     private void checkLogo() {
@@ -6217,8 +6219,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // If "Generate syntax only" is enabled, stop here
         if (chkSyntaxOnly.isSelected()) return;
-        // Change the Run button to display Stop instead
-        changeRunToStop();
+        // Change the Run button and disable some other options
+        preRunTasks();
         // Clear the console
         txtConsoleOutput.setText("");
         // If a YouTube URL was specified, call its method and then stop
@@ -6276,8 +6278,8 @@ public class GUI extends javax.swing.JFrame {
                             + " of the selected options. Please update hacktv and try again."
                             , AppName, JOptionPane.WARNING_MESSAGE);
                 }
-                // Revert button to display Run instead of Stop
-                changeStopToRun();            
+                // Revert what we changed before starting
+                postRunTasks();            
             }
             // Update the GUI from this method.
             @Override
@@ -6373,7 +6375,7 @@ public class GUI extends javax.swing.JFrame {
                             , AppName, JOptionPane.WARNING_MESSAGE);
                 }
                 // Revert button to display Run instead of Stop
-                changeStopToRun();
+                postRunTasks();
             }// End of done
         }; // End of SwingWorker
         runTV.execute();
@@ -6412,15 +6414,19 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void changeRunToStop() {
+    private void preRunTasks() {
         btnRun.setText("Stop hacktv");
         chkSyntaxOnly.setEnabled(false);
+        btnHackTVPath.setEnabled(false);
+        if (RunningOnWindows) btnDownloadHackTV.setEnabled(false);
         Running = true;
     }
     
-    private void changeStopToRun() {
+    private void postRunTasks() {
         btnRun.setText("Run hacktv");
         chkSyntaxOnly.setEnabled(true);
+        btnHackTVPath.setEnabled(true);
+        if (RunningOnWindows) btnDownloadHackTV.setEnabled(true);
         Running = false;
     }
     
