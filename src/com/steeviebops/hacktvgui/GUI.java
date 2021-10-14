@@ -3665,6 +3665,26 @@ public class GUI extends javax.swing.JFrame {
                 cmbECMaturity.setSelectedIndex(ImportedMaturityRating);
             }
         }
+        // EuroCrypt PPV
+        int ImportedProgNumber;
+        int ImportedProgCost;
+        if ( (chkECppv.isEnabled()) && (INIFile.getBooleanFromINI(fileContents, "hacktv", "ec-ppv")) ) {
+            chkECppv.doClick();
+            if (INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-num") != null) {
+                ImportedProgNumber = INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-num");
+            }
+            else {
+                ImportedProgNumber = 0;
+            }
+            if (INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-cost") != null) {
+                ImportedProgCost = INIFile.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-cost");
+            }
+            else {
+                ImportedProgCost = 0;
+            }
+            txtECprognum.setText(String.valueOf(ImportedProgNumber));
+            txtECprogcost.setText(String.valueOf(ImportedProgCost));
+        }
         // ACP
         if (INIFile.getBooleanFromINI(fileContents, "hacktv", "acp")) {
             chkACP.doClick();
@@ -3784,7 +3804,8 @@ public class GUI extends javax.swing.JFrame {
             ImportedSampleRate = Double.parseDouble("16");
             JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", AppName, JOptionPane.INFORMATION_MESSAGE);
         }
-        txtSampleRate.setText(ImportedSampleRate.toString().replace(".0","")); 
+        txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
+        btnRun.requestFocusInWindow();
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
         return true;
@@ -4005,6 +4026,16 @@ public class GUI extends javax.swing.JFrame {
         // EuroCrypt maturity rating
         if (cmbECMaturity.getSelectedIndex() > 0) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-mat-rating", cmbECMaturity.getSelectedIndex());
+        }
+        // EuroCrypt PPV
+        if (chkECppv.isSelected()) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-ppv", 1);
+            if (!txtECprognum.getText().isBlank()) {
+                FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-num", Integer.parseInt(txtECprognum.getText()));
+            }
+            if (!txtECprogcost.getText().isBlank()) {
+                FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-cost", Integer.parseInt(txtECprogcost.getText()));
+            }
         }
         // Show card serial
         if (chkShowCardSerial.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "showserial", 1); }
