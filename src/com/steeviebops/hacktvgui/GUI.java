@@ -313,6 +313,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Populate the look and feel combobox
         populateLaFList();
+        // Check youtube-dl setting
+        if (Prefs.get("ytdl", "youtube-dl").equals("yt-dlp")) chkytdlp.doClick();
         // Set default values when form loads
         radLocalSource.doClick();
         selectDefaultMode();
@@ -539,6 +541,7 @@ public class GUI extends javax.swing.JFrame {
         chkLocalModes = new javax.swing.JCheckBox();
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
+        chkytdlp = new javax.swing.JCheckBox();
         btnRun = new javax.swing.JButton();
         txtAllOptions = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
@@ -901,7 +904,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(41, Short.MAX_VALUE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1336,7 +1339,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(50, Short.MAX_VALUE))
+                .addContainerGap(51, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1545,7 +1548,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(251, Short.MAX_VALUE))
+                .addContainerGap(252, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1715,7 +1718,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(116, Short.MAX_VALUE))
+                .addContainerGap(117, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -2038,7 +2041,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(120, Short.MAX_VALUE))
+                .addContainerGap(121, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2187,6 +2190,13 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkytdlp.setText("Use yt-dlp instead of youtube-dl");
+        chkytdlp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkytdlpActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -2194,6 +2204,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(generalSettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkytdlp)
                     .addGroup(generalSettingsPanelLayout.createSequentialGroup()
                         .addComponent(chkSyntaxOnly)
                         .addGap(18, 18, 18)
@@ -2214,10 +2225,12 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkytdlp)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblLookAndFeel)
-                    .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(38, Short.MAX_VALUE))
+                    .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblLookAndFeel))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout settingsTabLayout = new javax.swing.GroupLayout(settingsTab);
@@ -2241,7 +2254,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(98, Short.MAX_VALUE))
+                .addContainerGap(103, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2863,6 +2876,7 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
         if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");
         if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
+        if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -5605,23 +5619,26 @@ public class GUI extends javax.swing.JFrame {
     
     private void youtubedl(String input) {
         // youtube-dl frontend. Pass the download URL as a string.
-        int q = JOptionPane.showConfirmDialog(null, "This will attempt to use youtube-dl to stream the requested video.\n" +
+        int q = JOptionPane.showConfirmDialog(null, "We will now attempt to use " + 
+                Prefs.get("ytdl", "youtube-dl") + 
+                " to stream the requested video.\n" +
             "Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
             String ytp;
             String url;
             if (RunningOnWindows) {
+                String ytdlexe = Prefs.get("ytdl", "youtube-dl") + ".exe";
                 // Check the JAR directory
-                if (Files.exists(Path.of(JarDir + "/youtube-dl.exe"))) {
-                    ytp = JarDir + "/youtube-dl.exe";
+                if (Files.exists(Path.of(JarDir + ytdlexe))) {
+                    ytp = JarDir + "/" + ytdlexe;
                 }
                 else {
                     // Hope it can be found in the PATH...
-                    ytp = "youtube-dl.exe";
+                    ytp = ytdlexe;
                 }
             }
             else {
-                ytp = "youtube-dl";
+                ytp = Prefs.get("ytdl", "youtube-dl");
             }
             // Remove the ytdl: prefix if specified
             if (input.toLowerCase().startsWith("ytdl:")) {
@@ -6334,11 +6351,18 @@ public class GUI extends javax.swing.JFrame {
             u = txtSource.getText();
         }
         // Populate arguments textbox
-        if (RunningOnWindows) {
-            txtAllOptions.setText("youtube-dl.exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
+        String ytdl;
+        if (ytp.contains("yt-dlp")) {
+            ytdl = "yt-dlp";
         }
         else {
-            txtAllOptions.setText("youtube-dl" + " -q" + " -o" + " - " + u + " | hacktv");
+            ytdl = "youtube-dl";
+        }
+        if (RunningOnWindows) {
+            txtAllOptions.setText(ytdl + ".exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
+        }
+        else {
+            txtAllOptions.setText(ytdl + " -q" + " -o" + " - " + u + " | hacktv");
         }
         for (int i = 1; i < allArgs.size() ; i++) {
             txtAllOptions.setText(txtAllOptions.getText() + '\u0020' + allArgs.get(i));
@@ -8066,6 +8090,16 @@ public class GUI extends javax.swing.JFrame {
             evt.consume();
         }
     }//GEN-LAST:event_txtECprogcostKeyTyped
+
+    private void chkytdlpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkytdlpActionPerformed
+        // Changes the youtube-dl handler to use yt-dlp instead
+        if (chkytdlp.isSelected()) {
+            Prefs.put("ytdl", "yt-dlp");
+        }
+        else {
+            Prefs.put("ytdl", "youtube-dl");
+        }
+    }//GEN-LAST:event_chkytdlpActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8127,6 +8161,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVideoFilter;
     private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
+    private javax.swing.JCheckBox chkytdlp;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
     private javax.swing.JComboBox<String> cmbECMaturity;
