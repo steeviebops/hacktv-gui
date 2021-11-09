@@ -562,6 +562,7 @@ public class GUI extends javax.swing.JFrame {
         menuAstra10Template = new javax.swing.JMenuItem();
         menuBSBTemplate = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
+        menuWiki = new javax.swing.JMenuItem();
         menuGithubRepo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         menuAbout = new javax.swing.JMenuItem();
@@ -2409,6 +2410,14 @@ public class GUI extends javax.swing.JFrame {
         menuBar.add(templatesMenu);
 
         helpMenu.setText("Help");
+
+        menuWiki.setText("Wiki page");
+        menuWiki.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuWikiActionPerformed(evt);
+            }
+        });
+        helpMenu.add(menuWiki);
 
         menuGithubRepo.setText("GitHub repository");
         menuGithubRepo.setToolTipText("");
@@ -5624,10 +5633,11 @@ public class GUI extends javax.swing.JFrame {
                 " to stream the requested video.\n" +
             "Do you wish to continue?", AppName, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
-            String ytp;
+            final String ytp;
             String url;
+            final String p = Prefs.get("ytdl", "youtube-dl");
             if (RunningOnWindows) {
-                String ytdlexe = Prefs.get("ytdl", "youtube-dl") + ".exe";
+                String ytdlexe = p + ".exe";
                 // Check the JAR directory
                 if (Files.exists(Path.of(JarDir + ytdlexe))) {
                     ytp = JarDir + "/" + ytdlexe;
@@ -5638,7 +5648,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else {
-                ytp = Prefs.get("ytdl", "youtube-dl");
+                ytp = p;
             }
             // Remove the ytdl: prefix if specified
             if (input.toLowerCase().startsWith("ytdl:")) {
@@ -7949,23 +7959,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_lblSyntaxOptionDisabledMouseReleased
 
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
-        String u = "https://github.com/steeviebops/hacktv-gui/";
-        try {
-            ProcessBuilder p;
-            if (System.getProperty("os.name").contains("Windows")) {
-               p = new ProcessBuilder("cmd.exe", "/c", "start", u);
-            }
-            else if (System.getProperty("os.name").contains("Mac")) {
-               p = new ProcessBuilder("open", u);
-            }
-            else {
-               p = new ProcessBuilder("xdg-open", u);
-            }
-            p.start();
-        }
-        catch (IOException e) {
-            System.err.println("Unable to open default browser.");
-        }
+        Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/");
     }//GEN-LAST:event_menuGithubRepoActionPerformed
 
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
@@ -8100,6 +8094,10 @@ public class GUI extends javax.swing.JFrame {
             Prefs.put("ytdl", "youtube-dl");
         }
     }//GEN-LAST:event_chkytdlpActionPerformed
+
+    private void menuWikiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuWikiActionPerformed
+        Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/wiki");
+    }//GEN-LAST:event_menuWikiActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8233,6 +8231,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuOpen;
     private javax.swing.JMenuItem menuSave;
     private javax.swing.JMenuItem menuSaveAs;
+    private javax.swing.JMenuItem menuWiki;
     private javax.swing.JFileChooser outputFileChooser;
     private javax.swing.JPanel outputTab;
     private javax.swing.JPanel pathPanel;

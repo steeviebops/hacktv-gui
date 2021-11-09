@@ -129,6 +129,14 @@
             <Property name="text" type="java.lang.String" value="Help"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="menuWiki">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Wiki page"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuWikiActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="menuGithubRepo">
               <Properties>
                 <Property name="text" type="java.lang.String" value="GitHub repository"/>

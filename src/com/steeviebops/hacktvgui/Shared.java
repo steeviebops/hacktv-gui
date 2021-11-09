@@ -51,8 +51,22 @@ public class Shared {
 	    return false;
 	}
 	try {
-	    double d = Double.parseDouble(strNum);
-	} catch (NumberFormatException nfe) {
+	    Double.parseDouble(strNum);
+	}
+        catch (NumberFormatException nfe) {
+	    return false;
+	}
+	return true;
+    }
+    
+    public static boolean isHex(String strHex) {
+	if (strHex == null) {
+	    return false;
+	}
+	try {
+	    Long.parseLong(strHex, 16);
+	}
+        catch (NumberFormatException nfe) {
 	    return false;
 	}
 	return true;
@@ -207,4 +221,24 @@ public class Shared {
             return "";
         }        
     }
+    
+    public static void launchBrowser(String u){
+        try {
+            ProcessBuilder p;
+            if (System.getProperty("os.name").contains("Windows")) {
+               p = new ProcessBuilder("cmd.exe", "/c", "start", u);
+            }
+            else if (System.getProperty("os.name").contains("Mac")) {
+               p = new ProcessBuilder("open", u);
+            }
+            else {
+               p = new ProcessBuilder("xdg-open", u);
+            }
+            p.start();
+        }
+        catch (IOException e) {
+            System.err.println("Unable to open default browser.");
+        }        
+    }
+
 }
