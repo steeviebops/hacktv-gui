@@ -231,10 +231,20 @@ public class GUI extends javax.swing.JFrame {
             // Use the Mac menu bar
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
-	GUI mainForm = new GUI(args);
-        // Prevent window from being resized below the current size
-        mainForm.setMinimumSize(mainForm.getSize());
-	mainForm.setVisible(true);
+        try {
+            GUI mainForm = new GUI(args);
+            // Prevent window from being resized below the current size
+            mainForm.setMinimumSize(mainForm.getSize());
+            mainForm.setVisible(true);
+        }
+	catch (HeadlessException e) {
+            // Catch this error if we find we're running on a headless JRE or an
+            // OS with no GUI support (e.g. WSL or Unix without X).
+            System.err.println("A fatal error occurred while attempting to "
+                    + "initialise the window, please see details below.\n" + 
+                    e.getMessage());
+            System.exit(1);
+        }
     }
     
     /**
@@ -5965,7 +5975,11 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void checkTestCardStatus() {
-        if ( (!cmbTest.isEnabled()) && (Fork == "CJ") && (Lines == 625) && (HTVLoadInProgress == false) ) {
+        if ( (!cmbTest.isEnabled())
+                && (Fork == "CJ")
+                && (Lines == 625)
+                && (HTVLoadInProgress == false)
+                && cmbTest.getItemCount() > 1 ) {
             // Enable cmbTest (test card dropdown)
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
