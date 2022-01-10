@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Stephen McGarry
+ * Copyright (C) 2022 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -100,7 +100,6 @@ public class GUI extends javax.swing.JFrame {
     private String DownloadURL;
     private String HTMLTempFile;
     private String HTMLFile;
-    private String HTMLString;
     private File SelectedFile;
     private Path TempDir;
     private String TeletextPath;
@@ -315,6 +314,7 @@ public class GUI extends javax.swing.JFrame {
         addARCorrectionOptions();
         addTestCardOptions();
         addOutputDevices();
+        addCeefaxRegions();
         if (Fork.equals("CJ")) {
             captainJack();
         }
@@ -505,6 +505,8 @@ public class GUI extends javax.swing.JFrame {
         lblTeefax = new javax.swing.JLabel();
         lblSpark = new javax.swing.JLabel();
         pbTeletext = new javax.swing.JProgressBar();
+        btnNMSCeefax = new javax.swing.JButton();
+        lblNMSCeefax = new javax.swing.JLabel();
         scramblingTab = new javax.swing.JPanel();
         scramblingPanel = new javax.swing.JPanel();
         cmbScramblingType = new javax.swing.JComboBox<>();
@@ -552,6 +554,8 @@ public class GUI extends javax.swing.JFrame {
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
         chkytdlp = new javax.swing.JCheckBox();
+        cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
+        lblNMSCeefaxRegion = new javax.swing.JLabel();
         btnRun = new javax.swing.JButton();
         txtAllOptions = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
@@ -915,7 +919,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1350,7 +1354,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(51, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1559,7 +1563,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(252, Short.MAX_VALUE))
+                .addContainerGap(254, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1668,11 +1672,22 @@ public class GUI extends javax.swing.JFrame {
         lblDownload.setText("Please choose a teletext service to download.");
         lblDownload.setEnabled(false);
 
-        lblTeefax.setText("Download Teefax");
+        lblTeefax.setText("<html>Download Teefax.</html>");
         lblTeefax.setEnabled(false);
 
-        lblSpark.setText("Download SPARK from TVARK");
+        lblSpark.setText("<html>Download SPARK from TVARK. https://www.tvark.org/</html>");
         lblSpark.setEnabled(false);
+
+        btnNMSCeefax.setText("Ceefax");
+        btnNMSCeefax.setEnabled(false);
+        btnNMSCeefax.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNMSCeefaxActionPerformed(evt);
+            }
+        });
+
+        lblNMSCeefax.setText("<html>Download a Ceefax recreation from Nathan Media Services<br>https://www.nathanmediaservices.co.uk/</html>");
+        lblNMSCeefax.setEnabled(false);
 
         javax.swing.GroupLayout downloadPanelLayout = new javax.swing.GroupLayout(downloadPanel);
         downloadPanel.setLayout(downloadPanelLayout);
@@ -1681,34 +1696,43 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(downloadPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pbTeletext, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblDownload, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(downloadPanelLayout.createSequentialGroup()
-                        .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnSpark, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(btnNMSCeefax, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                            .addComponent(btnTeefax, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                            .addComponent(btnSpark, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
                         .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblSpark)))
-                    .addComponent(pbTeletext, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblDownload, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblSpark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblNMSCeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 76, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloadPanelLayout.setVerticalGroup(
             downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(downloadPanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, downloadPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblDownload)
                 .addGap(18, 18, 18)
                 .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTeefax))
+                    .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSpark, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSpark))
+                    .addComponent(lblSpark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
+                .addGroup(downloadPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnNMSCeefax, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(downloadPanelLayout.createSequentialGroup()
+                        .addComponent(lblNMSCeefax, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                        .addGap(4, 4, 4)))
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(pbTeletext, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout teletextTabLayout = new javax.swing.GroupLayout(teletextTab);
@@ -1729,7 +1753,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(teletextPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(117, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Teletext", teletextTab);
@@ -2052,7 +2076,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addContainerGap(123, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2195,6 +2219,11 @@ public class GUI extends javax.swing.JFrame {
 
         lblLookAndFeel.setText("Theme");
 
+        cmbLookAndFeel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbLookAndFeelMouseWheelMoved(evt);
+            }
+        });
         cmbLookAndFeel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbLookAndFeelActionPerformed(evt);
@@ -2207,6 +2236,19 @@ public class GUI extends javax.swing.JFrame {
                 chkytdlpActionPerformed(evt);
             }
         });
+
+        cmbNMSCeefaxRegion.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbNMSCeefaxRegionMouseWheelMoved(evt);
+            }
+        });
+        cmbNMSCeefaxRegion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbNMSCeefaxRegionActionPerformed(evt);
+            }
+        });
+
+        lblNMSCeefaxRegion.setText("Ceefax (NMS) region");
 
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
@@ -2223,8 +2265,12 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkLocalModes)
                     .addGroup(generalSettingsPanelLayout.createSequentialGroup()
                         .addComponent(lblLookAndFeel)
+                        .addGap(78, 78, 78)
+                        .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(generalSettingsPanelLayout.createSequentialGroup()
+                        .addComponent(lblNMSCeefaxRegion)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
@@ -2237,6 +2283,10 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkLocalModes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkytdlp)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNMSCeefaxRegion))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2265,7 +2315,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(103, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2885,8 +2935,6 @@ public class GUI extends javax.swing.JFrame {
     
     private void resetPreferences() {
         // Delete everything from the preference store and exit immediately.
-        // If i is set to 1, a message will be printed to the console.
-        // This is used for the emergency reset option from the command line.
         if ( Prefs.get("HackTVPath", null) != null ) Prefs.remove("HackTVPath");
         if ( Prefs.get("File1", null) != null ) Prefs.remove("File1");
         if ( Prefs.get("File2", null) != null ) Prefs.remove("File2");
@@ -2896,6 +2944,7 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");
         if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
         if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
+        if ( Prefs.get("CeefaxRegion", null) != null ) Prefs.remove("CeefaxRegion");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -4383,8 +4432,36 @@ public class GUI extends javax.swing.JFrame {
         // Restore ellipsis to Save option
         if (menuSave.getText() == "Save") { menuSave.setText("Save..."); }
     }
+    
+    private void addCeefaxRegions() {
+        // Populate the Ceefax regions to the combobox in GUI settings
+        String[] CeefaxRegions = {
+            "East",
+            "East Midlands",
+            "London",
+            "Northern Ireland",
+            "Scotland",
+            "South",
+            "South West",
+            "Wales",
+            "West",
+            "Worldwide",
+            "Yorkshire & Lincolnshire"
+        };
+        cmbNMSCeefaxRegion.removeAllItems();
+        cmbNMSCeefaxRegion.setModel(new DefaultComboBoxModel<>(CeefaxRegions));
+        // Read a previously saved region from the prefs store.
+        // If not found or invalid, default to Worldwide.
+        int i = Prefs.getInt("CeefaxRegion", 9);
+        if ( (i + 1 <= cmbNMSCeefaxRegion.getItemCount()) && (i >= 0) ) {
+            cmbNMSCeefaxRegion.setSelectedIndex(i);
+        }
+        else {
+            cmbNMSCeefaxRegion.setSelectedIndex(9);
+        }
+    }
 
-    private void downloadTeletext(String url, String destinationFile) {
+    private void downloadTeletext(String url, String destinationFile, String HTMLString) {
         ArrayList<String> TeletextLinks = new ArrayList<>();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         // Downloads the specified file from URL and saves it to DestinationFile
@@ -4393,6 +4470,7 @@ public class GUI extends javax.swing.JFrame {
         // Specify the destination location of the HTML file we will download
         String DownloadPath = TempDir + OS_SEP + destinationFile;
         try {
+            DownloadInProgress = true;
             // If the file already exists from a previous attempt, delete it
             File f = new File(DownloadPath);
             if (f.exists()) Shared.deleteFSObject(f.toPath());
@@ -4412,73 +4490,89 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker<Integer, Integer> downloadPages = new SwingWorker<Integer, Integer>() {
             @Override
             protected Integer doInBackground() throws Exception {
-            File f;
-            Path fd = Paths.get(TempDir + OS_SEP + HTMLTempFile);
-            // Try to read the downloaded index file to a string
-            try {
-                HTMLFile = Files.readString(fd);
-            }
-            catch (IOException ex) {
-                System.err.println(ex);
-            }
-            // Search the string for the pattern defined in the teletext button
-            Pattern pattern = Pattern.compile(HTMLString, Pattern.DOTALL);
-            Matcher matcher = pattern.matcher(HTMLFile);
-            while (matcher.find()) {
-                // Populate the results to the TeletextLinks array
-                // Filter TTI and TTIX files only
-                if ( (matcher.group(1).endsWith(".tti")) || (matcher.group(1).endsWith(".ttix")) ) {
-                    TeletextLinks.add(matcher.group(1));
-                }
-            }
-            if (TeletextLinks.isEmpty()) {
-                return 3;
-            }
-            // Set SPARK prerequisites - change URL first
-            if (DownloadURL == "https://github.com/spark-teletext/spark-teletext/") {
-                DownloadURL = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
-                f = new File(TempDir + OS_SEP + "spark");
-            } else {
-            // Set Teefax temp directory
-                f = new File(TempDir + OS_SEP + "teefax");
-            }
-            /*  Delete this directory if it already exists (e.g. from a previous
-                download attempt).
-            */
-            if (Files.exists(f.toPath())) {
+                File f;
+                Path fd = Paths.get(TempDir + OS_SEP + HTMLTempFile);
+                // Try to read the downloaded index file to a string
                 try {
-                    Shared.deleteFSObject(f.toPath());
-                } catch (IOException ex) {
+                    HTMLFile = Files.readString(fd);
+                }
+                catch (IOException ex) {
                     System.err.println(ex);
                 }
-            }
-            // Create temp directory
-            if (!f.isDirectory()) f.mkdirs();
-            TeletextPath = f.toString();
-
-            for(int i = 0; i < TeletextLinks.size(); i++) {
-                int j = i+1;
-                if ( TeletextLinks.get(i).endsWith("tti") || TeletextLinks.get(i).endsWith("ttix") ) {
-                    try {
-                        // If the Stop button has been pressed, then stop
-                        if (DownloadCancelled) {
-                            DownloadCancelled = false;
-                            DownloadInProgress = false;
-                            return 1;
-                        }
-                        publish(j);
-                        // Do the actual downloading
-                        Shared.download(DownloadURL + TeletextLinks.get(i), TeletextPath + OS_SEP + TeletextLinks.get(i));
-                        // Stop when the integer value reaches the size of the teletext array
-                        if (j == TeletextLinks.size() ) { return 0; }
-                    }
-                    catch (IOException ex) {
-                        System.err.println(ex);
-                        return 2;
+                // Search the string for the pattern defined in the teletext button
+                Pattern pattern = Pattern.compile(HTMLString, Pattern.DOTALL);
+                Matcher matcher = pattern.matcher(HTMLFile);
+                while (matcher.find()) {
+                    // Populate the results to the TeletextLinks array
+                    // Filter TTI and TTIX files only
+                    if ( (matcher.group(1).endsWith(".tti")) || (matcher.group(1).endsWith(".ttix")) ) {
+                        TeletextLinks.add(matcher.group(1));
                     }
                 }
-            }
-            return 998;
+                if (TeletextLinks.isEmpty()) {
+                    return 3;
+                }
+                switch (DownloadURL) {
+                    case "https://github.com/spark-teletext/spark-teletext/":
+                        // Set SPARK prerequisites - change URL first
+                        DownloadURL = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
+                        f = new File(TempDir + OS_SEP + "spark");
+                        break;
+                    case "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/":
+                        // Set Ceefax temp directory
+                        f = new File(TempDir + OS_SEP + "ceefax");
+                        break;
+                    case "http://teastop.plus.com/svn/teletext/":
+                        // Set Teefax temp directory
+                        f = new File(TempDir + OS_SEP + "teefax");
+                        break;
+                    default:
+                        if (DownloadURL.startsWith("https://internal.nathanmediaservices.co.uk/svn/ceefax/")) {
+                            // This is most likely a Ceefax region
+                            f = new File(TempDir + OS_SEP + "ceefax_region");
+                        }
+                        else {
+                            System.err.println("Unknown teletext URL");
+                            return 997;
+                        }
+                        break;
+                }
+                /*  Delete this directory if it already exists (e.g. from a previous
+                    download attempt).
+                */
+                if (Files.exists(f.toPath())) {
+                    try {
+                        Shared.deleteFSObject(f.toPath());
+                    } catch (IOException ex) {
+                        System.err.println(ex);
+                    }
+                }
+                // Create temp directory
+                if (!f.isDirectory()) f.mkdirs();
+                TeletextPath = f.toString();
+
+                for(int i = 0; i < TeletextLinks.size(); i++) {
+                    int j = i+1;
+                    if ( TeletextLinks.get(i).endsWith("tti") || TeletextLinks.get(i).endsWith("ttix") ) {
+                        try {
+                            // If the Stop button has been pressed, then stop
+                            if (DownloadCancelled) {
+                                DownloadCancelled = false;
+                                DownloadInProgress = false;
+                                return 1;
+                            }
+                            publish(j);
+                            // Do the actual downloading
+                            Shared.download(DownloadURL + TeletextLinks.get(i), TeletextPath + OS_SEP + TeletextLinks.get(i));
+                            // Stop when the integer value reaches the size of the teletext array
+                            if (j == TeletextLinks.size() ) { return 0; }
+                        }
+                        catch (IOException ex) {
+                            return 2;
+                        }
+                    }
+                }
+                return 998;
             }
 
             @Override
@@ -4487,7 +4581,8 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     // Retrieve the status code from doInBackground.
                     status = get();
-                } catch (InterruptedException | ExecutionException ex) {
+                }
+                catch (InterruptedException | ExecutionException ex) {
                     System.err.println(ex);
                     status = 999;
                 }
@@ -4496,6 +4591,50 @@ public class GUI extends javax.swing.JFrame {
                         // All good
                         txtAllOptions.setText("Done");
                         txtTeletextSource.setText(TeletextPath);
+                        // Check if we just downloaded Ceefax
+                        if (DownloadURL.equals("https://internal.nathanmediaservices.co.uk/svn/ceefax/national/")) {
+                            // It's not enough to just download the national files, we also need a region
+                            String[] CeefaxRegionArray = new String[] {
+                                "East",
+                                "EastMidlands",
+                                "London",
+                                "NorthernIreland",
+                                "Scotland",
+                                "South",
+                                "SouthWest",
+                                "Wales",
+                                "West",
+                                "Worldwide",
+                                "Yorks&Lincs"
+                            };
+                            HTMLTempFile = "ceefax_region.html";
+                            DownloadURL = "https://internal.nathanmediaservices.co.uk/svn/ceefax/"
+                                    + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/";
+                            // Download regional index page
+                            downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
+                        }
+                        else if (HTMLTempFile.equals("ceefax_region.html")) {
+                            // Move the regional files to the national directory
+                            File rd = new File(TempDir + "/ceefax_region");
+                            File nd = new File(TempDir + "/ceefax");
+                            if ( (rd.isDirectory()) && (nd.isDirectory()) ) {
+                                File[] f = rd.listFiles();
+                                for (int i = 0; i < f.length; i++) {
+                                    try {
+                                        Files.move(f[i].toPath(), Path.of(nd + "/" + f[i].getName()), REPLACE_EXISTING);
+                                    }
+                                    catch (IOException e) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "An error occurred when merging the regional Ceefax data with the national data.\n"
+                                                + e, AppName, JOptionPane.WARNING_MESSAGE);
+                                        break;
+                                    }
+                                }
+                            }
+                            // Reset the source directory to the national directory,
+                            // which hopefully now has the regional files merged into it
+                            txtTeletextSource.setText(TeletextPath.substring(0, TeletextPath.length() - 7));
+                        }
                         break;
                     case 1:
                         // Download cancelled by the user
@@ -4552,12 +4691,21 @@ public class GUI extends javax.swing.JFrame {
         // re-enables them.
         btnTeefax.setText("Teefax");
         btnTeefax.setEnabled(true);
+        lblTeefax.setEnabled(true);
         btnSpark.setText("SPARK");
         btnSpark.setEnabled(true);
+        lblSpark.setEnabled(true);
+        btnNMSCeefax.setText("Ceefax");
+        btnNMSCeefax.setEnabled(true);
+        lblNMSCeefax.setEnabled(true);
+        chkTeletext.setEnabled(true);
+        txtTeletextSource.setEnabled(true);
+        btnTeletextBrowse.setEnabled(true);
         btnRun.setEnabled(true);
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        DownloadInProgress = false;
     }
-    
+      
     private void enableColourControl() {
         chkColour.setEnabled(true);
     }
@@ -6572,7 +6720,7 @@ public class GUI extends javax.swing.JFrame {
               v = "";
         }
         mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
-        JOptionPane.showMessageDialog(null, AppName + v + mv + "\n\nCreated 2020-2021 by Stephen McGarry.\n" +
+        JOptionPane.showMessageDialog(null, AppName + v + mv + "\n\nCreated 2020-2022 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
@@ -6737,15 +6885,21 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             btnSpark.setText("Stop");
+            chkTeletext.setEnabled(false);
+            txtTeletextSource.setEnabled(false);
+            btnTeletextBrowse.setEnabled(false);
             btnTeefax.setEnabled(false);
+            lblTeefax.setEnabled(false);
+            btnNMSCeefax.setEnabled(false);
+            lblNMSCeefax.setEnabled(false);
             btnRun.setEnabled(false);
             DownloadCancelled = false;
             // Set variables
             DownloadURL = "https://github.com/spark-teletext/spark-teletext/";
-            HTMLString = ".tti\">(.*?)</a>";
+            String HTMLString = ".tti\">(.*?)</a>";
             HTMLTempFile = "spark.html";
             // Download index page
-            downloadTeletext(DownloadURL, HTMLTempFile);
+            downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
         }
     }//GEN-LAST:event_btnSparkActionPerformed
 
@@ -6755,15 +6909,21 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             btnTeefax.setText("Stop");
+            chkTeletext.setEnabled(false);
+            txtTeletextSource.setEnabled(false);
+            btnTeletextBrowse.setEnabled(false);
             btnSpark.setEnabled(false);
+            lblSpark.setEnabled(false);
+            btnNMSCeefax.setEnabled(false);
+            lblNMSCeefax.setEnabled(false);
             btnRun.setEnabled(false);
             DownloadCancelled = false;
             // Set variables
             DownloadURL = "http://teastop.plus.com/svn/teletext/";
-            HTMLString = "\">(.*?)</a>";
+            String HTMLString = "\">(.*?)</a>";
             HTMLTempFile = "teefax.html";
             // Download index page
-            downloadTeletext(DownloadURL, HTMLTempFile);
+            downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
         }
     }//GEN-LAST:event_btnTeefaxActionPerformed
 
@@ -6784,9 +6944,11 @@ public class GUI extends javax.swing.JFrame {
             downloadPanel.setEnabled(true);
             btnTeefax.setEnabled(true);
             btnSpark.setEnabled(true);
+            btnNMSCeefax.setEnabled(true);
             lblDownload.setEnabled(true);
             lblTeefax.setEnabled(true);
             lblSpark.setEnabled(true);
+            lblNMSCeefax.setEnabled(true);
         }
         else {
             btnTeletextBrowse.setEnabled(false);
@@ -6797,9 +6959,11 @@ public class GUI extends javax.swing.JFrame {
             downloadPanel.setEnabled(false);
             btnTeefax.setEnabled(false);
             btnSpark.setEnabled(false);
+            btnNMSCeefax.setEnabled(false);
             lblDownload.setEnabled(false);
             lblTeefax.setEnabled(false);
             lblSpark.setEnabled(false);
+            lblNMSCeefax.setEnabled(false);
         }
     }//GEN-LAST:event_chkTeletextActionPerformed
 
@@ -8112,6 +8276,42 @@ public class GUI extends javax.swing.JFrame {
     private void menuWikiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuWikiActionPerformed
         Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/wiki");
     }//GEN-LAST:event_menuWikiActionPerformed
+
+    private void cmbNMSCeefaxRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionActionPerformed
+        Prefs.putInt("CeefaxRegion", cmbNMSCeefaxRegion.getSelectedIndex());
+    }//GEN-LAST:event_cmbNMSCeefaxRegionActionPerformed
+
+    private void btnNMSCeefaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNMSCeefaxActionPerformed
+        if ((btnNMSCeefax.getText()).contains("Stop")) {
+            DownloadCancelled = true;
+        }
+        else {
+            btnNMSCeefax.setText("Stop");
+            chkTeletext.setEnabled(false);
+            txtTeletextSource.setEnabled(false);
+            btnTeletextBrowse.setEnabled(false);
+            btnTeefax.setEnabled(false);
+            lblTeefax.setEnabled(false);
+            btnSpark.setEnabled(false);
+            lblSpark.setEnabled(false);
+            btnRun.setEnabled(false);
+            DownloadCancelled = false;
+            // Set variables
+            DownloadURL = "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/";
+            String HTMLString = "name=\"(.*?)\"";
+            HTMLTempFile = "ceefax_national.html";
+            // Download index page
+            downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
+        }
+    }//GEN-LAST:event_btnNMSCeefaxActionPerformed
+
+    private void cmbLookAndFeelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbLookAndFeelMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLookAndFeel);
+    }//GEN-LAST:event_cmbLookAndFeelMouseWheelMoved
+
+    private void cmbNMSCeefaxRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbNMSCeefaxRegion);
+    }//GEN-LAST:event_cmbNMSCeefaxRegionMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8127,6 +8327,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnClearMRUList;
     private javax.swing.JButton btnDownloadHackTV;
     private javax.swing.JButton btnHackTVPath;
+    private javax.swing.JButton btnNMSCeefax;
     private javax.swing.JButton btnPlaylistDown;
     private javax.swing.JButton btnPlaylistStart;
     private javax.swing.JButton btnPlaylistUp;
@@ -8181,6 +8382,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbLogo;
     private javax.swing.JComboBox<String> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
+    private javax.swing.JComboBox<String> cmbNMSCeefaxRegion;
     private javax.swing.JComboBox<String> cmbOutputDevice;
     private javax.swing.JComboBox<String> cmbScramblingKey1;
     private javax.swing.JComboBox<String> cmbScramblingKey2;
@@ -8215,6 +8417,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblLookAndFeel;
+    private javax.swing.JLabel lblNMSCeefax;
+    private javax.swing.JLabel lblNMSCeefaxRegion;
     private javax.swing.JLabel lblOutputDevice;
     private javax.swing.JLabel lblOutputDevice2;
     private javax.swing.JLabel lblRegion;

@@ -360,7 +360,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="42" max="32767" attributes="0"/>
+                          <EmptySpace pref="44" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -798,7 +798,7 @@
                           <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="51" max="32767" attributes="0"/>
+                          <EmptySpace pref="53" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1423,7 +1423,7 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="252" max="32767" attributes="0"/>
+                          <EmptySpace pref="254" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1713,7 +1713,7 @@
                           <Component id="teletextPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="downloadPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="117" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1848,22 +1848,25 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="pbTeletext" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="lblDownload" alignment="1" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="btnTeefax" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
-                                          <Component id="btnSpark" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                          <Component id="btnNMSCeefax" alignment="0" pref="120" max="32767" attributes="0"/>
+                                          <Component id="btnTeefax" alignment="0" pref="120" max="32767" attributes="0"/>
+                                          <Component id="btnSpark" alignment="0" pref="120" max="32767" attributes="0"/>
                                       </Group>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="lblTeefax" min="-2" pref="176" max="-2" attributes="0"/>
-                                          <Component id="lblSpark" min="-2" max="-2" attributes="0"/>
+                                          <Component id="lblTeefax" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="lblSpark" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="lblNMSCeefax" min="-2" max="-2" attributes="0"/>
                                       </Group>
+                                      <EmptySpace min="0" pref="76" max="32767" attributes="0"/>
                                   </Group>
-                                  <Component id="pbTeletext" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="lblDownload" alignment="1" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1871,7 +1874,7 @@
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="lblDownload" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -1885,8 +1888,16 @@
                                   <Component id="lblSpark" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="btnNMSCeefax" min="-2" pref="50" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="lblNMSCeefax" pref="50" max="32767" attributes="0"/>
+                                      <EmptySpace min="4" pref="4" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace type="separate" max="32767" attributes="0"/>
                               <Component id="pbTeletext" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1919,17 +1930,32 @@
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblTeefax">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Download Teefax"/>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download Teefax.&lt;/html&gt;"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblSpark">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Download SPARK from TVARK"/>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download SPARK from TVARK. https://www.tvark.org/&lt;/html&gt;"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JProgressBar" name="pbTeletext">
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnNMSCeefax">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Ceefax"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNMSCeefaxActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblNMSCeefax">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download a Ceefax recreation from Nathan Media Services&lt;br&gt;https://www.nathanmediaservices.co.uk/&lt;/html&gt;"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1959,7 +1985,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="121" max="32767" attributes="0"/>
+                          <EmptySpace pref="123" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2445,7 +2471,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="103" max="32767" attributes="0"/>
+                          <EmptySpace pref="77" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2633,7 +2659,7 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
+                          <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="chkytdlp" min="-2" max="-2" attributes="0"/>
@@ -2645,8 +2671,13 @@
                                   <Component id="chkLocalModes" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="lblLookAndFeel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="78" max="-2" attributes="0"/>
                                       <Component id="cmbLookAndFeel" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="lblNMSCeefaxRegion" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="cmbNMSCeefaxRegion" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
@@ -2664,6 +2695,11 @@
                               <Component id="chkLocalModes" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkytdlp" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="cmbNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="cmbLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -2717,6 +2753,7 @@
                         </Property>
                       </Properties>
                       <Events>
+                        <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbLookAndFeelMouseWheelMoved"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbLookAndFeelActionPerformed"/>
                       </Events>
                       <AuxValues>
@@ -2730,6 +2767,20 @@
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkytdlpActionPerformed"/>
                       </Events>
+                    </Component>
+                    <Component class="javax.swing.JComboBox" name="cmbNMSCeefaxRegion">
+                      <Events>
+                        <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbNMSCeefaxRegionMouseWheelMoved"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbNMSCeefaxRegionActionPerformed"/>
+                      </Events>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                      </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblNMSCeefaxRegion">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Ceefax (NMS) region"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
