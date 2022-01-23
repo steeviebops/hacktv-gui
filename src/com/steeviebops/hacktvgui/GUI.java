@@ -6122,6 +6122,14 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
+    private void showEMMWarning() {
+        if (!HTVLoadInProgress) JOptionPane.showMessageDialog(null,
+                "Care is advised when using this option.\n" +
+                "Incorrect use may permanently damage the viewing card.\n" +
+                "Do not use this option on an issue number other than the one selected.",
+                AppName, JOptionPane.WARNING_MESSAGE);
+    }
+    
     private void checkTestCardStatus() {
         if ( (!cmbTest.isEnabled())
                 && (Fork == "CJ")
@@ -6789,6 +6797,7 @@ public class GUI extends javax.swing.JFrame {
             txtCardNumber.setEnabled(true);
             lblEMMCardNumber.setEnabled(true);
             EMMParam = "--disableemm";
+            showEMMWarning();
         }
         else {
             EMMParam = "";
@@ -6806,6 +6815,7 @@ public class GUI extends javax.swing.JFrame {
             txtCardNumber.setEnabled(true);
             lblEMMCardNumber.setEnabled(true);
             EMMParam = "--enableemm";
+            showEMMWarning();
         }
         else {
             EMMParam = "";
@@ -7339,6 +7349,10 @@ public class GUI extends javax.swing.JFrame {
     private void chkAmpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAmpActionPerformed
         if (chkAmp.isSelected()) {
             RFampParam = "--amp";
+            if (!HTVLoadInProgress) JOptionPane.showMessageDialog(null,
+                    "Care is advised when using this option.\n" +
+                    "Incorrect use may permanently damage the amplifier.",
+                    AppName, JOptionPane.WARNING_MESSAGE);
         }
         else {
             RFampParam = "";
