@@ -5570,8 +5570,8 @@ public class GUI extends javax.swing.JFrame {
                 // Copy the demo page resource to the temp directory
                 try {
                     Shared.copyResource("/com/steeviebops/resources/demo.tti", TempDir.toString() + "/demo.tti", this.getClass());   
-                    if (RunningOnWindows) {
-                        TeletextSource = '\"' + TempDir.toString() + OS_SEP + "demo.tti"+ '\"';
+                    if ( (RunningOnWindows) && TempDir.toString().contains(" ") ) {
+                        TeletextSource = '\u0022' + TempDir.toString() + OS_SEP + "demo.tti" + '\u0022';
                     }
                     else {
                         TeletextSource = TempDir.toString() + OS_SEP + "demo.tti";
@@ -5580,14 +5580,15 @@ public class GUI extends javax.swing.JFrame {
                     System.err.println("An error occurred while attempting to copy to the temp directory: " + ex);
                 }
             }
-            else if ( (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) && (RunningOnWindows) ) {
-                TeletextSource = "raw:" + '\"' + txtTeletextSource.getText() + '\"';
+            else if ( (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) 
+                    && (RunningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
+                TeletextSource = "raw:" + '\u0022' + txtTeletextSource.getText() + '\u0022';
             }
             else if (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) {
                 TeletextSource = "raw:" + txtTeletextSource.getText();
             }
-            else if (RunningOnWindows) {
-                TeletextSource = '\"' + txtTeletextSource.getText() + '\"';
+            else if ( (RunningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
+                TeletextSource = '\u0022' + txtTeletextSource.getText() + '\u0022';
             }
             else {
                 TeletextSource = txtTeletextSource.getText();
@@ -6178,16 +6179,14 @@ public class GUI extends javax.swing.JFrame {
                     return false;
                 }
                 else {
-                    if (RunningOnWindows) {
-                        // Add quotes on Windows systems to handle paths with white spaces
-                        OutputDevice = '\"' + txtOutputDevice.getText()+ '\"';
+                    if ( (RunningOnWindows) && txtOutputDevice.getText().contains(" ") ) {
+                        OutputDevice = '\u0022' + txtOutputDevice.getText() + '\u0022';
                     }
                     else {
-                        // Don't add quotes on Unix systems as this just messes things up
                         OutputDevice = txtOutputDevice.getText();
                     }
                     if (cmbFileType.getSelectedIndex() != 3) {
-                        FileType = "-t" + cmbFileType.getItemAt(cmbFileType.getSelectedIndex());
+                        FileType = cmbFileType.getItemAt(cmbFileType.getSelectedIndex());
                     }
                     return true;
                 }
@@ -6353,7 +6352,10 @@ public class GUI extends javax.swing.JFrame {
         if (!FindKey.isEmpty()) allArgs.add(FindKey);
         if (!VITS.isEmpty()) allArgs.add(VITS);
         if (!ColourParam.isEmpty()) allArgs.add(ColourParam);
-        if (!FileType.isEmpty()) allArgs.add(FileType);
+        if (!FileType.isEmpty()) {
+            allArgs.add("-t");
+            allArgs.add(FileType);
+        }
         if (!VolumeParam.isEmpty()) allArgs.add(VolumeParam);
         if (!txtVolume.getText().isEmpty()) allArgs.add(txtVolume.getText());
         if (!DownmixParam.isEmpty()) allArgs.add(DownmixParam);        
@@ -6370,7 +6372,7 @@ public class GUI extends javax.swing.JFrame {
                         r -> {
                             // Add the rest. except for the start point or test cards
                             if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != StartPoint) ) {
-                                if (RunningOnWindows) {
+                                if ( (RunningOnWindows) && (PlaylistAL.get(r).contains(" "))) {
                                     allArgs.add('\u0022' + PlaylistAL.get(r) + '\u0022');
                                 }
                                 else {
@@ -6395,7 +6397,7 @@ public class GUI extends javax.swing.JFrame {
                         allArgs.add(PlaylistAL.get(i));
                     }
                     else {
-                        if (RunningOnWindows) {
+                        if ( (RunningOnWindows) && PlaylistAL.get(i).contains(" ") ) {
                             allArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
                         }
                         else {
@@ -6410,18 +6412,11 @@ public class GUI extends javax.swing.JFrame {
             // Specify stdIn as the input
             allArgs.add("-");
         }
-        else if (RunningOnWindows) {
-            // If it's a local path, add quotes to it, but don't for the test 
-            // card or a HTTP stream.
-            if ( (InputSource.contains("test:")) ||
-                (InputSource.startsWith("http")) ) {
-                allArgs.add(InputSource);
-            }
-            else {
-                allArgs.add('\"' + InputSource + '\"');
-            }
-        } else {
-            // Don't add quotes on Unix systems as this just messes things up
+        else if ( (RunningOnWindows) && InputSource.contains(" ")) {
+            // Add quotation marks if path contains whitespaces on Windows
+            allArgs.add('\u0022' + InputSource + '\u0022');
+        }
+        else {
             allArgs.add(InputSource);
         }
         // End add to arraylist
