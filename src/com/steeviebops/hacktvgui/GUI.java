@@ -4860,15 +4860,15 @@ public class GUI extends javax.swing.JFrame {
         switch (sconf) {
             case "videocrypt":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
-                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("28");
+                if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
+                if (!HTVLoadInProgress) txtPixelRate.setText("28");
                 disableScramblingKey2();                
                 sconf = "videocrypt";
                 break;
             case "videocrypt2":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
-                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("28");
+                if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
+                if (!HTVLoadInProgress) txtPixelRate.setText("28");
                 disableScramblingKey2();
                 sconf = "videocrypt2";
                 break;
@@ -4876,26 +4876,26 @@ public class GUI extends javax.swing.JFrame {
                 disableScramblingKey2();
                 // Set pixel rate to 17.75 MHz (more accurately 17.734475 but
                 // this is reported by hacktv as unsuitable for 625/50)
-                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("17.75");
+                if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
+                if (!HTVLoadInProgress) txtPixelRate.setText("17.75");
                 sconf = "videocrypts";
                 break;
             case "syster":
-                // No pixel sample rate required for Syster
+                // No pixel rate required for Syster
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
             case "d11":
                 // Set pixel rate to 17.75 MHz
-                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("17.75");
+                if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
+                if (!HTVLoadInProgress) txtPixelRate.setText("17.75");
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
             case "systercnr":
                 // Set pixel rate to 17.75 MHz
-                if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-                txtPixelRate.setText("17.75");
+                if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
+                if (!HTVLoadInProgress) txtPixelRate.setText("17.75");
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
