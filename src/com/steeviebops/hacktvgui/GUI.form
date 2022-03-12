@@ -2057,7 +2057,7 @@
                               <Component id="chkShowECM" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="emmPanel" pref="0" max="32767" attributes="0"/>
+                                  <Component id="emmPanel" max="32767" attributes="0"/>
                                   <Component id="scramblingOptionsPanel" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
@@ -2670,17 +2670,18 @@
                                   </Group>
                                   <Component id="chkLocalModes" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="lblLookAndFeel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="78" max="-2" attributes="0"/>
-                                      <Component id="cmbLookAndFeel" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="lblNMSCeefaxRegion" min="-2" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                          <Component id="lblLookAndFeel" max="32767" attributes="0"/>
+                                          <Component id="lblNMSCeefaxRegion" max="32767" attributes="0"/>
+                                      </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="cmbNMSCeefaxRegion" min="-2" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="cmbNMSCeefaxRegion" min="-2" max="-2" attributes="0"/>
+                                          <Component id="cmbLookAndFeel" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace pref="223" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2700,7 +2701,7 @@
                                   <Component id="cmbNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="cmbLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
