@@ -6,7 +6,7 @@ The application has been tested on Windows 10, Ubuntu 20.04, 21.04 and Fedora Wo
 
 ### Pre-requisites
 - A Java 11 or later runtime environment is required. Java 8 will not work. <a href="https://adoptopenjdk.net">AdoptOpenJDK</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
-- To use youtube-dl features, a copy of <a href="https://github.com/ytdl-org/youtube-dl/releases/">youtube-dl</a> or <a href="https://github.com/yt-dlp/yt-dlp/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file.
+- To use youtube-dl features, a copy of <a href="https://github.com/ytdl-org/youtube-dl/releases/">youtube-dl</a> or <a href="https://github.com/yt-dlp/yt-dlp/releases/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file.
 - Windows doesn't have a native way of programmatically sending SIGINT signals to gracefully close hacktv. Therefore, a helper application (windows-kill) is required when running hacktv-gui on Windows. If windows-kill cannot be found on startup, you'll be prompted to download it. This can also be done from the GUI settings tab. Alternatively, you can download it from https://github.com/ElyDotDev/windows-kill/releases/ and save it in the same directory as the JAR file.
 
 ### Licence information
