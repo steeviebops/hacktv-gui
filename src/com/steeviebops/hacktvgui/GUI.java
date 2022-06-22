@@ -254,7 +254,11 @@ public class GUI extends javax.swing.JFrame {
         // If the emergency reset command is specified, remove all prefs.
         // This is a safety net, in case any bad preferences prevent us from running.
         // We handle this as early as possible to ensure it will work correctly.
-        if ((args.length > 0) && (args[0].toLowerCase().equals("reset")) ) {
+        if ( (args.length > 0) && (args[0].toLowerCase().equals("reset")) ||
+                (args.length > 0) && (args[0].toLowerCase().equals("-reset")) ||
+                (args.length > 0) && (args[0].toLowerCase().equals("--reset")) ||
+                (args.length > 0) && (args[0].toLowerCase().equals("/reset")) )
+        {
             // Reset all preferences and exit
             resetPreferences();
         }
@@ -2743,7 +2747,8 @@ public class GUI extends javax.swing.JFrame {
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";                
             }
         }
-        else if (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) {
+        else if ( (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) &&
+                (cmbOutputDevice.getItemCount() == 0) ) {
             int q = JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
                     + "Do you want to use this file?\n"
                     + "You can suppress this prompt on the GUI settings tab.", AppName, JOptionPane.YES_NO_OPTION);
@@ -2917,7 +2922,7 @@ public class GUI extends javax.swing.JFrame {
             }
             return b;            
         }
-    }    
+    }
 
     private void loadPreferences(){
         // Check preferences node for the path to hacktv
@@ -5490,6 +5495,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             JOptionPane.showMessageDialog(null, "This mode is not supported by the selected output device.", AppName, JOptionPane.WARNING_MESSAGE);
             cmbVideoFormat.setSelectedIndex(PreviousIndex);
+            checkVideoFormat();
             return false;
         }
     }
@@ -7482,6 +7488,8 @@ public class GUI extends javax.swing.JFrame {
             detectFork();   
             selectModesFile();
             openModesFile();
+            populateVideoModes();
+            selectDefaultMode();
             if (Fork.equals("CJ")) {
                 captainJack();
             }
