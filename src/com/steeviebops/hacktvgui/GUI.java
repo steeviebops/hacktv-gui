@@ -590,6 +590,7 @@ public class GUI extends javax.swing.JFrame {
         setTitle("GUI frontend for hacktv");
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/steeviebops/resources/test.gif")).getImage());
 
+        sourceFileChooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_AND_DIRECTORIES);
         sourceFileChooser.setMultiSelectionEnabled(true);
 
         teletextFileChooser.setDialogTitle("Select a teletext file or directory");
