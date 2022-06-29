@@ -2564,7 +2564,8 @@ public class GUI extends javax.swing.JFrame {
             chkTextSubtitles,
             chkA2Stereo,
             chkPixelRate,
-            chkRandom
+            chkRandom,
+            chkNoDate
         };
     }
     
@@ -3780,6 +3781,10 @@ public class GUI extends javax.swing.JFrame {
             txtECprognum.setText(String.valueOf(ImportedProgNumber));
             txtECprogcost.setText(String.valueOf(ImportedProgCost));
         }
+        // EuroCrypt "No Date" setting
+        if (INIFile.getBooleanFromINI(fileContents, "hacktv", "ec-nodate")) {
+            chkNoDate.doClick();
+        }
         // ACP
         if (INIFile.getBooleanFromINI(fileContents, "hacktv", "acp")) {
             chkACP.doClick();
@@ -4131,6 +4136,10 @@ public class GUI extends javax.swing.JFrame {
             if (!txtECprogcost.getText().isBlank()) {
                 FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-cost", Integer.parseInt(txtECprogcost.getText()));
             }
+        }
+        // EuroCrypt "No Date" setting
+        if (chkNoDate.isSelected()) {
+            FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "ec-nodate", 1);
         }
         // Show card serial
         if (chkShowCardSerial.isSelected()) { FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "showserial", 1); }
