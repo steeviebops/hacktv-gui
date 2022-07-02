@@ -94,7 +94,7 @@ public class GUI extends javax.swing.JFrame {
     private boolean ACPSupported = false;
 
     // Declare a variable to determine the selected fork
-    private String Fork;
+    private boolean CaptainJack;
 
     // Declare Teletext-related variables that are reused across multiple subs
     private String DownloadURL;
@@ -319,7 +319,7 @@ public class GUI extends javax.swing.JFrame {
         addTestCardOptions();
         addOutputDevices();
         addCeefaxRegions();
-        if (Fork.equals("CJ")) {
+        if (CaptainJack) {
             captainJack();
         }
         else {
@@ -590,7 +590,6 @@ public class GUI extends javax.swing.JFrame {
         setTitle("GUI frontend for hacktv");
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/steeviebops/resources/test.gif")).getImage());
 
-        sourceFileChooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_AND_DIRECTORIES);
         sourceFileChooser.setMultiSelectionEnabled(true);
 
         teletextFileChooser.setDialogTitle("Select a teletext file or directory");
@@ -2971,11 +2970,12 @@ public class GUI extends javax.swing.JFrame {
         // Check if the specified path does not exist or is a directory
         if (!Files.exists(Path.of(HackTVPath))) {
             lblFork.setText("Not found");
-            Fork = "";
+            CaptainJack = false;
             return;
-        } else if (Files.isDirectory(Path.of(HackTVPath))) {
+        }
+        else if (Files.isDirectory(Path.of(HackTVPath))) {
             lblFork.setText("Invalid path");
-            Fork = "";
+            CaptainJack = false;
             return;            
         }
         /*  Check the size of the specified file.
@@ -2985,7 +2985,7 @@ public class GUI extends javax.swing.JFrame {
         File f = new File(HackTVPath);
         if (f.length() > 104857600) {
             lblFork.setText("Invalid file (too large)");
-            Fork = "";
+            CaptainJack = false;
             return;
         }
         // Test the specified file by loading it into memory using a BufferedReader.
@@ -2998,12 +2998,12 @@ public class GUI extends javax.swing.JFrame {
                 if (c.contains("--enableemm")) {
                     b = true;
                     lblFork.setText("Captain Jack");
-                    Fork = "CJ";
+                    CaptainJack = true;
                 }
                 else if (c.contains("Both VC1 and VC2 cannot be used together")) {
                     b = true;
                     lblFork.setText("fsphil");
-                    Fork = "";
+                    CaptainJack = false;
                 }
                 else {
                     // Clear the line and try another one
@@ -3020,18 +3020,18 @@ public class GUI extends javax.swing.JFrame {
             }
         catch (IOException ex) {
             lblFork.setText("File access error");
-            Fork = "";
+            CaptainJack = false;
             return;
         }
         if (!b) {
             lblFork.setText("Invalid file (not hacktv?)");
-            Fork = "";
+            CaptainJack = false;
             return;            
         }     
     }
     
     private String getFork() {
-        if (Fork.equals("CJ")) {
+        if (CaptainJack) {
             return "CaptainJack";
         }
         else {
@@ -3300,10 +3300,10 @@ public class GUI extends javax.swing.JFrame {
         String WrongFork = "This file was created with a different fork of " +
             "hacktv. We will attempt to process the file but some options " +
             "may not be available.";
-        if ((Fork.isEmpty()) && (!ImportedFork.isEmpty())) {
+        if ((!CaptainJack) && (ImportedFork.equals("captainjack"))) {
             JOptionPane.showMessageDialog(null, WrongFork, AppName, JOptionPane.WARNING_MESSAGE);
         }
-        if ((Fork.contains("CJ")) && (!ImportedFork.contains("captainjack"))) {
+        else if ((CaptainJack) && (!ImportedFork.equals("captainjack"))) {
             JOptionPane.showMessageDialog(null, WrongFork, AppName, JOptionPane.WARNING_MESSAGE);
         }
         // Reset all controls
@@ -3342,7 +3342,7 @@ public class GUI extends javax.swing.JFrame {
         Integer M3UIndex = (INIFile.getIntegerFromINI(fileContents, "hacktv-gui3", "m3uindex"));
         if (ImportedSource.toLowerCase().startsWith("test:")) {
             radTest.doClick();
-            if (Fork.equals("CJ")) {
+            if (CaptainJack) {
                 String ImportedTC = ImportedSource.replace("test:", "");
                 boolean TCFound = false;
                 if (!ImportedTC.isEmpty()) {
@@ -3665,11 +3665,11 @@ public class GUI extends javax.swing.JFrame {
                 cmbScramblingType.setSelectedIndex(4);
             } else if (ImportedScramblingSystem.equals("syster")) {
                 cmbScramblingType.setSelectedIndex(5);
-            } else if ((ImportedScramblingSystem.equals("d11")) && (Fork.equals("CJ")) ) {
+            } else if ((ImportedScramblingSystem.equals("d11")) && (CaptainJack) ) {
                 cmbScramblingType.setSelectedIndex(6);
-            } else if ((ImportedScramblingSystem.equals("systercnr")) && (Fork.equals("CJ")) ) {
+            } else if ((ImportedScramblingSystem.equals("systercnr")) && (CaptainJack) ) {
                 cmbScramblingType.setSelectedIndex(7);
-            } else if ((ImportedScramblingSystem.equals("systerls+cnr")) && (Fork.equals("CJ")) ) {
+            } else if ((ImportedScramblingSystem.equals("systerls+cnr")) && (CaptainJack) ) {
                 cmbScramblingType.setSelectedIndex(8);
             } else {
                 invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
@@ -3747,7 +3747,7 @@ public class GUI extends javax.swing.JFrame {
         int ImportedPermutationTable;
         if (INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable") != null) {
             ImportedPermutationTable = INIFile.getIntegerFromINI(fileContents, "hacktv", "permutationtable");
-            if ( (Fork.equals("CJ")) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
+            if ( (CaptainJack) && (ScramblingType1.equals("--syster")) || (ScramblingType1.equals("--systercnr")) ) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
                 cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
@@ -3990,7 +3990,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
         // Save current fork if applicable
-        if (Fork.equals("CJ")) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
+        if (CaptainJack) FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
         // Input source or test card
         if (PlaylistAL.size() > 0) {
             // We'll populate the playlist section later
@@ -4002,7 +4002,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             if (radTest.isSelected()) {
-                if ((Fork == "CJ") && (Lines == 625)) {
+                if ((CaptainJack) && (Lines == 625)) {
                     FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:" + TCArray[cmbTest.getSelectedIndex()]);
                 }
                 else {
@@ -4806,7 +4806,7 @@ public class GUI extends javax.swing.JFrame {
         ScramblingTypeAL.add("VideoCrypt I+II");
         ScramblingTypeAL.add("VideoCrypt S");
         ScramblingTypeAL.add("Nagravision Syster");
-        if (Fork.equals("CJ")) { 
+        if (CaptainJack) { 
             ScramblingTypeAL.add("Discret 11");
             ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
             ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
@@ -4818,7 +4818,7 @@ public class GUI extends javax.swing.JFrame {
         ScramblingTypeArray.add("--videocrypt");
         ScramblingTypeArray.add("--videocrypts");
         ScramblingTypeArray.add("--syster");
-        if (Fork.equals("CJ")) {
+        if (CaptainJack) {
             ScramblingTypeArray.add("--d11");
             ScramblingTypeArray.add("--systercnr");
             ScramblingTypeArray.add("--syster");
@@ -4967,7 +4967,7 @@ public class GUI extends javax.swing.JFrame {
         // VC1+2 dual mode    
         if (cmbScramblingType.getSelectedIndex() == 3) {
             final String sconf2 = "videocrypt2";
-            if (Fork.equals("CJ")) {
+            if (CaptainJack) {
                 enableScramblingKey1();
                 enableScramblingKey2();
             }
@@ -5021,7 +5021,7 @@ public class GUI extends javax.swing.JFrame {
             chkScrambleAudio.setEnabled(false);
         }
         // Enable EuroCrypt maturity rating
-        if ((Fork.equals("CJ")) && (ScramblingType2.equals("--eurocrypt"))) {
+        if ((CaptainJack) && (ScramblingType2.equals("--eurocrypt"))) {
             lblECMaturity.setEnabled(true);
             cmbECMaturity.setEnabled(true);
             cmbECMaturity.setSelectedIndex(0);
@@ -5032,7 +5032,7 @@ public class GUI extends javax.swing.JFrame {
             cmbECMaturity.setSelectedIndex(-1);
         }
         // Enable EuroCrypt PPV and "no date" options
-        if ((Fork.equals("CJ")) && (ScramblingType2.equals("--eurocrypt"))) {
+        if ((CaptainJack) && (ScramblingType2.equals("--eurocrypt"))) {
             chkECppv.setEnabled(true);
             chkNoDate.setEnabled(true);
         }
@@ -5045,7 +5045,7 @@ public class GUI extends javax.swing.JFrame {
         // Enable card serial option
         if ( ((ScramblingType1).equals("--videocrypt")) || 
                 ((ScramblingType1).equals("--videocrypt2")) ) {
-            if (Fork.equals("CJ")) { chkShowCardSerial.setEnabled(true); }
+            if (CaptainJack) { chkShowCardSerial.setEnabled(true); }
         }
         else {
             if (chkShowCardSerial.isSelected()) {
@@ -5083,7 +5083,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Enable permutation table options (Syster-based modes)
         if ( ((ScramblingType1).equals("--syster")) || (ScramblingType1).equals("--systercnr")) {
-            if (Fork.equals("CJ")) {
+            if (CaptainJack) {
                 lblSysterPermTable.setEnabled(true);
                 cmbSysterPermTable.setEnabled(true);
                 cmbSysterPermTable.setSelectedIndex(0);
@@ -5106,7 +5106,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            if (Fork.equals("CJ")) { chkShowECM.setEnabled(true); }
+            if (CaptainJack) { chkShowECM.setEnabled(true); }
             disableACP();
         }
     }
@@ -5569,7 +5569,7 @@ public class GUI extends javax.swing.JFrame {
     private void enableTeletext() {
         chkTeletext.setEnabled(true);
         teletextPanel.setEnabled(true);
-        if ((Fork.equals("CJ")) && (radLocalSource.isSelected())) {
+        if ((CaptainJack) && (radLocalSource.isSelected())) {
             chkTextSubtitles.setEnabled(true);
         }
     }  
@@ -6159,7 +6159,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void checkTestCardStatus() {
         if ( (!cmbTest.isEnabled())
-                && (Fork == "CJ")
+                && (CaptainJack)
                 && (Lines == 625)
                 && (HTVLoadInProgress == false)
                 && cmbTest.getItemCount() > 1 ) {
@@ -6170,7 +6170,7 @@ public class GUI extends javax.swing.JFrame {
         else if (HTVLoadInProgress == true) {
             // Do nothing so we don't interrupt the file loading process
         }
-        else if ((cmbTest.isEnabled()) && (Fork == "CJ") && (Lines == 625) ) {
+        else if ((cmbTest.isEnabled()) && (CaptainJack) && (Lines == 625) ) {
             // Do nothing if cmbTest is already enabled on a 625-line mode.
             // This prevents the test card from resetting back to bars when
             // changing video modes.
@@ -7340,7 +7340,7 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setVisible(true);
         }
         // Enable test card dropdown
-        if ((Fork == "CJ") && (Lines == 625) && (cmbTest.getItemCount() > 1)) {
+        if ((CaptainJack) && (Lines == 625) && (cmbTest.getItemCount() > 1)) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
@@ -7350,15 +7350,15 @@ public class GUI extends javax.swing.JFrame {
         // Enable all options in the frame
         chkRepeat.setEnabled(true);
         chkInterlace.setEnabled(true);
-        chkSubtitles.setEnabled(true);
         txtSource.setEnabled(true);
         btnSourceBrowse.setEnabled(true);
-        if (Fork == "CJ") {
+        if (CaptainJack) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
             chkARCorrection.setEnabled(true);
             chkVolume.setEnabled(true);
             chkDownmix.setEnabled(true);
+            chkSubtitles.setEnabled(true);
             // Disable test card dropdown
             cmbTest.setSelectedIndex(-1);
             cmbTest.setEnabled(false);
@@ -7511,7 +7511,7 @@ public class GUI extends javax.swing.JFrame {
             openModesFile();
             populateVideoModes();
             selectDefaultMode();
-            if (Fork.equals("CJ")) {
+            if (CaptainJack) {
                 captainJack();
             }
             else {
@@ -8135,7 +8135,7 @@ public class GUI extends javax.swing.JFrame {
                         detectFork();
                         selectModesFile();
                         openModesFile();
-                        if (Fork.equals("CJ")) {
+                        if (CaptainJack) {
                             captainJack();
                         }
                         else {

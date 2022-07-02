@@ -200,7 +200,6 @@
   <SubComponents>
     <Component class="javax.swing.JFileChooser" name="sourceFileChooser">
       <Properties>
-        <Property name="fileSelectionMode" type="int" value="2"/>
         <Property name="multiSelectionEnabled" type="boolean" value="true"/>
       </Properties>
       <AuxValues>
