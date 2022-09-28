@@ -343,6 +343,10 @@ public class GUI extends javax.swing.JFrame {
                 SelectedFile = new File(args[0]);
                 checkSelectedFile(SelectedFile);
             }
+            else if (args[0].endsWith(".m3u")) {
+                txtSource.setText(args[0]);
+                m3uHandler(args[0],0);
+            }
             else {
                 // Otherwise, assume it's a source file and populate the source
                 // text box with it.
@@ -3386,7 +3390,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            txtSource.setText(ImportedSource);
+            if (!ImportedSource.endsWith(".m3u")) txtSource.setText(ImportedSource);
         }
         // Video format
         String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
@@ -4010,11 +4014,20 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else if (txtSource.getText().toLowerCase().endsWith(".m3u")) {
-                int M3UIndex = cmbM3USource.getSelectedIndex();
-                FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
-                FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));
-            } else {
+                // Check if the M3U exists
+                if (Files.exists(Path.of(txtSource.getText()))) {
+                    // Save the selected item from the Extended M3U file
+                    int M3UIndex = cmbM3USource.getSelectedIndex();
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
+                    FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));                    
+                }
+                else {
+                    // Save path as-is. This may or may not be valid but will be caught when re-opened.
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
+                }
+            }
+            else {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
             }
         }
@@ -4266,7 +4279,7 @@ public class GUI extends javax.swing.JFrame {
             String FileContents = lnr2.readLine();
             br2.close();
             if ( (FileContents == null)) {
-                JOptionPane.showMessageDialog(null, "Invalid file format, only Extended M3U files are supported.", AppName, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Invalid file format.", AppName, JOptionPane.ERROR_MESSAGE);
                 resetM3UItems(false);
                 return;
             }
@@ -4282,8 +4295,11 @@ public class GUI extends javax.swing.JFrame {
                 resetM3UItems(false);
                 return;
             }
-        } catch (HeadlessException | IOException ex) {
+        } catch (IOException ex) {
+            // File is inaccessible, so stop
             System.err.println(ex);
+            JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
+                    + "It may have been removed, or you may not have the correct permissions to access it.", AppName, JOptionPane.ERROR_MESSAGE); 
             resetM3UItems(false);
             return;
         }
@@ -7849,12 +7865,13 @@ public class GUI extends javax.swing.JFrame {
             // Add the URL from the selected M3U item to the playlist
             PlaylistAL.add(PlaylistURLsAL.get(cmbM3USource.getSelectedIndex()));
         }
+        // Don't add YouTube or other youtube-dl compatible URLs to the playlist
         else if ( (txtSource.getText().contains("://youtube.com/")) ||
                   (txtSource.getText().contains("://www.youtube.com/")) ||
                   (txtSource.getText().contains("://youtu.be/")) ||
                   (txtSource.getText().startsWith("ytdl:")) ) {
-            JOptionPane.showMessageDialog(null, "Cannot add this URL to the playlist. "
-                        + "The youtube-dl handler is only supported for single files at present.", AppName, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Unable to add this URL to the playlist.\n"
+                        + "The youtube-dl handler is only supported for single URLs at present.", AppName, JOptionPane.WARNING_MESSAGE);
             return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
