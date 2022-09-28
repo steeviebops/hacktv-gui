@@ -112,7 +112,7 @@ public class INIFile {
         }
         // Remove all CR characters
         fileContents = fileContents.replaceAll("\r\n", "\n");
-        fileContents = fileContents.replaceAll("\r", "\n");
+        fileContents = fileContents.replaceAll("\r", "\n");        
         // Remove any comment lines so they don't interfere with processing
         fileContents = Stream.of(fileContents.split("\n"))
                 .filter(s -> !s.startsWith(";"))
@@ -121,9 +121,9 @@ public class INIFile {
         fileContents = fileContents.replaceAll("[^\\S\n]([=])[^\\S\n]", "=");
         // Extract the specified section from fileContents to parsedSection
         String parsedSection = null;
-        String r1 = "(?i)(?<=\\[";
-        String r2 = "\\]\\n)[^\\[]*";
-        Pattern pattern = Pattern.compile(r1 + section + r2, Pattern.MULTILINE);
+        String r1 = "(?ms)^\\[";
+        String r2 = "](?:(?!^\\[[^]\\n]+]).)*";
+        Pattern pattern = Pattern.compile(r1 + section + r2);
         Matcher matcher = pattern.matcher(fileContents);
         while (matcher.find()) {
             parsedSection = matcher.group(0);
