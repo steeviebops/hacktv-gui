@@ -149,7 +149,6 @@ public class GUI extends javax.swing.JFrame {
     
     // Process ID, used to gracefully close hacktv via the Stop button
     private long hpid;
-    private long ytpid;
     
     // Boolean to determine if hacktv is running or not
     private boolean Running;
@@ -6507,8 +6506,6 @@ public class GUI extends javax.swing.JFrame {
                     Process p = pb.start();
                     // Get the PID of the process we just started
                     hpid = p.pid();
-                    // Set ytpid to zero as it is not needed
-                    ytpid = 0;
                     // Capture the output
                     int a;
                     BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -6589,9 +6586,12 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
             @Override
             protected Void doInBackground() {
+                long ytpid;
                 // Create two processes, one for youtube-dl and the other for hacktv
+                // The "--ignore-config" argument tells youtube-dl to ignore any local
+                // configuration files which may conflict with what we need here.
                 List<ProcessBuilder> pb = Arrays.asList(
-                    new ProcessBuilder(ytp, "-q", "-o", "-", u)
+                    new ProcessBuilder(ytp, "--ignore-config", "-q", "-o", "-", u)
                         // Redirect any youtube-dl errors to the Java console
                         .redirectError(ProcessBuilder.Redirect.INHERIT),
                     new ProcessBuilder(allArgs)
@@ -6618,7 +6618,21 @@ public class GUI extends javax.swing.JFrame {
                     }
                     publish("\n" + "hacktv stopped");
                     // End youtube-dl if it's still running
-                    if (y.isAlive()) y.destroy();
+                    // yt-dlp can spawn a child process, we need to kill this
+                    // process instead of the parent. So check for it.
+                    // It also seems to need SIGBREAK, so we'll send -1 instead
+                    // of the usual -2.
+                    if (y.descendants().count() > 0) {                        
+                        y.descendants().forEach(d -> {
+                            if (d.info().toString().contains(ytdl)) {
+                                stopTV(d.pid(), 1);
+                            }
+                        });
+                        if (y.isAlive()) stopTV(ytpid, 2);
+                    }
+                    else if (y.isAlive()) {
+                        stopTV(ytpid, 2);
+                    }
                 }
                 catch (IOException ex) {
                     JOptionPane.showMessageDialog(null,
@@ -6654,7 +6668,7 @@ public class GUI extends javax.swing.JFrame {
         runTV.execute();
     }
     
-    private void stopTV(long pid) {
+    private void stopTV(long pid, int signal) {
         /** To stop hacktv gracefully, it needs to be sent a SIGINT signal.
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
          *  Under Windows it's not so easy, we need an external helper
@@ -6667,7 +6681,7 @@ public class GUI extends javax.swing.JFrame {
             try {
                 // Run windows-kill.exe from this path and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
-                    (JarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
+                    (JarDir + "\\windows-kill.exe", "-" + signal, Long.toString(pid));
                 Process p = StopHackTV.start();
             }
             catch (IOException ex)  {
@@ -6678,7 +6692,7 @@ public class GUI extends javax.swing.JFrame {
             try {
                 // Run kill and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
-                    ("kill", "-2", Long.toString(pid));
+                    ("kill", "-" + signal, Long.toString(pid));
                 Process p = StopHackTV.start();                
             }
             catch (IOException ex)  {
@@ -6709,8 +6723,7 @@ public class GUI extends javax.swing.JFrame {
         if (DownloadInProgress) { DownloadCancelled = true; }
         // Check if hacktv is running, if so then exit it
         if (Running) {
-            stopTV(hpid);
-            stopTV(ytpid);
+            stopTV(hpid, 2);
         }
         // Delete temp directory and files before exit
         if (TempDir != null) {
@@ -6736,8 +6749,7 @@ public class GUI extends javax.swing.JFrame {
                 runHackTV("");
             }
         } else {
-            stopTV(hpid);
-            stopTV(ytpid);
+            stopTV(hpid, 2);
         }
     }//GEN-LAST:event_btnRunActionPerformed
              
