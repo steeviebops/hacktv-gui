@@ -3731,7 +3731,7 @@ public class GUI extends javax.swing.JFrame {
                     // The ImportedCardNumber value only contains 8 digits of the card number
                     // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
                     if (Shared.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
-                            ImportedCardNumber + Luhn.CalculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
+                            ImportedCardNumber + Shared.CalculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
                 }
             }
         }
@@ -6117,7 +6117,7 @@ public class GUI extends javax.swing.JFrame {
                 return false;
             }
             else if (txtCardNumber.getText().length() == 9) {
-                if (!Luhn.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
+                if (!Shared.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, AppName, JOptionPane.WARNING_MESSAGE);
                     return false;
                 }
@@ -6131,7 +6131,7 @@ public class GUI extends javax.swing.JFrame {
                 // Only digits 4-13 of 13-digit card numbers are checked, so we
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
-                if (!Luhn.LuhnCheck(Long.parseLong(TruncatedCardNumber))) {
+                if (!Shared.LuhnCheck(Long.parseLong(TruncatedCardNumber))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, AppName, JOptionPane.WARNING_MESSAGE);
                     TruncatedCardNumber = "";
                     return false;

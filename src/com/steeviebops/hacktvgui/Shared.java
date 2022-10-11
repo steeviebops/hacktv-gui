@@ -46,6 +46,30 @@ import java.util.zip.ZipInputStream;
 
 public class Shared {
     
+    public static int CalculateLuhnCheckDigit(long input) {
+        // Calculates a check digit for the specified input using the Luhn algorithm
+        long t = 0;
+        // Read backwards, doubling every other digit
+        for (long l = input; l > 0; l = l / 100) {
+            // Double l and add it to t.
+            // If the result is greater than 9, the formula below will
+            // add the individual digits, e.g. 14 is 1 + 4 = 5.
+            t = t + (((l % 10) * 2 / 10) + (((l % 10) * 2) % 10));
+        }
+        // Read backwards again, add the remaining digits as-is
+        for (long l = input / 10; l > 0; l = l / 100) {
+            t = t + (l % 10);
+        }
+        // Multiply t by 9, the result of Mod10 is the check digit
+        return (int) ((t * 9) % 10);
+    }
+        
+    public static boolean LuhnCheck(Long input) {
+         // Feed the full number to this method and it will return true or 
+         // false based on whether the check digit is valid or not.
+        return CalculateLuhnCheckDigit(input / 10) == (input % 10);
+    }
+    
     public static boolean isNumeric(String strNum) {
 	if (strNum == null) {
 	    return false;
@@ -235,5 +259,4 @@ public class Shared {
         }
         p.start();
     }
-
 }
