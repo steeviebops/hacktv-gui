@@ -3730,7 +3730,8 @@ public class GUI extends javax.swing.JFrame {
                     Imported13Prefix = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
                     // The ImportedCardNumber value only contains 8 digits of the card number
                     // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
-                    txtCardNumber.setText(Imported13Prefix + ImportedCardNumber + Luhn.CalculateLuhnCheckDigit(ImportedCardNumber));
+                    if (Shared.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
+                            ImportedCardNumber + Luhn.CalculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
                 }
             }
         }
@@ -4111,24 +4112,25 @@ public class GUI extends javax.swing.JFrame {
         }
         if (chkActivateCard.isSelected()) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "emm", 1);
-            if (txtCardNumber.getText().length() == 9) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(0, 8));
-            } else if (txtCardNumber.getText().length() == 13) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(4, 12));
-                FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "13digitprefix", txtCardNumber.getText().substring(0, 4));
-            } else if (txtCardNumber.getText().length() == 8) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
-            }
         }
         else if (chkDeactivateCard.isSelected()) {
             FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv", "emm", 2);
-            if (txtCardNumber.getText().length() == 9) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(0, 8));
-            } else if (txtCardNumber.getText().length() == 13) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(4, 12));
-                FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "13digitprefix", txtCardNumber.getText().substring(0, 4));
-            } else if (txtCardNumber.getText().length() == 8) {
-                FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
+
+        }
+        if (Shared.isNumeric(txtCardNumber.getText())) {
+            switch (txtCardNumber.getText().length()) {
+                case 9:
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(0, 8));
+                    break;
+                case 13:
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(4, 12));
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "13digitprefix", txtCardNumber.getText().substring(0, 4));
+                    break;
+                case 8:
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
+                    break;
+                default:
+                    break;
             }
         }
         // Syster permutation table
@@ -6115,7 +6117,7 @@ public class GUI extends javax.swing.JFrame {
                 return false;
             }
             else if (txtCardNumber.getText().length() == 9) {
-                if (!Luhn.LuhnCheck(txtCardNumber.getText())) {
+                if (!Luhn.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, AppName, JOptionPane.WARNING_MESSAGE);
                     return false;
                 }
@@ -6129,7 +6131,7 @@ public class GUI extends javax.swing.JFrame {
                 // Only digits 4-13 of 13-digit card numbers are checked, so we
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
-                if (!Luhn.LuhnCheck(TruncatedCardNumber)) {
+                if (!Luhn.LuhnCheck(Long.parseLong(TruncatedCardNumber))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, AppName, JOptionPane.WARNING_MESSAGE);
                     TruncatedCardNumber = "";
                     return false;
@@ -6586,7 +6588,6 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
             @Override
             protected Void doInBackground() {
-                long ytpid;
                 // Create two processes, one for youtube-dl and the other for hacktv
                 // The "--ignore-config" argument tells youtube-dl to ignore any local
                 // configuration files which may conflict with what we need here.
@@ -6606,8 +6607,7 @@ public class GUI extends javax.swing.JFrame {
                     Process y = (Process) p.get(0);
                     // Get the hacktv process
                     Process h = (Process) p.get(1);
-                    // Get the PID of both processes
-                    ytpid = y.pid();
+                    // Get the PID of hacktv
                     hpid = h.pid();
                     // Capture the output of hacktv
                     int a;
@@ -6620,18 +6620,14 @@ public class GUI extends javax.swing.JFrame {
                     // End youtube-dl if it's still running
                     // yt-dlp can spawn a child process, we need to kill this
                     // process instead of the parent. So check for it.
-                    // It also seems to need SIGBREAK, so we'll send -1 instead
-                    // of the usual -2.
                     if (y.descendants().count() > 0) {                        
                         y.descendants().forEach(d -> {
-                            if (d.info().toString().contains(ytdl)) {
-                                stopTV(d.pid(), 1);
-                            }
+                            d.destroy();
                         });
-                        if (y.isAlive()) stopTV(ytpid, 2);
+                        if (y.isAlive()) y.destroy();
                     }
                     else if (y.isAlive()) {
-                        stopTV(ytpid, 2);
+                        y.destroy();
                     }
                 }
                 catch (IOException ex) {
@@ -6668,7 +6664,7 @@ public class GUI extends javax.swing.JFrame {
         runTV.execute();
     }
     
-    private void stopTV(long pid, int signal) {
+    private void stopTV(long pid) {
         /** To stop hacktv gracefully, it needs to be sent a SIGINT signal.
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
          *  Under Windows it's not so easy, we need an external helper
@@ -6681,7 +6677,7 @@ public class GUI extends javax.swing.JFrame {
             try {
                 // Run windows-kill.exe from this path and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
-                    (JarDir + "\\windows-kill.exe", "-" + signal, Long.toString(pid));
+                    (JarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
                 Process p = StopHackTV.start();
             }
             catch (IOException ex)  {
@@ -6692,7 +6688,7 @@ public class GUI extends javax.swing.JFrame {
             try {
                 // Run kill and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
-                    ("kill", "-" + signal, Long.toString(pid));
+                    ("kill", "-2", Long.toString(pid));
                 Process p = StopHackTV.start();                
             }
             catch (IOException ex)  {
@@ -6723,7 +6719,7 @@ public class GUI extends javax.swing.JFrame {
         if (DownloadInProgress) { DownloadCancelled = true; }
         // Check if hacktv is running, if so then exit it
         if (Running) {
-            stopTV(hpid, 2);
+            stopTV(hpid);
         }
         // Delete temp directory and files before exit
         if (TempDir != null) {
@@ -6749,7 +6745,7 @@ public class GUI extends javax.swing.JFrame {
                 runHackTV("");
             }
         } else {
-            stopTV(hpid, 2);
+            stopTV(hpid);
         }
     }//GEN-LAST:event_btnRunActionPerformed
              
@@ -8204,7 +8200,11 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_lblSyntaxOptionDisabledMouseReleased
 
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
-        Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/");
+        try {
+            Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/");        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", AppName, JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_menuGithubRepoActionPerformed
 
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
@@ -8341,7 +8341,12 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkytdlpActionPerformed
 
     private void menuWikiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuWikiActionPerformed
-        Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/wiki");
+        try {
+            Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/wiki");
+        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", AppName, JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_menuWikiActionPerformed
 
     private void cmbNMSCeefaxRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionActionPerformed

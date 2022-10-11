@@ -222,23 +222,18 @@ public class Shared {
         }        
     }
     
-    public static void launchBrowser(String u){
-        try {
-            ProcessBuilder p;
-            if (System.getProperty("os.name").contains("Windows")) {
-               p = new ProcessBuilder("cmd.exe", "/c", "start", u);
-            }
-            else if (System.getProperty("os.name").contains("Mac")) {
-               p = new ProcessBuilder("open", u);
-            }
-            else {
-               p = new ProcessBuilder("xdg-open", u);
-            }
-            p.start();
+    public static void launchBrowser(String u) throws IOException {
+        ProcessBuilder p;
+        if (System.getProperty("os.name").contains("Windows")) {
+            p = new ProcessBuilder("cmd.exe", "/c", "start", u);
         }
-        catch (IOException e) {
-            System.err.println("Unable to open default browser.");
-        }        
+        else if (System.getProperty("os.name").contains("Mac")) {
+            p = new ProcessBuilder("open", u);
+        }
+        else {
+            p = new ProcessBuilder("xdg-open", u);
+        }
+        p.start();
     }
 
 }

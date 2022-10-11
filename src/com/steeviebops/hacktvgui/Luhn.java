@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Stephen McGarry
+ * Copyright (C) 2022 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,59 +18,36 @@
 
 package com.steeviebops.hacktvgui;
 
-import java.util.ArrayList;
-
 /**
-* Calculates a check digit for the specified input using the Luhn
-* algorithm.
+* Calculates a check digit for the specified input using the Luhn algorithm.
 * @author Stephen McGarry
 */
 
 public class Luhn {
     
-    public static int CalculateLuhnCheckDigit(String input) {
-        ArrayList<Integer> Numbers;
-        int j;
-        int sum = 0;
-        Numbers = new ArrayList<>();
-        // Check if the input is numeric. If not, return -1
-	try {
-	    double d = Double.parseDouble(input);
-	} catch (NumberFormatException nfe) {
-	    return -1;
-	}
-        // Read backwards, doubling every second digit
-        for (int i = input.length() -1; i >= 0; i -= 2) {
-            j = Character.getNumericValue(input.charAt(i));
-            j = (j * 2);
-            // If the returned value is 10 or higher, subtract 9 from it
-            if (j >= 10) {
-                j = (j - 9);
-            }
-            Numbers.add(j);
+    public static int CalculateLuhnCheckDigit(long input) {
+        long t = 0;
+        // Read backwards, doubling every other digit
+        for (long l = input; l > 0; l = l / 100) {
+            // Double l and add it to t.
+            // If the result is greater than 9, the formula below will
+            // add the individual digits, e.g. 14 is 1 + 4 = 5.
+            t = t + (((l % 10) * 2 / 10) + (((l % 10) * 2) % 10));
         }
         // Read backwards again, add the remaining digits as-is
-        for (int i = input.length() -2; i >= 0; i -= 2) {
-            j = Character.getNumericValue(input.charAt(i));
-            Numbers.add(j);
+        for (long l = input / 10; l > 0; l = l / 100) {
+            t = t + (l % 10);
         }
-        // Add what we got
-        for (int i = 0; i < Numbers.size(); i++) {
-            sum = (sum + Numbers.get(i));
-        }
-        // Multiply the value by 9 and do a Mod10 on it. The returned value is
-        // the check digit.
-        return (sum * 9 % 10);
+        // Multiply t by 9, the result of Mod10 is the check digit
+        return (int) ((t * 9) % 10);
     }
-    
-    public static boolean LuhnCheck(String input) {
+        
+    public static boolean LuhnCheck(long input) {
         /** 
          * Feed the full number to this method and it will return true or 
          * false based on whether the check digit is valid or not.
          */
-        int p = CalculateLuhnCheckDigit(input.substring(0, input.length() -1));
-        int q = Integer.parseInt(input.substring(input.length() -1));
-        return p == q;
+        return CalculateLuhnCheckDigit(input / 10) == (input % 10);
     }
     
 }
