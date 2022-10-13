@@ -2961,6 +2961,7 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
         if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
         if ( Prefs.get("CeefaxRegion", null) != null ) Prefs.remove("CeefaxRegion");
+        if ( Prefs.get("SuppressWarnings", null) != null ) Prefs.remove("SuppressWarnings");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -6111,12 +6112,34 @@ public class GUI extends javax.swing.JFrame {
          */
         if ( (txtCardNumber.isEnabled()) && (ScramblingType1 == "--videocrypt") ) {
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
+            String WrongCardType = "The card number you entered appears to be for a different issue.\n"
+                    + "Using EMMs on the wrong card type may irreparably damage the card.";
             String InvalidCardNumber = "Card number should be exactly 8, 9 or 13 digits.";
+            // Make sure that the input is numeric only
             if (!Shared.isNumeric(txtCardNumber.getText())) {
                 JOptionPane.showMessageDialog(null, InvalidCardNumber, AppName, JOptionPane.WARNING_MESSAGE);
                 return false;
             }
             else if (txtCardNumber.getText().length() == 9) {
+                // Make sure that we're not trying to send EMMs to the wrong card type.
+                // Used info from settopbox.org to get a rough idea of the range and
+                // make an educated guess based on that information.
+                // If you have a legitimate card that fails this check, let me know.
+                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky07"))) {
+                    short s7 = Short.parseShort(txtCardNumber.getText().substring(0,3));
+                    if ((s7 > 30) && (s7 < 800)) {
+                        JOptionPane.showMessageDialog(null, WrongCardType, AppName, JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                }
+                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky09"))) {
+                    short s9 = Short.parseShort(txtCardNumber.getText().substring(0,3));
+                    if ((s9 < 190) || (s9 > 250)) {
+                        JOptionPane.showMessageDialog(null, WrongCardType, AppName, JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                }
+                // EMM checks passed, now do a Luhn check
                 if (!Shared.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, AppName, JOptionPane.WARNING_MESSAGE);
                     return false;
@@ -6128,6 +6151,16 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else if (txtCardNumber.getText().length() == 13) {
+                // Make sure that we're not trying to send EMMs to the wrong card type.
+                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky09"))) {
+                    JOptionPane.showMessageDialog(null, WrongCardType, AppName, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky07")) 
+                        && (!txtCardNumber.getText().startsWith("07")) ){
+                    JOptionPane.showMessageDialog(null, WrongCardType, AppName, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
                 // Only digits 4-13 of 13-digit card numbers are checked, so we
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
@@ -6167,7 +6200,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void showEMMWarning() {
-        if (!HTVLoadInProgress) JOptionPane.showMessageDialog(null,
+            if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) )
+                JOptionPane.showMessageDialog(null,
                 "Care is advised when using this option.\n" +
                 "Incorrect use may permanently damage the viewing card.\n" +
                 "Do not use this option on an issue number other than the one selected.",
@@ -7395,7 +7429,8 @@ public class GUI extends javax.swing.JFrame {
     private void chkAmpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAmpActionPerformed
         if (chkAmp.isSelected()) {
             RFampParam = "--amp";
-            if (!HTVLoadInProgress) JOptionPane.showMessageDialog(null,
+            if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) )
+                JOptionPane.showMessageDialog(null,
                     "Care is advised when using this option.\n" +
                     "Incorrect use may permanently damage the amplifier.",
                     AppName, JOptionPane.WARNING_MESSAGE);
