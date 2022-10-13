@@ -54,7 +54,7 @@ public class Shared {
             // Double l and add it to t.
             // If the result is greater than 9, the formula below will
             // add the individual digits, e.g. 14 is 1 + 4 = 5.
-            t = t + (((l % 10) * 2 / 10) + (((l % 10) * 2) % 10));
+            t = t + ( ((l % 10 * 2) / 10) + ((l % 10 * 2) % 10) );
         }
         // Read backwards again, add the remaining digits as-is
         for (long l = input / 10; l > 0; l = l / 100) {
