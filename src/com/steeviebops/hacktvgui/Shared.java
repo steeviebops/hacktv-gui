@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -182,6 +183,14 @@ public class Shared {
         try (InputStream in = connection.getInputStream()) {
             Files.copy(in, Paths.get(fileName));  
         }
+    }
+    
+    public static String downloadToString(String url) throws IOException {
+        // Downloads a file directly to a string, bypassing the file system
+        URLConnection connection = new URL(url).openConnection();
+        connection.setUseCaches(false);
+        InputStream in = connection.getInputStream();
+        return new String(in.readAllBytes(), StandardCharsets.UTF_8);
     }
     
     // Unzip code courtesy of https://www.baeldung.com/java-compress-and-uncompress
