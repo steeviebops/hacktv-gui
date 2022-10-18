@@ -52,7 +52,7 @@ import java.io.StringWriter;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -2691,7 +2691,7 @@ public class GUI extends javax.swing.JFrame {
                     // working directory
                     if (Files.exists(Path.of(tmpExePath))) {
                         Shared.deleteFSObject(Path.of(downloadPath));
-                        Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
+                        Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
                         // Clean up by removing remnants of what we unzipped
                         Shared.deleteFSObject(Path.of(tmpExePath).getParent());
                         return exePath;
@@ -2779,27 +2779,25 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void downloadModesFile() {
-        createTempDirectory();
-        String f = TempDir + OS_SEP + "Modes.ini";
+        // Download modes.ini directly to the ModesFile string
         String u = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         try {
-            // Delete Modes.ini if it already exists
-            if (Files.exists(Path.of(f))) Shared.deleteFSObject(Path.of(f));
-            Shared.download(u, f);
-            // Use the file we downloaded
-            ModesFilePath = f;
+            ModesFile = Shared.downloadToString(u);
         }
         catch (IOException ex) {
+                System.err.println("Error downloading modes.ini... " + ex);
                 JOptionPane.showMessageDialog(null, "Unable to download the modes file from Github.\n"
                         + "Using embedded copy instead, which may not be up to date.", AppName, JOptionPane.ERROR_MESSAGE);
-                System.err.println("Error downloading modes.ini... " + ex);
                 // Use the embedded copy
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         }
     } 
     
     private void openModesFile() {
-        if (ModesFilePath.startsWith("/com/steeviebops/resources/")) {
+        if ( (ModesFilePath == null) && (ModesFile != null) ) {
+            ModesFileLocation = "online";
+        }
+        else if (ModesFilePath.startsWith("/com/steeviebops/resources/")) {
             // Read the embedded modes.ini to the ModesFile string
             try {
                 if (getClass().getResourceAsStream(ModesFilePath) != null) {
@@ -2826,13 +2824,7 @@ public class GUI extends javax.swing.JFrame {
             File f = new File(ModesFilePath);
             try {
                 ModesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
-                if (ModesFilePath.equals(TempDir + OS_SEP + "Modes.ini")) {
-                    ModesFileLocation = "online";
-                }
-                else {
-                    ModesFileLocation = "external";
-                }
-                
+                ModesFileLocation = "external";
             }
             catch (IOException e) {
                 // Load failed, retry with the embedded file
@@ -4647,13 +4639,13 @@ public class GUI extends javax.swing.JFrame {
                                 "Worldwide",
                                 "Yorks&Lincs"
                             };
-                            HTMLTempFile = "ceefax_region.html";
+                            HTMLTempFile = "ceefax_region.xml";
                             DownloadURL = "https://internal.nathanmediaservices.co.uk/svn/ceefax/"
                                     + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/";
                             // Download regional index page
                             downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
                         }
-                        else if (HTMLTempFile.equals("ceefax_region.html")) {
+                        else if (HTMLTempFile.equals("ceefax_region.xml")) {
                             // Move the regional files to the national directory
                             File rd = new File(TempDir + "/ceefax_region");
                             File nd = new File(TempDir + "/ceefax");
@@ -4661,7 +4653,7 @@ public class GUI extends javax.swing.JFrame {
                                 File[] f = rd.listFiles();
                                 for (int i = 0; i < f.length; i++) {
                                     try {
-                                        Files.move(f[i].toPath(), Path.of(nd + "/" + f[i].getName()), REPLACE_EXISTING);
+                                        Files.move(f[i].toPath(), Path.of(nd + "/" + f[i].getName()), StandardCopyOption.REPLACE_EXISTING);
                                     }
                                     catch (IOException e) {
                                         JOptionPane.showMessageDialog(null,
@@ -8152,7 +8144,7 @@ public class GUI extends javax.swing.JFrame {
                     // and attempt to move it to the working directory
                     if (Files.exists(Path.of(tmpExePath))) {
                         Shared.deleteFSObject(Path.of(downloadPath));
-                        Files.move(Path.of(tmpExePath), Path.of(exePath), REPLACE_EXISTING);
+                        Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
                         return exePath;
                     }
                     else {
@@ -8406,7 +8398,7 @@ public class GUI extends javax.swing.JFrame {
             // Set variables
             DownloadURL = "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/";
             String HTMLString = "name=\"(.*?)\"";
-            HTMLTempFile = "ceefax_national.html";
+            HTMLTempFile = "ceefax_national.xml";
             // Download index page
             downloadTeletext(DownloadURL, HTMLTempFile, HTMLString);
         }
