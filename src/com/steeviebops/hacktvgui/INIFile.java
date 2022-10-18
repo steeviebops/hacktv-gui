@@ -44,6 +44,15 @@ import java.util.stream.Stream;
 
 public class INIFile {
     
+    /**
+     * Returns a boolean of the specified INI setting. This can be true, false, 1, or 0.
+     * If the value was not found, a default value of false is returned.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @return              Returns a boolean of the specified INI setting or a default value of false
+     */
     public static boolean getBooleanFromINI(String input, String section, String setting) {
         String v = getINIValue(input, section, setting, "").toLowerCase();
         switch (v) {
@@ -58,6 +67,14 @@ public class INIFile {
         }
     }
     
+    /**
+     * Returns an integer of the specified INI setting.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @return              An integer value if found, or null if it was not
+     */
     public static Integer getIntegerFromINI(String input, String section, String setting) {
         try {
             return Integer.parseInt(getINIValue(input, section, setting, ""));
@@ -67,6 +84,14 @@ public class INIFile {
         }
     }
     
+    /**
+     * Returns a double of the specified INI setting.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @return              A double value if found, or null if it was not
+     */
     public static Double getDoubleFromINI(String input, String section, String setting) {
         try {
             return Double.parseDouble(getINIValue(input, section, setting, ""));
@@ -74,9 +99,36 @@ public class INIFile {
         catch (NumberFormatException e) {
             return null;
         }
-    }    
+    }
     
-    public static String getStringFromINI(String input, String section, String setting, String defaultValue, Boolean preserveCase) {
+     /**
+     * Returns a long of the specified INI setting.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @return              A long value if found, or null if it was not
+     */
+    public static Long getLongFromINI(String input, String section, String setting) {
+        try {
+            return Long.parseLong(getINIValue(input, section, setting, ""));
+        }
+        catch (NumberFormatException e) {
+            return null;
+        }
+    }   
+    
+    /**
+     * Returns the specified INI setting as a string value, with the option of altering case.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @param defaultValue  The default value to return if the setting does not exist
+     * @param preserveCase  If true, returns the setting as specified in the INI file. If false, returns the setting in lower case.
+     * @return              Returns the value of the specified setting, or the specified default value if it does not exist.
+     */
+    public static String getStringFromINI(String input, String section, String setting, String defaultValue, boolean preserveCase) {
         if (!preserveCase) {
             return getINIValue(input, section, setting, defaultValue).toLowerCase();
         }
@@ -85,6 +137,15 @@ public class INIFile {
         }
     }    
     
+    /**
+     * Returns the specified INI setting as a string value.
+     * 
+     * @param input         A string containing the contents of the INI file, or its path
+     * @param section       The section of the INI file that you want to look up
+     * @param setting       The setting that you want to look up
+     * @param defaultValue  The default value to return if the setting does not exist
+     * @return              Returns the value of the specified setting, or the specified default value if it does not exist.
+     */
     public static String getINIValue(String input, String section, String setting, String defaultValue) {
         String fileContents;
         // If the setting string contains a backslash, square brackets or equals, abort immediately.
@@ -188,6 +249,15 @@ public class INIFile {
         } 
     }
     
+    /**
+     * Adds a boolean setting to a provided INI string.
+     *
+     * @param fileContents  The full INI file contents
+     * @param section       The section that you want to write to
+     * @param setting       The setting that you want to write to
+     * @param value         The new value of the setting
+     * @return              Returns fileContents with the new setting added or changed
+     */
     public static String setBooleanINIValue (String fileContents, String section, String setting, boolean value) {
         String stringValue;
         if (value == true) {
@@ -199,18 +269,54 @@ public class INIFile {
         return setINIValue(fileContents, section, setting, stringValue);
     }
     
+    /**
+     * Adds an integer setting to a provided INI string.
+     *
+     * @param fileContents  The full INI file contents
+     * @param section       The section that you want to write to
+     * @param setting       The setting that you want to write to
+     * @param value         The new value of the setting
+     * @return              Returns fileContents with the new setting added or changed
+     */
     public static String setIntegerINIValue (String fileContents, String section, String setting, Integer value) {
         return setINIValue(fileContents, section, setting, value.toString());
     }
     
+    /**
+     * Adds a double setting to a provided INI string.
+     *
+     * @param fileContents  The full INI file contents
+     * @param section       The section that you want to write to
+     * @param setting       The setting that you want to write to
+     * @param value         The new value of the setting
+     * @return              Returns fileContents with the new setting added or changed
+     */
     public static String setDoubleINIValue (String fileContents, String section, String setting, Double value) {
         return setINIValue(fileContents, section, setting, value.toString());
     }   
     
+    /**
+     * Adds a long setting to a provided INI string.
+     *
+     * @param fileContents  The full INI file contents
+     * @param section       The section that you want to write to
+     * @param setting       The setting that you want to write to
+     * @param value         The new value of the setting
+     * @return              Returns fileContents with the new setting added or changed
+     */
     public static String setLongINIValue (String fileContents, String section, String setting, Long value) {
         return setINIValue(fileContents, section, setting, value.toString());
     }
     
+    /**
+     * Adds a setting to a provided INI string.
+     *
+     * @param fileContents  The full INI file contents
+     * @param section       The section that you want to write to
+     * @param setting       The setting that you want to write to
+     * @param value         The new value of the setting
+     * @return              Returns fileContents with the new setting added or changed
+     */
     public static String setINIValue(String fileContents, String section, String setting, String value) {
         /**
          *  The way we save a file is as follows:
@@ -281,6 +387,12 @@ public class INIFile {
         return newContents;
     }
     
+    /**
+     * Returns a single section of an INI file
+     * @param fileContents  The contents of the INI file that you want to split
+     * @param section       The section that you want to extract from the file
+     * @return              Returns the section specified
+     */
     public static String splitINIfile(String fileContents, String section) {
         String selectedSection = null;
         // Remove any CR characters
