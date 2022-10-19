@@ -65,6 +65,7 @@ import java.util.stream.Stream;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
+import java.nio.file.InvalidPathException;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
@@ -1320,7 +1321,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(radMAC))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cmbVideoFormat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSampleRate)
                     .addComponent(chkAudio)
@@ -1362,7 +1363,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(53, Short.MAX_VALUE))
+                .addContainerGap(58, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -2215,7 +2216,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        lblSyntaxOptionDisabled.setForeground(new java.awt.Color(0, 0, 128));
+        lblSyntaxOptionDisabled.setForeground(new java.awt.Color(192, 0, 0));
         lblSyntaxOptionDisabled.setText("Why can't I change this option?");
         lblSyntaxOptionDisabled.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         lblSyntaxOptionDisabled.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -2586,6 +2587,23 @@ public class GUI extends javax.swing.JFrame {
                 // Get the implementation class for the look and feel
                 LaFAL.add(lookAndFeel.getClassName());
             }
+            // Add FlatLaf
+            // Not enabled by default, needs FlatLaf JAR dependency in classpath
+            // https://search.maven.org/artifact/com.formdev/flatlaf/2.2/jar
+            try {
+                // Check to see if the FlatLaf class is available to us
+                Class.forName("com.formdev.flatlaf.FlatLightLaf");
+                // Add the L&Fs
+                LaFAL.add("com.formdev.flatlaf.FlatLightLaf");
+                LaFAL.add("com.formdev.flatlaf.FlatDarkLaf");
+                LaFAL.add("com.formdev.flatlaf.FlatIntelliJLaf");
+                LaFAL.add("com.formdev.flatlaf.FlatDarculaLaf");
+                System.setProperty("flatlaf.menuBarEmbedded", "false");
+                //System.setProperty("flatlaf.useWindowDecorations", "false");
+            }
+            catch (ClassNotFoundException e) {
+                // No need to do anything, we just won't load FlatLaf stuff
+            }
             UIManager.put("swing.boldMetal", false);
             int d;
             if (System.getProperty("os.name").contains("Windows")) {
@@ -2596,7 +2614,18 @@ public class GUI extends javax.swing.JFrame {
                 // Set Metal as default
                 d = 0;
             }
-            changeLaF(Prefs.getInt("LookAndFeel", d));            
+            // Safeguard if the LookAndFeel preference is out of bounds
+            int v = Prefs.getInt("LookAndFeel", d);
+            if ((v >= (LaFAL.size())) || (v < 0)) {
+                // Use default L&F and reset preference
+                System.out.println("Specified look and feel not found, reverting to default.");
+                changeLaF(d);
+                Prefs.putInt("LookAndFeel", d);
+            }
+            else {
+                // Use the value we got from preferences
+                changeLaF(v);
+            }
         }
     }
     
@@ -2611,6 +2640,13 @@ public class GUI extends javax.swing.JFrame {
             for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
                 // Get the name of the look and feel
                 LAF.add(lookAndFeel.getName());
+            }
+            // Add FlatLaf if available
+            if (LaFAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
+                LAF.add("FlatLaf (light)");
+                LAF.add("FlatLaf (dark)");
+                LAF.add("FlatLaf (IntelliJ-style)");
+                LAF.add("FlatLaf (Darcula-style)");
             }
             String[] lf = new String[LAF.size()];
             for(int i = 0; i < LAF.size(); i++) {
@@ -6779,12 +6815,22 @@ public class GUI extends javax.swing.JFrame {
         // Get application version by checking the timestamp on the class file
         String v;
         String mv;
+        String cp = System.getProperty("java.class.path");
+        // If classpath contains multiple paths, remove all but the first
+        if (!RunningOnWindows) {
+            if (cp.contains(":")) {
+                cp = cp.substring(0, cp.indexOf(":"));
+            }            
+        }
+        else if (cp.contains(";")) {
+            cp = cp.substring(0, cp.indexOf(";"));
+        }
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String classFilePath = "/com/steeviebops/hacktvgui/GUI.class";
             Date date;
-            if (Files.exists(Path.of(System.getProperty("java.class.path")))) {
-                date = Shared.getLastUpdatedTime(System.getProperty("java.class.path"), classFilePath);
+            if (Files.exists(Path.of(cp))) {
+                date = Shared.getLastUpdatedTime(cp, classFilePath);
                 if (date != null) {
                     v = "\nCompilation date: " + sdf.format(date);
                 }
@@ -6796,7 +6842,7 @@ public class GUI extends javax.swing.JFrame {
                 v = "";
             }
         }
-        catch (NumberFormatException e) {
+        catch (NumberFormatException | InvalidPathException e) {
               v = "";
         }
         mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
