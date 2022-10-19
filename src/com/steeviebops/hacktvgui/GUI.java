@@ -144,6 +144,8 @@ public class GUI extends javax.swing.JFrame {
     private String[] LogoArray;
     private String[] TCArray;
     private ArrayList<String> PlaylistAL = new ArrayList<>();
+    private ArrayList<String> UhfAL;
+    private ArrayList<String> VhfAL;
     
     // Preferences node
     private Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
@@ -460,11 +462,11 @@ public class GUI extends javax.swing.JFrame {
         txtAntennaName = new javax.swing.JTextField();
         cmbFileType = new javax.swing.JComboBox<>();
         lblFileType = new javax.swing.JLabel();
-        lblRegion = new javax.swing.JLabel();
+        cmbRegion = new javax.swing.JComboBox<>();
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
         VideoFormatPanel = new javax.swing.JPanel();
-        cmbVideoFormat = new javax.swing.JComboBox<>();
+        cmbMode = new javax.swing.JComboBox<>();
         radPAL = new javax.swing.JRadioButton();
         radNTSC = new javax.swing.JRadioButton();
         radSECAM = new javax.swing.JRadioButton();
@@ -928,7 +930,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1029,7 +1031,17 @@ public class GUI extends javax.swing.JFrame {
 
         lblFileType.setText("File type");
 
-        lblRegion.setText("Region");
+        cmbRegion.setEnabled(false);
+        cmbRegion.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbRegionMouseWheelMoved(evt);
+            }
+        });
+        cmbRegion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbRegionActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout rfPanelLayout = new javax.swing.GroupLayout(rfPanel);
         rfPanel.setLayout(rfPanelLayout);
@@ -1059,14 +1071,14 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtAntennaName)
                             .addGroup(rfPanelLayout.createSequentialGroup()
                                 .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 110, Short.MAX_VALUE))))
+                                .addGap(0, 122, Short.MAX_VALUE))))
                     .addGroup(rfPanelLayout.createSequentialGroup()
                         .addComponent(chkAmp)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(rfPanelLayout.createSequentialGroup()
                         .addComponent(radCustom)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblRegion)))
+                        .addComponent(cmbRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         rfPanelLayout.setVerticalGroup(
@@ -1077,7 +1089,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(radCustom)
                     .addComponent(radUHF)
                     .addComponent(radVHF)
-                    .addComponent(lblRegion))
+                    .addComponent(cmbRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1137,14 +1149,14 @@ public class GUI extends javax.swing.JFrame {
 
         VideoFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video format options"));
 
-        cmbVideoFormat.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+        cmbMode.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                cmbVideoFormatMouseWheelMoved(evt);
+                cmbModeMouseWheelMoved(evt);
             }
         });
-        cmbVideoFormat.addActionListener(new java.awt.event.ActionListener() {
+        cmbMode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbVideoFormatActionPerformed(evt);
+                cmbModeActionPerformed(evt);
             }
         });
 
@@ -1272,7 +1284,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbVideoFormat, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cmbMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(VideoFormatPanelLayout.createSequentialGroup()
@@ -1320,7 +1332,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(radBW)
                     .addComponent(radMAC))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbVideoFormat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbMode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSampleRate)
@@ -1363,7 +1375,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+                .addContainerGap(74, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1572,7 +1584,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(254, Short.MAX_VALUE))
+                .addContainerGap(277, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -2091,7 +2103,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(97, Short.MAX_VALUE))
+                .addContainerGap(120, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2330,7 +2342,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(77, Short.MAX_VALUE))
+                .addContainerGap(100, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2959,7 +2971,7 @@ public class GUI extends javax.swing.JFrame {
             for(int i = 0; i < b.length; i++) {
                 b[i] = ml.get(i);            
             }
-            return b;            
+            return b;
         }
     }
 
@@ -3427,14 +3439,14 @@ public class GUI extends javax.swing.JFrame {
                 // Check if the mode we imported is in the PAL mode array
                 if (PALModeArray[i].equals(ImportedVideoMode)) {
                     radPAL.doClick();
-                    cmbVideoFormat.setSelectedIndex(i);
+                    cmbMode.setSelectedIndex(i);
                     ModeFound = true;
                     break;
                 }
                 // Check the 'alt' value to see if we find a match there
                 else if (checkAltModeNames(PALModeArray[i], ImportedVideoMode)) {
                     radPAL.doClick();
-                    cmbVideoFormat.setSelectedIndex(i);
+                    cmbMode.setSelectedIndex(i);
                     ModeFound = true;
                     break;
                 }
@@ -3444,13 +3456,13 @@ public class GUI extends javax.swing.JFrame {
                 for (int i = 0; i < NTSCModeArray.length; i++) {
                     if (NTSCModeArray[i].equals(ImportedVideoMode)) {
                         radNTSC.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
                     else if (checkAltModeNames(NTSCModeArray[i], ImportedVideoMode)) {
                             radNTSC.doClick();
-                            cmbVideoFormat.setSelectedIndex(i);
+                            cmbMode.setSelectedIndex(i);
                             ModeFound = true;
                             break;
                     }
@@ -3460,13 +3472,13 @@ public class GUI extends javax.swing.JFrame {
                 for (int i = 0; i < SECAMModeArray.length; i++) {
                     if (SECAMModeArray[i].equals(ImportedVideoMode)) {
                         radSECAM.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
                     else if (checkAltModeNames(SECAMModeArray[i], ImportedVideoMode)) {
                         radSECAM.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
@@ -3476,13 +3488,13 @@ public class GUI extends javax.swing.JFrame {
                 for (int i = 0; i < OtherModeArray.length; i++) {
                     if (OtherModeArray[i].equals(ImportedVideoMode)) {
                         radBW.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
                     else if (checkAltModeNames(OtherModeArray[i], ImportedVideoMode)) {
                         radBW.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
@@ -3492,13 +3504,13 @@ public class GUI extends javax.swing.JFrame {
                 for (int i = 0; i < MACModeArray.length; i++) {
                     if (MACModeArray[i].equals(ImportedVideoMode)) {
                         radMAC.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
                     else if (checkAltModeNames(MACModeArray[i], ImportedVideoMode)) {
                         radMAC.doClick();
-                        cmbVideoFormat.setSelectedIndex(i);
+                        cmbMode.setSelectedIndex(i);
                         ModeFound = true;
                         break;
                     }
@@ -4475,12 +4487,13 @@ public class GUI extends javax.swing.JFrame {
         }
         // If a baseband mode is selected, reset the video format to zero to
         // avoid unnecessary error messages.
-        if (!radCustom.isEnabled()) cmbVideoFormat.setSelectedIndex(0);
+        if (!radCustom.isEnabled()) cmbMode.setSelectedIndex(0);
         // Reset output device to HackRF
         cmbOutputDevice.setSelectedIndex(0);
         // Reset playlist start point
         StartPoint = -1;
         // Select default radio buttons and comboboxes
+        cmbRegion.setEnabled(false);
         radLocalSource.doClick();
         radPAL.doClick();
         radUHF.doClick();
@@ -4802,7 +4815,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             if (a != -1) {
-                cmbVideoFormat.setSelectedIndex(a);
+                cmbMode.setSelectedIndex(a);
             }
             else {
                 JOptionPane.showConfirmDialog(null, "Unable to find the PAL-FM mode, which is required for this template.", AppName, JOptionPane.ERROR_MESSAGE);
@@ -5370,7 +5383,9 @@ public class GUI extends javax.swing.JFrame {
         lblFrequency.setEnabled(false);
         txtFrequency.setText("");
         txtFrequency.setEnabled(false);
-        lblRegion.setText(" ");
+        cmbRegion.setEnabled(false);
+        cmbRegion.removeAllItems();
+        cmbRegion.addItem("");
         if (chkAmp.isSelected()) chkAmp.doClick();
         chkAmp.setEnabled(false);
         lblAntennaName.setEnabled(false);
@@ -5378,23 +5393,23 @@ public class GUI extends javax.swing.JFrame {
         txtAntennaName.setEnabled(false);
     }
     
-    private void checkVideoFormat() {
+    private void checkMode() {
     // Here, we read the selected combobox index and use that number to get
     // the corresponding video format from the required mode array.
         if (radPAL.isSelected()) {
-            Mode = PALModeArray[cmbVideoFormat.getSelectedIndex()];
+            Mode = PALModeArray[cmbMode.getSelectedIndex()];
         }
         else if (radNTSC.isSelected()) {
-            Mode = NTSCModeArray[cmbVideoFormat.getSelectedIndex()];
+            Mode = NTSCModeArray[cmbMode.getSelectedIndex()];
         }
         else if (radSECAM.isSelected()) {
-            Mode = SECAMModeArray[cmbVideoFormat.getSelectedIndex()];
+            Mode = SECAMModeArray[cmbMode.getSelectedIndex()];
         }
         else if (radBW.isSelected()) {
-            Mode = OtherModeArray[cmbVideoFormat.getSelectedIndex()];
+            Mode = OtherModeArray[cmbMode.getSelectedIndex()];
         }
         else if (radMAC.isSelected()) {
-            Mode = MACModeArray[cmbVideoFormat.getSelectedIndex()];
+            Mode = MACModeArray[cmbMode.getSelectedIndex()];
         }
         // Start reading the section we found above, starting with line count
         if (INIFile.getIntegerFromINI(ModesFile, Mode, "lines") != null) {
@@ -5403,8 +5418,8 @@ public class GUI extends javax.swing.JFrame {
         else {
             JOptionPane.showMessageDialog(null, "Unable to read the \"lines\" value for this mode. "
                     + "Defaulting to 525.", AppName, JOptionPane.WARNING_MESSAGE);
-            if (cmbVideoFormat.getItemCount() > 1) {
-                cmbVideoFormat.setSelectedIndex(PreviousIndex);                
+            if (cmbMode.getItemCount() > 1) {
+                cmbMode.setSelectedIndex(PreviousIndex);                
             }
             else {
                 // Default to 525 lines so we don't enable 625-specific stuff
@@ -5511,15 +5526,65 @@ public class GUI extends javax.swing.JFrame {
         else {
             disableChannelID();
         }
-        String u = INIFile.getStringFromINI(ModesFile, Mode, "uhf", "0", false);
-        if ( (u.equals("0")) || (u.isBlank())) {
+        // Check for UHF and VHF bandplans
+        // We now support up to five bandplans per band. uhf and vhf are the
+        // default and these names are retained for backwards compatibility.
+        // Additional bandplans can be added from uhf2 to uhf5, or vhf2 to vhf5.
+        UhfAL = new ArrayList<>();
+        VhfAL = new ArrayList<>();
+        for (int i = 0; i <=5; i++) {
+            // The string below is merged below to find uhf2-5
+            String s;
+            switch (i) {
+                case 0:
+                    // There's no uhf0 setting so pass an empty string
+                    s = "";
+                    break;
+                case 1:
+                    // There's no uhf1 setting so skip this
+                    continue;
+                default:
+                    s = Integer.toString(i);
+                    break;
+            }
+            String u = INIFile.getStringFromINI(ModesFile, Mode, "uhf" + s, "0", false);
+            if (!u.equals("0")) {
+                UhfAL.add(u);
+            }
+            else {
+                break;
+            }
+        }
+        for (int j = 0; j <=5; j++) {
+            // The string below is merged below to find vhf2-vhf5
+            String t;
+            switch (j) {
+                case 0:
+                    // There's no vhf0 setting, so pass an empty string
+                    t = "";
+                    break;
+                case 1:
+                    // There's no vhf1 setting, so skip this
+                    continue;
+                default:
+                    t = Integer.toString(j);
+                    break;
+            }
+            String v = INIFile.getStringFromINI(ModesFile, Mode, "vhf" + t, "0", false);
+            if (!v.equals("0")) {
+                VhfAL.add(v);
+            }
+            else {
+                break;
+            }
+        }
+        if (UhfAL.isEmpty()) {
             disableUHF();
         }
         else {
             enableUHF();
         }
-        String v = INIFile.getStringFromINI(ModesFile, Mode, "vhf", "0", false);
-        if ( (v.equals("0")) || (v.isBlank()) ) {
+        if (VhfAL.isEmpty()) {
             disableVHF();
         }
         else {
@@ -5560,8 +5625,8 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             JOptionPane.showMessageDialog(null, "This mode is not supported by the selected output device.", AppName, JOptionPane.WARNING_MESSAGE);
-            cmbVideoFormat.setSelectedIndex(PreviousIndex);
-            checkVideoFormat();
+            cmbMode.setSelectedIndex(PreviousIndex);
+            checkMode();
             return false;
         }
     }
@@ -5788,21 +5853,7 @@ public class GUI extends javax.swing.JFrame {
             // Extract (from ModesFile) the bandplan section that we need
             String bp = INIFile.splitINIfile(ModesFile, bpname);
             if (bp == null) {
-                JOptionPane.showMessageDialog(null, "The bandplan data in Modes.ini appears to be "
-                        + "missing or corrupt for the selected band.", AppName, JOptionPane.WARNING_MESSAGE);
-                switch (band) {
-                    case "vhf":
-                    radVHF.setEnabled(false);
-                    radCustom.doClick();
-                    break;
-                    case "uhf":
-                    radUHF.setEnabled(false);
-                    radCustom.doClick();
-                    break;
-                    default:
-                    radCustom.doClick();
-                }
-                return;
+                throw new IllegalArgumentException(band + " was not found in modes.ini");
             }
             // We just want the channel names/numbers so remove everything after =
             bp = bp.replaceAll("\\=.*", "");       
@@ -5834,25 +5885,19 @@ public class GUI extends javax.swing.JFrame {
             cmbChannel.setEnabled(true);       
             cmbChannel.removeAllItems();
             cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-            cmbChannel.setSelectedIndex(0);
-            // Set region ID if applicable
-            lblRegion.setText(INIFile.getStringFromINI(ModesFile, bpname, "region", "", true));            
+            cmbChannel.setSelectedIndex(0);          
         }
         catch (IllegalArgumentException ex) {
             System.err.println(ex);
-            JOptionPane.showMessageDialog(null, "An unexpected error occurred while attempting to load "
-                    + "the bandplan data for this mode. This may be due to incorrect settings in the Modes.ini file.", AppName, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "The bandplan data in Modes.ini appears to be "
+                    + "missing or corrupt for the selected band.", AppName, JOptionPane.WARNING_MESSAGE);
             radCustom.doClick();
             // Disable the band that failed
-            switch (band) {
-                case "vhf":
-                    radVHF.setEnabled(false);
-                    break;
-                case "uhf":
-                    radUHF.setEnabled(false);
-                    break;
-                default:
-                    break;
+            if (band.startsWith("uhf")) {
+                radUHF.setEnabled(false);
+            }
+            else if (band.startsWith("vhf")) {
+                radVHF.setEnabled(false);
             }
         }
     }
@@ -6814,7 +6859,7 @@ public class GUI extends javax.swing.JFrame {
     private void menuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAboutActionPerformed
         // Get application version by checking the timestamp on the class file
         String v;
-        String mv;
+        String mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version "+ ModesFileVersion;
         String cp = System.getProperty("java.class.path");
         // If classpath contains multiple paths, remove all but the first
         if (!RunningOnWindows) {
@@ -6845,7 +6890,6 @@ public class GUI extends javax.swing.JFrame {
         catch (NumberFormatException | InvalidPathException e) {
               v = "";
         }
-        mv = "\nUsing " + ModesFileLocation + " Modes.ini file, version " + ModesFileVersion;
         JOptionPane.showMessageDialog(null, AppName + v + mv + "\n\nCreated 2020-2022 by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n", "About " + AppName, JOptionPane.INFORMATION_MESSAGE);
@@ -7244,50 +7288,50 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkAudioActionPerformed
 
     private void radMACActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radMACActionPerformed
-        cmbVideoFormat.removeAllItems();
-        cmbVideoFormat.setModel( new DefaultComboBoxModel<>( addVideoModes("mac", 0) ) );
-        cmbVideoFormat.setSelectedIndex(0);
+        cmbMode.removeAllItems();
+        cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("mac", 0) ) );
+        cmbMode.setSelectedIndex(0);
     }//GEN-LAST:event_radMACActionPerformed
 
     private void radBWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radBWActionPerformed
-        cmbVideoFormat.removeAllItems();
-        cmbVideoFormat.setModel( new DefaultComboBoxModel<>( addVideoModes("other", 0) ) );
-        cmbVideoFormat.setSelectedIndex(0);        
+        cmbMode.removeAllItems();
+        cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("other", 0) ) );
+        cmbMode.setSelectedIndex(0);        
     }//GEN-LAST:event_radBWActionPerformed
 
     private void radSECAMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSECAMActionPerformed
-        cmbVideoFormat.removeAllItems();
-        cmbVideoFormat.setModel( new DefaultComboBoxModel<>( addVideoModes("secam", 0) ) );
-        cmbVideoFormat.setSelectedIndex(0);        
+        cmbMode.removeAllItems();
+        cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("secam", 0) ) );
+        cmbMode.setSelectedIndex(0);        
     }//GEN-LAST:event_radSECAMActionPerformed
 
     private void radNTSCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radNTSCActionPerformed
-        cmbVideoFormat.removeAllItems();
-        cmbVideoFormat.setModel( new DefaultComboBoxModel<>( addVideoModes("ntsc", 0) ) );
-        cmbVideoFormat.setSelectedIndex(0);
+        cmbMode.removeAllItems();
+        cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("ntsc", 0) ) );
+        cmbMode.setSelectedIndex(0);
     }//GEN-LAST:event_radNTSCActionPerformed
 
     private void radPALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radPALActionPerformed
-        cmbVideoFormat.removeAllItems();
-        cmbVideoFormat.setModel( new DefaultComboBoxModel<>( addVideoModes("pal", 0) ) );
-        cmbVideoFormat.setSelectedIndex(0);
+        cmbMode.removeAllItems();
+        cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("pal", 0) ) );
+        cmbMode.setSelectedIndex(0);
         // End populate
     }//GEN-LAST:event_radPALActionPerformed
 
-    private void cmbVideoFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbVideoFormatActionPerformed
-        if (cmbVideoFormat.getSelectedIndex() != -1) {
-            checkVideoFormat();
+    private void cmbModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbModeActionPerformed
+        if (cmbMode.getSelectedIndex() != -1) {
+            checkMode();
             /* Save the currently selected item into PreviousIndex.
                We can use this to revert the change if an unsupported mode is
                selected later.
             */
-            PreviousIndex = cmbVideoFormat.getSelectedIndex();
+            PreviousIndex = cmbMode.getSelectedIndex();
             // Set sample rate
             txtSampleRate.setText(DefaultSampleRate);
             // If test card is selected, see if the selected mode is 625 or not
             if (radTest.isSelected()) checkTestCardStatus();
         }
-    }//GEN-LAST:event_cmbVideoFormatActionPerformed
+    }//GEN-LAST:event_cmbModeActionPerformed
 
     private void chkARCorrectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkARCorrectionActionPerformed
         if (chkARCorrection.isSelected()) {
@@ -7517,10 +7561,24 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtFrequencyKeyTyped
 
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
+        // Set region and alternate plans for UHF
+        cmbRegion.removeAllItems();
+        for (int i = 0; i < UhfAL.size(); i++) {
+            cmbRegion.addItem(INIFile.getStringFromINI(ModesFile, UhfAL.get(i), "region", UhfAL.get(i), true));
+        }
+        // Enable the region combobox if multiple options are available.
+        if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
         populateBandPlan("uhf");
     }//GEN-LAST:event_radUHFActionPerformed
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
+        // Set region and alternate plans for VHF
+        cmbRegion.removeAllItems();
+        for (int i = 0; i < VhfAL.size(); i++) {
+            cmbRegion.addItem(INIFile.getStringFromINI(ModesFile, VhfAL.get(i), "region", VhfAL.get(i), true));
+        }
+        // Enable the region combobox if multiple options are available.
+        if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
         populateBandPlan("vhf");
     }//GEN-LAST:event_radVHFActionPerformed
 
@@ -7528,7 +7586,9 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(true);
         cmbChannel.setEnabled(false);
         cmbChannel.setSelectedIndex(-1);
-        lblRegion.setText(" ");
+        cmbRegion.setEnabled(false);
+        cmbRegion.removeAllItems();
+        cmbRegion.addItem("");
     }//GEN-LAST:event_radCustomActionPerformed
 
     private void menuNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNewActionPerformed
@@ -7558,7 +7618,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             if (a != -1) {
-                cmbVideoFormat.setSelectedIndex(a);
+                cmbMode.setSelectedIndex(a);
             }
             else {
                 JOptionPane.showConfirmDialog(null, "Unable to find the DMAC-FM mode, which is required for this template.", AppName, JOptionPane.ERROR_MESSAGE);
@@ -7606,6 +7666,7 @@ public class GUI extends javax.swing.JFrame {
             detectFork();   
             selectModesFile();
             openModesFile();
+            cmbRegion.setEnabled(false);
             populateVideoModes();
             selectDefaultMode();
             if (CaptainJack) {
@@ -7719,16 +7780,16 @@ public class GUI extends javax.swing.JFrame {
             case 0:
                 lblOutputDevice2.setText("Serial number (optional)");
                 OutputDevice = ""; // can also use hackrf
-                // If the RF panel is disabled, enable it and call checkVideoFormat
+                // If the RF panel is disabled, enable it and call checkMode
                 // to re-populate the channel options correctly
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected, reset it to something else
                     if (Baseband) {
                         JOptionPane.showMessageDialog(null, VideoFormatChanged, AppName, JOptionPane.INFORMATION_MESSAGE);   
-                        cmbVideoFormat.setSelectedIndex(0);
+                        cmbMode.setSelectedIndex(0);
                     }
                     enableRFOptions();
-                    checkVideoFormat();
+                    checkMode();
                 }
                 txtGain.setEnabled(true);
                 txtGain.setText("0");
@@ -7747,10 +7808,10 @@ public class GUI extends javax.swing.JFrame {
                 if (!radCustom.isEnabled()) {
                     if (Baseband) {
                         JOptionPane.showMessageDialog(null, VideoFormatChanged, AppName, JOptionPane.INFORMATION_MESSAGE);   
-                        cmbVideoFormat.setSelectedIndex(0);
+                        cmbMode.setSelectedIndex(0);
                     }
                     enableRFOptions();
-                    checkVideoFormat();
+                    checkMode();
                 }
                 txtGain.setEnabled(true);
                 txtGain.setText("0");
@@ -8095,9 +8156,9 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnPlaylistDownActionPerformed
 
-    private void cmbVideoFormatMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbVideoFormatMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbVideoFormat);
-    }//GEN-LAST:event_cmbVideoFormatMouseWheelMoved
+    private void cmbModeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbModeMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbMode);
+    }//GEN-LAST:event_cmbModeMouseWheelMoved
 
     private void cmbWSSMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbWSSMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbWSS);
@@ -8457,6 +8518,23 @@ public class GUI extends javax.swing.JFrame {
     private void cmbNMSCeefaxRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbNMSCeefaxRegion);
     }//GEN-LAST:event_cmbNMSCeefaxRegionMouseWheelMoved
+
+    private void cmbRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRegionActionPerformed
+        int i = cmbRegion.getSelectedIndex();
+        if (i == -1) return;
+        if (i == 0) {
+            if (radUHF.isSelected()) populateBandPlan("uhf");
+            if (radVHF.isSelected()) populateBandPlan("vhf");
+        }
+        else {
+            if (radUHF.isSelected()) populateBandPlan("uhf" + (i + 1));
+            if (radVHF.isSelected()) populateBandPlan("vhf" + (i + 1));
+        }
+    }//GEN-LAST:event_cmbRegionActionPerformed
+
+    private void cmbRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRegionMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRegion);
+    }//GEN-LAST:event_cmbRegionMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8528,14 +8606,15 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbLogo;
     private javax.swing.JComboBox<String> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
+    private javax.swing.JComboBox<String> cmbMode;
     private javax.swing.JComboBox<String> cmbNMSCeefaxRegion;
     private javax.swing.JComboBox<String> cmbOutputDevice;
+    private javax.swing.JComboBox<String> cmbRegion;
     private javax.swing.JComboBox<String> cmbScramblingKey1;
     private javax.swing.JComboBox<String> cmbScramblingKey2;
     private javax.swing.JComboBox<String> cmbScramblingType;
     private javax.swing.JComboBox<String> cmbSysterPermTable;
     private javax.swing.JComboBox<String> cmbTest;
-    private javax.swing.JComboBox<String> cmbVideoFormat;
     private javax.swing.JComboBox<String> cmbWSS;
     private javax.swing.JFileChooser configFileChooser;
     private javax.swing.JPanel consoleOutputPanel;
@@ -8567,7 +8646,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblNMSCeefaxRegion;
     private javax.swing.JLabel lblOutputDevice;
     private javax.swing.JLabel lblOutputDevice2;
-    private javax.swing.JLabel lblRegion;
     private javax.swing.JLabel lblSampleRate;
     private javax.swing.JLabel lblScramblingKey;
     private javax.swing.JLabel lblScramblingSystem;
