@@ -312,7 +312,7 @@ public class GUI extends javax.swing.JFrame {
         }
         populateCheckboxArray();
         loadPreferences();
-        detectFork();        
+        detectFork();
         selectModesFile();
         openModesFile();
         populateVideoModes();
@@ -1885,7 +1885,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkShowCardSerial))
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
         );
         emmPanelLayout.setVerticalGroup(
             emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1979,7 +1979,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(scramblingOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                         .addComponent(lblSysterPermTable)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
                         .addComponent(cmbSysterPermTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(scramblingOptionsPanelLayout.createSequentialGroup()
                         .addComponent(lblECMaturity)
@@ -2051,7 +2051,7 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
                         .addComponent(scramblingOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(emmPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(emmPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addContainerGap())
                     .addGroup(scramblingPanelLayout.createSequentialGroup()
                         .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2060,10 +2060,10 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(lblVC2ScramblingKey))
                         .addGap(18, 18, 18)
                         .addGroup(scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cmbScramblingKey1, 0, 381, Short.MAX_VALUE)
-                            .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cmbScramblingType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 34, Short.MAX_VALUE))))
+                            .addComponent(cmbScramblingKey1, 0, 405, Short.MAX_VALUE)
+                            .addComponent(cmbScramblingType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbScramblingKey2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         scramblingPanelLayout.setVerticalGroup(
             scramblingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2803,7 +2803,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";                
+                ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
             }
         }
         else if ( (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) &&
@@ -2877,7 +2877,7 @@ public class GUI extends javax.swing.JFrame {
             catch (IOException e) {
                 // Load failed, retry with the embedded file
                 JOptionPane.showMessageDialog(null, "Unable to read the modes file.\n"
-                        + "Retrying with the embedded copy, which may not be up to date.", AppName, JOptionPane.WARNING_MESSAGE);                
+                        + "Retrying with the embedded copy, which may not be up to date.", AppName, JOptionPane.WARNING_MESSAGE);
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "Modes.ini";
                 ModesFileLocation = "embedded";
                 openModesFile();
@@ -2969,7 +2969,7 @@ public class GUI extends javax.swing.JFrame {
             // Convert the ArrayList to an array to populate the combobox
             String[] b = new String[ml.size()];
             for(int i = 0; i < b.length; i++) {
-                b[i] = ml.get(i);            
+                b[i] = ml.get(i);    
             }
             return b;
         }
@@ -3020,7 +3020,7 @@ public class GUI extends javax.swing.JFrame {
         else if (Files.isDirectory(Path.of(HackTVPath))) {
             lblFork.setText("Invalid path");
             CaptainJack = false;
-            return;            
+            return;    
         }
         /*  Check the size of the specified file.
          *  If larger than 100MB, call the fsphil method and don't go any further.
@@ -3070,7 +3070,7 @@ public class GUI extends javax.swing.JFrame {
         if (!b) {
             lblFork.setText("Invalid file (not hacktv?)");
             CaptainJack = false;
-            return;            
+            return;    
         }     
     }
     
@@ -3218,7 +3218,7 @@ public class GUI extends javax.swing.JFrame {
         } else if (FilePath.equals(ConfigFile3)) {
             Prefs.put("File3", ConfigFile2);
             Prefs.put("File2", ConfigFile1);
-            Prefs.put("File1", FilePath);           
+            Prefs.put("File1", FilePath);   
             checkMRUList(); 
         } else if (FilePath.equals(ConfigFile4)) {
             Prefs.put("File4", ConfigFile3);
@@ -3303,7 +3303,7 @@ public class GUI extends javax.swing.JFrame {
                     this.setTitle(TitleBar + " - " + SourceFile.getName());
                     // Remove the ellipsis after Save to follow standard UI guidelines
                     menuSave.setText("Save");
-                    updateMRUList(SourceFile.toString());                    
+                    updateMRUList(SourceFile.toString());    
                 }
                 HTVLoadInProgress = false;
             }
@@ -3318,7 +3318,7 @@ public class GUI extends javax.swing.JFrame {
         } catch (IOException iox) {
                 // File is inaccessible, so stop
                 JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
-                        + "It may have been removed, or you may not have the correct permissions to access it.", AppName, JOptionPane.ERROR_MESSAGE);         
+                        + "It may have been removed, or you may not have the correct permissions to access it.", AppName, JOptionPane.ERROR_MESSAGE); 
         }
     }
     
@@ -3398,7 +3398,7 @@ public class GUI extends javax.swing.JFrame {
                         }
                     }
                     if (!TCFound) {
-                        invalidConfigFileValue("test card", ImportedTC);                
+                        invalidConfigFileValue("test card", ImportedTC);
                     }
                 }                
             }
@@ -3432,7 +3432,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             if (!ImportedSource.endsWith(".m3u")) txtSource.setText(ImportedSource);
         }
-        // Video format
+        // Video mode
         String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
         boolean ModeFound = false;
             for (int i = 0; i < PALModeArray.length; i++) {
@@ -3526,6 +3526,7 @@ public class GUI extends javax.swing.JFrame {
             // Return a value of -250 if the value is null so we can handle it
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
             String ImportedChannel = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "channel", "", true);
+            String ImportedBandPlan = INIFile.getStringFromINI(fileContents, "hacktv-gui3", "bandplan", "", false);
             Double ImportedFrequency;
             if (INIFile.getDoubleFromINI(fileContents, "hacktv", "frequency") != null) {
                 ImportedFrequency = INIFile.getDoubleFromINI(fileContents, "hacktv", "frequency");
@@ -3544,15 +3545,29 @@ public class GUI extends javax.swing.JFrame {
                 // Try to find the channel name by trying UHF first
                 boolean ChannelFound = false;
                 radUHF.doClick();
+                // Check the available bandplans for the one specified and set the region accordingly
+                for (int ub = 0; ub < UhfAL.size(); ub++) {
+                    if (UhfAL.get(ub).equals(ImportedBandPlan)) {
+                        cmbRegion.setSelectedIndex(ub);
+                    }
+                }
+                // Search for the specified channel
                 for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
                     if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
                         cmbChannel.setSelectedIndex(i);
                         ChannelFound = true;
                     }
-                }
+                }                    
                 // If not found, try VHF
                 if (!ChannelFound) {
                     radVHF.doClick();
+                    // Check the available bandplans for the one specified and set the region accordingly
+                    for (int vb = 0; vb < VhfAL.size(); vb++) {
+                        if (VhfAL.get(vb).equals(ImportedBandPlan)) {
+                            cmbRegion.setSelectedIndex(vb);
+                        }
+                    }
+                    // Search for the specified channel
                     for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
                         if ( (ChannelArray[i].toLowerCase()).equals(ImportedChannel.toLowerCase()) ) {
                             cmbChannel.setSelectedIndex(i);
@@ -3646,7 +3661,7 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 if (!logoFound) {
-                    invalidConfigFileValue("logo", ImportedLogo);                
+                    invalidConfigFileValue("logo", ImportedLogo);
                 }
             }
         }
@@ -4061,7 +4076,7 @@ public class GUI extends javax.swing.JFrame {
                     int M3UIndex = cmbM3USource.getSelectedIndex();
                     FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
                     FileContents = INIFile.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
-                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));                    
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", PlaylistURLsAL.get(M3UIndex));    
                 }
                 else {
                     // Save path as-is. This may or may not be valid but will be caught when re-opened.
@@ -4078,8 +4093,15 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!radCustom.isSelected()) {
                 FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
+                // Save band plan identifier, this uses the section name from modes.ini
+                if (radUHF.isSelected()) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "bandplan", UhfAL.get(cmbRegion.getSelectedIndex()));
+                }
+                else if (radVHF.isSelected()) {
+                    FileContents = INIFile.setINIValue(FileContents, "hacktv-gui3", "bandplan", VhfAL.get(cmbRegion.getSelectedIndex()));
+                }
             }
-            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);                
+            FileContents = INIFile.setLongINIValue(FileContents, "hacktv", "frequency", Frequency);
         }
         // Sample rate
         if (Shared.isNumeric(txtSampleRate.getText())) {
@@ -4413,7 +4435,7 @@ public class GUI extends javax.swing.JFrame {
                     // Convert ArrayList to an array so we can populate the combobox
                     PlaylistNames = new String[PlaylistNamesAL.size()];
                     for (int i = 0; i < PlaylistNamesAL.size(); i++) {
-                        PlaylistNames[i] = PlaylistNamesAL.get(i);                    
+                        PlaylistNames[i] = PlaylistNamesAL.get(i);    
                     }
                     return true;
                 }
@@ -4466,7 +4488,7 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setVisible(true);
             txtSource.setText("");
             cmbM3USource.setVisible(false);
-            cmbM3USource.setEnabled(false);           
+            cmbM3USource.setEnabled(false);   
         }
     }
     
@@ -4829,7 +4851,7 @@ public class GUI extends javax.swing.JFrame {
             // Set IF to Sky News
             txtFrequency.setText(String.format("%.2f",(11.377 - localOscillator) * 1000));
             JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to Sky News"
-                    + " (11.377 GHz) and run hacktv.", AppName, JOptionPane.INFORMATION_MESSAGE);            
+                    + " (11.377 GHz) and run hacktv.", AppName, JOptionPane.INFORMATION_MESSAGE);    
         }
     }    
     
@@ -4934,7 +4956,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             enableScramblingKey1();
             scramblingOptionsPanel.setEnabled(true);
-            emmPanel.setEnabled(true);            
+            emmPanel.setEnabled(true);    
         }
         // Get the scrambling system name  
         String sconf = ScramblingTypeArray.get(cmbScramblingType.getSelectedIndex()).substring(2);
@@ -4943,7 +4965,7 @@ public class GUI extends javax.swing.JFrame {
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
                 if ((!chkPixelRate.isSelected()) && !HTVLoadInProgress) chkPixelRate.doClick();
                 if (!HTVLoadInProgress) txtPixelRate.setText("28");
-                disableScramblingKey2();                
+                disableScramblingKey2();
                 sconf = "videocrypt";
                 break;
             case "videocrypt2":
@@ -5385,6 +5407,7 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEnabled(false);
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
+        // Add a blank item to prevent the combobox from enlarging on some L&Fs
         cmbRegion.addItem("");
         if (chkAmp.isSelected()) chkAmp.doClick();
         chkAmp.setEnabled(false);
@@ -5419,7 +5442,7 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Unable to read the \"lines\" value for this mode. "
                     + "Defaulting to 525.", AppName, JOptionPane.WARNING_MESSAGE);
             if (cmbMode.getItemCount() > 1) {
-                cmbMode.setSelectedIndex(PreviousIndex);                
+                cmbMode.setSelectedIndex(PreviousIndex);
             }
             else {
                 // Default to 525 lines so we don't enable 625-specific stuff
@@ -5692,7 +5715,7 @@ public class GUI extends javax.swing.JFrame {
         chkTeletext.setEnabled(false);
         teletextPanel.setEnabled(false);
         if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
-        chkTextSubtitles.setEnabled(false);        
+        chkTextSubtitles.setEnabled(false);
     }
     
     private boolean checkTeletextSource() {
@@ -5867,7 +5890,7 @@ public class GUI extends javax.swing.JFrame {
                     .collect(Collectors.joining("\n"));
             bp = Stream.of(bp.split("\n"))
                     .filter(g -> !g.contains("chid"))
-                    .collect(Collectors.joining("\n"));        
+                    .collect(Collectors.joining("\n"));
             // Add a headerless string to ChannelArray by splitting off the first line
             ChannelArray = bp.substring(bp.indexOf("\n") +1).split("\\r?\\n");
             // Populate FrequencyArray by reading ModesFile using what we added
@@ -5885,7 +5908,7 @@ public class GUI extends javax.swing.JFrame {
             cmbChannel.setEnabled(true);       
             cmbChannel.removeAllItems();
             cmbChannel.setModel(new DefaultComboBoxModel<>(ChannelArray));
-            cmbChannel.setSelectedIndex(0);          
+            cmbChannel.setSelectedIndex(0);  
         }
         catch (IllegalArgumentException ex) {
             System.err.println(ex);
@@ -6096,7 +6119,7 @@ public class GUI extends javax.swing.JFrame {
             else {
                 JOptionPane.showMessageDialog(null, InvalidInput, AppName, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
-                return false;                  
+                return false;  
             }
         }
         return true;
@@ -6255,7 +6278,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 JOptionPane.showMessageDialog(null, InvalidCardNumber, AppName, JOptionPane.WARNING_MESSAGE);  
-                tabPane.setSelectedIndex(4);              
+                tabPane.setSelectedIndex(4);      
                 return false;
             }
         }
@@ -6509,7 +6532,7 @@ public class GUI extends javax.swing.JFrame {
         }
         if (!VolumeParam.isEmpty()) allArgs.add(VolumeParam);
         if (!txtVolume.getText().isEmpty()) allArgs.add(txtVolume.getText());
-        if (!DownmixParam.isEmpty()) allArgs.add(DownmixParam);        
+        if (!DownmixParam.isEmpty()) allArgs.add(DownmixParam);
         // Finally, add the source video or test option.
         if (PlaylistAL.size() > 0) {
             InputSource = "";
@@ -6651,7 +6674,7 @@ public class GUI extends javax.swing.JFrame {
                             , AppName, JOptionPane.WARNING_MESSAGE);
                 }
                 // Revert what we changed before starting
-                postRunTasks();            
+                postRunTasks();    
             }
             // Update the GUI from this method.
             @Override
@@ -6796,7 +6819,7 @@ public class GUI extends javax.swing.JFrame {
                 // Run kill and feed the PID to it
                 ProcessBuilder StopHackTV = new ProcessBuilder
                     ("kill", "-2", Long.toString(pid));
-                Process p = StopHackTV.start();                
+                Process p = StopHackTV.start();
             }
             catch (IOException ex)  {
                 System.err.println(ex);
@@ -7031,7 +7054,7 @@ public class GUI extends javax.swing.JFrame {
                  */
                 if ( (ScramblingType1 == "--syster") && (cmbScramblingType.getSelectedIndex() == 8) ) {
                     ScramblingType2 = "--systercnr";
-                    ScramblingKey2 = ScramblingKey1;                    
+                    ScramblingKey2 = ScramblingKey1;    
                 }
                 // Delete the "blank" parameter if specified
                 // This is used as a placeholder for modes which don't use
@@ -7296,13 +7319,13 @@ public class GUI extends javax.swing.JFrame {
     private void radBWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radBWActionPerformed
         cmbMode.removeAllItems();
         cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("other", 0) ) );
-        cmbMode.setSelectedIndex(0);        
+        cmbMode.setSelectedIndex(0);
     }//GEN-LAST:event_radBWActionPerformed
 
     private void radSECAMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSECAMActionPerformed
         cmbMode.removeAllItems();
         cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("secam", 0) ) );
-        cmbMode.setSelectedIndex(0);        
+        cmbMode.setSelectedIndex(0);
     }//GEN-LAST:event_radSECAMActionPerformed
 
     private void radNTSCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radNTSCActionPerformed
@@ -7562,6 +7585,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
         // Set region and alternate plans for UHF
+        cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < UhfAL.size(); i++) {
             cmbRegion.addItem(INIFile.getStringFromINI(ModesFile, UhfAL.get(i), "region", UhfAL.get(i), true));
@@ -7573,6 +7597,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
         // Set region and alternate plans for VHF
+        cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < VhfAL.size(); i++) {
             cmbRegion.addItem(INIFile.getStringFromINI(ModesFile, VhfAL.get(i), "region", VhfAL.get(i), true));
@@ -7588,6 +7613,7 @@ public class GUI extends javax.swing.JFrame {
         cmbChannel.setSelectedIndex(-1);
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
+        // Add a blank item to prevent the combobox from enlarging on some L&Fs
         cmbRegion.addItem("");
     }//GEN-LAST:event_radCustomActionPerformed
 
@@ -7646,12 +7672,12 @@ public class GUI extends javax.swing.JFrame {
             }
             
             JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to the Galaxy "
-                    + "channel, or change this in the channel dropdown box on the Output tab.", AppName, JOptionPane.INFORMATION_MESSAGE);            
+                    + "channel, or change this in the channel dropdown box on the Output tab.", AppName, JOptionPane.INFORMATION_MESSAGE);    
         }
     }//GEN-LAST:event_menuBSBTemplateActionPerformed
 
     private void btnHackTVPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHackTVPathActionPerformed
-        hacktvFileChooser.setAcceptAllFileFilterUsed(true);        
+        hacktvFileChooser.setAcceptAllFileFilterUsed(true);
         int returnVal = hacktvFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = hacktvFileChooser.getSelectedFile();
@@ -8289,7 +8315,7 @@ public class GUI extends javax.swing.JFrame {
                         Prefs.put("HackTVPath", HackTVPath);
                         // Load the full path to a variable so we can use getParent on it
                         // and get its parent directory path
-                        HackTVDirectory = new File(HackTVPath).getParent();                    
+                        HackTVDirectory = new File(HackTVPath).getParent();    
                         // Detect what were provided with
                         detectFork();
                         selectModesFile();
@@ -8335,7 +8361,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
         try {
-            Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/");        }
+            Shared.launchBrowser("https://github.com/steeviebops/hacktv-gui/");}
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Unable to launch default browser.", AppName, JOptionPane.WARNING_MESSAGE);
         }

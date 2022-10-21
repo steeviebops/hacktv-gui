@@ -2021,7 +2021,7 @@
                                   <Group type="102" attributes="0">
                                       <Component id="scramblingOptionsPanel" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="emmPanel" min="-2" max="-2" attributes="0"/>
+                                      <Component id="emmPanel" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
@@ -2032,11 +2032,11 @@
                                       </Group>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="cmbScramblingKey1" alignment="0" pref="381" max="32767" attributes="0"/>
-                                          <Component id="cmbScramblingKey2" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="cmbScramblingKey1" alignment="0" pref="405" max="32767" attributes="0"/>
                                           <Component id="cmbScramblingType" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="cmbScramblingKey2" alignment="0" max="32767" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="34" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -2162,7 +2162,7 @@
                                       </Group>
                                       <Component id="chkShowCardSerial" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="112" max="32767" attributes="0"/>
+                                  <EmptySpace pref="95" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -2261,7 +2261,7 @@
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="0" attributes="0">
                                           <Component id="lblSysterPermTable" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace pref="16" max="32767" attributes="0"/>
+                                          <EmptySpace pref="45" max="32767" attributes="0"/>
                                           <Component id="cmbSysterPermTable" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="0" attributes="0">
