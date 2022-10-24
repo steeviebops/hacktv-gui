@@ -7584,6 +7584,9 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtFrequencyKeyTyped
 
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
+        // Get the name of the currently selected VHF region and look it up
+        String sv = "";
+        if (cmbRegion.getSelectedIndex() > 0) sv = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
         // Set region and alternate plans for UHF
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
@@ -7593,9 +7596,23 @@ public class GUI extends javax.swing.JFrame {
         // Enable the region combobox if multiple options are available.
         if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
         populateBandPlan("uhf");
+        // If multiple regions are available, see if there's a UHF region with the
+        // same name as the previously selected VHF one. If so, select it.
+        if ( (UhfAL.size() > 1) && (VhfAL.size() > 1) ) {
+            for (int r = 0; r < cmbRegion.getItemCount(); r++) {
+                String su = cmbRegion.getItemAt(r);
+                if (sv.equals(su)) {
+                    cmbRegion.setSelectedIndex(r);
+                    break;
+                }
+            }        
+        }
     }//GEN-LAST:event_radUHFActionPerformed
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
+        // Get the name of the currently selected UHF band plan and look it up
+        String su = "";
+        if (cmbRegion.getSelectedIndex() > 0) su = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
         // Set region and alternate plans for VHF
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
@@ -7605,6 +7622,17 @@ public class GUI extends javax.swing.JFrame {
         // Enable the region combobox if multiple options are available.
         if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
         populateBandPlan("vhf");
+        // If multiple regions are available, see if there's a VHF region with the
+        // same name as the previously selected UHF one. If so, select it.
+        if ( (UhfAL.size() > 1) && (VhfAL.size() > 1) ) {
+            for (int r = 0; r < cmbRegion.getItemCount(); r++) {
+                String sv = cmbRegion.getItemAt(r);
+                if (su.equals(sv)) {
+                    cmbRegion.setSelectedIndex(r);
+                    break;
+                }
+            }            
+        }
     }//GEN-LAST:event_radVHFActionPerformed
 
     private void radCustomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCustomActionPerformed
