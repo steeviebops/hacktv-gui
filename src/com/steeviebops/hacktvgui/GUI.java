@@ -41,6 +41,7 @@ import java.io.FileReader;
 import java.io.LineNumberReader;
 import javax.swing.filechooser.FileFilter;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
@@ -76,6 +77,7 @@ public class GUI extends javax.swing.JFrame {
     
     // Look and feel arraylist
     private ArrayList<String> LaFAL;
+    int defaultLaF;
     
     // Get user's home directory, used for file open dialogues
     private final String UserHomeDir = System.getProperty("user.home");
@@ -226,11 +228,14 @@ public class GUI extends javax.swing.JFrame {
     
     // Main method
     public static void main(String args[]) {
+        // Pre-initialisation macOS tasks
         if (System.getProperty("os.name").contains("Mac")) {
             // Put app name in the menu bar on MacOS
             System.setProperty("apple.awt.application.name", "hacktv-gui");
             // Use the Mac menu bar
             System.setProperty("apple.laf.useScreenMenuBar", "true");
+            // Set light/dark mode to current setting, seems to be broken
+            // System.setProperty("apple.awt.application.appearance", "system");
         }
         try {
             GUI mainForm = new GUI(args);
@@ -309,6 +314,25 @@ public class GUI extends javax.swing.JFrame {
             // Hide the Download button on the GUI Settings tab
             btnDownloadHackTV.setVisible(false);
             DefaultHackTVPath = "/usr/local/bin/hacktv";
+        }
+        // Post-initialisation macOS tasks
+        if (System.getProperty("os.name").contains("Mac")) {
+            // Move About to the application menu
+            // Remove it and Exit from Help and File, respectively
+            menuAbout.setVisible(false);
+            menuExit.setVisible(false);
+            sepMruSeparator.setVisible(false);
+            var desktop = Desktop.getDesktop();
+            if( desktop.isSupported( Desktop.Action.APP_ABOUT ) ) {
+                desktop.setAboutHandler( e -> {
+                    menuAbout.doClick();
+                } );
+            }
+            if( desktop.isSupported( Desktop.Action.APP_QUIT_HANDLER ) ) {
+                desktop.setQuitHandler( (e, response) -> {
+                    response.performQuit();
+                } );
+            }
         }
         populateCheckboxArray();
         loadPreferences();
@@ -2585,88 +2609,68 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void setLaF() {
-        if (System.getProperty("os.name").contains("Mac")) {
-            // Put app name in the menu bar on MacOS
-            System.setProperty("apple.awt.application.name", "hacktv-gui");
-            // Use the Mac menu bar
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            UIManager.getSystemLookAndFeelClassName();
+        LaFAL = new ArrayList <> ();
+        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+            // Get the implementation class for the look and feel
+            LaFAL.add(lookAndFeel.getClassName());
+            // Is this the system default?
+            if (UIManager.getSystemLookAndFeelClassName().equals(LaFAL.get(LaFAL.size() - 1))) {
+                defaultLaF = LaFAL.size() - 1;
+            }
+        }
+        // Add FlatLaf
+        // Not enabled by default, needs FlatLaf JAR dependency in classpath
+        // https://search.maven.org/artifact/com.formdev/flatlaf/2.2/jar
+        try {
+            // Check to see if the FlatLaf class is available to us
+            Class.forName("com.formdev.flatlaf.FlatLightLaf");
+            // Add the L&Fs
+            LaFAL.add("com.formdev.flatlaf.FlatLightLaf");
+            LaFAL.add("com.formdev.flatlaf.FlatDarkLaf");
+            LaFAL.add("com.formdev.flatlaf.FlatIntelliJLaf");
+            LaFAL.add("com.formdev.flatlaf.FlatDarculaLaf");
+            System.setProperty("flatlaf.menuBarEmbedded", "false");
+            //System.setProperty("flatlaf.useWindowDecorations", "false");
+        }
+        catch (ClassNotFoundException e) {
+            // No need to do anything, we just won't load FlatLaf stuff
+        }
+        UIManager.put("swing.boldMetal", false);
+        // Safeguard if the LookAndFeel preference is out of bounds
+        int v = Prefs.getInt("LookAndFeel", defaultLaF);
+        if ((v >= (LaFAL.size())) || (v < 0)) {
+            // Use default L&F and reset preference
+            System.out.println("Specified look and feel not found, reverting to default.");
+            changeLaF(defaultLaF);
+            Prefs.putInt("LookAndFeel", defaultLaF);
         }
         else {
-            LaFAL = new ArrayList <> ();
-            UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-            for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-                // Get the implementation class for the look and feel
-                LaFAL.add(lookAndFeel.getClassName());
-            }
-            // Add FlatLaf
-            // Not enabled by default, needs FlatLaf JAR dependency in classpath
-            // https://search.maven.org/artifact/com.formdev/flatlaf/2.2/jar
-            try {
-                // Check to see if the FlatLaf class is available to us
-                Class.forName("com.formdev.flatlaf.FlatLightLaf");
-                // Add the L&Fs
-                LaFAL.add("com.formdev.flatlaf.FlatLightLaf");
-                LaFAL.add("com.formdev.flatlaf.FlatDarkLaf");
-                LaFAL.add("com.formdev.flatlaf.FlatIntelliJLaf");
-                LaFAL.add("com.formdev.flatlaf.FlatDarculaLaf");
-                System.setProperty("flatlaf.menuBarEmbedded", "false");
-                //System.setProperty("flatlaf.useWindowDecorations", "false");
-            }
-            catch (ClassNotFoundException e) {
-                // No need to do anything, we just won't load FlatLaf stuff
-            }
-            UIManager.put("swing.boldMetal", false);
-            int d;
-            if (System.getProperty("os.name").contains("Windows")) {
-                // Set Windows L&F as default
-                d = 3;
-            }
-            else {
-                // Set Metal as default
-                d = 0;
-            }
-            // Safeguard if the LookAndFeel preference is out of bounds
-            int v = Prefs.getInt("LookAndFeel", d);
-            if ((v >= (LaFAL.size())) || (v < 0)) {
-                // Use default L&F and reset preference
-                System.out.println("Specified look and feel not found, reverting to default.");
-                changeLaF(d);
-                Prefs.putInt("LookAndFeel", d);
-            }
-            else {
-                // Use the value we got from preferences
-                changeLaF(v);
-            }
+            // Use the value we got from preferences
+            changeLaF(v);
         }
     }
     
     private void populateLaFList() {
-        if (System.getProperty("os.name").contains("Mac")) {
-            // Disable this on Mac
-            cmbLookAndFeel.setVisible(false);
+        ArrayList<String> LAF = new ArrayList <> ();
+        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
+            // Get the name of the look and feel
+            LAF.add(lookAndFeel.getName());
         }
-        else {
-            ArrayList<String> LAF = new ArrayList <> ();
-            UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-            for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-                // Get the name of the look and feel
-                LAF.add(lookAndFeel.getName());
-            }
-            // Add FlatLaf if available
-            if (LaFAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
-                LAF.add("FlatLaf (light)");
-                LAF.add("FlatLaf (dark)");
-                LAF.add("FlatLaf (IntelliJ-style)");
-                LAF.add("FlatLaf (Darcula-style)");
-            }
-            String[] lf = new String[LAF.size()];
-            for(int i = 0; i < LAF.size(); i++) {
-                lf[i] = LAF.get(i);
-            }
-            cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
-            cmbLookAndFeel.setSelectedIndex(Prefs.getInt("LookAndFeel", 0));
+        // Add FlatLaf if available
+        if (LaFAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
+            LAF.add("FlatLaf (light)");
+            LAF.add("FlatLaf (dark)");
+            LAF.add("FlatLaf (IntelliJ-style)");
+            LAF.add("FlatLaf (Darcula-style)");
         }
+        String[] lf = new String[LAF.size()];
+        for (int i = 0; i < LAF.size(); i++) {
+            lf[i] = LAF.get(i);
+        }
+        cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
+        cmbLookAndFeel.setSelectedIndex(Prefs.getInt("LookAndFeel", defaultLaF));
     }
     
     private void changeLaF(int i) {
@@ -8396,7 +8400,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuGithubRepoActionPerformed
 
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
-        changeLaF(cmbLookAndFeel.getSelectedIndex());
+        if (this.isVisible()) changeLaF(cmbLookAndFeel.getSelectedIndex());
     }//GEN-LAST:event_cmbLookAndFeelActionPerformed
 
     private void chkECppvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkECppvActionPerformed
