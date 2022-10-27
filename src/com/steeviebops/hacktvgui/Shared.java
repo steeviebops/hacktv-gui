@@ -21,11 +21,13 @@ package com.steeviebops.hacktvgui;
 * Various functions and methods not directly related to the GUI code.
 */
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -256,16 +258,20 @@ public class Shared {
     }
     
     public static void launchBrowser(String u) throws IOException {
-        ProcessBuilder p;
-        if (System.getProperty("os.name").contains("Windows")) {
-            p = new ProcessBuilder("cmd.exe", "/c", "start", u);
+        // Try using the native Desktop object
+        var d = Desktop.getDesktop();
+        try {
+            d.browse(URI.create(u));
         }
-        else if (System.getProperty("os.name").contains("Mac")) {
-            p = new ProcessBuilder("open", u);
+        catch (IOException | UnsupportedOperationException e) {
+            // Try using xdg-open
+            try {
+                ProcessBuilder p = new ProcessBuilder("xdg-open", u);
+                p.start();
+            }
+            catch (IOException ex) {
+                throw new IOException();
+            }
         }
-        else {
-            p = new ProcessBuilder("xdg-open", u);
-        }
-        p.start();
     }
 }
