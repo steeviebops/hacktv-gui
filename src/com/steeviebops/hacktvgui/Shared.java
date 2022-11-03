@@ -263,15 +263,10 @@ public class Shared {
         try {
             d.browse(URI.create(u));
         }
-        catch (IOException | UnsupportedOperationException e) {
+        catch (UnsupportedOperationException e) {
             // Try using xdg-open
-            try {
-                ProcessBuilder p = new ProcessBuilder("xdg-open", u);
-                p.start();
-            }
-            catch (IOException ex) {
-                throw new IOException();
-            }
+            ProcessBuilder p = new ProcessBuilder("xdg-open", u);
+            p.start();
         }
     }
 }
