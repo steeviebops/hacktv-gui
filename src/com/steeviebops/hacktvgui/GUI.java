@@ -45,6 +45,7 @@ import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -67,6 +68,7 @@ import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
+import javax.swing.KeyStroke;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
@@ -320,8 +322,9 @@ public class GUI extends javax.swing.JFrame {
             // Move About to the application menu
             // Remove it and Exit from Help and File, respectively
             menuAbout.setVisible(false);
+            sepAboutSeparator.setVisible(false);
             menuExit.setVisible(false);
-            sepMruSeparator.setVisible(false);
+            sepExitSeparator.setVisible(false);
             var desktop = Desktop.getDesktop();
             if( desktop.isSupported( Desktop.Action.APP_ABOUT ) ) {
                 desktop.setAboutHandler( e -> {
@@ -613,12 +616,13 @@ public class GUI extends javax.swing.JFrame {
         helpMenu = new javax.swing.JMenu();
         menuWiki = new javax.swing.JMenuItem();
         menuGithubRepo = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        sepAboutSeparator = new javax.swing.JPopupMenu.Separator();
         menuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GUI frontend for hacktv");
         setIconImage(new javax.swing.ImageIcon(getClass().getResource("/com/steeviebops/resources/test.gif")).getImage());
+        setName("mainFrame"); // NOI18N
 
         sourceFileChooser.setMultiSelectionEnabled(true);
 
@@ -2416,6 +2420,7 @@ public class GUI extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        menuNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         menuNew.setText("New");
         menuNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2424,6 +2429,7 @@ public class GUI extends javax.swing.JFrame {
         });
         fileMenu.add(menuNew);
 
+        menuOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         menuOpen.setText("Open...");
         menuOpen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2432,6 +2438,7 @@ public class GUI extends javax.swing.JFrame {
         });
         fileMenu.add(menuOpen);
 
+        menuSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         menuSave.setText("Save...");
         menuSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2440,6 +2447,7 @@ public class GUI extends javax.swing.JFrame {
         });
         fileMenu.add(menuSave);
 
+        menuSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
         menuSaveAs.setText("Save as...");
         menuSaveAs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2482,6 +2490,7 @@ public class GUI extends javax.swing.JFrame {
         fileMenu.add(menuMRUFile4);
         fileMenu.add(sepExitSeparator);
 
+        menuExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
         menuExit.setText("Exit");
         menuExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2522,6 +2531,7 @@ public class GUI extends javax.swing.JFrame {
 
         helpMenu.setText("Help");
 
+        menuWiki.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
         menuWiki.setText("Wiki page");
         menuWiki.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2538,7 +2548,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         helpMenu.add(menuGithubRepo);
-        helpMenu.add(jSeparator1);
+        helpMenu.add(sepAboutSeparator);
 
         menuAbout.setText("About");
         menuAbout.addActionListener(new java.awt.event.ActionListener() {
@@ -8687,7 +8697,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel generalSettingsPanel;
     private javax.swing.JFileChooser hacktvFileChooser;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JLabel lblAntennaName;
     private javax.swing.JLabel lblChannel;
     private javax.swing.JLabel lblClearAll;
@@ -8755,6 +8764,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel scramblingOptionsPanel;
     private javax.swing.JPanel scramblingPanel;
     private javax.swing.JPanel scramblingTab;
+    private javax.swing.JPopupMenu.Separator sepAboutSeparator;
     private javax.swing.JPopupMenu.Separator sepExitSeparator;
     private javax.swing.JPopupMenu.Separator sepMruSeparator;
     private javax.swing.JPanel settingsTab;
