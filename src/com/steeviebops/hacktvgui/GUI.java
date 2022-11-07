@@ -292,30 +292,26 @@ public class GUI extends javax.swing.JFrame {
             DefaultHackTVPath = System.getProperty("user.dir") + OS_SEP + "hacktv.exe";
             // Does windows-kill.exe exist in the current directory?
             if ( !Files.exists(Path.of(JarDir + "/windows-kill.exe")) ) {
-                // Enable the "Generate syntax only" option and prevent it from
-                // being disabled, because windows-kill.exe is missing
-                chkSyntaxOnly.doClick();
-                chkSyntaxOnly.setEnabled(false);
-                if (Prefs.get("MissingKillWarningShown", null) == null) {
-                int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
-                        + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
-                        + "Would you like to download it now?\n\n"
-                        + "This message will only be shown once.", APP_NAME, JOptionPane.YES_NO_OPTION);
-                    if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
-                    Prefs.put("MissingKillWarningShown", "1");
+                // Disable the "Use windows-kill instead of PowerShell" option
+                chkWindowsKill.setSelected(false);
+                chkWindowsKill.setEnabled(false);
+            }
+            else {
+                if (Prefs.get("windows-kill", "0").equals("1")) {
+                    chkWindowsKill.setSelected(true);
                 }
-            } else {
-                // Hide the "why can't I change this option?" message
-                lblSyntaxOptionDisabled.setVisible(false);
+                else {
+                    chkWindowsKill.setSelected(false);
+                }
             }
         }
         else {
             RunningOnWindows = false;
-            // Hide the "why can't I change this option?" message
-            lblSyntaxOptionDisabled.setVisible(false);
+            DefaultHackTVPath = "/usr/local/bin/hacktv";
+            // Hide the "Use windows-kill instead of PowerShell" option
+            chkWindowsKill.setVisible(false);
             // Hide the Download button on the GUI Settings tab
             btnDownloadHackTV.setVisible(false);
-            DefaultHackTVPath = "/usr/local/bin/hacktv";
         }
         // Post-initialisation macOS tasks
         if (System.getProperty("os.name").contains("Mac")) {
@@ -587,15 +583,15 @@ public class GUI extends javax.swing.JFrame {
         lblClearAll = new javax.swing.JLabel();
         generalSettingsPanel = new javax.swing.JPanel();
         chkSyntaxOnly = new javax.swing.JCheckBox();
-        lblSyntaxOptionDisabled = new javax.swing.JLabel();
         chkLocalModes = new javax.swing.JCheckBox();
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
         chkytdlp = new javax.swing.JCheckBox();
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
+        chkWindowsKill = new javax.swing.JCheckBox();
         btnRun = new javax.swing.JButton();
-        txtAllOptions = new javax.swing.JTextField();
+        txtStatus = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         menuNew = new javax.swing.JMenuItem();
@@ -958,7 +954,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addContainerGap(72, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1403,7 +1399,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addContainerGap(79, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1612,7 +1608,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(277, Short.MAX_VALUE))
+                .addContainerGap(282, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -2131,7 +2127,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(120, Short.MAX_VALUE))
+                .addContainerGap(125, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2231,7 +2227,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblClearAll)
                     .addComponent(lblClearMRU))
-                .addContainerGap(177, Short.MAX_VALUE))
+                .addContainerGap(191, Short.MAX_VALUE))
         );
         resetSettingsPanelLayout.setVerticalGroup(
             resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2253,15 +2249,6 @@ public class GUI extends javax.swing.JFrame {
         chkSyntaxOnly.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkSyntaxOnlyActionPerformed(evt);
-            }
-        });
-
-        lblSyntaxOptionDisabled.setForeground(new java.awt.Color(192, 0, 0));
-        lblSyntaxOptionDisabled.setText("Why can't I change this option?");
-        lblSyntaxOptionDisabled.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        lblSyntaxOptionDisabled.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                lblSyntaxOptionDisabledMouseReleased(evt);
             }
         });
 
@@ -2305,6 +2292,13 @@ public class GUI extends javax.swing.JFrame {
 
         lblNMSCeefaxRegion.setText("Ceefax (NMS) region");
 
+        chkWindowsKill.setText("Use windows-kill instead of PowerShell for stopping hacktv");
+        chkWindowsKill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkWindowsKillActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -2312,41 +2306,39 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(generalSettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkWindowsKill)
                     .addComponent(chkytdlp)
-                    .addGroup(generalSettingsPanelLayout.createSequentialGroup()
-                        .addComponent(chkSyntaxOnly)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblSyntaxOptionDisabled))
+                    .addComponent(chkSyntaxOnly)
                     .addComponent(chkLocalModes)
                     .addGroup(generalSettingsPanelLayout.createSequentialGroup()
-                        .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(lblLookAndFeel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblNMSCeefaxRegion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblNMSCeefaxRegion))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(223, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
             generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(generalSettingsPanelLayout.createSequentialGroup()
-                .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkSyntaxOnly)
-                    .addComponent(lblSyntaxOptionDisabled))
+                .addComponent(chkSyntaxOnly)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkytdlp)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkWindowsKill)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblNMSCeefaxRegion))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblLookAndFeel))
-                .addContainerGap())
+                    .addComponent(lblLookAndFeel)
+                    .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout settingsTabLayout = new javax.swing.GroupLayout(settingsTab);
@@ -2370,7 +2362,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(100, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2382,8 +2374,8 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        txtAllOptions.setEditable(false);
-        txtAllOptions.addMouseListener(new ContextMenuListener());
+        txtStatus.setEditable(false);
+        txtStatus.addMouseListener(new ContextMenuListener());
 
         javax.swing.GroupLayout containerPanelLayout = new javax.swing.GroupLayout(containerPanel);
         containerPanel.setLayout(containerPanelLayout);
@@ -2400,7 +2392,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(txtAllOptions))
+                    .addComponent(txtStatus))
                 .addContainerGap())
         );
         containerPanelLayout.setVerticalGroup(
@@ -2414,7 +2406,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtAllOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -2731,82 +2723,6 @@ public class GUI extends javax.swing.JFrame {
                 resetTeletextButtons();
             }
         }        
-    }
-    
-    private void downloadWindowsKill(){
-        // Downloads windows-kill from ElyDotDev (formerly alirdn) on Github
-        SwingWorker<String, Void> downloadWorker = new SwingWorker<String, Void>() {
-            @Override
-            protected String doInBackground() throws Exception {
-                try {
-                    createTempDirectory();
-                    String t = TempDir.toString();
-                    String downloadURL = "https://github.com/ElyDotDev/windows-kill/releases/download/1.1.4/windows-kill_x64_1.1.4_lib_release.zip";
-                    String downloadPath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release.zip";
-                    String tmpExePath = t + OS_SEP + "windows-kill_x64_1.1.4_lib_release" + OS_SEP + "windows-kill.exe";
-                    String exePath = JarDir + OS_SEP + "windows-kill.exe";
-                    // Start download
-                    Shared.download(downloadURL, downloadPath);
-                    // Unzip what we got to the temp directory
-                    Shared.UnzipFile(downloadPath, t);
-                    // Move windows-kill.exe from the temp directory to the
-                    // working directory
-                    if (Files.exists(Path.of(tmpExePath))) {
-                        Shared.deleteFSObject(Path.of(downloadPath));
-                        Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
-                        // Clean up by removing remnants of what we unzipped
-                        Shared.deleteFSObject(Path.of(tmpExePath).getParent());
-                        return exePath;
-                    }
-                    else {
-                        return null;
-                    }
-                }
-                catch (IOException ex) {
-                    System.err.println(ex);
-                    var err = new StringWriter();
-                    ex.printStackTrace(new PrintWriter(err));
-                    if (err.toString().contains("CertificateExpiredException")) {
-                        return "CertificateExpiredException";
-                    }
-                    else {
-                        return null;
-                    }
-                }
-            } // End doInBackground()
-            @Override
-            protected void done() {
-                // Retrieve the return value of doInBackground.
-                String exePath;
-                try {
-                    exePath = get();
-                }
-                catch (InterruptedException | ExecutionException ex) {
-                    exePath = null;   
-                }
-                if (exePath != null) {
-                    // Remove the syntax-only block
-                    if (Files.exists(Path.of(exePath))) {
-                        lblSyntaxOptionDisabled.setVisible(false);
-                        if (!chkSyntaxOnly.isEnabled()){
-                            chkSyntaxOnly.setEnabled(true);
-                            chkSyntaxOnly.doClick();
-                        }
-                    }
-                }
-                else if ( (exePath != null) && (exePath.equals("CertificateExpiredException")) ) {
-                        JOptionPane.showMessageDialog(null, "Download failed due to an expired SSL/TLS certificate.\n"
-                                + "Please ensure that your system date is correct. "
-                                + "Otherwise, please try again later.", APP_NAME, JOptionPane.WARNING_MESSAGE);
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, "An error occurred while downloading windows-kill.\n"
-                            + "Please ensure that you have write permissions to the "
-                            + "application directory and that you have internet access.", APP_NAME, JOptionPane.WARNING_MESSAGE);
-                }
-            } // End done()
-        }; // End SwingWorker
-        downloadWorker.execute();
     }
     
     private void selectModesFile() {
@@ -4592,14 +4508,14 @@ public class GUI extends javax.swing.JFrame {
             File f = new File(DownloadPath);
             if (f.exists()) Shared.deleteFSObject(f.toPath());
             // Download the index page
-            txtAllOptions.setText("Downloading index page from " + url);
+            txtStatus.setText("Downloading index page from " + url);
             Shared.download(url, DownloadPath);
         }
         catch (IOException ex) {
             System.err.println(ex);
             JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
                     + "Please ensure that you are connected to the internet and try again.", APP_NAME, JOptionPane.ERROR_MESSAGE);
-            txtAllOptions.setText("Cancelled");
+            txtStatus.setText("Cancelled");
             resetTeletextButtons();
             return;
         }
@@ -4706,7 +4622,7 @@ public class GUI extends javax.swing.JFrame {
                 switch (status) {
                     case 0:
                         // All good
-                        txtAllOptions.setText("Done");
+                        txtStatus.setText("Done");
                         txtTeletextSource.setText(TeletextPath);
                         // Check if we just downloaded Ceefax
                         if (DownloadURL.equals("https://internal.nathanmediaservices.co.uk/svn/ceefax/national/")) {
@@ -4756,7 +4672,7 @@ public class GUI extends javax.swing.JFrame {
                     case 1:
                         // Download cancelled by the user
                         pbTeletext.setValue(0);
-                        txtAllOptions.setText("Cancelled");
+                        txtStatus.setText("Cancelled");
                         break;
                     case 2:
                         // The index page was downloaded but a teletext page failed.
@@ -4764,19 +4680,19 @@ public class GUI extends javax.swing.JFrame {
                         JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
                                 + "Please ensure that you are connected to the internet and try again.", APP_NAME, JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
-                        txtAllOptions.setText("Failed");
+                        txtStatus.setText("Failed");
                         break;
                     case 3:
                         // The index page was downloaded but we didn't find anything.
                         // Most likely means that we need to revise this!
                         JOptionPane.showMessageDialog(null, "No teletext files were found.", APP_NAME, JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
-                        txtAllOptions.setText("Failed");
+                        txtStatus.setText("Failed");
                         break;
                     default:
                         JOptionPane.showMessageDialog(null, "An unknown error has occurred, code " + status, APP_NAME, JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
-                        txtAllOptions.setText("Failed");
+                        txtStatus.setText("Failed");
                         break;
                 }
                 pbTeletext.setValue(0);
@@ -4795,7 +4711,7 @@ public class GUI extends javax.swing.JFrame {
                 // the progress bar and display in the status bar.
                 int i = chunks.get(chunks.size()-1);
                 // Show progress in status bar
-                txtAllOptions.setText("Downloading page " + TeletextLinks.get(i -1) + " (" + i + " of " + TeletextLinks.size() + ")");
+                txtStatus.setText("Downloading page " + TeletextLinks.get(i -1) + " (" + i + " of " + TeletextLinks.size() + ")");
                 // Increment progress bar by one
                 pbTeletext.setValue(i);
             }
@@ -5972,7 +5888,7 @@ public class GUI extends javax.swing.JFrame {
             }
             chkSyntaxOnly.setEnabled(false);
             btnRun.setEnabled(false);
-            txtAllOptions.setText("Checking URL, please wait...");
+            txtStatus.setText("Checking URL, please wait...");
             // Check if the provided URL is a live stream or not
             SwingWorker <String, Void> checkYTDL = new SwingWorker <String, Void> () {
                 @Override
@@ -6610,7 +6526,7 @@ public class GUI extends javax.swing.JFrame {
         // End add to arraylist
         if (ytdlPath.isBlank()) {
             // Arguments textbox handling - clear it first
-            if (!txtAllOptions.getText().isEmpty()) txtAllOptions.setText("");
+            if (!txtStatus.getText().isEmpty()) txtStatus.setText("");
             /* Start a for loop to populate the textbox, using the arraylist size as
                the finish value.
             */
@@ -6620,11 +6536,11 @@ public class GUI extends javax.swing.JFrame {
                    in the textbox.
                 */
                 if (i == 1) { 
-                    txtAllOptions.setText(allArgs.get(i)); 
+                    txtStatus.setText(allArgs.get(i)); 
                 }
                 else {
-                    txtAllOptions.setText(
-                        txtAllOptions.getText() + '\u0020' + allArgs.get(i) );
+                    txtStatus.setText(
+                        txtStatus.getText() + '\u0020' + allArgs.get(i) );
                 }
             }
         }
@@ -6720,13 +6636,13 @@ public class GUI extends javax.swing.JFrame {
             ytdl = "youtube-dl";
         }
         if (RunningOnWindows) {
-            txtAllOptions.setText(ytdl + ".exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
+            txtStatus.setText(ytdl + ".exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
         }
         else {
-            txtAllOptions.setText(ytdl + " -q" + " -o" + " - " + u + " | hacktv");
+            txtStatus.setText(ytdl + " -q" + " -o" + " - " + u + " | hacktv");
         }
         for (int i = 1; i < allArgs.size() ; i++) {
-            txtAllOptions.setText(txtAllOptions.getText() + '\u0020' + allArgs.get(i));
+            txtStatus.setText(txtStatus.getText() + '\u0020' + allArgs.get(i));
         }
         // Spawn a new SwingWorker to run youtube-dl and hacktv
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
@@ -6811,21 +6727,39 @@ public class GUI extends javax.swing.JFrame {
     private void stopTV(long pid) {
         /** To stop hacktv gracefully, it needs to be sent a SIGINT signal.
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
-         *  Under Windows it's not so easy, we need an external helper
-         *  application. For this, we use:
+         * 
+         *  Under Windows it's not so easy.
+         *  We have implemented this using PowerShell but it's quite heavy
+         *  so another option is an external helper such as:
          *  https://github.com/ElyDotDev/windows-kill/releases
          */
         // Don't do anything if the PID is zero
         if (pid == 0) return;
         if (RunningOnWindows) {
-            try {
-                // Run windows-kill.exe from this path and feed the PID to it
-                ProcessBuilder StopHackTV = new ProcessBuilder
-                    (JarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
-                Process p = StopHackTV.start();
+            if (chkWindowsKill.isSelected()) {
+                try {
+                    // Run windows-kill.exe from this path and feed the PID to it
+                    ProcessBuilder StopHackTV = new ProcessBuilder
+                        (JarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
+                    Process p = StopHackTV.start();
+                }
+                catch (IOException ex)  {
+                    System.err.println(ex);
+                    JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using windows-kill.\n"
+                            + "Try using PowerShell instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                }
             }
-            catch (IOException ex)  {
-                System.err.println(ex);
+            else {
+                // Call the PowerShell method and feed the PID to it
+                try {
+                    btnRun.setEnabled(false);
+                    psKill(pid);
+                }
+                catch (IOException ex) {
+                    System.err.println(ex);
+                    JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using PowerShell.\n"
+                            + "Try using windows-kill instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
         else {
@@ -6837,8 +6771,34 @@ public class GUI extends javax.swing.JFrame {
             }
             catch (IOException ex)  {
                 System.err.println(ex);
-            }                
+            }
         }
+    }
+    
+    private void psKill(long pid) throws IOException {
+        // Use PowerShell to gracefully close hacktv on Windows
+        // The following string is PowerShell/C# code to implement the
+        // Win32 GenerateConsoleCtrlEvent API.
+        
+        // I decided to use a single clear string (with escape characters where
+        // necessary) rather than risking triggering AV software by using
+        // EncodedCommand. I've divided the string into lines here for clarity.
+        String ps1 = 
+                "Add-Type -Namespace 'a' -Name 'b' -MemberDefinition '"
+                +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool FreeConsole();"
+                +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool AttachConsole(uint p);"
+                +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool SetConsoleCtrlHandler(uint h, bool a);"
+                +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool GenerateConsoleCtrlEvent(uint e, uint p);"
+                +     "public static void SendCtrlC(uint p){"
+                +         "FreeConsole();"
+                +         "AttachConsole(p);"
+                +         "GenerateConsoleCtrlEvent(0, 0);"
+                +     "}';"
+                + "[a.b]::SendCtrlC(" + pid + ")";
+        // Run powershell.exe and feed the above command string to it
+        ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
     }
     
     private void preRunTasks() {
@@ -6851,6 +6811,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void postRunTasks() {
         btnRun.setText("Run hacktv");
+        if (!btnRun.isEnabled()) btnRun.setEnabled(true);
         chkSyntaxOnly.setEnabled(true);
         btnHackTVPath.setEnabled(true);
         if (RunningOnWindows) btnDownloadHackTV.setEnabled(true);
@@ -8393,14 +8354,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnDownloadHackTVActionPerformed
 
-    private void lblSyntaxOptionDisabledMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSyntaxOptionDisabledMouseReleased
-        // Show a message to explain why the syntax option is disabled
-        int q = JOptionPane.showConfirmDialog(null, "A helper application (windows-kill.exe) is required when running this application on Windows.\n"
-                + "It is available from from https://github.com/ElyDotDev/windows-kill/releases/\n"
-                + "Would you like to download it now?", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) downloadWindowsKill();
-    }//GEN-LAST:event_lblSyntaxOptionDisabledMouseReleased
-
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
         String u = "https://github.com/steeviebops/hacktv-gui/";
         try {
@@ -8606,6 +8559,15 @@ public class GUI extends javax.swing.JFrame {
     private void cmbRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRegionMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRegion);
     }//GEN-LAST:event_cmbRegionMouseWheelMoved
+
+    private void chkWindowsKillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkWindowsKillActionPerformed
+        if (chkWindowsKill.isSelected()) {
+            Prefs.put("windows-kill", "1");
+        }
+        else {
+            Prefs.put("windows-kill", "0");
+        }
+    }//GEN-LAST:event_chkWindowsKillActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8669,6 +8631,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVideoFilter;
     private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
+    private javax.swing.JCheckBox chkWindowsKill;
     private javax.swing.JCheckBox chkytdlp;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
@@ -8722,7 +8685,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblSpark;
     private javax.swing.JLabel lblSpecifyLocation;
     private javax.swing.JLabel lblSubtitleIndex;
-    private javax.swing.JLabel lblSyntaxOptionDisabled;
     private javax.swing.JLabel lblSysterPermTable;
     private javax.swing.JLabel lblTeefax;
     private javax.swing.JLabel lblTextSubtitleIndex;
@@ -8775,7 +8737,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel teletextPanel;
     private javax.swing.JPanel teletextTab;
     private javax.swing.JMenu templatesMenu;
-    private javax.swing.JTextField txtAllOptions;
     private javax.swing.JTextField txtAntennaName;
     private javax.swing.JTextField txtCardNumber;
     private javax.swing.JTextArea txtConsoleOutput;
@@ -8793,6 +8754,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtPosition;
     private javax.swing.JTextField txtSampleRate;
     private javax.swing.JTextField txtSource;
+    private javax.swing.JTextField txtStatus;
     private javax.swing.JTextField txtSubtitleIndex;
     private javax.swing.JTextField txtTeletextSource;
     private javax.swing.JTextField txtTextSubtitleIndex;
