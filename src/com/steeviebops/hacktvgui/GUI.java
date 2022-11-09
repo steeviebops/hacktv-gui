@@ -4272,7 +4272,7 @@ public class GUI extends javax.swing.JFrame {
             // We use endsWith to avoid problems caused by Unicode BOMs
             else if (!FileContents.endsWith("#EXTM3U") ) {
                 // Treat the file as a standard text-only playlist and populate
-                List pls = Files.readAllLines(fd, StandardCharsets.UTF_8);
+                List<String> pls = Files.readAllLines(fd, StandardCharsets.UTF_8);
                 PlaylistAL.addAll(pls);
                 populatePlaylist();
                 resetM3UItems(false);
