@@ -2885,16 +2885,16 @@ public class GUI extends javax.swing.JFrame {
         else {
             // Check if the specified modes are defined, if not, don't add them
             ArrayList <String> ml = new ArrayList <> ();
-            for (int i = 0; i < q.length; i++) {
-                String a = INIFile.getStringFromINI(ModesFile, q[i], "name", "", true);
+            for (String mode : q) {
+                String a = INIFile.getStringFromINI(ModesFile, mode, "name", "", true);
                 if (!a.isBlank()) {
                     // Add the friendly name of the mode
                     ml.add(a);
                 }
                 else {
                     // Add the mode itself
-                    ml.add("Unnamed mode '" + q[i] + "'");
-                }
+                    ml.add("Unnamed mode '" + mode + "'");
+                }                
             }
             // Convert the ArrayList to an array to populate the combobox
             String[] b = new String[ml.size()];
@@ -2926,12 +2926,13 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("File2", null) != null ) Prefs.remove("File2");
         if ( Prefs.get("File3", null) != null ) Prefs.remove("File3");
         if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
-        if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
         if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");
         if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
         if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
         if ( Prefs.get("CeefaxRegion", null) != null ) Prefs.remove("CeefaxRegion");
         if ( Prefs.get("SuppressWarnings", null) != null ) Prefs.remove("SuppressWarnings");
+        // Not used anymore but we should still remove it if present
+        if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -2967,28 +2968,22 @@ public class GUI extends javax.swing.JFrame {
         boolean b = false;
         try {
             String c;
-            BufferedReader br1 = new BufferedReader(new FileReader(HackTVPath));
-            while ((c = br1.readLine()) != null) {
-                if (c.contains("--enableemm")) {
-                    b = true;
-                    lblFork.setText("Captain Jack");
-                    CaptainJack = true;
+            try (BufferedReader br1 = new BufferedReader(new FileReader(HackTVPath))) {
+                while ((c = br1.readLine()) != null) {
+                    if (c.contains("--enableemm")) {
+                        b = true;
+                        lblFork.setText("Captain Jack");
+                        CaptainJack = true;
+                    }
+                    else if (c.contains("Both VC1 and VC2 cannot be used together")) {
+                        b = true;
+                        lblFork.setText("fsphil");
+                        CaptainJack = false;
+                    }
+                    // If we found a match, stop processing
+                    if (b) break;
                 }
-                else if (c.contains("Both VC1 and VC2 cannot be used together")) {
-                    b = true;
-                    lblFork.setText("fsphil");
-                    CaptainJack = false;
-                }
-                else {
-                    // Clear the line and try another one
-                    c = "";
-                }
-                // If we found a match, stop processing
-                if (b) break;
             }
-            // We no longer need c so clear it
-            c = null;
-            br1.close();
             // Run garbage collection to save memory
             System.gc();
             }
@@ -3000,7 +2995,6 @@ public class GUI extends javax.swing.JFrame {
         if (!b) {
             lblFork.setText("Invalid file (not hacktv?)");
             CaptainJack = false;
-            return;    
         }     
     }
     
@@ -3682,7 +3676,7 @@ public class GUI extends javax.swing.JFrame {
             int k = ScramblingKeyArray.indexOf(ImportedKey);
             if (k == -1) {
                 if (ImportedKey.equals("blank")) ImportedKey = ImportedKey.replace("blank", "");
-                if (ImportedScramblingSystem != "videocrypt1+2") {
+                if (!ImportedScramblingSystem.equals("videocrypt1+2")) {
                     invalidConfigFileValue("access type", ImportedKey);
                 }
                 else {
@@ -4216,11 +4210,10 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Commit to disk
-        try {
-            FileWriter fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8);
+        try (FileWriter fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8)) {
             fw.write(FileContents);
-            fw.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             JOptionPane.showMessageDialog(null, "An error occurred while writing to this file. "
                     + "The file may be read-only or you may not have the correct permissions.", APP_NAME, JOptionPane.ERROR_MESSAGE);
             return;
@@ -4267,11 +4260,9 @@ public class GUI extends javax.swing.JFrame {
         cmbM3USource.addItem("Loading playlist file, please wait...");
         // Load source file to path
         Path fd = Paths.get(SourceFile);
-        try {
-            BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8));
+        try (BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
             LineNumberReader lnr2 = new LineNumberReader(br2);
             String FileContents = lnr2.readLine();
-            br2.close();
             if ( (FileContents == null)) {
                 JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
                 resetM3UItems(false);
@@ -4288,6 +4279,7 @@ public class GUI extends javax.swing.JFrame {
                 populatePlaylist();
                 resetM3UItems(false);
                 return;
+                
             }
         } catch (IOException ex) {
             // File is inaccessible, so stop
@@ -4313,20 +4305,20 @@ public class GUI extends javax.swing.JFrame {
                     fileContents = fileContents.replaceAll("(?m)^[ \t]*\r?\n", "");
                     // Set up a BufferedReader and LineNumberReader to parse
                     // the string we got above
-                    BufferedReader br = new BufferedReader(new StringReader(fileContents));
-                    LineNumberReader lnr = new LineNumberReader(br);
-                    long linecount = fileContents.lines().count();
-                    for (int i = 1; i <= linecount; i++) {
-                        if (i % 2 == 0) {
-                            // Read even-numbered lines to the M3UFile string so we can parse it
-                            M3UNames = M3UNames + lnr.readLine() + System.lineSeparator();
-                        }
-                        else {
-                            // Read odd-numbered lines (URLs) directly to the ArrayList
-                            PlaylistURLsAL.add(lnr.readLine());
-                        }
+                    try (BufferedReader br = new BufferedReader(new StringReader(fileContents));
+                        LineNumberReader lnr = new LineNumberReader(br)) {
+                        long linecount = fileContents.lines().count();
+                        for (int i = 1; i <= linecount; i++) {
+                            if (i % 2 == 0) {
+                                // Read even-numbered lines to the M3UFile string so we can parse it
+                                M3UNames = M3UNames + lnr.readLine() + System.lineSeparator();
+                            }
+                            else {
+                                // Read odd-numbered lines (URLs) directly to the ArrayList
+                                PlaylistURLsAL.add(lnr.readLine());
+                            }
+                        }                        
                     }
-                    br.close();
                     // Remove the first entry of the URL ArrayList as this 
                     // contains the file header
                     PlaylistURLsAL.remove(0);
@@ -4463,7 +4455,7 @@ public class GUI extends javax.swing.JFrame {
         // Restore title bar to default
         if (TitleBarChanged) { this.setTitle(TitleBar); }
         // Restore ellipsis to Save option
-        if (menuSave.getText() == "Save") { menuSave.setText("Save..."); }
+        if (menuSave.getText().equals("Save")) { menuSave.setText("Save..."); }
     }
     
     private void addCeefaxRegions() {
@@ -4651,10 +4643,10 @@ public class GUI extends javax.swing.JFrame {
                             File rd = new File(TempDir + "/ceefax_region");
                             File nd = new File(TempDir + "/ceefax");
                             if ( (rd.isDirectory()) && (nd.isDirectory()) ) {
-                                File[] f = rd.listFiles();
-                                for (int i = 0; i < f.length; i++) {
+                                File[] files = rd.listFiles();
+                                for (File file : files) {
                                     try {
-                                        Files.move(f[i].toPath(), Path.of(nd + "/" + f[i].getName()), StandardCopyOption.REPLACE_EXISTING);
+                                        Files.move(file.toPath(), Path.of(nd + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                                     }
                                     catch (IOException e) {
                                         JOptionPane.showMessageDialog(null,
@@ -4957,12 +4949,10 @@ public class GUI extends javax.swing.JFrame {
         slist = Stream.of(slist.split("\n"))
                 .filter(f -> !f.contains(";"))
                 .collect(Collectors.joining("\n"));
-        int count = (int) slist.lines().count();
-        String[] ScramblingKey = new String[count - 1];
-        ScramblingKey = slist.substring(slist.indexOf("\n") +1).split("\\r?\\n");
+        String[] ScramblingKey = slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n");
         // Extract friendly names and add commands to an ArrayList
         ScramblingKeyArray = new ArrayList<>();
-        if ( (sconf == "single-cut")|| (sconf == "double-cut") ) {
+        if ( (sconf.equals("single-cut"))|| (sconf.equals("double-cut")) ) {
             ScramblingKey[0] = ("No conditional access (free");
             ScramblingKeyArray.clear();
             ScramblingKeyArray.add("");
@@ -5001,9 +4991,7 @@ public class GUI extends javax.swing.JFrame {
             slist2 = Stream.of(slist2.split("\n"))
                     .filter(f -> !f.contains(";"))
                     .collect(Collectors.joining("\n"));
-            int count2 = (int) slist2.lines().count();
-            String[] ScramblingKey2A = new String[count2 - 1];
-            ScramblingKey2A = slist2.substring(slist2.indexOf("\n") +1).split("\\r?\\n");
+            String[] ScramblingKey2A = slist2.substring(slist2.indexOf("\n") +1).split("\\r?\\n");
             // Extract friendly names and add commands to an ArrayList
             ScramblingKey2Array = new ArrayList<>();
             for (int i = 0; i < ScramblingKey2A.length; i++) {
@@ -5899,13 +5887,13 @@ public class GUI extends javax.swing.JFrame {
                     // Try to start the process
                     try {
                         Process pr = yt.start();
-                        // Capture the output
-                        String a;
-                        BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                        while ((a = br.readLine()) != null) {
-                            f = a;
+                        try (BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream()))) {
+                            // Capture the output
+                            String a;
+                            while ((a = br.readLine()) != null) {
+                                f = a;
+                            }
                         }
-                        br.close();
                     }
                     catch (IOException ex) {
                         return "";
@@ -6136,7 +6124,7 @@ public class GUI extends javax.swing.JFrame {
          *  If an 8-digit number is entered, this is passed to hacktv without
          *  any checks.
          */
-        if ( (txtCardNumber.isEnabled()) && (ScramblingType1 == "--videocrypt") ) {
+        if ( (txtCardNumber.isEnabled()) && (ScramblingType1.equals("--videocrypt")) ) {
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
             String WrongCardType = "The card number you entered appears to be for a different issue.\n"
                     + "Using EMMs on the wrong card type may irreparably damage the card.";
@@ -6212,7 +6200,7 @@ public class GUI extends javax.swing.JFrame {
                 return false;
             }
         }
-        else if ( (txtCardNumber.isEnabled()) && (ScramblingType1 == "--videocrypt2") ) {
+        else if ( (txtCardNumber.isEnabled()) && (ScramblingType1.equals("--videocrypt2")) ) {
             // Pass the digits unaltered and without Luhn checking for MultiChoice cards
             // This is temporary until I work out how to handle them
             TruncatedCardNumber = txtCardNumber.getText();
@@ -6351,7 +6339,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void runHackTV(String ytdlPath) {
         ArrayList<String> allArgs = new ArrayList<>();
-        // Call each method and check its response. If false, then stop.
+        // Call each function and check its response. If false, then stop.
         if (ytdlPath.isBlank()) if (!checkInput()) return;
         if (!checkCustomFrequency()) return;
         if (!checkFMDeviation()) return;
@@ -6486,17 +6474,22 @@ public class GUI extends javax.swing.JFrame {
                         }
                     );
             }
+            else if (StartPoint == -1) {
+                // Add everything from PlaylistAL as-is
+                allArgs.addAll(PlaylistAL);
+            }
             else {
                 // Move through PlaylistAL, starting at the value defined by StartPoint.
                 // When we reach the end of the array, start again at zero until we
                 // reach PlaylistAL.size() minus one.
                 int i = StartPoint;
+                int j = 0;
                 if (i == -1) i++;
-                for (int j = 0; j < PlaylistAL.size(); j++) {
+                while (j < PlaylistAL.size()) {
                     if ( (i == PlaylistAL.size()) && (StartPoint != 0) ) {
                         i = 0;
                     }
-                    if ( (PlaylistAL.get(i).contains("test:")) ||
+                    if ( (PlaylistAL.get(i).startsWith("test:")) ||
                         (PlaylistAL.get(i).startsWith("http")) ) {
                         allArgs.add(PlaylistAL.get(i));
                     }
@@ -6509,7 +6502,8 @@ public class GUI extends javax.swing.JFrame {
                         }
                     }
                     i++;
-                }                
+                    j++;
+                }
             }
         }
         else if (!ytdlPath.isBlank()) {
@@ -6562,24 +6556,23 @@ public class GUI extends javax.swing.JFrame {
                 // Create process with the ArrayList we populated above
                 ProcessBuilder pb = new ProcessBuilder(allArgs);
                 pb.directory(new File(HackTVDirectory));
-                pb.redirectErrorStream(true);
                 // Try to start the process
                 try {
                     Process p = pb.start();
                     // Get the PID of the process we just started
                     hpid = p.pid();
-                    // Capture the output
+                    // Capture the output of hacktv. We only need stderr.
                     int a;
-                    BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    while ( (a = br.read()) != -1 ) {
-                        // br.read() returns an integer value 'a' which is the ASCII
-                        // number of a character it has received from the process.
-                        // We convert 'a' to the actual character and publish it.
-                        // When the process has closed, br.read() will return -1
-                        // which will exit this loop.
-                        publish(String.valueOf((char)a));
+                    try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+                        while ( (a = br.read()) != -1 ) {
+                            // br.read() returns an integer value 'a' which is the ASCII
+                            // number of a character it has received from the process.
+                            // We convert 'a' to the actual character and publish it.
+                            // When the process has closed, br.read() will return -1
+                            // which will exit this loop.
+                            publish(String.valueOf((char)a));
+                        }
                     }
-                    br.close();
                     publish("\n" + "hacktv stopped");
                 }
                 catch (IOException ex) {
@@ -6656,7 +6649,6 @@ public class GUI extends javax.swing.JFrame {
                         // Redirect any youtube-dl errors to the Java console
                         .redirectError(ProcessBuilder.Redirect.INHERIT),
                     new ProcessBuilder(allArgs)
-                        .redirectErrorStream(true)
                         .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 );
                 try {
@@ -6669,9 +6661,9 @@ public class GUI extends javax.swing.JFrame {
                     Process h = (Process) p.get(1);
                     // Get the PID of hacktv
                     hpid = h.pid();
-                    // Capture the output of hacktv
+                    // Capture the output of hacktv. We only need stderr.
                     int a;
-                    try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getInputStream()))) {
+                    try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getErrorStream()))) {
                         while ( (a = br.read()) != -1 ) {
                             publish(String.valueOf((char)a));
                         }
@@ -6776,7 +6768,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void psKill(long pid) throws IOException {
-        // Use PowerShell to gracefully close hacktv on Windows
+        // Uses PowerShell to gracefully close hacktv on Windows
         // The following string is PowerShell/C# code to implement the
         // Win32 GenerateConsoleCtrlEvent API.
         
@@ -6784,21 +6776,25 @@ public class GUI extends javax.swing.JFrame {
         // necessary) rather than risking triggering AV software by using
         // EncodedCommand. I've divided the string into lines here for clarity.
         String ps1 = 
-                "Add-Type -Namespace 'a' -Name 'b' -MemberDefinition '"
+                "Add-Type -Namespace 'steeviebops' -Name 'hacktvgui' -MemberDefinition '"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool FreeConsole();"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool AttachConsole(uint p);"
-                +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool SetConsoleCtrlHandler(uint h, bool a);"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool GenerateConsoleCtrlEvent(uint e, uint p);"
                 +     "public static void SendCtrlC(uint p){"
                 +         "FreeConsole();"
                 +         "AttachConsole(p);"
                 +         "GenerateConsoleCtrlEvent(0, 0);"
                 +     "}';"
-                + "[a.b]::SendCtrlC(" + pid + ")";
+                + "[steeviebops.hacktvgui]::SendCtrlC(" + pid + ")";
         // Run powershell.exe and feed the above command string to it
         ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1);
-        pb.redirectErrorStream(true);
         Process p = pb.start();
+        // Redirect PowerShell output to stderr for troubleshooting
+        /*int a;
+        BufferedReader br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        while ( (a = br.read()) != -1 ) {
+            System.err.print(String.valueOf((char)a));
+        }*/
     }
     
     private void preRunTasks() {
@@ -6842,7 +6838,7 @@ public class GUI extends javax.swing.JFrame {
                 DownloadCancelled = true;
                 btnRun.setEnabled(false);
             }
-            else if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath == "")) ) {
+            else if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath.isBlank())) ) {
                 JOptionPane.showMessageDialog(null, "Unable to find hacktv. Please go to the GUI settings tab to add its location.", APP_NAME, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(5);
             }
@@ -7027,7 +7023,7 @@ public class GUI extends javax.swing.JFrame {
                  * scrambling key to the CNR mode - you can't use different
                  * access keys simultaneously.
                  */
-                if ( (ScramblingType1 == "--syster") && (cmbScramblingType.getSelectedIndex() == 8) ) {
+                if ( (ScramblingType1.equals("--syster")) && (cmbScramblingType.getSelectedIndex() == 8) ) {
                     ScramblingType2 = "--systercnr";
                     ScramblingKey2 = ScramblingKey1;    
                 }
@@ -7421,10 +7417,10 @@ public class GUI extends javax.swing.JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] f = sourceFileChooser.getSelectedFiles();
             if (f.length > 1) {
-                for (int i = 0; i < f.length; i++) {
-                    if ( (!f[i].toString().toLowerCase().endsWith(".m3u")) &&
-                           (!f[i].toString().toLowerCase().endsWith(".htv")) ) {
-                        PlaylistAL.add(f[i].toString());
+                for (File fn : f) {
+                    if ((!fn.toString().toLowerCase().endsWith(".m3u"))
+                            && (!fn.toString().toLowerCase().endsWith(".htv"))) {
+                        PlaylistAL.add(fn.toString());
                     }
                 }
                 populatePlaylist();
@@ -7790,14 +7786,16 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
     private void cmbSysterPermTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbSysterPermTableItemStateChanged
-        if (cmbSysterPermTable.getSelectedIndex() == 1) {
-            SysterPermTable = "--key-table-1";
-        }
-        else if (cmbSysterPermTable.getSelectedIndex() == 2) {
-            SysterPermTable = "--key-table-2";
-        }
-        else {
-            SysterPermTable = "";
+        switch (cmbSysterPermTable.getSelectedIndex()) {
+            case 1:
+                SysterPermTable = "--key-table-1";
+                break;
+            case 2:
+                SysterPermTable = "--key-table-2";
+                break;
+            default:
+                SysterPermTable = "";
+                break;
         }
     }//GEN-LAST:event_cmbSysterPermTableItemStateChanged
 
