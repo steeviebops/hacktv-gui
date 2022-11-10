@@ -51,6 +51,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -4238,6 +4239,122 @@ public class GUI extends javax.swing.JFrame {
         *  The M3UIndex variable is an integer value which specifies the index
         *  number to select in the combobox.
         */
+        String fileHeader;
+        try (BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
+            LineNumberReader lnr2 = new LineNumberReader(br2);
+            fileHeader = lnr2.readLine();
+        }
+        catch (MalformedInputException mie) {
+            // Retry using ISO-8859-1
+            try (BufferedReader br3 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.ISO_8859_1))) {
+                LineNumberReader lnr3 = new LineNumberReader(br3);
+                fileHeader = lnr3.readLine();
+            }
+            catch (IOException ioe) {
+                // File is inaccessible or unreadable, so stop
+                System.err.println(ioe);
+                JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
+                        + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
+                resetM3UItems(false);
+                return;
+            }
+        } 
+        catch (IOException ex) {
+            // File is inaccessible, so stop
+            System.err.println(ex);
+            JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
+                    + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
+            resetM3UItems(false);
+            return;       
+        }        
+        if ( (fileHeader == null)) {
+            JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            resetM3UItems(false);
+            return;
+        }
+        // Check that the file is in the correct format by loading its first line
+        // We use endsWith to avoid problems caused by Unicode BOMs
+        else if (!fileHeader.endsWith("#EXTM3U") ) {
+            boolean utf8;
+            // Treat the file as a standard text-only playlist
+            Path fp = Paths.get(SourceFile);
+            List<String> pls;
+            try {
+                pls = Files.readAllLines(fp, StandardCharsets.UTF_8);
+                utf8 = true;
+            }
+            catch (MalformedInputException mie){
+                // Retry using ISO-8859-1
+                try {
+                    pls = Files.readAllLines(fp, StandardCharsets.ISO_8859_1);
+                    utf8 = false;
+                }
+                catch (IOException ioe) {
+                    // File is unreadable, so stop
+                    System.err.println(ioe);
+                    JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    resetM3UItems(false);
+                    return;
+                }
+            }
+            catch (IOException ex) {
+                // File is unreadable, so stop
+                System.err.println(ex);
+                JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                resetM3UItems(false);
+                return;
+            }
+            // Define an ArrayList and a string to include missing paths
+            List<String> toRemove = new ArrayList<>();
+            String removed = "";
+            // Run through the imported playlist to check if the paths exist
+            int i = 0;
+            for (String file : pls) {
+                // Skip if this is a URL or test card
+                if ( (!file.startsWith("http:")) &&
+                        (!file.startsWith("https:")) &&
+                        (!file.startsWith("test:")) ) {
+                    if (!Files.exists(Path.of(file))) {
+                        if ( (!utf8) && (RunningOnWindows)) {
+                            // We may have encountered an encoding bug so retry
+                            // by converting the files string to MS-DOS CP 850
+                            try {
+                                String f850 = new String(file.getBytes("ISO-8859-1"), "CP850");
+                                if (Files.exists(Path.of(f850))) {
+                                    // Worked! Change the item in pls.
+                                    String f8 = new String(f850.getBytes(), "UTF-8");
+                                    pls.set(i, f8);
+                                }
+                            }
+                            catch (InvalidPathException | UnsupportedEncodingException e) {
+                                // Add the item to the "to remove" list
+                                // Also add it to the removed string so we can present it to the user
+                                toRemove.add(file);
+                                removed = removed + file + "\n";
+                            }
+                        }
+                        else {
+                            // Add the item to the "to remove" list
+                            // Also add it to the removed string so we can present it to the user
+                            toRemove.add(file);
+                            removed = removed + file + "\n";
+                        }
+                    }
+                }
+                i++;
+            }
+            // Did we add any files to be removed? If so, remove them and alert.
+            if (toRemove.size() > 0) {
+                pls.removeAll(toRemove);
+                JOptionPane.showMessageDialog(null, "Some files could not be found and have been removed from the playlist.\n" +
+                        removed, APP_NAME, JOptionPane.WARNING_MESSAGE);
+            }
+            // Add the imported playlist to PlaylistAL and populate
+            PlaylistAL.addAll(pls);
+            populatePlaylist();
+            resetM3UItems(false);
+            return;
+        }
         // Set mouse cursor to busy
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         // Temporarily disable the radio buttons, Browse and Run buttons, and menus
@@ -4258,35 +4375,6 @@ public class GUI extends javax.swing.JFrame {
         // Remove any existing items from the combobox
         cmbM3USource.removeAllItems();
         cmbM3USource.addItem("Loading playlist file, please wait...");
-        // Load source file to path
-        Path fd = Paths.get(SourceFile);
-        try (BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
-            LineNumberReader lnr2 = new LineNumberReader(br2);
-            String FileContents = lnr2.readLine();
-            if ( (FileContents == null)) {
-                JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
-                resetM3UItems(false);
-                return;
-            }
-            // Check that the file is in the correct format by loading its first line
-            // We use endsWith to avoid problems caused by Unicode BOMs
-            else if (!FileContents.endsWith("#EXTM3U") ) {
-                // Treat the file as a standard text-only playlist and populate
-                List<String> pls = Files.readAllLines(fd, StandardCharsets.UTF_8);
-                PlaylistAL.addAll(pls);
-                populatePlaylist();
-                resetM3UItems(false);
-                return;
-                
-            }
-        } catch (IOException ex) {
-            // File is inaccessible, so stop
-            System.err.println(ex);
-            JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
-                    + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
-            resetM3UItems(false);
-            return;
-        }
         // Create a SwingWorker to do the disruptive stuff
         SwingWorker<Boolean, Void> m3uWorker = new SwingWorker<Boolean, Void>() {
             @Override
@@ -4404,7 +4492,7 @@ public class GUI extends javax.swing.JFrame {
         if (!LoadSuccessful) {
             // Hide the combobox and show the source textbox
             // Use this for a load failure
-            resetM3UItems(true);
+            //resetM3UItems(true);
             txtSource.setVisible(true);
             txtSource.setText("");
             cmbM3USource.setVisible(false);
