@@ -49,7 +49,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.MalformedInputException;
@@ -822,6 +821,11 @@ public class GUI extends javax.swing.JFrame {
         txtSource.addMouseListener(new ContextMenuListener());
 
         cmbM3USource.setEnabled(false);
+        cmbM3USource.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbM3USourceMouseWheelMoved(evt);
+            }
+        });
 
         btnSourceBrowse.setText("Browse...");
         btnSourceBrowse.addActionListener(new java.awt.event.ActionListener() {
@@ -4232,7 +4236,7 @@ public class GUI extends javax.swing.JFrame {
     }
          
     private void m3uHandler(String SourceFile, int M3UIndex) {
-        /** Basic Extended M3U file parser.
+        /** Basic M3U file parser.
         *  This reads the channel name from each even-numbered line and the
         *  URL from each odd-numbered line. They're added to arrays to populate
         *  a combobox.
@@ -4355,6 +4359,7 @@ public class GUI extends javax.swing.JFrame {
             resetM3UItems(false);
             return;
         }
+        // Handler for Extended M3U files (with #EXTM3U header)
         // Set mouse cursor to busy
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         // Temporarily disable the radio buttons, Browse and Run buttons, and menus
@@ -4376,44 +4381,44 @@ public class GUI extends javax.swing.JFrame {
         cmbM3USource.removeAllItems();
         cmbM3USource.addItem("Loading playlist file, please wait...");
         // Create a SwingWorker to do the disruptive stuff
-        SwingWorker<Boolean, Void> m3uWorker = new SwingWorker<Boolean, Void>() {
+        SwingWorker<Boolean, Double> m3uWorker = new SwingWorker<Boolean, Double>() {
             @Override
             protected Boolean doInBackground() throws Exception {
                 String M3UNames = "";
-                ArrayList <String> PlaylistNamesAL = new ArrayList <> ();
+                ArrayList<String> PlaylistNamesAL = new ArrayList <> ();
                 PlaylistURLsAL = new ArrayList <> ();
                 try {
-                    // Read source file to a string.
-                    // This allows us to manipulate it if necessary.
-                    Path fn = Path.of(SourceFile);
-                    String fileContents = Files.readString(fn, StandardCharsets.UTF_8); 
-                    // Strip out any blank lines
-                    fileContents = fileContents.replaceAll("(?m)^[ \t]*\r?\n", "");
-                    // Set up a BufferedReader and LineNumberReader to parse
-                    // the string we got above
-                    try (BufferedReader br = new BufferedReader(new StringReader(fileContents));
-                        LineNumberReader lnr = new LineNumberReader(br)) {
-                        long linecount = fileContents.lines().count();
-                        for (int i = 1; i <= linecount; i++) {
-                            if (i % 2 == 0) {
-                                // Read even-numbered lines to the M3UFile string so we can parse it
-                                M3UNames = M3UNames + lnr.readLine() + System.lineSeparator();
-                            }
-                            else {
-                                // Read odd-numbered lines (URLs) directly to the ArrayList
-                                PlaylistURLsAL.add(lnr.readLine());
-                            }
-                        }                        
+                    // Read source file to a list.
+                    List<String> fl = Files.readAllLines(Path.of(SourceFile));
+                    // Remove the first line as this contains the #EXTM3U header
+                    // We don't need it and if there's a BOM in front, it'll
+                    // just mess things up.
+                    fl.remove(0);
+                    // Loop over the list, only adding lines that either start
+                    // with #EXTINF, are not blank, and do not start with #
+                    int ln = 0;
+                    for (String l : fl) {
+                        // Publish a decimal value for the percentage indicator
+                        publish((double) ln / fl.size());
+                        if (l.startsWith("#EXTINF:")) {
+                            // Read names to M3UNames so we can parse them
+                            M3UNames = M3UNames + l + System.lineSeparator();
+                        }
+                        else if ((!l.startsWith("#")) && (!l.isBlank())) {
+                            // Read URLs directly to the arraylist
+                            PlaylistURLsAL.add(l);
+                        }
+                        ln++;
                     }
-                    // Remove the first entry of the URL ArrayList as this 
-                    // contains the file header
-                    PlaylistURLsAL.remove(0);
-                } catch (IOException ex) {
+                }
+                catch (IOException ex) {
                     System.err.println(ex);
                     return false;
                 }
-                // Use a regex to retrieve the contents of each even-numbered 
-                // line after the last comma. This contains the channel name.
+                // Done, publish 100%
+                publish(1.0);
+                // Use a regex to retrieve the contents of each line after the
+                // last comma. This contains the channel name.
                 Pattern p = Pattern.compile(".*,\\s*(.*)");
                 Matcher m = p.matcher(M3UNames);
                 while (m.find()) {
@@ -4443,38 +4448,47 @@ public class GUI extends javax.swing.JFrame {
                     // Convert ArrayList to an array so we can populate the combobox
                     PlaylistNames = new String[PlaylistNamesAL.size()];
                     for (int i = 0; i < PlaylistNamesAL.size(); i++) {
-                        PlaylistNames[i] = PlaylistNamesAL.get(i);    
+                        PlaylistNames[i] = PlaylistNamesAL.get(i);
                     }
                     return true;
                 }
             } // End doInBackground()
 
-           @Override
-           protected void done() {
-            // Retrieve the return value of doInBackground.
-            boolean status;
-            try {
-                status = get();
+            @Override
+            protected void done() {
+                // Retrieve the return value of doInBackground.
+                boolean status;
+                try {
+                    status = get();
+                }
+                catch (InterruptedException | ExecutionException ex) {
+                    status = false;   
+                }
+                if (status) {
+                    // Enable and populate the combobox
+                    cmbM3USource.setEnabled(true);
+                    cmbM3USource.setModel(new DefaultComboBoxModel <> (PlaylistNames));
+                    cmbM3USource.setSelectedIndex(M3UIndex);
+                    // Repaint the combobox (resolves an issue with it not showing the
+                    // correct entry on the Metal L&F after loading an M3U file).
+                    cmbM3USource.repaint();
+                    // Reset cursor and re-enable the radio buttons that we disabled
+                    resetM3UItems(true);
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, 
+                            "An error occurred while processing this file. "
+                                    + "It may be invalid or corrupted.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    resetM3UItems(false); 
+                }
+            } // End done()
+
+            @Override
+            protected void process(List<Double> chunks) {
+                short p = (short) (chunks.get(chunks.size()-1) * 100);
+                cmbM3USource.removeAllItems();
+                cmbM3USource.addItem("Loading playlist file, please wait... " + p + "%");
             }
-            catch (InterruptedException | ExecutionException ex) {
-                status = false;   
-            }
-            if (status) {
-                // Enable and populate the combobox
-                cmbM3USource.setEnabled(true);
-                cmbM3USource.setModel(new DefaultComboBoxModel <> (PlaylistNames));
-                cmbM3USource.setSelectedIndex(M3UIndex);
-                // Repaint the combobox (resolves an issue with it not showing the
-                // correct entry on the Metal L&F after loading an M3U file).
-                cmbM3USource.repaint();
-                // Reset cursor and re-enable the radio buttons that we disabled
-                resetM3UItems(true);
-            }
-            else {
-                JOptionPane.showMessageDialog(null, "An error occurred while processing this file. It may be invalid or corrupted.", APP_NAME, JOptionPane.ERROR_MESSAGE);
-                resetM3UItems(false); 
-            }
-           } // End done()
           }; // End SwingWorker
         m3uWorker.execute();       
     }     
@@ -6814,7 +6828,7 @@ public class GUI extends javax.swing.JFrame {
         // Don't do anything if the PID is zero
         if (pid == 0) return;
         if (RunningOnWindows) {
-            if (chkWindowsKill.isSelected()) {
+            if (Prefs.get("windows-kill", "0").equals("1")) {
                 try {
                     // Run windows-kill.exe from this path and feed the PID to it
                     ProcessBuilder StopHackTV = new ProcessBuilder
@@ -6830,7 +6844,6 @@ public class GUI extends javax.swing.JFrame {
             else {
                 // Call the PowerShell method and feed the PID to it
                 try {
-                    btnRun.setEnabled(false);
                     psKill(pid);
                 }
                 catch (IOException ex) {
@@ -6903,7 +6916,7 @@ public class GUI extends javax.swing.JFrame {
     private void cleanupBeforeExit() {
         // Check if a teletext download is in progress
         // If so, then abort
-        if (DownloadInProgress) { DownloadCancelled = true; }
+        if (DownloadInProgress) DownloadCancelled = true;
         // Check if hacktv is running, if so then exit it
         if (Running) {
             stopTV(hpid);
@@ -6932,6 +6945,10 @@ public class GUI extends javax.swing.JFrame {
                 runHackTV("");
             }
         } else {
+            // Disable the stop button if using PowerShell to close
+            if ((RunningOnWindows) && (!chkWindowsKill.isSelected())) {
+                btnRun.setEnabled(false);
+            }
             stopTV(hpid);
         }
     }//GEN-LAST:event_btnRunActionPerformed
@@ -8652,6 +8669,10 @@ public class GUI extends javax.swing.JFrame {
             Prefs.put("windows-kill", "0");
         }
     }//GEN-LAST:event_chkWindowsKillActionPerformed
+
+    private void cmbM3USourceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbM3USourceMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbM3USource);
+    }//GEN-LAST:event_cmbM3USourceMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
