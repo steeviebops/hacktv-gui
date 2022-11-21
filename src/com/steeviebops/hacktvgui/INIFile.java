@@ -398,6 +398,10 @@ public class INIFile {
         // Remove any CR characters
         fileContents = fileContents.replace("\r\n", "\n");
         fileContents = fileContents.replace("\r", "\n");
+        // Remove any comment lines so they don't interfere with processing
+        fileContents = Stream.of(fileContents.split("\n"))
+                .filter(s -> !s.startsWith(";"))
+                .collect(Collectors.joining("\n"));
         // Extract the specified section from fileContents
         String r1 = "^\\[";
         String r2 = "](?:\\n(?:[^\\[\\n].*)?)*";
