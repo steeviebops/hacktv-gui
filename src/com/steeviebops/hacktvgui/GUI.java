@@ -164,7 +164,7 @@ public class GUI extends javax.swing.JFrame {
     private boolean HTVLoadInProgress = false;
     
     // Video line count. At the moment, we just use this for enabling/disabling
-    // the test card dropdown, supported on 625 only.
+    // the test card dropdown.
     private int Lines;  
     
     // Integer to save the previously selected item in the VideoFormat combobox.
@@ -341,7 +341,6 @@ public class GUI extends javax.swing.JFrame {
         populateVideoModes();
         addWSSModes();
         addARCorrectionOptions();
-        addTestCardOptions();
         addOutputDevices();
         addCeefaxRegions();
         if (CaptainJack) {
@@ -3308,7 +3307,96 @@ public class GUI extends javax.swing.JFrame {
         else {
             cmbOutputDevice.setSelectedIndex(3);
             txtOutputDevice.setText(ImportedOutputDevice);
-        }        
+        }
+        // Video mode
+        String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
+        boolean ModeFound = false;
+        for (int i = 0; i < PALModeArray.length; i++) {
+            // Check if the mode we imported is in the PAL mode array
+            if (PALModeArray[i].equals(ImportedVideoMode)) {
+                radPAL.doClick();
+                cmbMode.setSelectedIndex(i);
+                ModeFound = true;
+                break;
+            }
+            // Check the 'alt' value to see if we find a match there
+            else if (checkAltModeNames(PALModeArray[i], ImportedVideoMode)) {
+                radPAL.doClick();
+                cmbMode.setSelectedIndex(i);
+                ModeFound = true;
+                break;
+            }
+        }
+        if (!ModeFound) {
+            // Check the NTSC mode array, and so on...
+            for (int i = 0; i < NTSCModeArray.length; i++) {
+                if (NTSCModeArray[i].equals(ImportedVideoMode)) {
+                    radNTSC.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+                else if (checkAltModeNames(NTSCModeArray[i], ImportedVideoMode)) {
+                        radNTSC.doClick();
+                        cmbMode.setSelectedIndex(i);
+                        ModeFound = true;
+                        break;
+                }
+            }      
+        }
+        if (!ModeFound) {
+            for (int i = 0; i < SECAMModeArray.length; i++) {
+                if (SECAMModeArray[i].equals(ImportedVideoMode)) {
+                    radSECAM.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+                else if (checkAltModeNames(SECAMModeArray[i], ImportedVideoMode)) {
+                    radSECAM.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+            }
+        }
+        if (!ModeFound) {
+            for (int i = 0; i < OtherModeArray.length; i++) {
+                if (OtherModeArray[i].equals(ImportedVideoMode)) {
+                    radBW.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+                else if (checkAltModeNames(OtherModeArray[i], ImportedVideoMode)) {
+                    radBW.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+            }
+        }
+        if (!ModeFound) {
+            for (int i = 0; i < MACModeArray.length; i++) {
+                if (MACModeArray[i].equals(ImportedVideoMode)) {
+                    radMAC.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+                else if (checkAltModeNames(MACModeArray[i], ImportedVideoMode)) {
+                    radMAC.doClick();
+                    cmbMode.setSelectedIndex(i);
+                    ModeFound = true;
+                    break;
+                }
+            }
+        }
+        if (!ModeFound) {
+           invalidConfigFileValue("video mode", ImportedVideoMode);
+           resetAllControls();
+           return false;
+        }
         // Input source or test card
         String ImportedSource = INIFile.getStringFromINI(fileContents, "hacktv", "input", "", true);
         String M3USource = (INIFile.getStringFromINI(fileContents, "hacktv-gui3", "m3usource", "", true));
@@ -3361,95 +3449,6 @@ public class GUI extends javax.swing.JFrame {
         else {
             if (!ImportedSource.endsWith(".m3u")) txtSource.setText(ImportedSource);
         }
-        // Video mode
-        String ImportedVideoMode = INIFile.getStringFromINI(fileContents, "hacktv", "mode", "", false);
-        boolean ModeFound = false;
-            for (int i = 0; i < PALModeArray.length; i++) {
-                // Check if the mode we imported is in the PAL mode array
-                if (PALModeArray[i].equals(ImportedVideoMode)) {
-                    radPAL.doClick();
-                    cmbMode.setSelectedIndex(i);
-                    ModeFound = true;
-                    break;
-                }
-                // Check the 'alt' value to see if we find a match there
-                else if (checkAltModeNames(PALModeArray[i], ImportedVideoMode)) {
-                    radPAL.doClick();
-                    cmbMode.setSelectedIndex(i);
-                    ModeFound = true;
-                    break;
-                }
-            }
-            if (!ModeFound) {
-                // Check the NTSC mode array, and so on...
-                for (int i = 0; i < NTSCModeArray.length; i++) {
-                    if (NTSCModeArray[i].equals(ImportedVideoMode)) {
-                        radNTSC.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                    else if (checkAltModeNames(NTSCModeArray[i], ImportedVideoMode)) {
-                            radNTSC.doClick();
-                            cmbMode.setSelectedIndex(i);
-                            ModeFound = true;
-                            break;
-                    }
-                }      
-            }
-            if (!ModeFound) {
-                for (int i = 0; i < SECAMModeArray.length; i++) {
-                    if (SECAMModeArray[i].equals(ImportedVideoMode)) {
-                        radSECAM.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                    else if (checkAltModeNames(SECAMModeArray[i], ImportedVideoMode)) {
-                        radSECAM.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                }
-            }
-            if (!ModeFound) {
-                for (int i = 0; i < OtherModeArray.length; i++) {
-                    if (OtherModeArray[i].equals(ImportedVideoMode)) {
-                        radBW.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                    else if (checkAltModeNames(OtherModeArray[i], ImportedVideoMode)) {
-                        radBW.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                }
-            }
-            if (!ModeFound) {
-                for (int i = 0; i < MACModeArray.length; i++) {
-                    if (MACModeArray[i].equals(ImportedVideoMode)) {
-                        radMAC.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                    else if (checkAltModeNames(MACModeArray[i], ImportedVideoMode)) {
-                        radMAC.doClick();
-                        cmbMode.setSelectedIndex(i);
-                        ModeFound = true;
-                        break;
-                    }
-                }
-            }
-            if (!ModeFound) {
-               invalidConfigFileValue("video mode", ImportedVideoMode);
-               resetAllControls();
-               return false;
-            }
         // Frequency or channel number
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             // Return a value of -250 if the value is null so we can handle it
@@ -3991,7 +3990,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             if (radTest.isSelected()) {
-                if ((CaptainJack) && (Lines == 625)) {
+                if ((CaptainJack) && (cmbTest.getComponentCount() > 1)) {
                     FileContents = INIFile.setINIValue(FileContents, "hacktv", "input", "test:" + TCArray[cmbTest.getSelectedIndex()]);
                 }
                 else {
@@ -5338,8 +5337,15 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addTestCardOptions() {
+        String testcards;
+        // Backwards compatibility. [testcards] refers to 625 line cards.
+        // So we set l to a blank string on 625, otherwise we populate it with
+        // the line count.
+        // e.g, if l is set to 525 we'll query Modes.ini for [testcards525].
+        String l = "";
+        if (Lines != 625) l = Integer.toString(Lines);
         // Extract (from ModesFile) the test card list
-        String testcards = INIFile.splitINIfile(ModesFile, "testcards");
+        testcards = INIFile.splitINIfile(ModesFile, "testcards" + l);
         if (testcards == null) {
             // If nothing was found, disable the test card combobox
             // Use a dummy string to preserve the length of the combobox
@@ -5352,18 +5358,14 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // We just want the commands so remove everything after =
-            testcards = testcards.replaceAll("\\=.*", "");       
-            // Remove commented out lines
-            testcards = Stream.of(testcards.split("\n"))
-                    .filter(f -> !f.contains(";"))
-                    .collect(Collectors.joining("\n"));     
+            testcards = testcards.replaceAll("\\=.*", "");
             // Add a headerless string to TCArray by splitting off the first line
             TCArray = testcards.substring(testcards.indexOf("\n") +1).split("\\r?\\n");
             // Populate TCNames by reading ModesFile using what we added
             // to TCArray.
             String[] TCNames = new String[TCArray.length];
             for (int i = 0; i < TCArray.length; i++) {
-                TCNames[i] = INIFile.getStringFromINI(ModesFile, "testcards", TCArray[i], "", true);
+                TCNames[i] = INIFile.getStringFromINI(ModesFile, "testcards" + l, TCArray[i], "", true);
             }
             cmbTest.removeAllItems();
             cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
@@ -5435,8 +5437,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void checkMode() {
-    // Here, we read the selected combobox index and use that number to get
-    // the corresponding video format from the required mode array.
+        // Here, we read the selected combobox index and use that number to get
+        // the corresponding video format from the required mode array.
         if (radPAL.isSelected()) {
             Mode = PALModeArray[cmbMode.getSelectedIndex()];
         }
@@ -5452,6 +5454,8 @@ public class GUI extends javax.swing.JFrame {
         else if (radMAC.isSelected()) {
             Mode = MACModeArray[cmbMode.getSelectedIndex()];
         }
+        // Save the line count from the previously selected mode
+        int oldLines = Lines;
         // Start reading the section we found above, starting with line count
         if (INIFile.getIntegerFromINI(ModesFile, Mode, "lines") != null) {
             Lines = INIFile.getIntegerFromINI(ModesFile, Mode, "lines");
@@ -5567,6 +5571,9 @@ public class GUI extends javax.swing.JFrame {
         else {
             disableChannelID();
         }
+        // Check if the line count varies from the previous mode
+        // If so, refresh the available test cards
+        if (oldLines != Lines) addTestCardOptions();
         // Check for UHF and VHF bandplans
         // We now support up to five bandplans per band. uhf and vhf are the
         // default and these names are retained for backwards compatibility.
@@ -6325,8 +6332,7 @@ public class GUI extends javax.swing.JFrame {
     private void checkTestCardStatus() {
         if ( (!cmbTest.isEnabled())
                 && (CaptainJack)
-                && (Lines == 625)
-                && (HTVLoadInProgress == false)
+                && (!HTVLoadInProgress)
                 && cmbTest.getItemCount() > 1 ) {
             // Enable cmbTest (test card dropdown)
             cmbTest.setEnabled(true);
@@ -6335,8 +6341,8 @@ public class GUI extends javax.swing.JFrame {
         else if (HTVLoadInProgress == true) {
             // Do nothing so we don't interrupt the file loading process
         }
-        else if ((cmbTest.isEnabled()) && (CaptainJack) && (Lines == 625) ) {
-            // Do nothing if cmbTest is already enabled on a 625-line mode.
+        else if ((cmbTest.isEnabled()) && (CaptainJack) ) {
+            // Do nothing if cmbTest is already enabled on a supported mode.
             // This prevents the test card from resetting back to bars when
             // changing video modes.
         }
@@ -7425,7 +7431,7 @@ public class GUI extends javax.swing.JFrame {
             PreviousIndex = cmbMode.getSelectedIndex();
             // Set sample rate
             txtSampleRate.setText(DefaultSampleRate);
-            // If test card is selected, see if the selected mode is 625 or not
+            // If test card is selected, see if the selected mode is supported
             if (radTest.isSelected()) checkTestCardStatus();
         }
     }//GEN-LAST:event_cmbModeActionPerformed
@@ -7577,7 +7583,7 @@ public class GUI extends javax.swing.JFrame {
             txtSource.setVisible(true);
         }
         // Enable test card dropdown
-        if ((CaptainJack) && (Lines == 625) && (cmbTest.getItemCount() > 1)) {
+        if ((CaptainJack) && (cmbTest.getItemCount() > 1)) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
