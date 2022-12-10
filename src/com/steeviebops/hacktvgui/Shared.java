@@ -48,8 +48,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class Shared {
-    
-    public static int CalculateLuhnCheckDigit(long input) {
+  
+    public int CalculateLuhnCheckDigit(long input) {
         // Calculates a check digit for the specified input using the Luhn algorithm
         long t = 0;
         // Read backwards, doubling every other digit
@@ -67,13 +67,13 @@ public class Shared {
         return (int) ((t * 9) % 10);
     }
         
-    public static boolean LuhnCheck(Long input) {
+    public boolean LuhnCheck(Long input) {
          // Feed the full number to this method and it will return true or 
          // false based on whether the check digit is valid or not.
         return CalculateLuhnCheckDigit(input / 10) == (input % 10);
     }
     
-    public static boolean isNumeric(String strNum) {
+    public boolean isNumeric(String strNum) {
 	if (strNum == null) {
 	    return false;
 	}
@@ -86,7 +86,7 @@ public class Shared {
 	return true;
     }
     
-    public static boolean isHex(String strHex) {
+    public boolean isHex(String strHex) {
 	if (strHex == null) {
 	    return false;
 	}
@@ -99,7 +99,7 @@ public class Shared {
 	return true;
     }
     
-    public static int wildcardFind(String pathToScan, String startsWith, String endsWith) {
+    public int wildcardFind(String pathToScan, String startsWith, String endsWith) {
         // Returns the number of files found in a directory with the specified start and end strings
         // Case insensitive, feed it with lowercase filenames
         String fileToFilter;
@@ -121,7 +121,7 @@ public class Shared {
         return c;
     }    
     
-    public static void deleteFSObject(Path pathToBeDeleted) throws IOException {
+    public void deleteFSObject(Path pathToBeDeleted) throws IOException {
         // Deletes the path specified to this method
 	Files.walkFileTree(pathToBeDeleted, 
 	  new SimpleFileVisitor<Path>() {
@@ -142,12 +142,12 @@ public class Shared {
 	});        
     }
     
-    public static void copyResource(String res, String dest, Class c) throws IOException {
+    public void copyResource(String res, String dest, Class c) throws IOException {
         InputStream src = c.getResourceAsStream(res);
         Files.copy(src, Paths.get(dest), StandardCopyOption.REPLACE_EXISTING);
     }
     
-    public static String stripQuotes(String FilePath) {
+    public String stripQuotes(String FilePath) {
         // Bug fix for cases where a path containing quotes is pasted into
         // the file open prompt. This causes Swing to prepend the current
         // directory to the path (with the intended file path including
@@ -162,7 +162,7 @@ public class Shared {
         return FilePath;
     }
     
-    public static Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
+    public Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
         try {
             JarFile jar = new JarFile(jarFilePath);
             Enumeration<JarEntry> enumEntries = jar.entries();
@@ -179,7 +179,7 @@ public class Shared {
         return null;
      }
 
-    public static void download(String url, String fileName) throws IOException {
+    public void download(String url, String fileName) throws IOException {
         URLConnection connection = new URL(url).openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
@@ -187,17 +187,17 @@ public class Shared {
         }
     }
     
-    public static String downloadToString(String url) throws IOException {
+    public String downloadToString(String url) throws IOException {
         // Downloads a file directly to a string, bypassing the file system
         URLConnection connection = new URL(url).openConnection();
         connection.setUseCaches(false);
-        InputStream in = connection.getInputStream();
-        return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        try (InputStream in = connection.getInputStream()) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
     
     // Unzip code courtesy of https://www.baeldung.com/java-compress-and-uncompress
-    
-    public static void UnzipFile(String fileZip, String destination) throws IOException {
+    public void UnzipFile(String fileZip, String destination) throws IOException {
         File destDir = new File(destination);
         byte[] buffer = new byte[1024];
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip))) {
@@ -231,7 +231,7 @@ public class Shared {
         }
     }
     
-    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+    public File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
         File destFile = new File(destinationDir, zipEntry.getName());
 
         String destDirPath = destinationDir.getCanonicalPath();
@@ -244,7 +244,7 @@ public class Shared {
         return destFile;
     }
     
-    public static String getCurrentDirectory() {
+    public String getCurrentDirectory() {
         try {
             // Get the current directory path
             CodeSource codeSource = GUI.class.getProtectionDomain().getCodeSource();
@@ -257,7 +257,7 @@ public class Shared {
         }        
     }
     
-    public static void launchBrowser(String u) throws IOException {
+    public void launchBrowser(String u) throws IOException {
         // Try using the native Desktop object
         var d = Desktop.getDesktop();
         try {
