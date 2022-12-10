@@ -182,9 +182,6 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="GUI frontend for hacktv"/>
-    <Property name="iconImage" type="java.awt.Image" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-      <Connection code="new javax.swing.ImageIcon(getClass().getResource(&quot;/com/steeviebops/resources/test.gif&quot;)).getImage()" type="code"/>
-    </Property>
     <Property name="name" type="java.lang.String" value="mainFrame" noResource="true"/>
   </Properties>
   <SyntheticProperties>
@@ -379,7 +376,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="72" max="32767" attributes="0"/>
+                          <EmptySpace pref="95" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -560,25 +557,16 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Repeat indefinitely"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkRepeatActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkTimestamp">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Overlay timestamp"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkTimestampActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkInterlace">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Interlaced video"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkInterlaceActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkPosition">
                       <Properties>
@@ -817,7 +805,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="VideoFormatPanel" min="-2" pref="214" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace pref="79" max="32767" attributes="0"/>
@@ -1157,6 +1145,10 @@
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="chkInvertVideo" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                  </Group>
                                   <Component id="cmbMode" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -1177,7 +1169,7 @@
                                                   <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
                                                   <Component id="chkColour" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" pref="128" max="32767" attributes="0"/>
+                                              <EmptySpace type="unrelated" pref="142" max="32767" attributes="0"/>
                                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -1248,6 +1240,8 @@
                                   <Component id="chkVideoFilter" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkColour" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                              <Component id="chkInvertVideo" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -1387,9 +1381,6 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Disable colour"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkColourActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkA2Stereo">
                       <Properties>
@@ -1418,6 +1409,11 @@
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFMDev.addMouseListener(new ContextMenuListener());"/>
                       </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkInvertVideo">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Invert video polarity"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1452,7 +1448,7 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="282" max="32767" attributes="0"/>
+                          <EmptySpace pref="305" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1506,17 +1502,11 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="VITS test signal"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkVITSActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkACP">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Macrovision ACP"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkACPActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkWSS">
                       <Properties>
@@ -1658,9 +1648,6 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Verbose output"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkVerboseActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkVolume">
                       <Properties>
@@ -1674,9 +1661,6 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Downmix 5.1 audio to 2.0"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDownmixActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkMacChId">
                       <Properties>
@@ -2014,7 +1998,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="125" max="32767" attributes="0"/>
+                          <EmptySpace pref="148" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2250,18 +2234,12 @@
                             <Property name="text" type="java.lang.String" value="Show card serial"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
-                          <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkShowCardSerialActionPerformed"/>
-                          </Events>
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkFindKeys">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="Find keys on PPV card"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
-                          <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkFindKeysActionPerformed"/>
-                          </Events>
                         </Component>
                       </SubComponents>
                     </Container>
@@ -2469,9 +2447,6 @@
                         <Property name="text" type="java.lang.String" value="Show ECMs on console"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkShowECMActionPerformed"/>
-                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -2509,7 +2484,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="77" max="32767" attributes="0"/>
+                          <EmptySpace pref="100" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2530,18 +2505,26 @@
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblSpecifyLocation" min="-2" max="-2" attributes="0"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="lblDetectedBuikd" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="lblFork" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="lblSpecifyLocation" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
-                                  <Component id="txtHackTVPath" alignment="0" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnDownloadHackTV" max="32767" attributes="0"/>
-                                  <Component id="btnHackTVPath" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Group type="102" attributes="0">
+                                              <Component id="lblDetectedBuikd" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                                              <Component id="lblFork" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          </Group>
+                                          <Component id="txtHackTVPath" pref="414" max="32767" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                          <Component id="btnDownloadHackTV" max="32767" attributes="0"/>
+                                          <Component id="btnHackTVPath" max="32767" attributes="0"/>
+                                      </Group>
+                                  </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -2553,9 +2536,9 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="lblSpecifyLocation" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="btnHackTVPath" max="32767" attributes="0"/>
                                   <Component id="txtHackTVPath" max="32767" attributes="0"/>
-                                  <Component id="btnHackTVPath" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
