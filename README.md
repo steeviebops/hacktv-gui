@@ -1,8 +1,14 @@
 # hacktv-gui - a GUI frontend application for hacktv
 
-hacktv-gui is, as the name suggests, a GUI frontend application for hacktv, which is available at https://github.com/fsphil/hacktv/ or https://github.com/captainjack64/hacktv/. It allows you to run hacktv without the use of a command line. In addition, it includes playlist support, a handler for online teletext services, and support for any streaming video site which is compatible with youtube-dl. You can also save your settings to a file and reload them later.
+hacktv-gui is, as the name suggests, a GUI frontend application for hacktv, which is available at https://github.com/fsphil/hacktv/ or https://github.com/captainjack64/hacktv/. It allows you to run hacktv without the use of a command line. In addition, it includes playlist support, a handler for online teletext services, and support for any streaming video site which is compatible with youtube-dl or yt-dlp. You can also save your settings to a file and reload them later.
 
-The application has been tested on Windows 10, Ubuntu 20.04, 21.04 and Fedora Workstation 32. It has also had some basic testing on MacOS Catalina.
+The application has been tested on:
+
+- Windows 7 SP1, 10 and 11
+- Ubuntu 20.04, 21.04 and 22.04
+- Kubuntu 22.04
+- Fedora Workstation 32
+- macOS Catalina and Ventura.
 
 ### Pre-requisites
 - A Java 11 or later runtime environment is required. Java 8 will not work. <a href="https://adoptopenjdk.net">AdoptOpenJDK</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
