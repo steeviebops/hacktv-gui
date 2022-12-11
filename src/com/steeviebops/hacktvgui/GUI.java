@@ -53,6 +53,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -220,14 +221,16 @@ public class GUI extends javax.swing.JFrame {
     private String A2StereoParam = "";
     // End parameter variables
     
-    // Object instances
+    // Class instances
     final Shared SharedInst = new Shared();
     final INIFile INI = new INIFile();
     
     // Main method
     public static void main(String args[]) {
         // Pre-initialisation macOS tasks
-        // These need to be done before initialising the form constructor
+        // These need to be done before creating the GUI class instance.
+        // We'll set the dock icon later because that need to be done after
+        // the GUI class instance is created.
         if (System.getProperty("os.name").contains("Mac")) {
             // Put app name in the menu bar
             System.setProperty("apple.awt.application.name", APP_NAME);
@@ -237,10 +240,13 @@ public class GUI extends javax.swing.JFrame {
             // System.setProperty("apple.awt.application.appearance", "system");
         }
         try {
+            // Create GUI class instance
             var g = new GUI(args);
-            // Set window icon
-            // We must check for both conditions here.
+            // Set window icon. The process to do this is OS-specific.
+            // For macOS, we need to use the ICON_IMAGE feature of the Taskbar
+            // class, so we'll check if the current environment supports it.
             // Taskbar is supported on Windows, but ICON_IMAGE is not.
+            // So we need to check for both to avoid issues on Windows.
             // Just checking for ICON_IMAGE will cause an exception on
             // platforms that don't support Taskbar at all (e.g. KDE).
             if ((Taskbar.isTaskbarSupported()) && 
@@ -256,6 +262,7 @@ public class GUI extends javax.swing.JFrame {
                 }                
             }
             else {
+                // Set icon without using Taskbar class
                 try {
                     g.setIconImages(g.setIcons());
                 }
@@ -4484,6 +4491,16 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected void process(List<Double> chunks) {
                 short p = (short) (chunks.get(chunks.size()-1) * 100);
+                // Taskbar/dock progress if supported
+                if (Taskbar.isTaskbarSupported()) {
+                    var t = Taskbar.getTaskbar();
+                    if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                        t.setWindowProgressValue(GUI.this, p);
+                    }
+                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                        t.setProgressValue((short) p);
+                    }
+                }
                 cmbM3USource.removeAllItems();
                 cmbM3USource.addItem("Loading playlist file, please wait... " + p + "%");
             }
@@ -4501,6 +4518,16 @@ public class GUI extends javax.swing.JFrame {
         btnAdd.setEnabled(true);
         fileMenu.setEnabled(true);
         templatesMenu.setEnabled(true);
+        // Reset taskbar/dock progress bars
+        if (Taskbar.isTaskbarSupported()) {
+            var t = Taskbar.getTaskbar();
+            if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                t.setWindowProgressState(GUI.this, Taskbar.State.OFF);
+            }
+            else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                t.setProgressValue(-1);
+            }
+        }
         if (!LoadSuccessful) {
             // Hide the combobox and show the source textbox
             // Use this for a load failure
@@ -4801,10 +4828,20 @@ public class GUI extends javax.swing.JFrame {
                 // the progress bar and display in the status bar.
                 int i = chunks.get(chunks.size()-1);
                 // Show progress in status bar
-                double p = (double) i / TeletextLinks.size();
+                double pc = (double) i / TeletextLinks.size() * 100;
                 txtStatus.setText("Downloading page " + TeletextLinks.get(i -1)
                         +  '\u0020' + "(" + i + " of " + TeletextLinks.size() + ")"
-                        +  '\u0020' + (short) (p * 100) + "%");
+                        +  '\u0020' + (short) pc + "%");
+                // Taskbar/dock progress if supported
+                if (Taskbar.isTaskbarSupported()) {
+                    var t = Taskbar.getTaskbar();
+                    if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                        t.setWindowProgressValue(GUI.this, (short) pc);
+                    }
+                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                        t.setProgressValue((short) pc);
+                    }
+                }
                 // Increment progress bar by one
                 pbTeletext.setValue(i);
             }
@@ -4828,6 +4865,16 @@ public class GUI extends javax.swing.JFrame {
         txtTeletextSource.setEnabled(true);
         btnTeletextBrowse.setEnabled(true);
         btnRun.setEnabled(true);
+        // Reset taskbar/dock progress bars
+        if (Taskbar.isTaskbarSupported()) {
+            var t = Taskbar.getTaskbar();
+            if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                t.setWindowProgressState(GUI.this, Taskbar.State.OFF);
+            }
+            else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                t.setProgressValue(-1);
+            }
+        }
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         DownloadInProgress = false;
     }
