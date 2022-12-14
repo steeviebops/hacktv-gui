@@ -2924,6 +2924,10 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("CeefaxRegion", null) != null ) Prefs.remove("CeefaxRegion");
         if ( Prefs.get("SuppressWarnings", null) != null ) Prefs.remove("SuppressWarnings");
         if ( Prefs.get("windows-kill", null) != null ) Prefs.remove("windows-kill");
+        if ( Prefs.get("lastdir", null) != null ) Prefs.remove("lastdir");
+        if ( Prefs.get("lastfdir", null) != null ) Prefs.remove("lastfdir");
+        if ( Prefs.get("lasttxdir", null) != null ) Prefs.remove("lasttxdir");
+        if ( Prefs.get("lasthtvdir", null) != null ) Prefs.remove("lasthtvdir");
         // Not used anymore but we should still remove it if present
         if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
         System.out.println("All preferences have been reset to defaults.");
@@ -7226,9 +7230,15 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnTeefaxActionPerformed
 
     private void btnTeletextBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTeletextBrowseActionPerformed
+        // Retrieve the last used directory from the prefs store if it exists
+        teletextFileChooser.setCurrentDirectory(
+            new File(Prefs.get("lasttxdir", System.getProperty("user.home")))
+        );
         int result = teletextFileChooser.showOpenDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
+            // Save the chosen directory to prefs
+            Prefs.put("lasttxdir", teletextFileChooser.getCurrentDirectory().toString());
             File f = teletextFileChooser.getSelectedFile();
             txtTeletextSource.setText(SharedInst.stripQuotes(f.getAbsolutePath()));
         }
@@ -7491,9 +7501,15 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkPositionActionPerformed
 
     private void btnSourceBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSourceBrowseActionPerformed
+        // Retrieve the last used directory from the prefs store if it exists
+        sourceFileChooser.setCurrentDirectory(
+            new File(Prefs.get("lastdir", System.getProperty("user.home")))
+        );
         int returnVal = sourceFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] f = sourceFileChooser.getSelectedFiles();
+            // Save the chosen directory to prefs
+            Prefs.put("lastdir", sourceFileChooser.getCurrentDirectory().toString());
             if (f.length > 1) {
                 for (File fn : f) {
                     if ((!fn.toString().toLowerCase().endsWith(".m3u"))
@@ -7754,9 +7770,15 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuBSBTemplateActionPerformed
 
     private void btnHackTVPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHackTVPathActionPerformed
+        // Retrieve the last used directory from the prefs store if it exists
+        hacktvFileChooser.setCurrentDirectory(
+            new File(Prefs.get("lasthtvdir", System.getProperty("user.home")))
+        );
         hacktvFileChooser.setAcceptAllFileFilterUsed(true);
         int returnVal = hacktvFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            // Save the chosen directory to prefs
+            Prefs.put("lasthtvdir", hacktvFileChooser.getCurrentDirectory().toString());
             File file = hacktvFileChooser.getSelectedFile();
             HackTVPath = SharedInst.stripQuotes(file.toString());
             txtHackTVPath.setText(HackTVPath);
@@ -7936,8 +7958,14 @@ public class GUI extends javax.swing.JFrame {
                 cmbFileType.setSelectedIndex(3);
                 // Opens the save file dialogue, but only if selected by the user
                 if (HTVLoadInProgress == false) {
+                    // Retrieve the last used directory from the prefs store if it exists
+                    outputFileChooser.setCurrentDirectory(
+                        new File(Prefs.get("lastfdir", System.getProperty("user.home")))
+                    );
                     int result = outputFileChooser.showSaveDialog(this);
                     if (result == JFileChooser.APPROVE_OPTION) {
+                        // Save the chosen directory to prefs
+                        Prefs.put("lastfdir", outputFileChooser.getCurrentDirectory().toString());
                         File o = outputFileChooser.getSelectedFile();
                         txtOutputDevice.setText(o.toString());
                     }
