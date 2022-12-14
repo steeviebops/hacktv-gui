@@ -180,7 +180,7 @@ public class Shared {
      }
 
     public void download(String url, String fileName) throws IOException {
-        URLConnection connection = new URL(url).openConnection();
+        var connection = new URL(url).openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
             Files.copy(in, Paths.get(fileName));  
@@ -258,15 +258,15 @@ public class Shared {
     }
     
     public void launchBrowser(String u) throws IOException {
-        // Try using the native Desktop object
-        var d = Desktop.getDesktop();
-        try {
-            d.browse(URI.create(u));
+        // Try using the native Desktop class
+        if ( (Desktop.isDesktopSupported()) &&
+               (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) ) {
+            Desktop.getDesktop().browse(URI.create(u));
         }
-        catch (UnsupportedOperationException e) {
+        else {
             // Try using xdg-open
             ProcessBuilder p = new ProcessBuilder("xdg-open", u);
-            p.start();
+            p.start();            
         }
     }
     
