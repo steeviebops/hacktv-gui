@@ -53,7 +53,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -119,7 +118,6 @@ public class GUI extends javax.swing.JFrame {
     private String HackTVPath;
     private String HackTVDirectory;
     private final String DefaultHackTVPath;
-    private final String OS_SEP;
 
     // Declare variable for the title bar display
     private String TitleBar;
@@ -295,8 +293,7 @@ public class GUI extends javax.swing.JFrame {
         if ( (args.length > 0) && (args[0].toLowerCase().equals("reset")) ||
                 (args.length > 0) && (args[0].toLowerCase().equals("-reset")) ||
                 (args.length > 0) && (args[0].toLowerCase().equals("--reset")) ||
-                (args.length > 0) && (args[0].toLowerCase().equals("/reset")) )
-        {
+                (args.length > 0) && (args[0].toLowerCase().equals("/reset")) ) {
             // Reset all preferences and exit
             resetPreferences();
         }
@@ -313,12 +310,10 @@ public class GUI extends javax.swing.JFrame {
         initComponents();
         // Set the JarDir variable so we know where we're located
         JarDir = Path.of(SharedInst.getCurrentDirectory());
-        // Get OS path separator (e.g. / on Unix and \ on Windows)
-        OS_SEP = (System.getProperty("file.separator"));
         // Check operating system and set OS-specific options
         if (System.getProperty("os.name").contains("Windows")) {
             RunningOnWindows = true;
-            DefaultHackTVPath = System.getProperty("user.dir") + OS_SEP + "hacktv.exe";
+            DefaultHackTVPath = System.getProperty("user.dir") + "/" + "hacktv.exe";
             // Does windows-kill.exe exist in the current directory?
             if ( !Files.exists(Path.of(JarDir + "/windows-kill.exe")) ) {
                 // Disable the "Use windows-kill instead of PowerShell" option
@@ -535,6 +530,8 @@ public class GUI extends javax.swing.JFrame {
         chkFMDev = new javax.swing.JCheckBox();
         txtFMDev = new javax.swing.JTextField();
         chkInvertVideo = new javax.swing.JCheckBox();
+        chkMacChId = new javax.swing.JCheckBox();
+        txtMacChId = new javax.swing.JTextField();
         PlaybackTab = new javax.swing.JPanel();
         VBIPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
@@ -549,9 +546,7 @@ public class GUI extends javax.swing.JFrame {
         chkVerbose = new javax.swing.JCheckBox();
         chkVolume = new javax.swing.JCheckBox();
         chkDownmix = new javax.swing.JCheckBox();
-        chkMacChId = new javax.swing.JCheckBox();
         txtVolume = new javax.swing.JTextField();
-        txtMacChId = new javax.swing.JTextField();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -972,7 +967,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(95, Short.MAX_VALUE))
+                .addContainerGap(102, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1316,6 +1311,22 @@ public class GUI extends javax.swing.JFrame {
 
         chkInvertVideo.setText("Invert video polarity");
 
+        chkMacChId.setText("Override MAC channel ID");
+        chkMacChId.setEnabled(false);
+        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMacChIdActionPerformed(evt);
+            }
+        });
+
+        txtMacChId.setEnabled(false);
+        txtMacChId.addMouseListener(new ContextMenuListener());
+        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout VideoFormatPanelLayout = new javax.swing.GroupLayout(VideoFormatPanel);
         VideoFormatPanel.setLayout(VideoFormatPanelLayout);
         VideoFormatPanelLayout.setHorizontalGroup(
@@ -1354,13 +1365,15 @@ public class GUI extends javax.swing.JFrame {
                                     .addGroup(VideoFormatPanelLayout.createSequentialGroup()
                                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(chkFMDev))
+                                            .addComponent(chkFMDev)
+                                            .addComponent(chkMacChId))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))))
                         .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(radMAC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING))))
+                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtMacChId))))
                 .addContainerGap())
         );
         VideoFormatPanelLayout.setVerticalGroup(
@@ -1394,10 +1407,13 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkNICAM))
                 .addGap(2, 2, 2)
                 .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkVideoFilter)
-                    .addComponent(chkColour))
+                    .addComponent(chkColour)
+                    .addComponent(chkMacChId)
+                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(2, 2, 2)
-                .addComponent(chkInvertVideo)
+                .addGroup(VideoFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkInvertVideo)
+                    .addComponent(chkVideoFilter))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1419,7 +1435,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(77, Short.MAX_VALUE))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1457,7 +1473,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
                     .addComponent(chkVITS))
-                .addContainerGap(156, Short.MAX_VALUE))
+                .addContainerGap(170, Short.MAX_VALUE))
         );
         VBIPanelLayout.setVerticalGroup(
             VBIPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1465,9 +1481,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(VBIPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkWSS)
                     .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkACP)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, 0)
+                .addComponent(chkACP, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
                 .addComponent(chkVITS)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1515,27 +1531,11 @@ public class GUI extends javax.swing.JFrame {
 
         chkDownmix.setText("Downmix 5.1 audio to 2.0");
 
-        chkMacChId.setText("Override MAC channel ID");
-        chkMacChId.setEnabled(false);
-        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkMacChIdActionPerformed(evt);
-            }
-        });
-
         txtVolume.setEnabled(false);
         txtVolume.addMouseListener(new ContextMenuListener());
         txtVolume.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtVolumeKeyTyped(evt);
-            }
-        });
-
-        txtMacChId.setEnabled(false);
-        txtMacChId.addMouseListener(new ContextMenuListener());
-        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyTyped(evt);
             }
         });
 
@@ -1545,29 +1545,20 @@ public class GUI extends javax.swing.JFrame {
             AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
-                        .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkGamma)
-                            .addComponent(chkOutputLevel))
-                        .addGap(66, 66, 66)
-                        .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18))
-                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
-                        .addComponent(chkMacChId)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
+                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkGamma)
+                    .addComponent(chkOutputLevel)
+                    .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
+                    .addComponent(txtGamma, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
+                    .addComponent(txtVolume))
+                .addGap(18, 18, 18)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkVerbose)
-                    .addComponent(chkDownmix)
-                    .addGroup(AdditionalOptionsPanelLayout.createSequentialGroup()
-                        .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
-                        .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                    .addComponent(chkDownmix))
+                .addContainerGap(120, Short.MAX_VALUE))
         );
         AdditionalOptionsPanelLayout.setVerticalGroup(
             AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1575,18 +1566,16 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkGamma)
                     .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkVolume)
-                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(chkDownmix))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOutputLevel)
                     .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkDownmix))
+                    .addComponent(chkVerbose))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AdditionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkMacChId)
-                    .addComponent(chkVerbose)
-                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkVolume))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1608,7 +1597,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(305, Short.MAX_VALUE))
+                .addContainerGap(313, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -2112,7 +2101,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(148, Short.MAX_VALUE))
+                .addContainerGap(155, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2352,7 +2341,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(100, Short.MAX_VALUE))
+                .addContainerGap(107, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2730,23 +2719,23 @@ public class GUI extends javax.swing.JFrame {
     
     private void selectModesFile() {
         if ((Prefs.get("UseLocalModesFile", "0")).equals("1")) {
-            if (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) {
+            if (Files.exists(Path.of(JarDir + "/" + "Modes.ini"))) {
                 // Use the local file
-                ModesFilePath = JarDir + OS_SEP + "Modes.ini";
+                ModesFilePath = JarDir + "/" + "Modes.ini";
             }
             else {
                 // Use the embedded copy
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
             }
         }
-        else if ( (Files.exists(Path.of(JarDir + OS_SEP + "Modes.ini"))) &&
+        else if ( (Files.exists(Path.of(JarDir + "/" + "Modes.ini"))) &&
                 (cmbOutputDevice.getItemCount() == 0) ) {
             int q = JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
                     + "Do you want to use this file?\n"
                     + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION);
             if (q == JOptionPane.YES_OPTION) {
                 // Use the local file
-                ModesFilePath = JarDir + OS_SEP + "Modes.ini";
+                ModesFilePath = JarDir + "/" + "Modes.ini";
             }
             else {
                 // Download from Github
@@ -4618,7 +4607,7 @@ public class GUI extends javax.swing.JFrame {
         // Create temp directory if it does not exist
         createTempDirectory();
         // Specify the destination location of the HTML file we will download
-        String DownloadPath = TempDir + OS_SEP + destinationFile;
+        String DownloadPath = TempDir + "/" + destinationFile;
         try {
             DownloadInProgress = true;
             // If the file already exists from a previous attempt, delete it
@@ -4641,7 +4630,7 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected Integer doInBackground() throws Exception {
                 File f;
-                Path fd = Paths.get(TempDir + OS_SEP + HTMLTempFile);
+                Path fd = Paths.get(TempDir + "/" + HTMLTempFile);
                 // Try to read the downloaded index file to a string
                 try {
                     HTMLFile = Files.readString(fd);
@@ -4666,20 +4655,20 @@ public class GUI extends javax.swing.JFrame {
                     case "https://github.com/spark-teletext/spark-teletext/":
                         // Set SPARK prerequisites - change URL first
                         DownloadURL = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
-                        f = new File(TempDir + OS_SEP + "spark");
+                        f = new File(TempDir + "/" + "spark");
                         break;
                     case "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/":
                         // Set Ceefax temp directory
-                        f = new File(TempDir + OS_SEP + "ceefax");
+                        f = new File(TempDir + "/" + "ceefax");
                         break;
                     case "http://teastop.plus.com/svn/teletext/":
                         // Set Teefax temp directory
-                        f = new File(TempDir + OS_SEP + "teefax");
+                        f = new File(TempDir + "/" + "teefax");
                         break;
                     default:
                         if (DownloadURL.startsWith("https://internal.nathanmediaservices.co.uk/svn/ceefax/")) {
                             // This is most likely a Ceefax region
-                            f = new File(TempDir + OS_SEP + "ceefax_region");
+                            f = new File(TempDir + "/" + "ceefax_region");
                         }
                         else {
                             System.err.println("Unknown teletext URL");
@@ -4713,7 +4702,7 @@ public class GUI extends javax.swing.JFrame {
                             }
                             publish(j);
                             // Do the actual downloading
-                            SharedInst.download(DownloadURL + TeletextLinks.get(i), TeletextPath + OS_SEP + TeletextLinks.get(i));
+                            SharedInst.download(DownloadURL + TeletextLinks.get(i), TeletextPath + "/" + TeletextLinks.get(i));
                             // Stop when the integer value reaches the size of the teletext array
                             if (j == TeletextLinks.size() ) { return 0; }
                         }
@@ -5805,10 +5794,10 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     SharedInst.copyResource("/com/steeviebops/resources/demo.tti", TempDir.toString() + "/demo.tti", this.getClass());   
                     if ( (RunningOnWindows) && TempDir.toString().contains(" ") ) {
-                        TeletextSource = '\u0022' + TempDir.toString() + OS_SEP + "demo.tti" + '\u0022';
+                        TeletextSource = '\u0022' + TempDir.toString() + "/" + "demo.tti" + '\u0022';
                     }
                     else {
-                        TeletextSource = TempDir.toString() + OS_SEP + "demo.tti";
+                        TeletextSource = TempDir.toString() + "/" + "demo.tti";
                     }
                 } catch (IOException ex) {
                     System.err.println("An error occurred while attempting to copy to the temp directory: " + ex);
@@ -5835,7 +5824,7 @@ public class GUI extends javax.swing.JFrame {
                         + "This could cause subtitles to be unreliable. Please move these files "
                         + "if you encounter problems.";
                 // If the teletext source is set to SPARK with subtitles enabled, delete their page 888 to avoid issues
-                if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + OS_SEP + "spark")) ) {
+                if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + "/" + "spark")) ) {
                     if ( (Files.exists(Path.of(TempDir + "/spark/P888.tti"))) || (Files.exists(Path.of(TempDir + "/spark/p888.tti"))) ) {
                         try {
                             SharedInst.deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
@@ -6282,8 +6271,6 @@ public class GUI extends javax.swing.JFrame {
          */
         if ( (txtCardNumber.isEnabled()) && (ScramblingType1.equals("--videocrypt")) ) {
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
-            String WrongCardType = "The card number you entered appears to be for a different issue.\n"
-                    + "Using EMMs on the wrong card type may irreparably damage the card.";
             String InvalidCardNumber = "Card number should be exactly 8, 9 or 13 digits.";
             // Make sure that the input is numeric only
             if (!SharedInst.isNumeric(txtCardNumber.getText())) {
@@ -6291,46 +6278,20 @@ public class GUI extends javax.swing.JFrame {
                 return false;
             }
             else if (txtCardNumber.getText().length() == 9) {
-                // Make sure that we're not trying to send EMMs to the wrong card type.
-                // Used info from settopbox.org to get a rough idea of the range and
-                // make an educated guess based on that information.
-                // If you have a legitimate card that fails this check, let me know.
-                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky07"))) {
-                    short s7 = Short.parseShort(txtCardNumber.getText().substring(0,3));
-                    if ((s7 > 30) && (s7 < 800)) {
-                        JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                        return false;
-                    }
-                }
-                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky09"))) {
-                    short s9 = Short.parseShort(txtCardNumber.getText().substring(0,3));
-                    if ((s9 < 190) || (s9 > 250)) {
-                        JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                        return false;
-                    }
-                }
-                // EMM checks passed, now do a Luhn check
+                // Do a Luhn check on the provided card number
                 if (!SharedInst.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
                     JOptionPane.showMessageDialog(null, LuhnCheckFailed, APP_NAME, JOptionPane.WARNING_MESSAGE);
                     return false;
                 }
                 else {
+                    // Make sure that we're not trying to send EMMs to the wrong card type.
+                    if (!checkEMMCardType(txtCardNumber.getText())) return false;
                     // hacktv doesn't use the check digit so strip it out
                     TruncatedCardNumber = txtCardNumber.getText().substring(0,8);
                     return true;
                 }
             }
             else if (txtCardNumber.getText().length() == 13) {
-                // Make sure that we're not trying to send EMMs to the wrong card type.
-                if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky09"))) {
-                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-                else if ((!EMMParam.isEmpty()) && (ScramblingKey1.equals("sky07")) 
-                        && (!txtCardNumber.getText().startsWith("07")) ){
-                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
                 // Only digits 4-13 of 13-digit card numbers are checked, so we
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
@@ -6340,12 +6301,16 @@ public class GUI extends javax.swing.JFrame {
                     return false;
                 }
                 else {
+                    // Make sure that we're not trying to send EMMs to the wrong card type.
+                    if (!checkEMMCardType(TruncatedCardNumber)) return false;
                     // hacktv doesn't use the check digit so strip it out
                     TruncatedCardNumber = txtCardNumber.getText().substring(4,12);
                     return true;
                 }
             }
             else if (txtCardNumber.getText().length() == 8) {
+                // Make sure that we're not trying to send EMMs to the wrong card type.
+                if (!checkEMMCardType(txtCardNumber.getText())) return false;
                 // Pass the digits unaltered and without Luhn checking
                 TruncatedCardNumber = txtCardNumber.getText();
                 return true;
@@ -6369,13 +6334,46 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
+    private boolean checkEMMCardType(String cardNumber) {
+        // Make sure that we're not trying to send EMMs to the wrong card type.
+        // Used info from settopbox.org to get a rough idea of the range and
+        // make an educated guess based on that information.
+        // If you have a legitimate card that fails this check, let me know.
+        String WrongCardType = "The card number you entered appears to be for a different issue.\n"
+                + "Using EMMs on the wrong card type may irreparably damage the card.";
+        switch (ScramblingKey1) {
+            case "sky07":
+                short s7 = Short.parseShort(cardNumber.substring(0,3));
+                if ((s7 > 30) && (s7 < 800)) {
+                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            case "sky09":
+                short s9 = Short.parseShort(cardNumber.substring(0,3));
+                if ((s9 < 190) || (s9 > 250)) {
+                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            default:
+                return true;
+        }
+    }
+    
     private void showEMMWarning() {
-            if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) )
-                JOptionPane.showMessageDialog(null,
+        if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) ) {
+            JOptionPane.showMessageDialog(null,
                 "Care is advised when using this option.\n" +
                 "Incorrect use may permanently damage the viewing card.\n" +
                 "Do not use this option on an issue number other than the one selected.",
-                APP_NAME, JOptionPane.WARNING_MESSAGE);
+                APP_NAME, JOptionPane.WARNING_MESSAGE
+            );
+        }
     }
     
     private void checkTestCardStatus() {
@@ -8329,9 +8327,9 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     createTempDirectory();
                     String t = TempDir.toString();
-                    String downloadPath = t + OS_SEP + "hacktv.zip";
-                    String tmpExePath = t + OS_SEP + "hacktv.exe";
-                    String exePath = JarDir + OS_SEP + "hacktv.exe";
+                    String downloadPath = t + "/" + "hacktv.zip";
+                    String tmpExePath = t + "/" + "hacktv.exe";
+                    String exePath = JarDir + "/" + "hacktv.exe";
                     // Download hacktv.zip from Captain Jack
                     SharedInst.download("https://filmnet.plus/hacktv/hacktv.zip", downloadPath);
                     // Unzip what we got to the temp directory
