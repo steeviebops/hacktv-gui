@@ -6888,7 +6888,7 @@ public class GUI extends javax.swing.JFrame {
         // Don't do anything if the PID is zero
         if (pid == 0) return;
         if (RunningOnWindows) {
-            if (Prefs.get("windows-kill", "0").equals("1")) {
+            if (chkWindowsKill.isSelected()) {
                 try {
                     // Run windows-kill.exe from this path and feed the PID to it
                     ProcessBuilder StopHackTV = new ProcessBuilder
@@ -6899,6 +6899,7 @@ public class GUI extends javax.swing.JFrame {
                     System.err.println(ex);
                     JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using windows-kill.\n"
                             + "Try using PowerShell instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    btnRun.setEnabled(true);
                 }
             }
             else {
@@ -6910,6 +6911,7 @@ public class GUI extends javax.swing.JFrame {
                     System.err.println(ex);
                     JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using PowerShell.\n"
                             + "Try using windows-kill instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    btnRun.setEnabled(true);
                 }
             }
         }
