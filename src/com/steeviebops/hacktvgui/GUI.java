@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Stephen McGarry
+ * Copyright (C) 2023 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -415,6 +415,10 @@ public class GUI extends javax.swing.JFrame {
         SourceButtonGroup = new javax.swing.ButtonGroup();
         VideoFormatButtonGroup = new javax.swing.ButtonGroup();
         BandButtonGroup = new javax.swing.ButtonGroup();
+        MacStereoButtonGroup = new javax.swing.ButtonGroup();
+        MacSRButtonGroup = new javax.swing.ButtonGroup();
+        MacCompressionButtonGroup = new javax.swing.ButtonGroup();
+        MacProtectionButtonGroup = new javax.swing.ButtonGroup();
         sourceFileChooser = sourceFileChooser = new JFileChooser(UserHomeDir);
         teletextFileChooser = teletextFileChooser = new JFileChooser();
         teletextFileChooser.setCurrentDirectory(new File(UserHomeDir));
@@ -547,6 +551,19 @@ public class GUI extends javax.swing.JFrame {
         chkVolume = new javax.swing.JCheckBox();
         chkDownmix = new javax.swing.JCheckBox();
         txtVolume = new javax.swing.JTextField();
+        macPanel = new javax.swing.JPanel();
+        radMacStereo = new javax.swing.JRadioButton();
+        radMac32k = new javax.swing.JRadioButton();
+        radMacCompanded = new javax.swing.JRadioButton();
+        radMacMono = new javax.swing.JRadioButton();
+        radMac16k = new javax.swing.JRadioButton();
+        radMacLinear = new javax.swing.JRadioButton();
+        radMacL1 = new javax.swing.JRadioButton();
+        radMacL2 = new javax.swing.JRadioButton();
+        lblMacAudioMode = new javax.swing.JLabel();
+        lblMacSampleRate = new javax.swing.JLabel();
+        lblMacCompression = new javax.swing.JLabel();
+        lblMacProtection = new javax.swing.JLabel();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -855,11 +872,11 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(chkTimestamp)
                             .addComponent(chkInterlace)
                             .addComponent(chkRandom))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 113, Short.MAX_VALUE)
                                 .addComponent(lblSubtitleIndex)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -879,7 +896,7 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SourcePanelLayout.createSequentialGroup()
                                 .addGroup(SourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
+                                    .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
                                     .addGroup(SourcePanelLayout.createSequentialGroup()
                                         .addComponent(radLocalSource)
                                         .addGap(39, 39, 39)
@@ -889,7 +906,7 @@ public class GUI extends javax.swing.JFrame {
                                         .addGap(0, 0, Short.MAX_VALUE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(SourcePanelLayout.createSequentialGroup()
-                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(6, 6, 6)))
@@ -1579,15 +1596,101 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC audio options"));
+
+        MacStereoButtonGroup.add(radMacStereo);
+        radMacStereo.setText("Stereo");
+
+        MacSRButtonGroup.add(radMac32k);
+        radMac32k.setText("32 kHz");
+
+        MacCompressionButtonGroup.add(radMacCompanded);
+        radMacCompanded.setText("Companded");
+
+        MacStereoButtonGroup.add(radMacMono);
+        radMacMono.setText("Mono");
+
+        MacSRButtonGroup.add(radMac16k);
+        radMac16k.setText("16 kHz");
+
+        MacCompressionButtonGroup.add(radMacLinear);
+        radMacLinear.setText("Linear");
+
+        MacProtectionButtonGroup.add(radMacL1);
+        radMacL1.setText("Level 1");
+
+        MacProtectionButtonGroup.add(radMacL2);
+        radMacL2.setText("Level 2");
+
+        lblMacAudioMode.setText("Audio channels");
+
+        lblMacSampleRate.setText("Audio sample rate");
+
+        lblMacCompression.setText("Compression");
+
+        lblMacProtection.setText("Protection level");
+
+        javax.swing.GroupLayout macPanelLayout = new javax.swing.GroupLayout(macPanel);
+        macPanel.setLayout(macPanelLayout);
+        macPanelLayout.setHorizontalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblMacAudioMode)
+                    .addComponent(lblMacSampleRate)
+                    .addComponent(lblMacCompression)
+                    .addComponent(lblMacProtection))
+                .addGap(18, 18, 18)
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(radMacCompanded)
+                    .addComponent(radMacL1)
+                    .addComponent(radMac32k)
+                    .addComponent(radMacStereo))
+                .addGap(18, 18, 18)
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(radMacL2)
+                    .addComponent(radMacLinear)
+                    .addComponent(radMac16k)
+                    .addComponent(radMacMono))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        macPanelLayout.setVerticalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(radMacStereo)
+                    .addComponent(radMacMono)
+                    .addComponent(lblMacAudioMode))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(radMac32k)
+                    .addComponent(radMac16k)
+                    .addComponent(lblMacSampleRate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(radMacCompanded)
+                    .addComponent(radMacLinear)
+                    .addComponent(lblMacCompression))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(radMacL1)
+                    .addComponent(radMacL2)
+                    .addComponent(lblMacProtection))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout PlaybackTabLayout = new javax.swing.GroupLayout(PlaybackTab);
         PlaybackTab.setLayout(PlaybackTabLayout);
         PlaybackTabLayout.setHorizontalGroup(
             PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PlaybackTabLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PlaybackTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(VBIPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(PlaybackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(VBIPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         PlaybackTabLayout.setVerticalGroup(
@@ -1597,7 +1700,9 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VBIPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(313, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(179, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -1650,11 +1755,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addComponent(chkTeletext)
-                        .addGap(286, 406, Short.MAX_VALUE))
+                        .addGap(286, 420, Short.MAX_VALUE))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(teletextPanelLayout.createSequentialGroup()
-                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
+                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(teletextPanelLayout.createSequentialGroup()
@@ -1742,7 +1847,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblSpark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblNMSCeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 76, Short.MAX_VALUE)))
+                        .addGap(0, 90, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloadPanelLayout.setVerticalGroup(
@@ -3807,6 +3912,21 @@ public class GUI extends javax.swing.JFrame {
             if (!chkMacChId.isSelected()) chkMacChId.doClick();
             txtMacChId.setText(ImportedChID);
         }
+        // MAC audio options
+        if (radMAC.isSelected()) {
+            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-mode", "stereo", false).equals("mono")) {
+                radMacMono.setSelected(true);
+            }
+            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-quality", "high", false).equals("medium")) {
+                radMac16k.setSelected(true);
+            }
+            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-compression", "companded", false).equals("linear")) {
+                radMacLinear.setSelected(true);
+            }
+            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-protection", "l1", false).equals("l2")) {
+                radMacL2.setSelected(true);
+            }
+        }
         // Disable colour
         if (chkColour.isEnabled()) {
             // Accept both UK and US English spelling
@@ -4186,6 +4306,11 @@ public class GUI extends javax.swing.JFrame {
         if (chkInvertVideo.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1); }
         // MAC channel ID
         if (chkMacChId.isSelected()) { FileContents = INI.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText()); }
+        // MAC audio options
+        if (radMacMono.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-mode", "mono");
+        if (radMac16k.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-quality", "medium");
+        if (radMacLinear.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-compression", "linear");
+        if (radMacL2.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-protection", "l2");
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
             if (!txtAntennaName.getText().isBlank())
@@ -5605,13 +5730,13 @@ public class GUI extends javax.swing.JFrame {
             disableScrambling();
         }
         if (radMAC.isSelected()) {
-            enableChannelID();
+            configureMacPanel(true);
             if (chkMacChId.isSelected()) chkMacChId.doClick();
             chkAudio.setEnabled(false);
             AudioParam = "";
         }
         else {
-            disableChannelID();
+            configureMacPanel(false);
         }
         // Check if the line count varies from the previous mode
         // If so, refresh the available test cards
@@ -5859,15 +5984,36 @@ public class GUI extends javax.swing.JFrame {
         return true;
     }
     
-    private void enableChannelID() {
-        chkMacChId.setEnabled(true);
-    }
-    
-    private void disableChannelID() {
-        if (chkMacChId.isSelected()) {
-            chkMacChId.doClick();
+    private void configureMacPanel(boolean e) {
+        // Enable or disable MAC video-related options based on the boolean
+        // sent to this method
+        if (e) {
+            radMacStereo.setSelected(true);
+            radMac32k.setSelected(true);
+            radMacCompanded.setSelected(true);
+            radMacL1.setSelected(true);
         }
-        chkMacChId.setEnabled(false);
+        else {
+            if (chkMacChId.isSelected()) chkMacChId.doClick();
+            MacStereoButtonGroup.clearSelection();
+            MacSRButtonGroup.clearSelection();
+            MacCompressionButtonGroup.clearSelection();
+            MacProtectionButtonGroup.clearSelection();
+        }
+        macPanel.setEnabled(e);
+        chkMacChId.setEnabled(e);
+        lblMacAudioMode.setEnabled(e);
+        radMacStereo.setEnabled(e);
+        radMacMono.setEnabled(e);
+        lblMacSampleRate.setEnabled(e);
+        radMac32k.setEnabled(e);
+        radMac16k.setEnabled(e);
+        lblMacCompression.setEnabled(e);
+        radMacCompanded.setEnabled(e);
+        radMacLinear.setEnabled(e);
+        lblMacProtection.setEnabled(e);
+        radMacL1.setEnabled(e);
+        radMacL2.setEnabled(e);
     }
     
     private void setFrequency() {
@@ -6494,6 +6640,19 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
+    private ArrayList<String> checkMacOptions() {
+        // Trying a different way of adding arguments...
+        // If any of these radio buttons are selected, return their arguments.
+        // We don't need to return the arguments for the other options (such as
+        // 32 kHz audio or stereo) because they're defaults anyway).
+        var macArgs = new ArrayList<String>();
+        if (radMacMono.isSelected()) macArgs.add("--mac-audio-mono");
+        if (radMac16k.isSelected()) macArgs.add("--mac-audio-medium-quality");
+        if (radMacLinear.isSelected()) macArgs.add("--mac-audio-linear");
+        if (radMacL2.isSelected()) macArgs.add("--mac-audio-l2-protection");
+        return macArgs;
+    }
+    
     private void runHackTV(String ytdlPath) {
         ArrayList<String> allArgs = new ArrayList<>();
         // Call each function and check its response. If false, then stop.
@@ -6546,6 +6705,7 @@ public class GUI extends javax.swing.JFrame {
             allArgs.add(txtGain.getText());
         }
         // Optional values second, see if they're defined first before adding
+        if (radMAC.isSelected()) allArgs.addAll(checkMacOptions());
         if (!ChIDParam.isEmpty()) {allArgs.add(ChIDParam);}
         if (!ChID.isEmpty()) {allArgs.add(ChID);}
         if (!AudioParam.isEmpty()) allArgs.add(AudioParam);
@@ -8665,6 +8825,10 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel AdditionalOptionsPanel;
     private javax.swing.ButtonGroup BandButtonGroup;
     private javax.swing.JPanel FrequencyPanel;
+    private javax.swing.ButtonGroup MacCompressionButtonGroup;
+    private javax.swing.ButtonGroup MacProtectionButtonGroup;
+    private javax.swing.ButtonGroup MacSRButtonGroup;
+    private javax.swing.ButtonGroup MacStereoButtonGroup;
     private javax.swing.JPanel PlaybackTab;
     private javax.swing.ButtonGroup SourceButtonGroup;
     private javax.swing.JPanel SourcePanel;
@@ -8768,6 +8932,10 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblLookAndFeel;
+    private javax.swing.JLabel lblMacAudioMode;
+    private javax.swing.JLabel lblMacCompression;
+    private javax.swing.JLabel lblMacProtection;
+    private javax.swing.JLabel lblMacSampleRate;
     private javax.swing.JLabel lblNMSCeefax;
     private javax.swing.JLabel lblNMSCeefaxRegion;
     private javax.swing.JLabel lblOutputDevice;
@@ -8783,6 +8951,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblTextSubtitleIndex;
     private javax.swing.JLabel lblVC2ScramblingKey;
     private javax.swing.JList<String> lstPlaylist;
+    private javax.swing.JPanel macPanel;
     private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenuItem menuAstra10Template;
     private javax.swing.JMenuItem menuAstra975Template;
@@ -8808,6 +8977,14 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton radCustom;
     private javax.swing.JRadioButton radLocalSource;
     private javax.swing.JRadioButton radMAC;
+    private javax.swing.JRadioButton radMac16k;
+    private javax.swing.JRadioButton radMac32k;
+    private javax.swing.JRadioButton radMacCompanded;
+    private javax.swing.JRadioButton radMacL1;
+    private javax.swing.JRadioButton radMacL2;
+    private javax.swing.JRadioButton radMacLinear;
+    private javax.swing.JRadioButton radMacMono;
+    private javax.swing.JRadioButton radMacStereo;
     private javax.swing.JRadioButton radNTSC;
     private javax.swing.JRadioButton radPAL;
     private javax.swing.JRadioButton radSECAM;

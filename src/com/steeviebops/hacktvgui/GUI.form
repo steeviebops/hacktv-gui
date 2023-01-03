@@ -8,6 +8,14 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="BandButtonGroup">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="MacStereoButtonGroup">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="MacSRButtonGroup">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="MacCompressionButtonGroup">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="MacProtectionButtonGroup">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="fileMenu">
@@ -404,11 +412,11 @@
                                           <Component id="chkInterlace" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkRandom" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace pref="66" max="32767" attributes="0"/>
+                                      <EmptySpace pref="73" max="32767" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkSubtitles" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="106" max="32767" attributes="0"/>
+                                              <EmptySpace pref="113" max="32767" attributes="0"/>
                                               <Component id="lblSubtitleIndex" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="separate" max="-2" attributes="0"/>
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
@@ -435,7 +443,7 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="playlistScrollPane" pref="412" max="32767" attributes="0"/>
+                                                  <Component id="playlistScrollPane" pref="426" max="32767" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
@@ -448,7 +456,7 @@
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" attributes="0">
-                                              <Component id="txtSource" pref="377" max="32767" attributes="0"/>
+                                              <Component id="txtSource" pref="389" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="cmbM3USource" max="32767" attributes="0"/>
                                               <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
@@ -1457,10 +1465,11 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
+                      <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="VBIPanel" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="macPanel" max="32767" attributes="0"/>
+                              <Component id="VBIPanel" alignment="0" max="32767" attributes="0"/>
                               <Component id="AdditionalOptionsPanel" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1474,7 +1483,9 @@
                           <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="313" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="macPanel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="179" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1686,6 +1697,163 @@
                     </Component>
                   </SubComponents>
                 </Container>
+                <Container class="javax.swing.JPanel" name="macPanel">
+                  <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                        <TitledBorder title="MAC audio options"/>
+                      </Border>
+                    </Property>
+                  </Properties>
+
+                  <Layout>
+                    <DimensionLayout dim="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="lblMacAudioMode" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacSampleRate" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacCompression" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacProtection" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="radMacCompanded" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacL1" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMac32k" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacStereo" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="radMacL2" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacLinear" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMac16k" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacMono" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                    <DimensionLayout dim="1">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="radMacStereo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacMono" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacAudioMode" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="radMac32k" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMac16k" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacSampleRate" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="radMacCompanded" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacLinear" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacCompression" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="radMacL1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="radMacL2" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblMacProtection" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JRadioButton" name="radMacStereo">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacStereoButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Stereo"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMac32k">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacSRButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="32 kHz"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMacCompanded">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacCompressionButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Companded"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMacMono">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacStereoButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Mono"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMac16k">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacSRButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="16 kHz"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMacLinear">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacCompressionButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Linear"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMacL1">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacProtectionButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Level 1"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="radMacL2">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="MacProtectionButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Level 2"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblMacAudioMode">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Audio channels"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblMacSampleRate">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Audio sample rate"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblMacCompression">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Compression"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="lblMacProtection">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Protection level"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
               </SubComponents>
             </Container>
             <Container class="javax.swing.JPanel" name="teletextTab">
@@ -1740,12 +1908,12 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="chkTeletext" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="286" pref="406" max="32767" attributes="0"/>
+                                      <EmptySpace min="286" pref="420" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <Component id="txtTeletextSource" pref="377" max="32767" attributes="0"/>
+                                              <Component id="txtTeletextSource" pref="391" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
                                           </Group>
@@ -1869,7 +2037,7 @@
                                           <Component id="lblSpark" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="lblNMSCeefax" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="76" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="90" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
