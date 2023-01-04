@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Stephen McGarry
+ * Copyright (C) 2023 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,13 +45,13 @@ import java.util.stream.Stream;
 public class INIFile {
     
     /**
-     * Returns a boolean of the specified INI setting. This can be true, false, 1, or 0.
+     * Returns a Boolean of the specified INI setting. This can be true, false, 1, or 0.
      * If the value was not found, a default value of false is returned.
      * 
      * @param input         A string containing the contents of the INI file, or its path
      * @param section       The section of the INI file that you want to look up
      * @param setting       The setting that you want to look up
-     * @return              Returns a boolean of the specified INI setting or a default value of false
+     * @return              Returns a Boolean of the specified INI setting or a default value of false
      */
     public boolean getBooleanFromINI(String input, String section, String setting) {
         String v = getINIValue(input, section, setting, "").toLowerCase();
@@ -133,7 +133,7 @@ public class INIFile {
             return getINIValue(input, section, setting, defaultValue).toLowerCase();
         }
         else {
-            return (getINIValue(input, section, setting, defaultValue)); 
+            return getINIValue(input, section, setting, defaultValue); 
         }
     }    
     
