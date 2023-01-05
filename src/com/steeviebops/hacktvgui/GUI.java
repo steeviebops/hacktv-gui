@@ -127,10 +127,8 @@ public class GUI extends javax.swing.JFrame {
     private ArrayList<String> PlaylistURLsAL;
     private String[] PlaylistNames;
 
-    /* Declare a variable for storing the default sample rate for the selected video mode
-     * This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
-     * FMSampleRate specifies the recommended sample rate for the pre-emphasis filter
-     */
+    // Declare a variable for storing the default sample rate for the selected video mode
+    // This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
     private String DefaultSampleRate;
     
     // Declare combobox arrays and ArrayLists
@@ -143,7 +141,6 @@ public class GUI extends javax.swing.JFrame {
     private String[] MACModeArray;
     private String[] ChannelArray;
     private String[] WSSModeArray;
-    private String[] ARCorrectionModeArray;
     private ArrayList<String> ScramblingTypeArray;
     private ArrayList<String> ScramblingKeyArray;
     private ArrayList<String> ScramblingKey2Array;
@@ -152,6 +149,9 @@ public class GUI extends javax.swing.JFrame {
     private final ArrayList<String> PlaylistAL = new ArrayList<>();
     private ArrayList<String> UhfAL;
     private ArrayList<String> VhfAL;
+
+    // Checkbox array for the File > New option
+    private javax.swing.JCheckBox[] CheckBoxes;
     
     // Preferences node
     private final Preferences Prefs = Preferences.userNodeForPackage(GUI.class);
@@ -178,46 +178,12 @@ public class GUI extends javax.swing.JFrame {
     private int StartPoint = -1;
     
     // Declare variables used for storing parameters
-    private String InputSource = "";
     private String Mode = "";
     private long Frequency;
-    private int SampleRate;
-    private int PixelRate;
-    private String SubtitlesParam = "";
-    private String AudioParam = "";
-    private String NICAMParam = "";
-    private String WssParam = "";
-    private String WssMode = "";
     private String ScramblingType1 = "";
     private String ScramblingKey1 = "";
     private String ScramblingType2 = "";
     private String ScramblingKey2 = "";
-    private String ScrambleAudio = "";
-    private String TeletextParam = "";
-    private String TeletextSource = "";
-    private String RFampParam = "";
-    private String FMDevParam = "";
-    private int FMDevValue;
-    private String GammaParam = "";
-    private String OutputLevelParam = "";
-    private String FilterParam = "";
-    private String PositionParam = "";
-    private String LogoParam = "";
-    private String LogoFileName = "";
-    private String EMMParam = "";
-    private String TruncatedCardNumber = "";
-    private String ScalingMode = "";
-    private String ChIDParam = "";
-    private String ChID = "";
-    private String SysterPermTable = "";
-    private String OutputDevice = "";
-    private String AntennaParam = "";
-    private String AntennaName = "";
-    private String FileType = "";
-    private String VolumeParam = "";
-    private String TeletextSubtitlesParam = "";
-    private String A2StereoParam = "";
-    // End parameter variables
     
     // Class instances
     final Shared SharedInst = new Shared();
@@ -240,6 +206,16 @@ public class GUI extends javax.swing.JFrame {
         try {
             // Create GUI class instance
             var g = new GUI(args);
+            // If the emergency reset command is specified, remove all prefs.
+            // This is a safety net, in case any bad preferences prevent us from running.
+            // We handle this as early as possible to ensure it will work correctly.
+            if ( (args.length > 0) && (args[0].toLowerCase().equals("reset")) ||
+                    (args.length > 0) && (args[0].toLowerCase().equals("-reset")) ||
+                    (args.length > 0) && (args[0].toLowerCase().equals("--reset")) ||
+                    (args.length > 0) && (args[0].toLowerCase().equals("/reset")) ) {
+                // Reset all preferences and exit
+                g.resetPreferences();
+            }
             // Set window icon. The process to do this is OS-specific.
             // For macOS, we need to use the ICON_IMAGE feature of the Taskbar
             // class, so we'll check if the current environment supports it.
@@ -287,16 +263,6 @@ public class GUI extends javax.swing.JFrame {
      * @param args
      */
     public GUI(String[] args) {
-        // If the emergency reset command is specified, remove all prefs.
-        // This is a safety net, in case any bad preferences prevent us from running.
-        // We handle this as early as possible to ensure it will work correctly.
-        if ( (args.length > 0) && (args[0].toLowerCase().equals("reset")) ||
-                (args.length > 0) && (args[0].toLowerCase().equals("-reset")) ||
-                (args.length > 0) && (args[0].toLowerCase().equals("--reset")) ||
-                (args.length > 0) && (args[0].toLowerCase().equals("/reset")) ) {
-            // Reset all preferences and exit
-            resetPreferences();
-        }
         // Add a shutdown hook to run exit tasks
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -313,7 +279,7 @@ public class GUI extends javax.swing.JFrame {
         // Check operating system and set OS-specific options
         if (System.getProperty("os.name").contains("Windows")) {
             RunningOnWindows = true;
-            DefaultHackTVPath = System.getProperty("user.dir") + "/" + "hacktv.exe";
+            DefaultHackTVPath = System.getProperty("user.dir") + "/hacktv.exe";
             // Does windows-kill.exe exist in the current directory?
             if ( !Files.exists(Path.of(JarDir + "/windows-kill.exe")) ) {
                 // Disable the "Use windows-kill instead of PowerShell" option
@@ -346,12 +312,12 @@ public class GUI extends javax.swing.JFrame {
             menuExit.setVisible(false);
             sepExitSeparator.setVisible(false);
             var desktop = Desktop.getDesktop();
-            if( desktop.isSupported( Desktop.Action.APP_ABOUT ) ) {
+            if (desktop.isSupported(Desktop.Action.APP_ABOUT)) {
                 desktop.setAboutHandler( e -> {
                     menuAbout.doClick();
                 } );
             }
-            if( desktop.isSupported( Desktop.Action.APP_QUIT_HANDLER ) ) {
+            if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
                 desktop.setQuitHandler( (e, response) -> {
                     response.performQuit();
                 } );
@@ -748,11 +714,6 @@ public class GUI extends javax.swing.JFrame {
         cmbLogo.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbLogoMouseWheelMoved(evt);
-            }
-        });
-        cmbLogo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbLogoActionPerformed(evt);
             }
         });
 
@@ -2018,19 +1979,9 @@ public class GUI extends javax.swing.JFrame {
 
         chkScrambleAudio.setText("Scramble audio");
         chkScrambleAudio.setEnabled(false);
-        chkScrambleAudio.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkScrambleAudioActionPerformed(evt);
-            }
-        });
 
         cmbSysterPermTable.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default", "1", "2" }));
         cmbSysterPermTable.setEnabled(false);
-        cmbSysterPermTable.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                cmbSysterPermTableItemStateChanged(evt);
-            }
-        });
         cmbSysterPermTable.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbSysterPermTableMouseWheelMoved(evt);
@@ -2046,6 +1997,11 @@ public class GUI extends javax.swing.JFrame {
         cmbECMaturity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" }));
         cmbECMaturity.setSelectedIndex(-1);
         cmbECMaturity.setEnabled(false);
+        cmbECMaturity.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbECMaturityMouseWheelMoved(evt);
+            }
+        });
 
         chkECppv.setText("EuroCrypt pay-per-view mode");
         chkECppv.setEnabled(false);
@@ -2798,13 +2754,20 @@ public class GUI extends javax.swing.JFrame {
          */
         if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
             if (evt < 0) {
-                int p = evt * evt; // negative * negative = positive
+                int p = evt * -1; // negative * negative = positive
                 if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
             }
             else if (evt > 0) {
                 if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
-            }            
+            }
         }
+    }
+    
+    private void messageBox(String msg, int type) {
+        // type can be any of the following (from -1 to 3)
+        // PLAIN_MESSAGE, ERROR_MESSAGE, INFORMATION_MESSAGE, WARNING_MESSAGE
+        // or QUESTION_MESSAGE
+        JOptionPane.showMessageDialog(null, msg, APP_NAME, type);
     }
 
     private void createTempDirectory() {
@@ -2816,7 +2779,7 @@ public class GUI extends javax.swing.JFrame {
             }
             catch (IOException ex) {
                 System.err.println(ex);
-                JOptionPane.showMessageDialog(null, "An error occurred while creating the temp directory.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("An error occurred while creating the temp directory.", JOptionPane.ERROR_MESSAGE);
                 resetTeletextButtons();
             }
         }        
@@ -2861,8 +2824,8 @@ public class GUI extends javax.swing.JFrame {
         }
         catch (IOException ex) {
                 System.err.println("Error downloading modes.ini... " + ex);
-                JOptionPane.showMessageDialog(null, "Unable to download the modes file from Github.\n"
-                        + "Using embedded copy instead, which may not be up to date.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Unable to download the modes file from Github.\n"
+                        + "Using embedded copy instead, which may not be up to date.", JOptionPane.ERROR_MESSAGE);
                 // Use the embedded copy
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
         }
@@ -2887,8 +2850,8 @@ public class GUI extends javax.swing.JFrame {
             }
             catch (IOException | FileSystemNotFoundException ex) {
                 // No modes file to load, we cannot continue
-                JOptionPane.showMessageDialog(null, "Critical error, unable to read the embedded modes file.\n"
-                        + "The application will now exit.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Critical error, unable to read the embedded modes file.\n"
+                        + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
                 ModesFileLocation = null;
                 System.err.println(ex);
                 System.exit(1);
@@ -2903,8 +2866,8 @@ public class GUI extends javax.swing.JFrame {
             }
             catch (IOException e) {
                 // Load failed, retry with the embedded file
-                JOptionPane.showMessageDialog(null, "Unable to read the modes file.\n"
-                        + "Retrying with the embedded copy, which may not be up to date.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Unable to read the modes file.\n"
+                        + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "Modes.ini";
                 ModesFileLocation = "embedded";
                 openModesFile();
@@ -2945,8 +2908,8 @@ public class GUI extends javax.swing.JFrame {
             radMAC.doClick();
         }
         else {
-            JOptionPane.showMessageDialog(null, "No video systems were found. The Modes.ini file may be invalid or corrupted.\n"
-                    + "The application will now exit.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            messageBox("No video systems were found. The Modes.ini file may be invalid or corrupted.\n"
+                    + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
         if (chkAudio.isEnabled()) {
@@ -2961,7 +2924,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private String[] addVideoModes(String ColourStandard, int returnValue) {
-        /**
+        /*
          * ColourStandard specifies what to look for (pal, ntsc, secam, other or mac)
          * returnValue specifies what we return in the array
          * 0 = return the friendly name of the mode
@@ -3293,8 +3256,8 @@ public class GUI extends javax.swing.JFrame {
                     saveConfigFile(SelectedFile);
                 }
             } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, "An error occurred while writing to this file. "
-                            + "You may not have the correct permissions to write to this location.", APP_NAME, JOptionPane.ERROR_MESSAGE);       
+                    messageBox("An error occurred while writing to this file. "
+                            + "You may not have the correct permissions to write to this location.", JOptionPane.ERROR_MESSAGE);       
             }
         }    
     }
@@ -3311,7 +3274,7 @@ public class GUI extends javax.swing.JFrame {
                 f = f.replaceAll("\\A\uFEFF", "");
             }
             else {
-                JOptionPane.showMessageDialog(null, "Invalid configuration file.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
                 System.err.println("File too large (> 1MB)");
                 return;
             }
@@ -3335,16 +3298,16 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // No idea what we've read here, abort
-                JOptionPane.showMessageDialog(null, "Invalid configuration file.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
                 System.err.println("[hacktv] section not found");
             }
         } catch (MalformedInputException ex) {
-                JOptionPane.showMessageDialog(null, "Invalid configuration file.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
                 System.err.println("The specified file contains invalid data.");
         } catch (IOException iox) {
                 // File is inaccessible, so stop
-                JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
-                        + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
+                messageBox("The specified file could not be opened.\n"
+                        + "It may have been removed, or you may not have the correct permissions to access it.", JOptionPane.ERROR_MESSAGE); 
         }
     }
     
@@ -3371,10 +3334,10 @@ public class GUI extends javax.swing.JFrame {
             "hacktv. We will attempt to process the file but some options " +
             "may not be available.";
         if ((!CaptainJack) && (ImportedFork.equals("captainjack"))) {
-            JOptionPane.showMessageDialog(null, WrongFork, APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox(WrongFork, JOptionPane.WARNING_MESSAGE);
         }
         else if ((CaptainJack) && (!ImportedFork.equals("captainjack"))) {
-            JOptionPane.showMessageDialog(null, WrongFork, APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox(WrongFork, JOptionPane.WARNING_MESSAGE);
         }
         // Reset all controls
         resetAllControls();
@@ -3560,7 +3523,7 @@ public class GUI extends javax.swing.JFrame {
                 ImportedFrequency = Double.parseDouble("-250");
             }
             if ((ImportedChannel.isEmpty()) && (ImportedFrequency == -250)) {
-                JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox(NoFrequencyOrChannel, JOptionPane.WARNING_MESSAGE);
                 resetAllControls();
                 return false;
             } else if (ImportedChannel.isEmpty()) {
@@ -3610,7 +3573,7 @@ public class GUI extends javax.swing.JFrame {
                         invalidConfigFileValue("channel", ImportedChannel);
                     } else {
                         // If not found, and the frequency is also blank, abort
-                        JOptionPane.showMessageDialog(null, NoFrequencyOrChannel, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                        messageBox(NoFrequencyOrChannel, JOptionPane.WARNING_MESSAGE);
                         resetAllControls();
                         return false;
                     }
@@ -3673,8 +3636,8 @@ public class GUI extends javax.swing.JFrame {
             // hacktv now contains its own internal resources so external files
             // are no longer supported.
             if (ImportedLogo.endsWith(".png")) {
-                JOptionPane.showMessageDialog(null, 
-                     "hacktv no longer supports external logo files. Logo option disabled.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox(
+                     "hacktv no longer supports external logo files. Logo option disabled.", JOptionPane.WARNING_MESSAGE);
             }
             else if (!ImportedLogo.isBlank()) {
                 boolean logoFound = false;
@@ -3721,8 +3684,7 @@ public class GUI extends javax.swing.JFrame {
                 cmbWSS.setSelectedIndex(ImportedWSS - 1);
             }
         }
-        /**
-         * Aspect ratio correction for 16:9 content on 4:3 displays
+        /* Aspect ratio correction for 16:9 content on 4:3 displays
          * If the arcorrection value is not defined, leave the option unchecked
          * Otherwise, check the option and process it as normal
          */
@@ -4007,7 +3969,7 @@ public class GUI extends javax.swing.JFrame {
             ImportedSampleRate = (INI.getDoubleFromINI(fileContents, "hacktv", "samplerate") / 1000000);
         } else {
             ImportedSampleRate = Double.parseDouble("16");
-            JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
         }
         txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
         btnRun.requestFocusInWindow();
@@ -4041,9 +4003,10 @@ public class GUI extends javax.swing.JFrame {
                 (settingName.contains("VideoCrypt II scrambling key")) ) {
             cmbScramblingType.setSelectedIndex(0);
         }
-        JOptionPane.showMessageDialog(null, "The " + settingName + '\u0020' + '\u0022' + value + '\u0022' + 
+        messageBox("The " + settingName + '\u0020' + '\u0022' + value + '\u0022' + 
                 " specified in the configuration file could not be found.\n" +
-                        "The file may have been created in a newer version or the value is invalid.", APP_NAME,  JOptionPane.WARNING_MESSAGE);
+                "The file may have been created in a newer version or the value is invalid.",
+                JOptionPane.WARNING_MESSAGE);
     }
     
     private void saveConfigFile (File DestinationFileName) {
@@ -4085,7 +4048,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
             case 3:
                 if (txtOutputDevice.getText().isBlank()) {
-                    JOptionPane.showMessageDialog(null, "Please select an output file or change the output device.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                    messageBox("Please select an output file or change the output device.", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
                     FileContents = INI.setINIValue(FileContents, "hacktv", "output", txtOutputDevice.getText());
@@ -4342,8 +4305,8 @@ public class GUI extends javax.swing.JFrame {
             fw.write(FileContents);
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "An error occurred while writing to this file. "
-                    + "The file may be read-only or you may not have the correct permissions.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            messageBox("An error occurred while writing to this file. "
+                    + "The file may be read-only or you may not have the correct permissions.", JOptionPane.ERROR_MESSAGE);
             return;
         }
         // Display the opened filename in the title bar
@@ -4380,8 +4343,8 @@ public class GUI extends javax.swing.JFrame {
             catch (IOException ioe) {
                 // File is inaccessible or unreadable, so stop
                 System.err.println(ioe);
-                JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
-                        + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
+                messageBox("The specified file could not be opened.\n"
+                        + "It may have been removed, or you may not have the correct permissions to access it.", JOptionPane.ERROR_MESSAGE); 
                 resetM3UItems(false);
                 return;
             }
@@ -4389,13 +4352,13 @@ public class GUI extends javax.swing.JFrame {
         catch (IOException ex) {
             // File is inaccessible, so stop
             System.err.println(ex);
-            JOptionPane.showMessageDialog(null, "The specified file could not be opened.\n"
-                    + "It may have been removed, or you may not have the correct permissions to access it.", APP_NAME, JOptionPane.ERROR_MESSAGE); 
+            messageBox("The specified file could not be opened.\n"
+                    + "It may have been removed, or you may not have the correct permissions to access it.", JOptionPane.ERROR_MESSAGE); 
             resetM3UItems(false);
             return;       
         }        
         if ( (fileHeader == null)) {
-            JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
             resetM3UItems(false);
             return;
         }
@@ -4419,7 +4382,7 @@ public class GUI extends javax.swing.JFrame {
                 catch (IOException ioe) {
                     // File is unreadable, so stop
                     System.err.println(ioe);
-                    JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
                     resetM3UItems(false);
                     return;
                 }
@@ -4427,7 +4390,7 @@ public class GUI extends javax.swing.JFrame {
             catch (IOException ex) {
                 // File is unreadable, so stop
                 System.err.println(ex);
-                JOptionPane.showMessageDialog(null, "Invalid file format.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
                 resetM3UItems(false);
                 return;
             }
@@ -4473,8 +4436,8 @@ public class GUI extends javax.swing.JFrame {
             // Did we add any files to be removed? If so, remove them and alert.
             if (toRemove.size() > 0) {
                 pls.removeAll(toRemove);
-                JOptionPane.showMessageDialog(null, "Some files could not be found and have been removed from the playlist.\n" +
-                        removed, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Some files could not be found and have been removed from the playlist.\n" +
+                        removed, JOptionPane.WARNING_MESSAGE);
             }
             // Add the imported playlist to PlaylistAL and populate
             PlaylistAL.addAll(pls);
@@ -4599,9 +4562,9 @@ public class GUI extends javax.swing.JFrame {
                     resetM3UItems(true);
                 }
                 else {
-                    JOptionPane.showMessageDialog(null, 
+                    messageBox(
                             "An error occurred while processing this file. "
-                                    + "It may be invalid or corrupted.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                                    + "It may be invalid or corrupted.", JOptionPane.ERROR_MESSAGE);
                     resetM3UItems(false); 
                 }
             } // End done()
@@ -4658,6 +4621,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void resetAllControls() {
+        // Clear status bar
+        txtStatus.setText("");
         // Uncheck all checkboxes
         for(JCheckBox cb: CheckBoxes){
             if ( cb.isSelected() ) { cb.doClick(); }
@@ -4748,8 +4713,8 @@ public class GUI extends javax.swing.JFrame {
         }
         catch (IOException ex) {
             System.err.println(ex);
-            JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
-                    + "Please ensure that you are connected to the internet and try again.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            messageBox("An error occurred while downloading files. "
+                    + "Please ensure that you are connected to the internet and try again.", JOptionPane.ERROR_MESSAGE);
             txtStatus.setText("Cancelled");
             resetTeletextButtons();
             return;
@@ -4892,9 +4857,8 @@ public class GUI extends javax.swing.JFrame {
                                         Files.move(file.toPath(), Path.of(nd + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                                     }
                                     catch (IOException e) {
-                                        JOptionPane.showMessageDialog(null,
-                                                "An error occurred when merging the regional Ceefax data with the national data.\n"
-                                                + e, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                                        messageBox("An error occurred when merging the regional Ceefax data with the national data.\n"
+                                                + e, JOptionPane.WARNING_MESSAGE);
                                         break;
                                     }
                                 }
@@ -4912,20 +4876,20 @@ public class GUI extends javax.swing.JFrame {
                     case 2:
                         // The index page was downloaded but a teletext page failed.
                         // Connection failure?
-                        JOptionPane.showMessageDialog(null, "An error occurred while downloading files. "
-                                + "Please ensure that you are connected to the internet and try again.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                        messageBox("An error occurred while downloading files. "
+                                + "Please ensure that you are connected to the internet and try again.", JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
                         txtStatus.setText("Failed");
                         break;
                     case 3:
                         // The index page was downloaded but we didn't find anything.
                         // Most likely means that we need to revise this!
-                        JOptionPane.showMessageDialog(null, "No teletext files were found.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                        messageBox("No teletext files were found.", JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
                         txtStatus.setText("Failed");
                         break;
                     default:
-                        JOptionPane.showMessageDialog(null, "An unknown error has occurred, code " + status, APP_NAME, JOptionPane.ERROR_MESSAGE);
+                        messageBox("An unknown error has occurred, code " + status, JOptionPane.ERROR_MESSAGE);
                         pbTeletext.setValue(0);
                         txtStatus.setText("Failed");
                         break;
@@ -5028,7 +4992,7 @@ public class GUI extends javax.swing.JFrame {
                 cmbMode.setSelectedIndex(a);
             }
             else {
-                JOptionPane.showConfirmDialog(null, "Unable to find the PAL-FM mode, which is required for this template.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Unable to find the PAL-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
                 resetAllControls();
                 return;
             }
@@ -5038,8 +5002,8 @@ public class GUI extends javax.swing.JFrame {
             txtFMDev.setText("10");
             // Set IF to Sky News
             txtFrequency.setText(String.format("%.2f",(11.377 - localOscillator) * 1000));
-            JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to Sky News"
-                    + " (11.377 GHz) and run hacktv.", APP_NAME, JOptionPane.INFORMATION_MESSAGE);    
+            messageBox("Template values have been loaded. Tune your receiver to Sky News"
+                    + " (11.377 GHz) and run hacktv.", JOptionPane.INFORMATION_MESSAGE);    
         }
     }    
     
@@ -5205,8 +5169,8 @@ public class GUI extends javax.swing.JFrame {
             ScramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
-            JOptionPane.showMessageDialog(null, "The scrambling key information in Modes.ini appears to be "
-                    + "missing or corrupt for the selected scrambling type.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("The scrambling key information in Modes.ini appears to be "
+                    + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
             return;
         }
         // We just want the commands so remove everything after =
@@ -5246,8 +5210,8 @@ public class GUI extends javax.swing.JFrame {
             // Extract (from ModesFile) the VC2 scrambling key section
             String slist2 = INI.splitINIfile(ModesFile, sconf2);
             if (slist2 == null) {
-                JOptionPane.showMessageDialog(null, "The scrambling key information in Modes.ini appears to be "
-                        + "missing or corrupt for the selected scrambling type.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("The scrambling key information in Modes.ini appears to be "
+                        + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
                 cmbScramblingType.setSelectedIndex(0);
                 return;
             }
@@ -5426,16 +5390,14 @@ public class GUI extends javax.swing.JFrame {
         cmbWSS.setSelectedIndex(-1);
     }
     
-    private void checkWSS() {
+    private ArrayList<String> checkWSS() {
         // Populate WSS parameters if enabled
+        var al = new ArrayList<String>();
         if (chkWSS.isSelected()) {
-            WssParam = "--wss";
-            WssMode = WSSModeArray[cmbWSS.getSelectedIndex()];
+            al.add("--wss");
+            al.add(WSSModeArray[cmbWSS.getSelectedIndex()]);
         }
-            else {
-            WssParam = "";
-            WssMode = "";
-        }        
+        return al;
     }
     
     private void addARCorrectionOptions() {
@@ -5444,23 +5406,26 @@ public class GUI extends javax.swing.JFrame {
             "Letterboxed",
             "Cropped"
         };
-        ARCorrectionModeArray = new String[] {
-            "",
-            "--letterbox",
-            "--pillarbox"
-        };
         cmbARCorrection.removeAllItems();
         cmbARCorrection.setModel(new DefaultComboBoxModel<>(ARCorrectionMode));
         cmbARCorrection.setSelectedIndex(0);
     }
     
-    private void checkARCorrectionOptions() {
+    private ArrayList<String> checkARCorrectionOptions() {
+        var al = new ArrayList<String>();
         if (chkARCorrection.isSelected()) {
-            ScalingMode = ARCorrectionModeArray[cmbARCorrection.getSelectedIndex()];
+            switch (cmbARCorrection.getSelectedIndex()) {
+                case 1:
+                    al.add("--letterbox");
+                    break;
+                case 2:
+                    al.add("--pillarbox");
+                    break;
+                default:
+                    break;
+            }
         }
-        else {
-            ScalingMode = "";
-        }
+        return al;
     }
     
     private void addLogoOptions() {
@@ -5491,16 +5456,14 @@ public class GUI extends javax.swing.JFrame {
         if (!chkLogo.isSelected()) cmbLogo.setSelectedIndex(-1);
     }
     
-    private void checkLogo() {
+    private ArrayList<String> checkLogo() {
+        var al = new ArrayList<String>();
         // Populate logo parameters if enabled
         if (chkLogo.isSelected()) {
-            LogoParam = "--logo";
-            LogoFileName = LogoArray[cmbLogo.getSelectedIndex()];
+            al.add("--logo");
+            al.add(LogoArray[cmbLogo.getSelectedIndex()]);
         }
-            else {
-            LogoParam = "";
-            LogoFileName = "";
-        }        
+        return al;
     }
     
     private void addTestCardOptions() {
@@ -5545,13 +5508,15 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void checkTestCard() {
+    private ArrayList<String> checkTestCard() {
+        var al = new ArrayList<String>();
         if (cmbTest.isEnabled()) {
-            InputSource = "test:" + TCArray[cmbTest.getSelectedIndex()];
+            al.add("test:" + TCArray[cmbTest.getSelectedIndex()]);
         }
         else if (radTest.isSelected()) {
-            InputSource = "test:colourbars";
+            al.add("test:colourbars");
         }
+        return al;
     }
     
     private void addOutputDevices() {
@@ -5628,8 +5593,8 @@ public class GUI extends javax.swing.JFrame {
             Lines = INI.getIntegerFromINI(ModesFile, Mode, "lines");
         }
         else {
-            JOptionPane.showMessageDialog(null, "Unable to read the \"lines\" value for this mode. "
-                    + "Defaulting to 525.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("Unable to read the \"lines\" value for this mode. "
+                    + "Defaulting to 525.", JOptionPane.WARNING_MESSAGE);
             if (cmbMode.getItemCount() > 1) {
                 cmbMode.setSelectedIndex(PreviousIndex);
             }
@@ -5654,7 +5619,7 @@ public class GUI extends javax.swing.JFrame {
                 if (!checkBasebandSupport()) return;
                 break;
             default:
-                JOptionPane.showMessageDialog(null, "No modulation specified, defaulting to VSB.", APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+                messageBox("No modulation specified, defaulting to VSB.", JOptionPane.INFORMATION_MESSAGE);
                 Baseband = false;
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 disableFMDeviation();
@@ -5664,7 +5629,7 @@ public class GUI extends javax.swing.JFrame {
             DefaultSampleRate = Double.toString(INI.getDoubleFromINI(ModesFile, Mode, "sr") / 1000000).replace(".0", "");
         }
         else {
-            JOptionPane.showMessageDialog(null, "No sample rate specified, defaulting to 16 MHz.", APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
             DefaultSampleRate = "16";
         }
         if (INI.getBooleanFromINI(ModesFile, Mode, "colour")) {
@@ -5733,7 +5698,6 @@ public class GUI extends javax.swing.JFrame {
             configureMacPanel(true);
             if (chkMacChId.isSelected()) chkMacChId.doClick();
             chkAudio.setEnabled(false);
-            AudioParam = "";
         }
         else {
             configureMacPanel(false);
@@ -5826,7 +5790,6 @@ public class GUI extends javax.swing.JFrame {
     private void disableAudioOption() {
         chkAudio.setSelected(false);
         chkAudio.setEnabled(false);
-        AudioParam = "";
     }
     
     private boolean checkBasebandSupport() {
@@ -5839,7 +5802,7 @@ public class GUI extends javax.swing.JFrame {
             return true;
         }
         else {
-            JOptionPane.showMessageDialog(null, "This mode is not supported by the selected output device.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("This mode is not supported by the selected output device.", JOptionPane.WARNING_MESSAGE);
             cmbMode.setSelectedIndex(PreviousIndex);
             checkMode();
             return false;
@@ -5910,8 +5873,10 @@ public class GUI extends javax.swing.JFrame {
         chkTextSubtitles.setEnabled(false);
     }
     
-    private boolean checkTeletextSource() {
+    private ArrayList<String> checkTeletextSource() {
+        var al = new ArrayList<String>();
         if (chkTeletext.isSelected()) {
+            al.add("--teletext");
             // If the txtTeletextSource field contains quotes, remove them
             if ((txtTeletextSource.getText()).contains(String.valueOf((char)34))) {
                 txtTeletextSource.setText(txtTeletextSource.getText().replaceAll(String.valueOf((char)34), ""));
@@ -5923,27 +5888,28 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     SharedInst.copyResource("/com/steeviebops/resources/demo.tti", TempDir.toString() + "/demo.tti", this.getClass());   
                     if ( (RunningOnWindows) && TempDir.toString().contains(" ") ) {
-                        TeletextSource = '\u0022' + TempDir.toString() + "/" + "demo.tti" + '\u0022';
+                        al.add('\u0022' + TempDir.toString() + File.separator + "demo.tti" + '\u0022');
                     }
                     else {
-                        TeletextSource = TempDir.toString() + "/" + "demo.tti";
+                        al.add(TempDir.toString() + File.separator + "demo.tti");
                     }
                 } catch (IOException ex) {
                     System.err.println("An error occurred while attempting to copy to the temp directory: " + ex);
+                    return null;
                 }
             }
             else if ( (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) 
                     && (RunningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
-                TeletextSource = "raw:" + '\u0022' + txtTeletextSource.getText() + '\u0022';
+                al.add("raw:" + '\u0022' + txtTeletextSource.getText() + '\u0022');
             }
             else if (txtTeletextSource.getText().toLowerCase().endsWith(".t42")) {
-                TeletextSource = "raw:" + txtTeletextSource.getText();
+                al.add("raw:" + txtTeletextSource.getText());
             }
             else if ( (RunningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
-                TeletextSource = '\u0022' + txtTeletextSource.getText() + '\u0022';
+                al.add('\u0022' + txtTeletextSource.getText() + '\u0022');
             }
             else {
-                TeletextSource = txtTeletextSource.getText();
+                al.add(txtTeletextSource.getText());
             }
             if ( (chkTextSubtitles.isSelected()) && (!txtTeletextSource.getText().isBlank()) ) {
                 String p888err = "This directory contains a teletext file (P888.tti) for page 888. "
@@ -5959,8 +5925,8 @@ public class GUI extends javax.swing.JFrame {
                             SharedInst.deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
                         }
                         catch (IOException ex) {
-                            JOptionPane.showMessageDialog(null, p888err, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                            return false;
+                            messageBox(p888err, JOptionPane.ERROR_MESSAGE);
+                            return null;
                         }                    
                     }
                 }
@@ -5969,19 +5935,19 @@ public class GUI extends javax.swing.JFrame {
                 else if ( (Files.exists(Path.of(txtTeletextSource.getText() + "/P888.tti"))) || 
                         (txtTeletextSource.getText().toLowerCase().endsWith("p888.tti")) ||
                         (txtTeletextSource.getText().toLowerCase().endsWith("p888.ttix")) ) {
-                    JOptionPane.showMessageDialog(null, p888err, APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    return false;
+                    messageBox(p888err, JOptionPane.ERROR_MESSAGE);
+                    return null;
                 }
                 // If the directory contains any text files in the page 800 range (p8*.tti or p8*.ttix)
                 // generate a warning because this can prevent subtitles from running in real time.
                 if ( (SharedInst.wildcardFind(txtTeletextSource.getText(), "p8", ".tti") > 0) || 
                         (SharedInst.wildcardFind(txtTeletextSource.getText(), "p8", ".ttix") > 0) ) {
-                    JOptionPane.showMessageDialog(null, p888warn, APP_NAME, JOptionPane.WARNING_MESSAGE);
-                    return true;
+                    messageBox(p888warn, JOptionPane.WARNING_MESSAGE);
+                    return null;
                 }
             }
         }
-        return true;
+        return al;
     }
     
     private void configureMacPanel(boolean e) {
@@ -6016,16 +5982,6 @@ public class GUI extends javax.swing.JFrame {
         radMacL2.setEnabled(e);
     }
     
-    private void setFrequency() {
-    // Here, we read the selected combobox index and use that number to get
-    // the corresponding frequency from the Frequency array.
-        Frequency = FrequencyArray[cmbChannel.getSelectedIndex()];
-    // Convert the imported value so we can display it in MHz on-screen
-        DecimalFormat df = new DecimalFormat("0.00");
-        double input = Frequency;
-        txtFrequency.setText((df.format(input / 1000000))/* .replace(".00", "") */);
-    }
-    
     private void enableNICAM() {
         if (chkAudio.isSelected()) {
             chkNICAM.setEnabled(true);
@@ -6038,8 +5994,6 @@ public class GUI extends javax.swing.JFrame {
         chkNICAM.setEnabled(false);
         chkNICAM.setSelected(false);
         NICAMSupported = false;
-        // Clear NICAMParam as we don't need it if NICAM is not supported anyway
-        NICAMParam = "";
     }
     
     private void enableA2Stereo() {
@@ -6056,8 +6010,6 @@ public class GUI extends javax.swing.JFrame {
         A2Supported = false;
         chkA2Stereo.setEnabled(false);
         chkA2Stereo.setSelected(false);
-        // Clear A2StereoParam as we don't need it if A2 is not supported anyway
-        A2StereoParam = "";
     }    
     
     private void enableFMDeviation() {
@@ -6089,7 +6041,8 @@ public class GUI extends javax.swing.JFrame {
             // Extract (from ModesFile) the bandplan section that we need
             String bp = INI.splitINIfile(ModesFile, bpname);
             if (bp == null) {
-                throw new IllegalArgumentException(band + " was not found in modes.ini");
+                 messageBox(band + " was not found in modes.ini", JOptionPane.ERROR_MESSAGE);
+                 return;
             }
             // We just want the channel names/numbers so remove everything after =
             bp = bp.replaceAll("\\=.*", "");       
@@ -6114,7 +6067,9 @@ public class GUI extends javax.swing.JFrame {
                     FrequencyArray[i] = INI.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]);
                 }
                 else {
-                    throw new IllegalArgumentException("Invalid data returned from Modes.ini, section name: " + bpname);
+                     messageBox("Invalid data returned from Modes.ini, section name: "
+                             + bpname, JOptionPane.ERROR_MESSAGE);
+                     return;
                 }
             }
             // Enable cmbChannel and populate it with the contents of ChannelArray
@@ -6125,8 +6080,8 @@ public class GUI extends javax.swing.JFrame {
         }
         catch (IllegalArgumentException ex) {
             System.err.println(ex);
-            JOptionPane.showMessageDialog(null, "The bandplan data in Modes.ini appears to be "
-                    + "missing or corrupt for the selected band.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("The bandplan data in Modes.ini appears to be "
+                    + "missing or corrupt for the selected band.", JOptionPane.WARNING_MESSAGE);
             radCustom.doClick();
             // Disable the band that failed
             if (band.startsWith("uhf")) {
@@ -6202,17 +6157,16 @@ public class GUI extends javax.swing.JFrame {
                         u = get();
                     }
                     catch (InterruptedException | ExecutionException e) {
-                        u = "";
-                        runHackTV("");
+                        return;
                     }
                     // If it's a live stream, set the manifest (m3u8) URL as the
                     // source and restart. We don't need youtube-dl for this.
                     if ( (u != null) && (u.endsWith(".m3u8")) ) {
                         txtSource.setText(u);
-                        runHackTV("");
+                        populateArguments("");
                     }
                     else {
-                        runHackTV(ytp);
+                        populateArguments(ytp);
                     }
                     btnRun.setEnabled(true);
                 }
@@ -6221,13 +6175,12 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    private boolean checkInput() {
+    private String checkInput() {
         // Skip this method if the playlist is populated
-        if (PlaylistAL.size() > 0) return true;
+        if (PlaylistAL.size() > 0) return "";
         if (radLocalSource.isSelected()) {
             if (cmbM3USource.isVisible()) {
-                InputSource = PlaylistURLsAL.get(cmbM3USource.getSelectedIndex());
-                return true;
+                return PlaylistURLsAL.get(cmbM3USource.getSelectedIndex());
             }
             else if ( (txtSource.getText().contains("://youtube.com/")) ||
                       (txtSource.getText().contains("://www.youtube.com/")) ||
@@ -6238,73 +6191,71 @@ public class GUI extends javax.swing.JFrame {
                     youtubedl(txtSource.getText());
                 }
                 else {
-                    JOptionPane.showMessageDialog(null, "youtube-dl is not supported in syntax only mode.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                    messageBox("youtube-dl is not supported in syntax only mode.", JOptionPane.WARNING_MESSAGE);
                 }
-                // Return false as we're going to restart if the download is successful
-                return false;
+                // Return null as we're going to restart if the download is successful
+                return null;
             }
             else if (!txtSource.getText().isBlank()) { 
-                InputSource = txtSource.getText().replace("\"", "");
-                return true;
+                return txtSource.getText().replace("\"", "");
             }
             else {
-                JOptionPane.showMessageDialog(null, "Please specify an input file to broadcast or choose the test card option.", APP_NAME, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(0);
-                return false;
+                 messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
+                 return null;
             }
         }
         else {
-            return true;
+            return "";
         }
     }
     
-    private boolean checkSampleRate() {
+    private Integer checkSampleRate() {
         if (SharedInst.isNumeric( txtSampleRate.getText())) {
             Double SR = Double.parseDouble(txtSampleRate.getText());
-            SampleRate = (int) (SR * 1000000);
-            return true;
+            return (int) (SR * 1000000);
         }
         else {
-            JOptionPane.showMessageDialog(null, "Please specify a valid sample rate in MHz.", APP_NAME, JOptionPane.WARNING_MESSAGE);
             tabPane.setSelectedIndex(1);
-            return false;
+            messageBox("Please specify a valid sample rate in MHz.", JOptionPane.WARNING_MESSAGE);
+            return null;
         }
     }
     
-    private boolean checkPixelRate() {
+    private ArrayList<String> checkPixelRate() {
+        var al = new ArrayList<String>();
         if (chkPixelRate.isSelected()) {
             try {
                 Double PR = Double.parseDouble(txtPixelRate.getText());
-                PixelRate = (int) (PR * 1000000);
-                return true;
+                int PixelRate = (int) (PR * 1000000);
+                al.add("--pixelrate");
+                al.add(Integer.toString(PixelRate));
             }
             catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(null, "Please specify a valid pixel rate in MHz.", APP_NAME, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
-                return false;
+                messageBox("Please specify a valid pixel rate in MHz.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
-        else {
-            return true;
-        }
+        return al;
     }
    
-    private boolean checkFMDeviation() {
+    private ArrayList<String> checkFMDeviation() {
+        var al = new ArrayList<String>();
         if (chkFMDev.isSelected()) {
             if (SharedInst.isNumeric(txtFMDev.getText())) {
-                Double Deviation = Double.parseDouble(txtFMDev.getText());
-                FMDevValue = (int) (Deviation * 1000000);
-                return true;
+                al.add("--deviation");
+                Double d = Double.parseDouble(txtFMDev.getText());
+                int i = (int) (d * 1000000);
+                al.add(Integer.toString(i));
             }
             else {
-                JOptionPane.showMessageDialog(null, "Please specify a valid deviation in MHz.", APP_NAME, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
-                return false;
+                messageBox("Please specify a valid deviation in MHz.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
-        else {
-            return true;
-        }
+        return al;
     }
     
     private boolean checkCustomFrequency(){
@@ -6317,7 +6268,7 @@ public class GUI extends javax.swing.JFrame {
             if ( (SharedInst.isNumeric( txtFrequency.getText())) && (!txtFrequency.getText().contains(" ")) ){
                 CustomFreq = new BigDecimal(txtFrequency.getText());
                 if ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) {
-                    JOptionPane.showMessageDialog(null, InvalidInput, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                    messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
                     tabPane.setSelectedIndex(1);
                     return false;
                 }
@@ -6330,7 +6281,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else {
-                JOptionPane.showMessageDialog(null, InvalidInput, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
                 return false;  
             }
@@ -6338,80 +6289,94 @@ public class GUI extends javax.swing.JFrame {
         return true;
     }
     
-    private boolean checkMacChId() {
+    private ArrayList<String> checkMacChId() {
+        var al = new ArrayList<String>();
         if (chkMacChId.isSelected()) {
             if (txtMacChId.getText().matches("^[0-9a-fA-F]+$")) {
-                ChID = "0x" + txtMacChId.getText();
-                return true;
+                al.add("--chid");
+                al.add("0x" + txtMacChId.getText());
             }
             else {
-                JOptionPane.showMessageDialog(null, "Please specify a valid hexadecimal channel ID.", APP_NAME, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(2);
-                return false;
-            }
+                tabPane.setSelectedIndex(1);
+                messageBox("Please specify a valid hexadecimal channel ID.", JOptionPane.WARNING_MESSAGE);
+                return null;
+            }            
         }
-        else {
-            return true;
-        }
+        return al;
     }
     
-    private boolean checkGamma() {
-        String InvalidGamma = "Gamma should be a decimal value.";
+    private ArrayList<String> checkGamma() {
+        var al = new ArrayList<String>();
         if (chkGamma.isSelected()) {
-            if (!SharedInst.isNumeric(txtGamma.getText())) {
-                JOptionPane.showMessageDialog(null, InvalidGamma, APP_NAME, JOptionPane.WARNING_MESSAGE);
+            if (SharedInst.isNumeric(txtGamma.getText())) {
+                al.add("--gamma");
+                al.add(txtGamma.getText());
+            }
+            else {    
                 tabPane.setSelectedIndex(2);
-                return false;
-            }
-            else {
-                return true;
+                messageBox("Gamma should be a decimal value.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
-        else {
-            return true;
-        }
+        return al;
     }
     
-    private boolean checkOutputLevel() {
-        String InvalidOutputLevel = "Output level should be a decimal value.";
+    private ArrayList<String> checkOutputLevel() {
+        var al = new ArrayList<String>();
         if (chkOutputLevel.isSelected()) {
-            if (!SharedInst.isNumeric(txtOutputLevel.getText())) {
-                JOptionPane.showMessageDialog(null, InvalidOutputLevel, APP_NAME, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(2);
-                return false;    
+            if (SharedInst.isNumeric(txtOutputLevel.getText())) {
+                al.add("--level");
+                al.add(txtOutputLevel.getText());
             }
             else {
-                return true;
+                tabPane.setSelectedIndex(2);
+                messageBox("Output level should be a decimal value.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
-        else {
-            return true;
-        }
+        return al;
     }
     
-    private boolean checkGain() {
-        // Only check gain if the text field is enabled
-        if (!txtGain.isEnabled()) return true;
+    private ArrayList<String> checkPosition() {
+        var al = new ArrayList<String>();
+        if (chkPosition.isSelected()) {
+            if (!SharedInst.isNumeric(txtPosition.getText())) {
+                tabPane.setSelectedIndex(0);
+                messageBox("Please specify a valid position.", JOptionPane.WARNING_MESSAGE);
+                return null;
+            }
+            else {
+                al.add("--position");
+                al.add(txtPosition.getText());     
+            }
+        }
+        return al;
+    }
+    
+    private ArrayList<String> checkGain() {
+        var al = new ArrayList<String>();
         String InvalidGain = "Gain should be between 0 and 47 dB.";
         if (SharedInst.isNumeric(txtGain.getText())) {
-            int Gain = Integer.parseInt(txtGain.getText());
-            if ( (Gain >= 0) && (Gain <=47) ) {
-                return true;
+            int g = Integer.parseInt(txtGain.getText());
+            if ( (g >= 0) && (g <= 47) ) {
+                al.add("-g");
+                al.add(txtGain.getText());
             }
             else {
-                JOptionPane.showMessageDialog(null, InvalidGain, APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(1);
-                return false;
+                return null;
             }
         }
         else {
-            JOptionPane.showMessageDialog(null, InvalidGain, APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
             tabPane.setSelectedIndex(1);
-            return false;
+            return null;
         }
+        return al;
     }
     
-    private boolean checkCardNumber() {
+    private String checkCardNumber() {
         /*  Sky viewing cards use the Luhn algorithm to verify if the card
          *  number is valid. So we will use it here too.
          *  Issue 07 cards have either 13-digit or 9-digit numbers.
@@ -6420,25 +6385,25 @@ public class GUI extends javax.swing.JFrame {
          *  any checks.
          */
         if ( (txtCardNumber.isEnabled()) && (ScramblingType1.equals("--videocrypt")) ) {
+            String TruncatedCardNumber;
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
             String InvalidCardNumber = "Card number should be exactly 8, 9 or 13 digits.";
             // Make sure that the input is numeric only
             if (!SharedInst.isNumeric(txtCardNumber.getText())) {
-                JOptionPane.showMessageDialog(null, InvalidCardNumber, APP_NAME, JOptionPane.WARNING_MESSAGE);
-                return false;
+                 messageBox(InvalidCardNumber, JOptionPane.WARNING_MESSAGE);
+                 return null;
             }
             else if (txtCardNumber.getText().length() == 9) {
                 // Do a Luhn check on the provided card number
                 if (!SharedInst.LuhnCheck(Long.parseLong(txtCardNumber.getText()))) {
-                    JOptionPane.showMessageDialog(null, LuhnCheckFailed, APP_NAME, JOptionPane.WARNING_MESSAGE);
-                    return false;
+                    messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
+                    return null;
                 }
                 else {
                     // Make sure that we're not trying to send EMMs to the wrong card type.
-                    if (!checkEMMCardType(txtCardNumber.getText())) return false;
+                    if (!checkEMMCardType(txtCardNumber.getText())) return null;
                     // hacktv doesn't use the check digit so strip it out
-                    TruncatedCardNumber = txtCardNumber.getText().substring(0,8);
-                    return true;
+                    return txtCardNumber.getText().substring(0,8);
                 }
             }
             else if (txtCardNumber.getText().length() == 13) {
@@ -6446,41 +6411,36 @@ public class GUI extends javax.swing.JFrame {
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
                 if (!SharedInst.LuhnCheck(Long.parseLong(TruncatedCardNumber))) {
-                    JOptionPane.showMessageDialog(null, LuhnCheckFailed, APP_NAME, JOptionPane.WARNING_MESSAGE);
-                    TruncatedCardNumber = "";
-                    return false;
+                    messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
+                    return null;
                 }
                 else {
                     // Make sure that we're not trying to send EMMs to the wrong card type.
-                    if (!checkEMMCardType(TruncatedCardNumber)) return false;
+                    if (!checkEMMCardType(TruncatedCardNumber)) return null;
                     // hacktv doesn't use the check digit so strip it out
-                    TruncatedCardNumber = txtCardNumber.getText().substring(4,12);
-                    return true;
+                    return txtCardNumber.getText().substring(4,12);
                 }
             }
             else if (txtCardNumber.getText().length() == 8) {
                 // Make sure that we're not trying to send EMMs to the wrong card type.
-                if (!checkEMMCardType(txtCardNumber.getText())) return false;
+                if (!checkEMMCardType(txtCardNumber.getText())) return null;
                 // Pass the digits unaltered and without Luhn checking
-                TruncatedCardNumber = txtCardNumber.getText();
-                return true;
+                return txtCardNumber.getText();
             }
             else {
-                JOptionPane.showMessageDialog(null, InvalidCardNumber, APP_NAME, JOptionPane.WARNING_MESSAGE);  
-                tabPane.setSelectedIndex(4);      
-                return false;
+                tabPane.setSelectedIndex(4);
+                messageBox(InvalidCardNumber, JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
         else if ( (txtCardNumber.isEnabled()) && (ScramblingType1.equals("--videocrypt2")) ) {
             // Pass the digits unaltered and without Luhn checking for MultiChoice cards
             // This is temporary until I work out how to handle them
-            TruncatedCardNumber = txtCardNumber.getText();
-            return true;
+            return txtCardNumber.getText();
         }
         else {
-            // If the txtCardNumber textbox is disabled, return true and exit
-            TruncatedCardNumber = "";
-            return true;
+            // If the txtCardNumber textbox is disabled, return null and exit
+            return null;
         }
     }
     
@@ -6495,7 +6455,7 @@ public class GUI extends javax.swing.JFrame {
             case "sky07":
                 short s7 = Short.parseShort(cardNumber.substring(0,3));
                 if ((s7 > 30) && (s7 < 800)) {
-                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 else {
@@ -6504,7 +6464,7 @@ public class GUI extends javax.swing.JFrame {
             case "sky09":
                 short s9 = Short.parseShort(cardNumber.substring(0,3));
                 if ((s9 < 190) || (s9 > 250)) {
-                    JOptionPane.showMessageDialog(null, WrongCardType, APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
                 else {
@@ -6517,11 +6477,11 @@ public class GUI extends javax.swing.JFrame {
     
     private void showEMMWarning() {
         if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) ) {
-            JOptionPane.showMessageDialog(null,
+            messageBox(
                 "Care is advised when using this option.\n" +
                 "Incorrect use may permanently damage the viewing card.\n" +
                 "Do not use this option on an issue number other than the one selected.",
-                APP_NAME, JOptionPane.WARNING_MESSAGE
+                JOptionPane.WARNING_MESSAGE
             );
         }
     }
@@ -6550,18 +6510,16 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private boolean checkOutputDevice() {
-        // Reset SoapySDR and file parameters
-        AntennaParam = "";
-        AntennaName = "";
-        FileType = "";
+    private ArrayList<String> checkOutputDevice() {
+        var al = new ArrayList<String>();
         switch (cmbOutputDevice.getSelectedIndex()) {
             case 3:
                 // If File is selected, check if the path is blank
                 if (txtOutputDevice.getText().isBlank()) {
-                    JOptionPane.showMessageDialog(null, "Please select an output file or change the output device.", APP_NAME, JOptionPane.WARNING_MESSAGE);
                     tabPane.setSelectedIndex(1);
-                    return false;
+                     messageBox("Please select an output file or change the output device.",
+                             JOptionPane.WARNING_MESSAGE);
+                     return null;
                 }
                 // Do not allow file output to go to the console.
                 // Bad things will happen, such as hanging the GUI and consuming large amounts of RAM!
@@ -6569,152 +6527,174 @@ public class GUI extends javax.swing.JFrame {
                         (txtOutputDevice.getText().equals("/dev/stdout")) ||
                         (txtOutputDevice.getText().equals("/dev/stderr")) ||
                         (txtOutputDevice.getText().toLowerCase().equals("con")) ) {
-                    JOptionPane.showMessageDialog(null, "Outputting to the console is not supported.", APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    return false;
+                     messageBox("Outputting to the console is not supported.",
+                             JOptionPane.ERROR_MESSAGE);
+                     return null;
                 }
                 else {
+                    al.add("-o");
                     if ( (RunningOnWindows) && txtOutputDevice.getText().contains(" ") ) {
-                        OutputDevice = '\u0022' + txtOutputDevice.getText() + '\u0022';
+                        al.add('\u0022' + txtOutputDevice.getText() + '\u0022');
                     }
                     else {
-                        OutputDevice = txtOutputDevice.getText();
+                        al.add(txtOutputDevice.getText());
                     }
                     if (cmbFileType.getSelectedIndex() != 3) {
-                        FileType = cmbFileType.getItemAt(cmbFileType.getSelectedIndex());
+                        al.add ("-t");
+                        al.add(cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
                     }
-                    return true;
                 }
+                break;
             case 2:
                 // fl2k
+                al.add("-o");
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "fl2k" + ":" + txtOutputDevice.getText();
+                    al.add("fl2k:" + txtOutputDevice.getText());
                 }
                 else {
-                    OutputDevice = "fl2k";
+                    al.add("fl2k");
                 }
-                return true;
+                break;
             case 1:
                 // SoapySDR
-                if (!txtAntennaName.getText().isBlank()) {
-                    AntennaParam = "--antenna";
-                    AntennaName = txtAntennaName.getText();
-                }
-                else {
-                    AntennaParam = "";
-                    AntennaName = "";
-                }
+                al.add("-o");
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "soapysdr" + ":" + txtOutputDevice.getText();
+                    al.add("soapysdr:" + txtOutputDevice.getText());
                 }
                 else {
-                    OutputDevice = "soapysdr";
+                    al.add("soapysdr");
                 }
-                return true;
+                if (!txtAntennaName.getText().isBlank()) {
+                    al.add("--antenna");
+                    al.add(txtAntennaName.getText());
+                }
+                break;
             case 0:
                 // HackRF
                 if (!txtOutputDevice.getText().isBlank()) {
-                    OutputDevice = "hackrf"  + ":" + txtOutputDevice.getText();
+                    al.add("-o");
+                    al.add("hackrf:" + txtOutputDevice.getText());
                 }
-                else {
-                    OutputDevice = "";
-                }
-                return true;
+                break;
             default:
                 // This should never run
-                return false;
+                break;
         }
+        return al;
     }
     
-    private boolean checkVolume() {
-        // Only check volume if the text field is enabled
-        if (!txtVolume.isEnabled()) return true;
-        String InvalidVolume = "Volume should be a numeric or decimal value.";
-        if (SharedInst.isNumeric(txtVolume.getText())) {
-            VolumeParam = "--volume";
-            return true;
+    private ArrayList<String> checkVolume() {
+        var al = new ArrayList<String>();
+        // Only check volume if the option is enabled
+        if (chkVolume.isSelected()) {
+            if (SharedInst.isNumeric(txtVolume.getText())) {
+                al.add("--volume");
+                al.add(txtVolume.getText());
+            }
+            else {
+                 messageBox("Volume should be a numeric or decimal value.", JOptionPane.WARNING_MESSAGE);
+                 return null;
+            }
         }
-        else {
-            JOptionPane.showMessageDialog(null, InvalidVolume, APP_NAME, JOptionPane.WARNING_MESSAGE);
-            tabPane.setSelectedIndex(2);
-            return false;
-        }
+        return al;
     }
     
     private ArrayList<String> checkMacOptions() {
-        // Trying a different way of adding arguments...
         // If any of these radio buttons are selected, return their arguments.
         // We don't need to return the arguments for the other options (such as
         // 32 kHz audio or stereo) because they're defaults anyway).
-        var macArgs = new ArrayList<String>();
-        if (radMacMono.isSelected()) macArgs.add("--mac-audio-mono");
-        if (radMac16k.isSelected()) macArgs.add("--mac-audio-medium-quality");
-        if (radMacLinear.isSelected()) macArgs.add("--mac-audio-linear");
-        if (radMacL2.isSelected()) macArgs.add("--mac-audio-l2-protection");
-        return macArgs;
+        var al = new ArrayList<String>();
+        if (radMacMono.isSelected()) al.add("--mac-audio-mono");
+        if (radMac16k.isSelected()) al.add("--mac-audio-medium-quality");
+        if (radMacLinear.isSelected()) al.add("--mac-audio-linear");
+        if (radMacL2.isSelected()) al.add("--mac-audio-l2-protection");
+        return al;
     }
     
-    private void runHackTV(String ytdlPath) {
-        ArrayList<String> allArgs = new ArrayList<>();
-        // Call each function and check its response. If false, then stop.
-        if (ytdlPath.isBlank()) if (!checkInput()) return;
-        if (!checkCustomFrequency()) return;
-        if (!checkFMDeviation()) return;
-        if (!checkGamma()) return;
-        if (!checkOutputLevel()) return;
-        if (!checkGain()) return;
-        if (!checkSampleRate()) return;
-        if (!checkPixelRate()) return;
-        if (!checkMacChId()) return;
-        if (!checkCardNumber()) return;
-        if (!checkOutputDevice()) return;
-        if (!checkVolume()) return;
-        if (!checkTeletextSource()) return;
-        // These methods don't return anything but we do need to check them. 
-        checkWSS();
-        checkARCorrectionOptions();
-        checkTestCard();
-        checkLogo();
-        // Add all possible parameters to an arraylist to feed to ProcessBuilder
+    private void populateArguments(String ytdlPath) {
+        // Add all required arguments to an ArrayList
+        var allArgs = new ArrayList<String>();
+        // hacktv path
         allArgs.add(HackTVPath);
-        if (!OutputDevice.isEmpty()) {
-            allArgs.add("-o");
-            allArgs.add(OutputDevice);
+        // Output device
+        if (checkOutputDevice() != null) {
+            allArgs.addAll(checkOutputDevice());
         }
+        else {
+            return;
+        }
+        // Video mode
         allArgs.add("-m");
         allArgs.add(Mode);
         // Only add frequency for HackRF or SoapySDR
-        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) {
+        if ( (cmbOutputDevice.getSelectedIndex() == 0) ||
+                (cmbOutputDevice.getSelectedIndex() == 1) ) {
+            if (!checkCustomFrequency()) return;
             allArgs.add("-f");
             allArgs.add(Long.toString(Frequency));
         }
-        // Add subtitles here, we need to make sure that subtitles is not the last parameter if
-        // no index is specified. Otherwise hacktv reports that no input has been specified.
-        if (!SubtitlesParam.isEmpty()) allArgs.add(SubtitlesParam);
-        if (!txtSubtitleIndex.getText().isEmpty()) allArgs.add(txtSubtitleIndex.getText());
-        if (!TeletextSubtitlesParam.isEmpty()) allArgs.add(TeletextSubtitlesParam);
-        if (!txtTextSubtitleIndex.getText().isEmpty()) allArgs.add(txtTextSubtitleIndex.getText());
+        // Add subtitles here, we need to make sure that subtitles is not the 
+        // last parameter if no index is specified. Otherwise hacktv reports 
+        // that no input has been specified. We do this by putting it before a
+        // mandatory parameter, in this case sample rate.
+        if (chkSubtitles.isSelected()) {
+            allArgs.add("--subtitles");
+            if (!txtSubtitleIndex.getText().isEmpty()) {
+                allArgs.add(txtSubtitleIndex.getText());
+            }
+        }
+        if (chkTextSubtitles.isSelected()) {
+            allArgs.add("--tx-subtitles");
+            if (!txtTextSubtitleIndex.getText().isEmpty()) {
+                allArgs.add(txtTextSubtitleIndex.getText());
+            }
+        }
+        // Sample rate
         allArgs.add("-s");
-        allArgs.add(Integer.toString(SampleRate));
-        if (chkPixelRate.isSelected()) {
-            allArgs.add("--pixelrate");
-            allArgs.add(Integer.toString(PixelRate));
+        if (checkSampleRate() != null) {
+            allArgs.add(Integer.toString(checkSampleRate()));
+        }
+        else {
+            return;
+        }
+        // Pixel rate
+        if (checkPixelRate() != null) {
+            allArgs.addAll(checkPixelRate());
+        }
+        else {
+            return;
         }
         // Only add gain for HackRF or SoapySDR
         if (txtGain.isEnabled()) {
-            allArgs.add("-g");
-            allArgs.add(txtGain.getText());
+            if (checkGain() != null) {
+                allArgs.addAll(checkGain());
+            }
+            else {
+                return;
+            }
         }
-        // Optional values second, see if they're defined first before adding
-        if (radMAC.isSelected()) allArgs.addAll(checkMacOptions());
-        if (!ChIDParam.isEmpty()) {allArgs.add(ChIDParam);}
-        if (!ChID.isEmpty()) {allArgs.add(ChID);}
-        if (!AudioParam.isEmpty()) allArgs.add(AudioParam);
-        if (!NICAMParam.isEmpty()) allArgs.add(NICAMParam);
-        if (!A2StereoParam.isEmpty()) allArgs.add(A2StereoParam);
+        if (chkAmp.isSelected()) allArgs.add("--amp");
+        allArgs.addAll(checkWSS());
+        allArgs.addAll(checkARCorrectionOptions());
+        allArgs.addAll(checkLogo());
+        if (radMAC.isSelected()) {
+            if (checkMacChId() == null) return;
+            allArgs.addAll(checkMacOptions());
+            allArgs.addAll(checkMacChId());
+        }
+        if ( (chkAudio.isEnabled()) && (!chkAudio.isSelected()) ){
+            allArgs.add("--noaudio");
+        }
+        else if ( (chkNICAM.isEnabled())
+                && (!chkNICAM.isSelected()) 
+                && (!chkA2Stereo.isSelected()) ) {
+            allArgs.add("--nonicam");
+        }
+        else if (chkA2Stereo.isSelected()) {
+            allArgs.add("--a2stereo");
+        }
         if (chkACP.isSelected()) allArgs.add("--acp");
         if (chkRepeat.isSelected()) allArgs.add("--repeat");
-        if (!WssParam.isEmpty()) allArgs.add(WssParam);
-        if (!WssMode.isEmpty()) allArgs.add(WssMode);
         if (!ScramblingType1.isEmpty()) allArgs.add(ScramblingType1);
         if (!ScramblingKey1.isEmpty()) allArgs.add(ScramblingKey1);
         if (!ScramblingType2.isEmpty()) allArgs.add(ScramblingType2);
@@ -6732,141 +6712,188 @@ public class GUI extends javax.swing.JFrame {
             allArgs.add(n + "," + c);
         }
         if (chkNoDate.isSelected()) allArgs.add("--nodate");
-        if (!ScrambleAudio.isEmpty()) allArgs.add(ScrambleAudio);
-        if (!SysterPermTable.isEmpty()) allArgs.add(SysterPermTable);
-        if (!TeletextParam.isEmpty()) allArgs.add(TeletextParam);
-        if (!TeletextSource.isEmpty()) allArgs.add(TeletextSource);
-        if (!RFampParam.isEmpty()) allArgs.add(RFampParam);
-        if (!FMDevParam.isEmpty()) allArgs.add(FMDevParam);
-        if (!AntennaParam.isEmpty()) allArgs.add(AntennaParam);
-        if (!AntennaName.isEmpty()) allArgs.add(AntennaName);
-        if (chkFMDev.isSelected()) allArgs.add(Integer.toString(FMDevValue));
-        if (!GammaParam.isEmpty()) allArgs.add(GammaParam);
-        if (!txtGamma.getText().isEmpty()) allArgs.add(txtGamma.getText());
-        if (!OutputLevelParam.isEmpty()) allArgs.add(OutputLevelParam);
-        if (!txtOutputLevel.getText().isEmpty()) allArgs.add(txtOutputLevel.getText());
-        if (!FilterParam.isEmpty()) allArgs.add(FilterParam);
-        if (!PositionParam.isEmpty()) allArgs.add(PositionParam);
-        if (!txtPosition.getText().isEmpty()) allArgs.add(txtPosition.getText());
+        if (chkScrambleAudio.isSelected()) {
+            if (ScramblingType1.equals("--single-cut") ||
+                (ScramblingType1.equals("--double-cut")) ) {
+                allArgs.add("--scramble-audio");
+            }
+            else {
+                allArgs.add("--systeraudio");
+            }
+        }
+        switch (cmbSysterPermTable.getSelectedIndex()) {
+            case 1:
+                allArgs.add("--key-table-1");
+                break;
+            case 2:
+                allArgs.add("--key-table-2");
+                break;
+            default:
+                break;
+        }
+        // The functions below can return null as an error code, so check for
+        // this and stop if necessary.
+        if (checkTeletextSource() != null)  {
+            allArgs.addAll(checkTeletextSource());
+        }
+        else {
+            return;
+        }
+        if (checkFMDeviation() != null) {
+            allArgs.addAll(checkFMDeviation());
+        }
+        else {
+            return;
+        }
+        if (checkGamma() != null) {
+            allArgs.addAll(checkGamma());
+        }
+        else {
+            return;
+        }
+        if (checkOutputLevel() != null) {
+            allArgs.addAll(checkOutputLevel());
+        }
+        else {
+            return;
+        }
+        if (checkPosition() != null) {
+            allArgs.addAll(checkPosition());
+        }
+        else {
+            return;
+        }
+        if (checkVolume() != null) {
+            allArgs.addAll(checkVolume());
+        }
+        else {
+            return;
+        }
         if (chkTimestamp.isSelected()) allArgs.add("--timestamp");
-        if (!LogoParam.isEmpty()) allArgs.add(LogoParam);
-        if (!LogoFileName.isEmpty()) allArgs.add(LogoFileName);
+        if (chkVideoFilter.isSelected()) allArgs.add("--filter");
         if (chkVerbose.isSelected()) allArgs.add("--verbose");
-        if (!EMMParam.isEmpty()) allArgs.add(EMMParam);
-        if (!TruncatedCardNumber.isEmpty()) {allArgs.add(TruncatedCardNumber);}
+        if (txtCardNumber.isEnabled()) {
+            String c = checkCardNumber();
+            if (c != null) {
+                if (chkActivateCard.isSelected()) {
+                    allArgs.add("--enableemm");
+                }
+                else if (chkDeactivateCard.isSelected()) {
+                    allArgs.add("--disableemm");
+                }
+                allArgs.add(c);
+            }
+        }
         if (chkShowECM.isSelected()) allArgs.add("--showecm");
-        if (!ScalingMode.isEmpty()) allArgs.add(ScalingMode);
         if (chkInterlace.isSelected()) allArgs.add("--interlace");
         if (chkShowCardSerial.isSelected()) allArgs.add("--showserial");
         if (chkFindKeys.isSelected()) allArgs.add("--findkey");
         if (chkVITS.isSelected()) allArgs.add("--vits");
         if (chkColour.isSelected()) allArgs.add("--nocolour");
         if (chkInvertVideo.isSelected()) allArgs.add("--invert-video");
-        if (!FileType.isEmpty()) {
-            allArgs.add("-t");
-            allArgs.add(FileType);
-        }
-        if (!VolumeParam.isEmpty()) allArgs.add(VolumeParam);
-        if (!txtVolume.getText().isEmpty()) allArgs.add(txtVolume.getText());
         if (chkDownmix.isSelected()) allArgs.add("--downmix");
-        // Finally, add the source video or test option.
-        if (PlaylistAL.size() > 0) {
-            InputSource = "";
-            if (chkRandom.isSelected()) {
-                // Set the start point as the first item
-                if (StartPoint != -1) allArgs.add(PlaylistAL.get(StartPoint));
-                new Random().ints(0, PlaylistAL.size())
-                    .distinct()
-                    .limit(PlaylistAL.size())
-                    .forEach(
-                        r -> {
-                            // Add the rest. except for the start point or test cards
-                            if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != StartPoint) ) {
-                                if ( (RunningOnWindows) && (PlaylistAL.get(r).contains(" "))) {
-                                    allArgs.add('\u0022' + PlaylistAL.get(r) + '\u0022');
+        // Finally, add the source video or test option
+        if (ytdlPath.isBlank()) {
+            String InputSource = checkInput();
+            if (InputSource == null) return;
+            if (PlaylistAL.size() > 0) {
+                if (chkRandom.isSelected()) {
+                    // Set the start point as the first item
+                    if (StartPoint != -1) allArgs.add(PlaylistAL.get(StartPoint));
+                    new Random().ints(0, PlaylistAL.size())
+                        .distinct()
+                        .limit(PlaylistAL.size())
+                        .forEach(
+                            r -> {
+                                // Add the rest. except for the start point or test cards
+                                if ( (!PlaylistAL.get(r).startsWith("test:")) && (r != StartPoint) ) {
+                                    if ( (RunningOnWindows) && (PlaylistAL.get(r).contains(" "))) {
+                                        allArgs.add('\u0022' + PlaylistAL.get(r) + '\u0022');
+                                    }
+                                    else {
+                                       allArgs.add(PlaylistAL.get(r));
+                                    }
                                 }
-                                else {
-                                   allArgs.add(PlaylistAL.get(r));
-                                }                                
-                            }
-                        }
+                           }
                     );
-            }
-            else if (StartPoint == -1) {
-                // Add everything from PlaylistAL as-is
-                allArgs.addAll(PlaylistAL);
-            }
-            else {
-                // Move through PlaylistAL, starting at the value defined by StartPoint.
-                // When we reach the end of the array, start again at zero until we
-                // reach PlaylistAL.size() minus one.
-                int i = StartPoint;
-                int j = 0;
-                if (i == -1) i++;
-                while (j < PlaylistAL.size()) {
-                    if ( (i == PlaylistAL.size()) && (StartPoint != 0) ) {
-                        i = 0;
-                    }
-                    if ( (PlaylistAL.get(i).startsWith("test:")) ||
-                        (PlaylistAL.get(i).startsWith("http")) ) {
-                        allArgs.add(PlaylistAL.get(i));
-                    }
-                    else {
-                        if ( (RunningOnWindows) && PlaylistAL.get(i).contains(" ") ) {
-                            allArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
+                }
+                else {
+                    // Move through PlaylistAL, starting at the value defined by StartPoint.
+                    // When we reach the end of the array, start again at zero until we
+                    // reach PlaylistAL.size() minus one.
+                    int i = StartPoint;
+                    int j = 0;
+                    if (i == -1) i++;
+                    while (j < PlaylistAL.size()) {
+                        if ( (i == PlaylistAL.size()) && (StartPoint != 0) ) {
+                            i = 0;
                         }
-                        else {
+                        if ( (PlaylistAL.get(i).startsWith("test:")) ||
+                            (PlaylistAL.get(i).startsWith("http")) ) {
                             allArgs.add(PlaylistAL.get(i));
                         }
+                        else {
+                            if ( (RunningOnWindows) && PlaylistAL.get(i).contains(" ") ) {
+                                allArgs.add('\u0022' + PlaylistAL.get(i) + '\u0022');
+                            }
+                            else {
+                                allArgs.add(PlaylistAL.get(i));
+                            }
+                        }
+                        i++;
+                        j++;
                     }
-                    i++;
-                    j++;
-                }
+                }  
             }
-        }
-        else if (!ytdlPath.isBlank()) {
-            // Specify stdIn as the input
-            allArgs.add("-");
-        }
-        else if ( (RunningOnWindows) && InputSource.contains(" ")) {
-            // Add quotation marks if path contains whitespaces on Windows
-            allArgs.add('\u0022' + InputSource + '\u0022');
-        }
-        else {
-            allArgs.add(InputSource);
-        }
-        // End add to arraylist
-        if (ytdlPath.isBlank()) {
+            else if ( (RunningOnWindows) && InputSource.contains(" ")) {
+                // Add quotation marks if path contains whitespaces on Windows
+                allArgs.add('\u0022' + InputSource + '\u0022');
+            }
+            else if (radTest.isSelected()) {
+                allArgs.addAll(checkTestCard());
+            }
+            else {
+                allArgs.add(InputSource);
+            }
             // Arguments textbox handling - clear it first
             if (!txtStatus.getText().isEmpty()) txtStatus.setText("");
-            /* Start a for loop to populate the textbox, using the arraylist size as
-               the finish value.
-            */
+            // Start a for loop to populate the textbox, using the arraylist 
+            // size as the finish value.
             for (int i = 1; i < allArgs.size() ; i++) {
-                /* Add value 1 (mode) first and then add all other values. I've set 
-                   it up this way to prevent a leading space from being printed
-                   in the textbox.
-                */
+                // Add value 1 (mode) first and then add all other values. I've
+                // set it up this way to prevent a leading space from being
+                // printed in the textbox.
                 if (i == 1) { 
                     txtStatus.setText(allArgs.get(i)); 
                 }
                 else {
-                    txtStatus.setText(
-                        txtStatus.getText() + '\u0020' + allArgs.get(i) );
+                    txtStatus.setText( txtStatus.getText() + 
+                            '\u0020' + allArgs.get(i) );
                 }
-            }
+            }            
         }
+        else {
+            // Specify stdIn as the source
+            allArgs.add("-");
+        }
+        // End add to arraylist
         // If "Generate syntax only" is enabled, stop here
         if (chkSyntaxOnly.isSelected()) return;
         // Change the Run button and disable some other options
         preRunTasks();
         // Clear the console
         txtConsoleOutput.setText("");
-        // If a YouTube URL was specified, call its method and then stop
+        // If a YouTube URL was specified, call its method.
+        // Otherwise, call the standard one.
         if (!ytdlPath.isBlank()) {
             runYTDLpipe(ytdlPath, allArgs);
-            return;
         }
+        else {
+            runHackTV(allArgs);
+        }
+    }
+    
+    private void runHackTV(ArrayList<String> allArgs) {
         // Spawn a new SwingWorker to run hacktv
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
             @Override
@@ -6895,8 +6922,7 @@ public class GUI extends javax.swing.JFrame {
                     publish("\n" + "hacktv stopped");
                 }
                 catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null,
-                            "An error occurred while attempting to run hacktv.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox("An error occurred while attempting to run hacktv.", JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             } // End doInBackground
@@ -6911,9 +6937,9 @@ public class GUI extends javax.swing.JFrame {
                    is not supported.
                 */
                 if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
-                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
+                    messageBox("This copy of hacktv does not appear to support one or more"
                             + " of the selected options. Please update hacktv and try again."
-                            , APP_NAME, JOptionPane.WARNING_MESSAGE);
+                            , JOptionPane.WARNING_MESSAGE);
                 }
                 // Revert what we changed before starting
                 postRunTasks();    
@@ -7003,8 +7029,7 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null,
-                            "An error occurred while attempting to run youtube-dl or hacktv.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox("An error occurred while attempting to run youtube-dl or hacktv.", JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             } // End doInBackground
@@ -7025,9 +7050,9 @@ public class GUI extends javax.swing.JFrame {
                    is not supported.
                 */
                 if (txtConsoleOutput.getText().contains("Usage: hacktv [options] input [input...]")) {
-                    JOptionPane.showMessageDialog(null, "This copy of hacktv does not appear to support one or more"
+                    messageBox("This copy of hacktv does not appear to support one or more"
                             + " of the selected options. Please update hacktv and try again."
-                            , APP_NAME, JOptionPane.WARNING_MESSAGE);
+                            , JOptionPane.WARNING_MESSAGE);
                 }
                 // Revert button to display Run instead of Stop
                 postRunTasks();
@@ -7037,7 +7062,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void stopTV(long pid) {
-        /** To stop hacktv gracefully, it needs to be sent a SIGINT signal.
+        /*  To stop hacktv gracefully, it needs to be sent a SIGINT signal.
          *  Under Unix/POSIX systems this is easy, just run kill -2 and the PID.
          * 
          *  Under Windows it's not so easy.
@@ -7057,8 +7082,8 @@ public class GUI extends javax.swing.JFrame {
                 }
                 catch (IOException ex)  {
                     System.err.println(ex);
-                    JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using windows-kill.\n"
-                            + "Try using PowerShell instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox("An error occurred while attempting to stop hacktv using windows-kill.\n"
+                            + "Try using PowerShell instead, see help for details.", JOptionPane.ERROR_MESSAGE);
                     btnRun.setEnabled(true);
                 }
             }
@@ -7069,8 +7094,8 @@ public class GUI extends javax.swing.JFrame {
                 }
                 catch (IOException ex) {
                     System.err.println(ex);
-                    JOptionPane.showMessageDialog(null, "An error occurred while attempting to stop hacktv using PowerShell.\n"
-                            + "Try using windows-kill instead, see help for details.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                    messageBox("An error occurred while attempting to stop hacktv using PowerShell.\n"
+                            + "Try using windows-kill instead, see help for details.", JOptionPane.ERROR_MESSAGE);
                     btnRun.setEnabled(true);
                 }
             }
@@ -7160,11 +7185,11 @@ public class GUI extends javax.swing.JFrame {
                 btnRun.setEnabled(false);
             }
             else if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(HackTVPath))) || ((HackTVPath.isBlank())) ) {
-                JOptionPane.showMessageDialog(null, "Unable to find hacktv. Please go to the GUI settings tab to add its location.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                messageBox("Unable to find hacktv. Please go to the GUI settings tab to add its location.", JOptionPane.WARNING_MESSAGE);
                 tabPane.setSelectedIndex(5);
             }
             else {
-                runHackTV("");
+                populateArguments("");
             }
         } else {
             // Disable the stop button if using PowerShell to close
@@ -7218,24 +7243,6 @@ public class GUI extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_menuExitActionPerformed
       
-    private void chkScrambleAudioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkScrambleAudioActionPerformed
-        if (chkScrambleAudio.isSelected()) {
-            if ( (ScramblingType1.equals("--syster")) ||
-                (ScramblingType1.equals("--d11")) ||
-                (ScramblingType1.equals("--systercnr")) ) {
-                ScrambleAudio = "--systeraudio";
-            }
-            else if (ScramblingType1.equals("--single-cut") ||
-                (ScramblingType1.equals("--double-cut")) )
-            {
-                ScrambleAudio = "--scramble-audio";
-            }
-        }
-        else {
-            ScrambleAudio = "";
-        }
-    }//GEN-LAST:event_chkScrambleAudioActionPerformed
-
     private void txtCardNumberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCardNumberKeyTyped
         if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
             evt.consume();
@@ -7250,11 +7257,9 @@ public class GUI extends javax.swing.JFrame {
             chkActivateCard.setSelected(false);
             txtCardNumber.setEnabled(true);
             lblEMMCardNumber.setEnabled(true);
-            EMMParam = "--disableemm";
             showEMMWarning();
         }
         else {
-            EMMParam = "";
             if ( !chkActivateCard.isSelected()) {
                 txtCardNumber.setText("");
                 txtCardNumber.setEnabled(false);
@@ -7268,11 +7273,9 @@ public class GUI extends javax.swing.JFrame {
             chkDeactivateCard.setSelected(false);
             txtCardNumber.setEnabled(true);
             lblEMMCardNumber.setEnabled(true);
-            EMMParam = "--enableemm";
             showEMMWarning();
         }
         else {
-            EMMParam = "";
             if ( !chkDeactivateCard.isSelected()) {
                 txtCardNumber.setText("");
                 txtCardNumber.setEnabled(false);
@@ -7410,7 +7413,6 @@ public class GUI extends javax.swing.JFrame {
         if (chkTeletext.isSelected()) {
             btnTeletextBrowse.setEnabled(true);
             txtTeletextSource.setEnabled(true);
-            TeletextParam = "--teletext";
             downloadPanel.setEnabled(true);
             btnTeefax.setEnabled(true);
             btnSpark.setEnabled(true);
@@ -7424,8 +7426,6 @@ public class GUI extends javax.swing.JFrame {
             btnTeletextBrowse.setEnabled(false);
             txtTeletextSource.setText("");
             txtTeletextSource.setEnabled(false);
-            TeletextParam = "";
-            TeletextSource = "";
             downloadPanel.setEnabled(false);
             btnTeefax.setEnabled(false);
             btnSpark.setEnabled(false);
@@ -7440,24 +7440,20 @@ public class GUI extends javax.swing.JFrame {
     private void chkOutputLevelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOutputLevelActionPerformed
         if (chkOutputLevel.isSelected()) {
             txtOutputLevel.setEnabled(true);
-            OutputLevelParam = "--level";
         }
         else {
             txtOutputLevel.setText("");
             txtOutputLevel.setEnabled(false);
-            OutputLevelParam = "";
         }
     }//GEN-LAST:event_chkOutputLevelActionPerformed
 
     private void chkGammaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkGammaActionPerformed
         if (chkGamma.isSelected()) {
             txtGamma.setEnabled(true);
-            GammaParam = "--gamma";
         }
         else {
             txtGamma.setText("");
             txtGamma.setEnabled(false);
-            GammaParam = "";
         }
     }//GEN-LAST:event_chkGammaActionPerformed
 
@@ -7473,11 +7469,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkWSSActionPerformed
 
     private void chkVideoFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVideoFilterActionPerformed
-        if (chkVideoFilter.isSelected()) {
-            FilterParam = "--filter";
-        }
-        else {
-            FilterParam = "";
+        if (!chkVideoFilter.isSelected()) {
             if ( ScramblingType1.equals("--videocrypt") || ScramblingType1.equals("--videocrypt2") ) {
                 if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
                 txtPixelRate.setText("14");
@@ -7517,25 +7509,16 @@ public class GUI extends javax.swing.JFrame {
     private void chkMacChIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMacChIdActionPerformed
         if (chkMacChId.isSelected()) {
             txtMacChId.setEnabled(true);
-            ChIDParam = "--chid";
         }
         else {
             txtMacChId.setText("");
             txtMacChId.setEnabled(false);
-            ChIDParam = "";
-            ChID = "";
         }
     }//GEN-LAST:event_chkMacChIdActionPerformed
 
     private void chkNICAMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkNICAMActionPerformed
         if (chkNICAM.isSelected()) {
-            NICAMParam = "";
             if (chkA2Stereo.isSelected()) chkA2Stereo.doClick();
-        }
-        else {
-            if (NICAMSupported = true) {
-                if (!chkA2Stereo.isSelected()) NICAMParam = "--nonicam";
-            }
         }
     }//GEN-LAST:event_chkNICAMActionPerformed
 
@@ -7546,15 +7529,12 @@ public class GUI extends javax.swing.JFrame {
                 chkNICAM.doClick();
             }
             if (A2Supported) chkA2Stereo.setEnabled(true);
-            AudioParam = "";
         }
         else {
             if (chkNICAM.isSelected()) chkNICAM.doClick();
             chkNICAM.setEnabled(false);
             if (chkA2Stereo.isSelected()) chkA2Stereo.doClick();
             chkA2Stereo.setEnabled(false);
-            AudioParam = "--noaudio";
-            NICAMParam = "";
         }
     }//GEN-LAST:event_chkAudioActionPerformed
 
@@ -7614,23 +7594,12 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkARCorrectionActionPerformed
 
-    private void cmbLogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLogoActionPerformed
-        if ( cmbLogo.getSelectedIndex() != -1) {
-            LogoFileName = LogoArray[cmbLogo.getSelectedIndex()];
-        }
-        else {
-            LogoFileName = "";
-        }
-    }//GEN-LAST:event_cmbLogoActionPerformed
-
     private void chkSubtitlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSubtitlesActionPerformed
         if (chkSubtitles.isSelected()) {
             lblSubtitleIndex.setEnabled(true);
-            SubtitlesParam = "--subtitles";
             txtSubtitleIndex.setEnabled(true);
         }
         else {
-            SubtitlesParam = "";
             lblSubtitleIndex.setEnabled(false);
             txtSubtitleIndex.setText("");
             txtSubtitleIndex.setEnabled(false);
@@ -7644,7 +7613,6 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Disable the cmbLogo combobox and clear its variables
-            LogoParam = "";
             cmbLogo.setSelectedIndex(-1);
             cmbLogo.setEnabled(false);
         }
@@ -7652,11 +7620,9 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkPositionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPositionActionPerformed
         if (chkPosition.isSelected()) {
-            PositionParam = "--position";
             txtPosition.setEnabled(true);
         }
         else {
-            PositionParam = "";
             txtPosition.setText("");
             txtPosition.setEnabled(false);
         }
@@ -7689,7 +7655,7 @@ public class GUI extends javax.swing.JFrame {
                     m3uHandler(file.getAbsolutePath(),0);
                 } else if (file.getAbsolutePath().toLowerCase().endsWith(".htv")) {
                     // Don't try to process a file with a .HTV extension
-                    JOptionPane.showMessageDialog(null, "Configuration files should be opened from the File menu.", APP_NAME, JOptionPane.WARNING_MESSAGE);    
+                    messageBox("Configuration files should be opened from the File menu.", JOptionPane.WARNING_MESSAGE);    
                 } else {
                     txtSource.setVisible(true);
                     cmbM3USource.setVisible(false);
@@ -7760,21 +7726,20 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkAmpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAmpActionPerformed
         if (chkAmp.isSelected()) {
-            RFampParam = "--amp";
             if ( (!HTVLoadInProgress) && (!Prefs.get("SuppressWarnings", "0").equals("1")) )
-                JOptionPane.showMessageDialog(null,
-                    "Care is advised when using this option.\n" +
+                messageBox("Care is advised when using this option.\n" +
                     "Incorrect use may permanently damage the amplifier.",
-                    APP_NAME, JOptionPane.WARNING_MESSAGE);
-        }
-        else {
-            RFampParam = "";
+                    JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_chkAmpActionPerformed
 
     private void cmbChannelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbChannelActionPerformed
         if ( cmbChannel.getSelectedIndex() != -1) {
-            setFrequency();
+            Frequency = FrequencyArray[cmbChannel.getSelectedIndex()];
+            // Convert the imported value so we can display it in MHz on-screen
+            DecimalFormat df = new DecimalFormat("0.00");
+            double input = Frequency;
+            txtFrequency.setText((df.format(input / 1000000)));
             // Retrieve MAC channel ID
             if (radMAC.isSelected()) {
                 String b = "";
@@ -7902,7 +7867,7 @@ public class GUI extends javax.swing.JFrame {
                 cmbMode.setSelectedIndex(a);
             }
             else {
-                JOptionPane.showConfirmDialog(null, "Unable to find the DMAC-FM mode, which is required for this template.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Unable to find the DMAC-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
                 resetAllControls();
                 return;
             }
@@ -7921,13 +7886,13 @@ public class GUI extends javax.swing.JFrame {
                 cmbChannel.setSelectedIndex(b);
             }
             else {
-                JOptionPane.showConfirmDialog(null, "Unable to find the Galaxy channel, which is required for this template.", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                messageBox("Unable to find the Galaxy channel, which is required for this template.", JOptionPane.ERROR_MESSAGE);
                 resetAllControls();
                 return;
             }
             
-            JOptionPane.showMessageDialog(null, "Template values have been loaded. Tune your receiver to the Galaxy "
-                    + "channel, or change this in the channel dropdown box on the Output tab.", APP_NAME, JOptionPane.INFORMATION_MESSAGE);    
+            messageBox("Template values have been loaded. Tune your receiver to the Galaxy "
+                    + "channel, or change this in the channel dropdown box on the Output tab.", JOptionPane.INFORMATION_MESSAGE);    
         }
     }//GEN-LAST:event_menuBSBTemplateActionPerformed
 
@@ -8038,20 +8003,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
-    private void cmbSysterPermTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbSysterPermTableItemStateChanged
-        switch (cmbSysterPermTable.getSelectedIndex()) {
-            case 1:
-                SysterPermTable = "--key-table-1";
-                break;
-            case 2:
-                SysterPermTable = "--key-table-2";
-                break;
-            default:
-                SysterPermTable = "";
-                break;
-        }
-    }//GEN-LAST:event_cmbSysterPermTableItemStateChanged
-
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
         String VideoFormatChanged = "The selected video format has been changed because this output device does not support it. Please select another format.";
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
@@ -8059,13 +8010,12 @@ public class GUI extends javax.swing.JFrame {
             // hackrf
             case 0:
                 lblOutputDevice2.setText("Serial number (optional)");
-                OutputDevice = ""; // can also use hackrf
                 // If the RF panel is disabled, enable it and call checkMode
                 // to re-populate the channel options correctly
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected, reset it to something else
                     if (Baseband) {
-                        JOptionPane.showMessageDialog(null, VideoFormatChanged, APP_NAME, JOptionPane.INFORMATION_MESSAGE);   
+                        messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
                         cmbMode.setSelectedIndex(0);
                     }
                     enableRFOptions();
@@ -8087,7 +8037,7 @@ public class GUI extends javax.swing.JFrame {
                 lblOutputDevice2.setText("Device options");
                 if (!radCustom.isEnabled()) {
                     if (Baseband) {
-                        JOptionPane.showMessageDialog(null, VideoFormatChanged, APP_NAME, JOptionPane.INFORMATION_MESSAGE);   
+                        messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
                         cmbMode.setSelectedIndex(0);
                     }
                     enableRFOptions();
@@ -8142,23 +8092,19 @@ public class GUI extends javax.swing.JFrame {
     private void chkVolumeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVolumeActionPerformed
         if (chkVolume.isSelected()) {
             txtVolume.setEnabled(true);
-            VolumeParam = "--volume";
         }
         else {
             txtVolume.setEnabled(false);
             txtVolume.setText("");
-            VolumeParam = "";
         }
     }//GEN-LAST:event_chkVolumeActionPerformed
 
     private void chkTextSubtitlesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkTextSubtitlesActionPerformed
         if (chkTextSubtitles.isSelected()) {
-            TeletextSubtitlesParam = "--tx-subtitles";
             lblTextSubtitleIndex.setEnabled(true);
             txtTextSubtitleIndex.setEnabled(true); 
         }
         else {
-            TeletextSubtitlesParam = "";
             txtTextSubtitleIndex.setEnabled(false);
             txtTextSubtitleIndex.setText("");
             lblTextSubtitleIndex.setEnabled(false);
@@ -8167,19 +8113,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkA2StereoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkA2StereoActionPerformed
         if (chkA2Stereo.isSelected()) {
-            A2StereoParam = "--a2stereo";
             if (chkNICAM.isSelected()) {
                 chkNICAM.doClick();
-                NICAMParam = "";
             }
             else {
-                NICAMParam = "";
-            }
-        }
-        else {
-            A2StereoParam = "";
-            if ( (chkNICAM.isEnabled()) && (!chkNICAM.isSelected()) ) {
-                NICAMParam = "--nonicam";
             }
         }
     }//GEN-LAST:event_chkA2StereoActionPerformed
@@ -8196,12 +8133,10 @@ public class GUI extends javax.swing.JFrame {
     private void chkFMDevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFMDevActionPerformed
         if (chkFMDev.isSelected()) {
             txtFMDev.setEnabled(true);
-            FMDevParam = "--deviation";
         }
         else {
             txtFMDev.setText("");
             txtFMDev.setEnabled(false);
-            FMDevParam = "";
         }
     }//GEN-LAST:event_chkFMDevActionPerformed
 
@@ -8289,8 +8224,8 @@ public class GUI extends javax.swing.JFrame {
                   (txtSource.getText().contains("://www.youtube.com/")) ||
                   (txtSource.getText().contains("://youtu.be/")) ||
                   (txtSource.getText().startsWith("ytdl:")) ) {
-            JOptionPane.showMessageDialog(null, "Unable to add this URL to the playlist.\n"
-                        + "The youtube-dl handler is only supported for single URLs at present.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("Unable to add this URL to the playlist.\n"
+                        + "The youtube-dl handler is only supported for single URLs at present.", JOptionPane.WARNING_MESSAGE);
             return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
@@ -8300,8 +8235,8 @@ public class GUI extends javax.swing.JFrame {
         else if (radTest.isSelected()) {
             for (int i = 0; i < PlaylistAL.size(); i++) {
                 if (PlaylistAL.get(i).startsWith("test:")) {
-                    JOptionPane.showMessageDialog(null, "Only one test card can be added to the playlist.\n"
-                        + "It should also be placed as the last item in the playlist.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                    messageBox("Only one test card can be added to the playlist.\n"
+                        + "It should also be placed as the last item in the playlist.", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             }
@@ -8486,7 +8421,7 @@ public class GUI extends javax.swing.JFrame {
         // It never ends, so the playlist becomes pointless.
         int s = lstPlaylist.getSelectedIndex();
         if (PlaylistAL.get(s).startsWith("test:")) {
-            JOptionPane.showMessageDialog(null, "Test cards cannot be set as the start point of a playlist.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("Test cards cannot be set as the start point of a playlist.", JOptionPane.WARNING_MESSAGE);
         }
         else if (s == StartPoint) {
             // Reset the start point
@@ -8581,14 +8516,14 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 else if ( (exePath != null) && (exePath.equals("CertificateExpiredException")) ) {
-                        JOptionPane.showMessageDialog(null, "Download failed due to an expired SSL/TLS certificate.\n"
+                        messageBox("Download failed due to an expired SSL/TLS certificate.\n"
                                 + "Please ensure that your system date is correct. "
-                                + "Otherwise, please try again later.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                                + "Otherwise, please try again later.", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
-                    JOptionPane.showMessageDialog(null, "An error occurred while downloading hacktv.\n"
+                    messageBox("An error occurred while downloading hacktv.\n"
                             + "Please ensure that you have write permissions to the "
-                            + "application directory and that you have internet access.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+                            + "application directory and that you have internet access.", JOptionPane.WARNING_MESSAGE);
                 }
                 btnDownloadHackTV.setEnabled(true);
             } // End done()
@@ -8608,7 +8543,7 @@ public class GUI extends javax.swing.JFrame {
             SharedInst.launchBrowser(u);
         }
         catch (IOException | UnsupportedOperationException e) {
-            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("Unable to launch default browser.", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_menuGithubRepoActionPerformed
 
@@ -8751,7 +8686,7 @@ public class GUI extends javax.swing.JFrame {
             SharedInst.launchBrowser(u);
         }
         catch (IOException | UnsupportedOperationException e) {
-            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", APP_NAME, JOptionPane.WARNING_MESSAGE);
+            messageBox("Unable to launch default browser.", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_menuWikiActionPerformed
 
@@ -8820,6 +8755,10 @@ public class GUI extends javax.swing.JFrame {
     private void cmbM3USourceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbM3USourceMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbM3USource);
     }//GEN-LAST:event_cmbM3USourceMouseWheelMoved
+
+    private void cmbECMaturityMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbECMaturityMouseWheelMoved
+        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbECMaturity);
+    }//GEN-LAST:event_cmbECMaturityMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -9030,6 +8969,4 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtTextSubtitleIndex;
     private javax.swing.JTextField txtVolume;
     // End of variables declaration//GEN-END:variables
-    // Checkbox array for the File > New option
-    private javax.swing.JCheckBox[] CheckBoxes;
 }
