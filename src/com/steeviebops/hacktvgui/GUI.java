@@ -341,8 +341,6 @@ public class GUI extends javax.swing.JFrame {
         }
         // Populate the look and feel combobox
         populateLaFList();
-        // Check youtube-dl setting
-        if (Prefs.get("ytdl", "youtube-dl").equals("yt-dlp")) chkytdlp.doClick();
         // Set default values when form loads
         radLocalSource.doClick();
         selectDefaultMode();
@@ -593,7 +591,6 @@ public class GUI extends javax.swing.JFrame {
         chkLocalModes = new javax.swing.JCheckBox();
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
-        chkytdlp = new javax.swing.JCheckBox();
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkWindowsKill = new javax.swing.JCheckBox();
@@ -2312,13 +2309,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        chkytdlp.setText("Use yt-dlp instead of youtube-dl");
-        chkytdlp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkytdlpActionPerformed(evt);
-            }
-        });
-
         cmbNMSCeefaxRegion.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbNMSCeefaxRegionMouseWheelMoved(evt);
@@ -2347,7 +2337,6 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkWindowsKill)
-                    .addComponent(chkytdlp)
                     .addComponent(chkSyntaxOnly)
                     .addComponent(chkLocalModes)
                     .addGroup(generalSettingsPanelLayout.createSequentialGroup()
@@ -2358,7 +2347,7 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(216, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
             generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2367,10 +2356,8 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkytdlp)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkWindowsKill)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblNMSCeefaxRegion))
@@ -2402,7 +2389,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(107, Short.MAX_VALUE))
+                .addContainerGap(135, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2988,7 +2975,6 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("File4", null) != null ) Prefs.remove("File4");
         if ( Prefs.get("UseLocalModesFile", null) != null ) Prefs.remove("UseLocalModesFile");
         if ( Prefs.get("LookAndFeel", null) != null ) Prefs.remove("LookAndFeel");
-        if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
         if ( Prefs.get("CeefaxRegion", null) != null ) Prefs.remove("CeefaxRegion");
         if ( Prefs.get("SuppressWarnings", null) != null ) Prefs.remove("SuppressWarnings");
         if ( Prefs.get("windows-kill", null) != null ) Prefs.remove("windows-kill");
@@ -2998,6 +2984,7 @@ public class GUI extends javax.swing.JFrame {
         if ( Prefs.get("lasthtvdir", null) != null ) Prefs.remove("lasthtvdir");
         // Not used anymore but we should still remove it if present
         if ( Prefs.get("MissingKillWarningShown", null) != null ) Prefs.remove("MissingKillWarningShown");
+        if ( Prefs.get("ytdl", null) != null ) Prefs.remove("ytdl");
         System.out.println("All preferences have been reset to defaults.");
         System.exit(0);
     }
@@ -6094,15 +6081,15 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void youtubedl(String input) {
-        // youtube-dl frontend. Pass the download URL as a string.
-        int q = JOptionPane.showConfirmDialog(null, "We will now attempt to use " + 
-                Prefs.get("ytdl", "youtube-dl") + 
-                " to stream the requested video.\n" +
+        // yt-dlp frontend. Pass the download URL as a string.
+        // youtube-dl is no longer supported
+        int q = JOptionPane.showConfirmDialog(null, "We will now attempt to use"
+                + " yt-dlp to stream the requested video.\n" +
             "Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION);
         if (q == JOptionPane.YES_OPTION) {
             final String ytp;
             String url;
-            final String p = Prefs.get("ytdl", "youtube-dl");
+            final String p = "yt-dlp";
             if (RunningOnWindows) {
                 String ytdlexe = p + ".exe";
                 // Check the JAR directory
@@ -6160,7 +6147,7 @@ public class GUI extends javax.swing.JFrame {
                         return;
                     }
                     // If it's a live stream, set the manifest (m3u8) URL as the
-                    // source and restart. We don't need youtube-dl for this.
+                    // source and restart. We don't need yt-dlp for this.
                     if ( (u != null) && (u.endsWith(".m3u8")) ) {
                         txtSource.setText(u);
                         populateArguments("");
@@ -6186,12 +6173,12 @@ public class GUI extends javax.swing.JFrame {
                       (txtSource.getText().contains("://www.youtube.com/")) ||
                       (txtSource.getText().contains("://youtu.be/")) ||
                       (txtSource.getText().startsWith("ytdl:")) ) {
-                // Invoke the youtube-dl handler
+                // Invoke the yt-dlp handler
                 if (!chkSyntaxOnly.isSelected()) {
                     youtubedl(txtSource.getText());
                 }
                 else {
-                    messageBox("youtube-dl is not supported in syntax only mode.", JOptionPane.WARNING_MESSAGE);
+                    messageBox("yt-dlp is not supported in syntax only mode.", JOptionPane.WARNING_MESSAGE);
                 }
                 // Return null as we're going to restart if the download is successful
                 return null;
@@ -6965,33 +6952,43 @@ public class GUI extends javax.swing.JFrame {
         else {
             u = txtSource.getText();
         }
+        // Populate yt-dlp parameters
+        // The "--ignore-config" parameter tells yt-dlp to ignore any local
+        // configuration files which may conflict with what we need here.
+        var ytargs = new ArrayList<String>();
+        ytargs.add(ytp);
+        ytargs.add("--ignore-config");
+        ytargs.add("-q");
+        ytargs.add("-o");
+        ytargs.add("-");
+        ytargs.add(u);
         // Populate arguments textbox
-        String ytdl;
-        if (ytp.contains("yt-dlp")) {
-            ytdl = "yt-dlp";
-        }
-        else {
-            ytdl = "youtube-dl";
-        }
+        for (int i = 0; i < ytargs.size() ; i++) {
+            if (i == 0) { 
+                txtStatus.setText(ytargs.get(i)); 
+            }
+            else {
+                txtStatus.setText( txtStatus.getText() + 
+                        '\u0020' + ytargs.get(i) );
+            }
+        }   
         if (RunningOnWindows) {
-            txtStatus.setText(ytdl + ".exe" + " -q" + " -o" + " - " + u + " | hacktv.exe");
+            txtStatus.setText( txtStatus.getText() + " | hacktv.exe");
         }
         else {
-            txtStatus.setText(ytdl + " -q" + " -o" + " - " + u + " | hacktv");
+            txtStatus.setText( txtStatus.getText() + " | hacktv");
         }
         for (int i = 1; i < allArgs.size() ; i++) {
             txtStatus.setText(txtStatus.getText() + '\u0020' + allArgs.get(i));
         }
-        // Spawn a new SwingWorker to run youtube-dl and hacktv
+        // Spawn a new SwingWorker to run yt-dlp and hacktv
         SwingWorker <Void, String> runTV = new SwingWorker <Void, String> () {
             @Override
             protected Void doInBackground() {
-                // Create two processes, one for youtube-dl and the other for hacktv
-                // The "--ignore-config" argument tells youtube-dl to ignore any local
-                // configuration files which may conflict with what we need here.
+                // Create two processes, one for yt-dlp and the other for hacktv
                 List<ProcessBuilder> pb = Arrays.asList(
-                    new ProcessBuilder(ytp, "--ignore-config", "-q", "-o", "-", u)
-                        // Redirect any youtube-dl errors to the Java console
+                    new ProcessBuilder(ytargs)
+                        // Redirect any yt-dlp errors to the Java console
                         .redirectError(ProcessBuilder.Redirect.INHERIT),
                     new ProcessBuilder(allArgs)
                         .redirectOutput(ProcessBuilder.Redirect.PIPE)
@@ -6999,9 +6996,9 @@ public class GUI extends javax.swing.JFrame {
                 );
                 try {
                     // Start the processes using startPipeline, which will pipe
-                    // stdOut of youtube-dl to stdIn of hacktv
+                    // stdOut of yt-dlp to stdIn of hacktv
                     List<Process> p = ProcessBuilder.startPipeline(pb);
-                    // Get the youtube-dl process
+                    // Get the yt-dlp process
                     Process y = (Process) p.get(0);
                     // Get the hacktv process
                     Process h = (Process) p.get(1);
@@ -7015,7 +7012,7 @@ public class GUI extends javax.swing.JFrame {
                         }
                     }
                     publish("\n" + "hacktv stopped");
-                    // End youtube-dl if it's still running
+                    // End yt-dlp if it's still running
                     // yt-dlp can spawn a child process, we need to kill this
                     // process instead of the parent. So check for it.
                     if (y.descendants().count() > 0) {                        
@@ -7029,7 +7026,7 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 catch (IOException ex) {
-                    messageBox("An error occurred while attempting to run youtube-dl or hacktv.", JOptionPane.ERROR_MESSAGE);
+                    messageBox("An error occurred while attempting to run yt-dlp or hacktv.", JOptionPane.ERROR_MESSAGE);
                 }
                 return null;
             } // End doInBackground
@@ -8219,13 +8216,13 @@ public class GUI extends javax.swing.JFrame {
             // Add the URL from the selected M3U item to the playlist
             PlaylistAL.add(PlaylistURLsAL.get(cmbM3USource.getSelectedIndex()));
         }
-        // Don't add YouTube or other youtube-dl compatible URLs to the playlist
+        // Don't add YouTube or other yt-dlp compatible URLs to the playlist
         else if ( (txtSource.getText().contains("://youtube.com/")) ||
                   (txtSource.getText().contains("://www.youtube.com/")) ||
                   (txtSource.getText().contains("://youtu.be/")) ||
                   (txtSource.getText().startsWith("ytdl:")) ) {
             messageBox("Unable to add this URL to the playlist.\n"
-                        + "The youtube-dl handler is only supported for single URLs at present.", JOptionPane.WARNING_MESSAGE);
+                        + "The yt-dlp handler is only supported for single URLs at present.", JOptionPane.WARNING_MESSAGE);
             return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
@@ -8670,16 +8667,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_txtECprogcostKeyTyped
 
-    private void chkytdlpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkytdlpActionPerformed
-        // Changes the youtube-dl handler to use yt-dlp instead
-        if (chkytdlp.isSelected()) {
-            Prefs.put("ytdl", "yt-dlp");
-        }
-        else {
-            Prefs.put("ytdl", "youtube-dl");
-        }
-    }//GEN-LAST:event_chkytdlpActionPerformed
-
     private void menuWikiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuWikiActionPerformed
         String u = "https://github.com/steeviebops/hacktv-gui/wiki";
         try {
@@ -8828,7 +8815,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
     private javax.swing.JCheckBox chkWindowsKill;
-    private javax.swing.JCheckBox chkytdlp;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
     private javax.swing.JComboBox<String> cmbECMaturity;

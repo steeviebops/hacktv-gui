@@ -2641,7 +2641,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="107" max="32767" attributes="0"/>
+                          <EmptySpace pref="135" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2841,7 +2841,6 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="chkWindowsKill" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkytdlp" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkSyntaxOnly" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkLocalModes" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
@@ -2856,7 +2855,7 @@
                                       </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace pref="216" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2867,10 +2866,8 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkLocalModes" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="chkytdlp" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkWindowsKill" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="cmbNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -2920,14 +2917,6 @@
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                       </AuxValues>
-                    </Component>
-                    <Component class="javax.swing.JCheckBox" name="chkytdlp">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Use yt-dlp instead of youtube-dl"/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkytdlpActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbNMSCeefaxRegion">
                       <Events>
