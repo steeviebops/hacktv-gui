@@ -351,7 +351,7 @@ public class GUI extends javax.swing.JFrame {
             chkNoUpdateCheck.setSelected(true);
         }
         else {
-            checkForUpdates();
+            checkForUpdates(true);
         }
         // If any command line parameters were specified, handle them
         if (args.length > 0) {
@@ -2771,7 +2771,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void checkForUpdates() {
+    private void checkForUpdates(boolean Silent) {
         // Queries the Github API for the latest release
         SwingWorker<Integer, Void> updateWorker = new SwingWorker<Integer, Void>() {
             @Override
@@ -2822,7 +2822,7 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     case 0:
                         // Update available
-                        if (!containerPanel.isVisible()) {
+                        if (Silent) {
                             updateMenu.setVisible(true);
                             return;
                         }
@@ -2832,18 +2832,18 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     case 1:
                         // No update available
-                        if (!containerPanel.isVisible()) return;
+                        if (Silent) return;
                         messageBox("No updates are available at this time.", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     case 2:
                         // Connection error
-                        if (!containerPanel.isVisible()) return;
+                        if (Silent) return;
                         messageBox("An error occurred while attempting to contact the Github server\n"
                            + "Please check your internet connection and try again.", JOptionPane.ERROR_MESSAGE);
                         break;
                     default:
                         // Unknown error
-                        if (!containerPanel.isVisible()) return;
+                        if (Silent) return;
                         System.err.println("Error code: " + status);
                         messageBox("An unknown error occurred while attempting to contact the Github server.", JOptionPane.ERROR_MESSAGE);
                         break;
@@ -8959,7 +8959,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkNoUpdateCheckActionPerformed
 
     private void menuUpdateCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUpdateCheckActionPerformed
-        checkForUpdates();
+        checkForUpdates(false);
     }//GEN-LAST:event_menuUpdateCheckActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
