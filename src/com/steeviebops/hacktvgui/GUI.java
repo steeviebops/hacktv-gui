@@ -84,9 +84,6 @@ public class GUI extends javax.swing.JFrame {
     private ArrayList<String> LaFAL;
     int defaultLaF;
     
-    // Get user's home directory, used for file open dialogues
-    private final String UserHomeDir = System.getProperty("user.home");
-    
     // String to set the directory where this application's JAR is located
     private final Path JarDir;
     
@@ -176,12 +173,12 @@ public class GUI extends javax.swing.JFrame {
     private int StartPoint = -1;
     
     // Declare variables used for storing parameters
-    private String Mode = "";
+    private String Mode = new String();
     private long Frequency;
-    private String ScramblingType1 = "";
-    private String ScramblingKey1 = "";
-    private String ScramblingType2 = "";
-    private String ScramblingKey2 = "";
+    private String ScramblingType1 = new String();
+    private String ScramblingKey1 = new String();
+    private String ScramblingType2 = new String();
+    private String ScramblingKey2 = new String();
     
     // Class instances
     final Shared SharedInst = new Shared();
@@ -380,6 +377,7 @@ public class GUI extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         SourceButtonGroup = new javax.swing.ButtonGroup();
         VideoFormatButtonGroup = new javax.swing.ButtonGroup();
@@ -388,21 +386,22 @@ public class GUI extends javax.swing.JFrame {
         MacSRButtonGroup = new javax.swing.ButtonGroup();
         MacCompressionButtonGroup = new javax.swing.ButtonGroup();
         MacProtectionButtonGroup = new javax.swing.ButtonGroup();
-        sourceFileChooser = sourceFileChooser = new JFileChooser(UserHomeDir);
-        teletextFileChooser = teletextFileChooser = new JFileChooser();
-        teletextFileChooser.setCurrentDirectory(new File(UserHomeDir));
+        sourceFileChooser = new JFileChooser();
+        sourceFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        teletextFileChooser = new JFileChooser();
+        teletextFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
         teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("All teletext files (*.tti, *.t42)", "tti", "t42"));
         teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Teletext files (*.tti)", "tti"));
         teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Teletext containers (*.t42)", "t42"));
         teletextFileChooser.setAcceptAllFileFilterUsed(true);
-        configFileChooser = configFileChooser = new JFileChooser();
-        configFileChooser.setCurrentDirectory(new File(UserHomeDir));
+        configFileChooser = new JFileChooser();
+        configFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
         configFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("hacktv configuration file (*.htv)", "htv"));
         configFileChooser.setAcceptAllFileFilterUsed(true);
-        hacktvFileChooser = hacktvFileChooser = new JFileChooser();
-        hacktvFileChooser.setCurrentDirectory(new File(UserHomeDir));
+        hacktvFileChooser = new JFileChooser();
+        hacktvFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         hacktvFileChooser.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File file) {
@@ -419,17 +418,16 @@ public class GUI extends javax.swing.JFrame {
             }
             @Override
             public String getDescription() {
-                if (System.getProperty("os.name").contains("Windows")) {
-                    return "hacktv binaries (hacktv.exe)";
+                if (!System.getProperty("os.name").contains("Windows")) {
+                    return "hacktv binaries (hacktv)";
                 }
                 else {
-                    return "hacktv binaries (hacktv)";
+                    return "hacktv binaries (hacktv.exe)";
                 }
             }
         });
-        outputFileChooser = outputFileChooser = new JFileChooser();
-        outputFileChooser.setCurrentDirectory(new File(UserHomeDir));
-        ;
+        outputFileChooser = new JFileChooser();
+        outputFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         containerPanel = new javax.swing.JPanel();
         consoleOutputPanel = new javax.swing.JPanel();
         consoleScrollPane = new javax.swing.JScrollPane();
@@ -601,8 +599,9 @@ public class GUI extends javax.swing.JFrame {
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkWindowsKill = new javax.swing.JCheckBox();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
-        btnRun = new javax.swing.JButton();
         txtStatus = new javax.swing.JTextField();
+        RunButtonGrid = new javax.swing.JPanel();
+        btnRun = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         menuNew = new javax.swing.JMenuItem();
@@ -660,7 +659,7 @@ public class GUI extends javax.swing.JFrame {
         );
         consoleOutputPanelLayout.setVerticalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(consoleScrollPane, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(consoleScrollPane)
         );
 
         SourcePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Source options"));
@@ -952,7 +951,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(sourceTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(SourcePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(102, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Source", sourceTab);
@@ -1169,7 +1168,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        VideoFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video format options"));
+        VideoFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video mode options"));
 
         cmbMode.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -1420,7 +1419,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(VideoFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(FrequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(84, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1670,7 +1669,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(179, Short.MAX_VALUE))
+                .addContainerGap(108, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -2169,7 +2168,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(155, Short.MAX_VALUE))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2409,10 +2408,15 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
+
+        txtStatus.setEditable(false);
+        txtStatus.addMouseListener(new ContextMenuListener());
+
+        RunButtonGrid.setLayout(new java.awt.GridBagLayout());
 
         btnRun.setText("Run hacktv");
         btnRun.addActionListener(new java.awt.event.ActionListener() {
@@ -2420,9 +2424,12 @@ public class GUI extends javax.swing.JFrame {
                 btnRunActionPerformed(evt);
             }
         });
-
-        txtStatus.setEditable(false);
-        txtStatus.addMouseListener(new ContextMenuListener());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 113;
+        gridBagConstraints.ipady = 33;
+        RunButtonGrid.add(btnRun, gridBagConstraints);
 
         javax.swing.GroupLayout containerPanelLayout = new javax.swing.GroupLayout(containerPanel);
         containerPanel.setLayout(containerPanelLayout);
@@ -2431,15 +2438,13 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(containerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStatus)
                     .addGroup(containerPanelLayout.createSequentialGroup()
-                        .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(containerPanelLayout.createSequentialGroup()
-                                .addGap(170, 170, 170)
-                                .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(tabPane)
+                            .addComponent(RunButtonGrid, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(txtStatus))
+                        .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         containerPanelLayout.setVerticalGroup(
@@ -2449,8 +2454,8 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(containerPanelLayout.createSequentialGroup()
                         .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnRun, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(RunButtonGrid, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2629,7 +2634,9 @@ public class GUI extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(containerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(containerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
 
         pack();
@@ -2765,7 +2772,8 @@ public class GUI extends javax.swing.JFrame {
                 this.pack();
                 Prefs.putInt("LookAndFeel", i);
             }
-            catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex) {
+            catch (ClassNotFoundException | IllegalAccessException | 
+                    InstantiationException | UnsupportedLookAndFeelException ex) {
                 System.err.println(ex);
             }            
         }
@@ -4587,7 +4595,7 @@ public class GUI extends javax.swing.JFrame {
             }
             // Define an ArrayList and a string to include missing paths
             List<String> toRemove = new ArrayList<>();
-            String removed = "";
+            String removed = new String();
             // Run through the imported playlist to check if the paths exist
             int i = 0;
             for (String file : pls) {
@@ -4661,7 +4669,7 @@ public class GUI extends javax.swing.JFrame {
         SwingWorker<Boolean, Double> m3uWorker = new SwingWorker<Boolean, Double>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                String M3UNames = "";
+                String M3UNames = new String();
                 ArrayList<String> PlaylistNamesAL = new ArrayList <> ();
                 PlaylistURLsAL = new ArrayList <> ();
                 try {
@@ -5666,7 +5674,7 @@ public class GUI extends javax.swing.JFrame {
         // So we set l to a blank string on 625, otherwise we populate it with
         // the line count.
         // e.g, if l is set to 525 we'll query Modes.ini for [testcards525].
-        String l = "";
+        String l = new String();
         if (Lines != 625) l = Integer.toString(Lines);
         // Extract (from ModesFile) the test card list
         testcards = INI.splitINIfile(ModesFile, "testcards" + l);
@@ -7931,7 +7939,7 @@ public class GUI extends javax.swing.JFrame {
             txtFrequency.setText((df.format(input / 1000000)));
             // Retrieve MAC channel ID
             if (radMAC.isSelected()) {
-                String b = "";
+                String b = new String();
                 if (radUHF.isSelected()) {
                     b = "uhf";
                 }
@@ -7966,7 +7974,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
         // Get the name of the currently selected VHF region and look it up
-        String sv = "";
+        String sv = new String();
         if (cmbRegion.getSelectedIndex() > 0) sv = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
         // Set region and alternate plans for UHF
         cmbRegion.setEnabled(false);
@@ -7992,7 +8000,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
         // Get the name of the currently selected UHF band plan and look it up
-        String su = "";
+        String su = new String();
         if (cmbRegion.getSelectedIndex() > 0) su = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
         // Set region and alternate plans for VHF
         cmbRegion.setEnabled(false);
@@ -8193,21 +8201,22 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
-        String VideoFormatChanged = "The selected video format has been changed because this output device does not support it. Please select another format.";
+        String ModeChanged = "The selected video mode has been changed "
+                + "because this output device does not support it. Please select another mode.";
         boolean bb = INI.getStringFromINI(ModesFile, Mode, "modulation", "", false).equals("baseband");
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
         switch(cmbOutputDevice.getSelectedIndex()) {
             // hackrf
             case 0:
                 lblOutputDevice2.setText("Serial number (optional)");
-                // If the RF panel is disabled, enable it and call checkMode
-                // to re-populate the channel options correctly
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected, reset it to something else
                     if (bb) {
-                        messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
+                        messageBox(ModeChanged, JOptionPane.WARNING_MESSAGE);
                         cmbMode.setSelectedIndex(0);
                     }
+                    // If the RF panel is disabled, enable it and call checkMode
+                    // to re-populate the channel options correctly
                     enableRFOptions();
                     checkMode();
                 }
@@ -8227,7 +8236,7 @@ public class GUI extends javax.swing.JFrame {
                 lblOutputDevice2.setText("Device options");
                 if (!radCustom.isEnabled()) {
                     if (bb) {
-                        messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
+                        messageBox(ModeChanged, JOptionPane.WARNING_MESSAGE);   
                         cmbMode.setSelectedIndex(0);
                     }
                     enableRFOptions();
@@ -8972,6 +8981,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup MacSRButtonGroup;
     private javax.swing.ButtonGroup MacStereoButtonGroup;
     private javax.swing.JPanel PlaybackTab;
+    private javax.swing.JPanel RunButtonGrid;
     private javax.swing.ButtonGroup SourceButtonGroup;
     private javax.swing.JPanel SourcePanel;
     private javax.swing.JPanel VBIPanel;

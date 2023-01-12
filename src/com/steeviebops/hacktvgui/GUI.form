@@ -240,7 +240,10 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="containerPanel" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="containerPanel" max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
+          </Group>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -250,7 +253,7 @@
         <Property name="multiSelectionEnabled" type="boolean" value="true"/>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="sourceFileChooser = new JFileChooser(UserHomeDir);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xd;&#xa;sourceFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JFileChooser" name="teletextFileChooser">
@@ -259,22 +262,22 @@
         <Property name="fileSelectionMode" type="int" value="2"/>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="teletextFileChooser = new JFileChooser();&#xa;teletextFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa; &#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;All teletext files (*.tti, *.t42)&quot;, &quot;tti&quot;, &quot;t42&quot;));&#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;Teletext files (*.tti)&quot;, &quot;tti&quot;));&#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;Teletext containers (*.t42)&quot;, &quot;t42&quot;));&#xa;teletextFileChooser.setAcceptAllFileFilterUsed(true);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xa;teletextFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));&#xa; &#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;All teletext files (*.tti, *.t42)&quot;, &quot;tti&quot;, &quot;t42&quot;));&#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;Teletext files (*.tti)&quot;, &quot;tti&quot;));&#xa;teletextFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;Teletext containers (*.t42)&quot;, &quot;t42&quot;));&#xa;teletextFileChooser.setAcceptAllFileFilterUsed(true);"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JFileChooser" name="configFileChooser">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="configFileChooser = new JFileChooser();&#xa;configFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa; &#xa;configFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;hacktv configuration file (*.htv)&quot;, &quot;htv&quot;));&#xa;configFileChooser.setAcceptAllFileFilterUsed(true);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xa;configFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));&#xa; &#xa;configFileChooser.addChoosableFileFilter(new FileNameExtensionFilter(&quot;hacktv configuration file (*.htv)&quot;, &quot;htv&quot;));&#xa;configFileChooser.setAcceptAllFileFilterUsed(true);"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JFileChooser" name="hacktvFileChooser">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="hacktvFileChooser = new JFileChooser();&#xa;hacktvFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa;hacktvFileChooser.setFileFilter(new FileFilter() {&#xa;    @Override&#xa;    public boolean accept(File file) {&#xa;// always accept directories&#xa;if (file.isDirectory())&#xa;    return true;&#xa;// but only files with specific name&#xa;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;    return file.getName().equals(&quot;hacktv&quot;);&#xa;}&#xa;else {&#xa;    return file.getName().equals(&quot;hacktv.exe&quot;);&#xa;}&#xa;    }&#xa;    @Override&#xa;    public String getDescription() {&#xa;&#x9;if (System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv.exe)&quot;;&#xa;&#x9;}&#xa;        else {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv)&quot;;&#xa;&#x9;}&#xa;    }&#xa;});"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xa;hacktvFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));&#xa;hacktvFileChooser.setFileFilter(new FileFilter() {&#xa;    @Override&#xa;    public boolean accept(File file) {&#xa;// always accept directories&#xa;if (file.isDirectory())&#xa;    return true;&#xa;// but only files with specific name&#xa;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;    return file.getName().equals(&quot;hacktv&quot;);&#xa;}&#xa;else {&#xa;    return file.getName().equals(&quot;hacktv.exe&quot;);&#xa;}&#xa;    }&#xa;    @Override&#xa;    public String getDescription() {&#xa;&#x9;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv)&quot;;&#xa;&#x9;}&#xa;        else {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv.exe)&quot;;&#xa;&#x9;}&#xa;    }&#xa;});"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JFileChooser" name="outputFileChooser">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="outputFileChooser = new JFileChooser();&#xa;outputFileChooser.setCurrentDirectory(new File(UserHomeDir));&#xa;"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xd;&#xa;outputFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));"/>
       </AuxValues>
     </Component>
     <Container class="javax.swing.JPanel" name="containerPanel">
@@ -283,20 +286,17 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="txtStatus" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tabPane" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" attributes="0">
-                                  <EmptySpace min="-2" pref="170" max="-2" attributes="0"/>
-                                  <Component id="btnRun" min="-2" pref="200" max="-2" attributes="0"/>
-                              </Group>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="tabPane" max="32767" attributes="0"/>
+                              <Component id="RunButtonGrid" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Component id="consoleOutputPanel" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="txtStatus" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
@@ -309,14 +309,14 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="tabPane" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="btnRun" min="-2" pref="56" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="RunButtonGrid" min="-2" pref="95" max="-2" attributes="0"/>
                       </Group>
                       <Component id="consoleOutputPanel" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="txtStatus" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -339,7 +339,7 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="consoleScrollPane" alignment="1" max="32767" attributes="0"/>
+                  <Component id="consoleScrollPane" alignment="0" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
           </Layout>
@@ -407,7 +407,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="102" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -838,7 +838,7 @@
                           <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="84" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1164,7 +1164,7 @@
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                        <TitledBorder title="Video format options"/>
+                        <TitledBorder title="Video mode options"/>
                       </Border>
                     </Property>
                   </Properties>
@@ -1507,7 +1507,7 @@
                           <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="macPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="179" max="32767" attributes="0"/>
+                          <EmptySpace pref="108" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2179,7 +2179,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="155" max="32767" attributes="0"/>
+                          <EmptySpace pref="84" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2664,7 +2664,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="112" max="32767" attributes="0"/>
+                          <EmptySpace pref="41" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2980,14 +2980,6 @@
             </Container>
           </SubComponents>
         </Container>
-        <Component class="javax.swing.JButton" name="btnRun">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Run hacktv"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRunActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JTextField" name="txtStatus">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
@@ -2996,6 +2988,25 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtStatus.addMouseListener(new ContextMenuListener());"/>
           </AuxValues>
         </Component>
+        <Container class="javax.swing.JPanel" name="RunButtonGrid">
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JButton" name="btnRun">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Run hacktv"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRunActionPerformed"/>
+              </Events>
+              <Constraints>
+                <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+                  <GridBagConstraints gridX="0" gridY="0" gridWidth="1" gridHeight="1" fill="0" ipadX="113" ipadY="33" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
+                </Constraint>
+              </Constraints>
+            </Component>
+          </SubComponents>
+        </Container>
       </SubComponents>
     </Container>
   </SubComponents>
