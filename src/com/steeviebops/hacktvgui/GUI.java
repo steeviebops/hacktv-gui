@@ -8194,6 +8194,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
         String VideoFormatChanged = "The selected video format has been changed because this output device does not support it. Please select another format.";
+        boolean bb = INI.getStringFromINI(ModesFile, Mode, "modulation", "", false).equals("baseband");
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
         switch(cmbOutputDevice.getSelectedIndex()) {
             // hackrf
@@ -8203,7 +8204,7 @@ public class GUI extends javax.swing.JFrame {
                 // to re-populate the channel options correctly
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected, reset it to something else
-                    if (checkBasebandSupport()) {
+                    if (bb) {
                         messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
                         cmbMode.setSelectedIndex(0);
                     }
@@ -8225,7 +8226,7 @@ public class GUI extends javax.swing.JFrame {
             case 1:
                 lblOutputDevice2.setText("Device options");
                 if (!radCustom.isEnabled()) {
-                    if (checkBasebandSupport()) {
+                    if (bb) {
                         messageBox(VideoFormatChanged, JOptionPane.INFORMATION_MESSAGE);   
                         cmbMode.setSelectedIndex(0);
                     }
