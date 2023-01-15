@@ -2739,7 +2739,8 @@ public class GUI extends javax.swing.JFrame {
             chkPixelRate,
             chkRandom,
             chkNoDate,
-            chkInvertVideo
+            chkInvertVideo,
+            chkVITC
         };
     }
     
@@ -4101,6 +4102,10 @@ public class GUI extends javax.swing.JFrame {
         if (INI.getBooleanFromINI(fileContents, "hacktv", "vits")) {
             chkVITS.doClick();
         }
+        // VITC
+        if (INI.getBooleanFromINI(fileContents, "hacktv", "vitc")) {
+            chkVITC.doClick();
+        }
         // Subtitles
         if (INI.getBooleanFromINI(fileContents, "hacktv", "subtitles")) {
             chkSubtitles.doClick();
@@ -4508,6 +4513,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // VITS
         if (chkVITS.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vits", 1); }
+        // VITC
+        if (chkVITC.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vitc", 1);
         // Disable colour
         if (chkColour.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1); }
         // Invert video
