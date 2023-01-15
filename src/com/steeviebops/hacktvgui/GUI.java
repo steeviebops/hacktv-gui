@@ -511,6 +511,7 @@ public class GUI extends javax.swing.JFrame {
         chkACP = new javax.swing.JCheckBox();
         chkWSS = new javax.swing.JCheckBox();
         cmbWSS = new javax.swing.JComboBox<>();
+        chkVITC = new javax.swing.JCheckBox();
         AdditionalOptionsPanel = new javax.swing.JPanel();
         chkGamma = new javax.swing.JCheckBox();
         txtGamma = new javax.swing.JTextField();
@@ -1449,6 +1450,8 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkVITC.setText("VITC (Vertical Interval Time Code)");
+
         javax.swing.GroupLayout VBIPanelLayout = new javax.swing.GroupLayout(VBIPanel);
         VBIPanel.setLayout(VBIPanelLayout);
         VBIPanelLayout.setHorizontalGroup(
@@ -1461,8 +1464,9 @@ public class GUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
-                    .addComponent(chkVITS))
-                .addContainerGap(170, Short.MAX_VALUE))
+                    .addComponent(chkVITS)
+                    .addComponent(chkVITC))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         VBIPanelLayout.setVerticalGroup(
             VBIPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1474,6 +1478,8 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkACP, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(chkVITS)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkVITC)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1674,7 +1680,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(AdditionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(108, Short.MAX_VALUE))
+                .addContainerGap(87, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", PlaybackTab);
@@ -2173,7 +2179,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(84, Short.MAX_VALUE))
+                .addContainerGap(86, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2413,7 +2419,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(41, Short.MAX_VALUE))
+                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -5247,7 +5253,7 @@ public class GUI extends javax.swing.JFrame {
             // fg is the STB frequency, we default to the old frequency for
             // The Children's Channel (10.994 GHz)
             double fg = 10.994;
-            // Convert fg to MHx for clarity, we'll use this value internally
+            // Convert fg to MHz for clarity, we'll use this value internally
             int f = (int) (fg * 1000);
             int lo = (int) ((double) localOscillator * 1000);
             int of;
@@ -5946,6 +5952,13 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             disableVITS();
+        }
+        if ((Lines == 625) || (Lines == 525)) {
+            chkVITC.setEnabled(true);
+        }
+        else {
+            if (chkVITC.isSelected()) chkVITC.doClick();
+            chkVITC.setEnabled(false);
         }
         if (INI.getBooleanFromINI(ModesFile, Mode, "acp")) {
             ACPSupported = true;
@@ -7056,6 +7069,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkShowCardSerial.isSelected()) allArgs.add("--showserial");
         if (chkFindKeys.isSelected()) allArgs.add("--findkey");
         if (chkVITS.isSelected()) allArgs.add("--vits");
+        if (chkVITC.isSelected()) allArgs.add("--vitc");
         if (chkColour.isSelected()) allArgs.add("--nocolour");
         if (chkInvertVideo.isSelected()) allArgs.add("--invert-video");
         if (chkDownmix.isSelected()) allArgs.add("--downmix");
@@ -9134,6 +9148,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkTeletext;
     private javax.swing.JCheckBox chkTextSubtitles;
     private javax.swing.JCheckBox chkTimestamp;
+    private javax.swing.JCheckBox chkVITC;
     private javax.swing.JCheckBox chkVITS;
     private javax.swing.JCheckBox chkVerbose;
     private javax.swing.JCheckBox chkVideoFilter;
