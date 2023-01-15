@@ -16,6 +16,8 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="MacProtectionButtonGroup">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="TemplateButtonGroup">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="fileMenu">
@@ -121,6 +123,50 @@
             <Property name="text" type="java.lang.String" value="Templates"/>
           </Properties>
           <SubComponents>
+            <Menu class="javax.swing.JMenu" name="menuFreqSelect">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Frequency selection"/>
+              </Properties>
+              <SubComponents>
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuIF">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="TemplateButtonGroup"/>
+                    </Property>
+                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="text" type="java.lang.String" value="Intermediate frequency (IF)"/>
+                    <Property name="actionCommand" type="java.lang.String" value="0"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuIFActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKuBand">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="TemplateButtonGroup"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Second harmonic (Ku band)"/>
+                    <Property name="actionCommand" type="java.lang.String" value="1"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuKuBandActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKaBand">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="TemplateButtonGroup"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Fourth harmonic (Ka band)"/>
+                    <Property name="actionCommand" type="java.lang.String" value="2"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuKaBandActionPerformed"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
             <MenuItem class="javax.swing.JMenuItem" name="menuAstra975Template">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Astra analogue STB (9.75 GHz)..."/>

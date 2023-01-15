@@ -129,7 +129,7 @@ public class GUI extends javax.swing.JFrame {
     
     // Declare combobox arrays and ArrayLists
     // These are used to store secondary information (frequencies, parameters, etc)
-    private int[] FrequencyArray;
+    private long[] FrequencyArray;
     private String[] PALModeArray;
     private String[] NTSCModeArray;
     private String[] SECAMModeArray;
@@ -386,6 +386,7 @@ public class GUI extends javax.swing.JFrame {
         MacSRButtonGroup = new javax.swing.ButtonGroup();
         MacCompressionButtonGroup = new javax.swing.ButtonGroup();
         MacProtectionButtonGroup = new javax.swing.ButtonGroup();
+        TemplateButtonGroup = new javax.swing.ButtonGroup();
         sourceFileChooser = new JFileChooser();
         sourceFileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         teletextFileChooser = new JFileChooser();
@@ -616,6 +617,10 @@ public class GUI extends javax.swing.JFrame {
         sepExitSeparator = new javax.swing.JPopupMenu.Separator();
         menuExit = new javax.swing.JMenuItem();
         templatesMenu = new javax.swing.JMenu();
+        menuFreqSelect = new javax.swing.JMenu();
+        menuIF = new javax.swing.JRadioButtonMenuItem();
+        menuKuBand = new javax.swing.JRadioButtonMenuItem();
+        menuKaBand = new javax.swing.JRadioButtonMenuItem();
         menuAstra975Template = new javax.swing.JMenuItem();
         menuAstra10Template = new javax.swing.JMenuItem();
         menuBSBTemplate = new javax.swing.JMenuItem();
@@ -2547,6 +2552,41 @@ public class GUI extends javax.swing.JFrame {
 
         templatesMenu.setText("Templates");
 
+        menuFreqSelect.setText("Frequency selection");
+
+        TemplateButtonGroup.add(menuIF);
+        menuIF.setSelected(true);
+        menuIF.setText("Intermediate frequency (IF)");
+        menuIF.setActionCommand("0");
+        menuIF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuIFActionPerformed(evt);
+            }
+        });
+        menuFreqSelect.add(menuIF);
+
+        TemplateButtonGroup.add(menuKuBand);
+        menuKuBand.setText("Second harmonic (Ku band)");
+        menuKuBand.setActionCommand("1");
+        menuKuBand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuKuBandActionPerformed(evt);
+            }
+        });
+        menuFreqSelect.add(menuKuBand);
+
+        TemplateButtonGroup.add(menuKaBand);
+        menuKaBand.setText("Fourth harmonic (Ka band)");
+        menuKaBand.setActionCommand("2");
+        menuKaBand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuKaBandActionPerformed(evt);
+            }
+        });
+        menuFreqSelect.add(menuKaBand);
+
+        templatesMenu.add(menuFreqSelect);
+
         menuAstra975Template.setText("Astra analogue STB (9.75 GHz)...");
         menuAstra975Template.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2938,23 +2978,23 @@ public class GUI extends javax.swing.JFrame {
     
     private void selectModesFile() {
         if ((Prefs.getInt("UseLocalModesFile", 0)) == 1) {
-            if (Files.exists(Path.of(JarDir + "/" + "Modes.ini"))) {
+            if (Files.exists(Path.of(JarDir + File.separator + "Modes.ini"))) {
                 // Use the local file
-                ModesFilePath = JarDir + "/" + "Modes.ini";
+                ModesFilePath = JarDir + File.separator + "Modes.ini";
             }
             else {
                 // Use the embedded copy
                 ModesFilePath = "/com/steeviebops/resources/" + getFork() + "/Modes.ini";
             }
         }
-        else if ( (Files.exists(Path.of(JarDir + "/" + "Modes.ini"))) &&
+        else if ( (Files.exists(Path.of(JarDir + File.separator + "Modes.ini"))) &&
                 (cmbOutputDevice.getItemCount() == 0) ) {
             int q = JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
                     + "Do you want to use this file?\n"
                     + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION);
             if (q == JOptionPane.YES_OPTION) {
                 // Use the local file
-                ModesFilePath = JarDir + "/" + "Modes.ini";
+                ModesFilePath = JarDir + File.separator + "Modes.ini";
             }
             else {
                 // Download from Github
@@ -4900,7 +4940,7 @@ public class GUI extends javax.swing.JFrame {
         // Create temp directory if it does not exist
         createTempDirectory();
         // Specify the destination location of the HTML file we will download
-        String DownloadPath = TempDir + "/" + destinationFile;
+        String DownloadPath = TempDir + File.separator + destinationFile;
         try {
             DownloadInProgress = true;
             // If the file already exists from a previous attempt, delete it
@@ -4923,7 +4963,7 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected Integer doInBackground() throws Exception {
                 File f;
-                Path fd = Paths.get(TempDir + "/" + HTMLTempFile);
+                Path fd = Paths.get(TempDir + File.separator + HTMLTempFile);
                 String dUrl = url;
                 // Try to read the downloaded index file to a string
                 try {
@@ -4949,20 +4989,20 @@ public class GUI extends javax.swing.JFrame {
                     case "https://github.com/spark-teletext/spark-teletext/":
                         // Set SPARK prerequisites - change URL first
                         dUrl = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
-                        f = new File(TempDir + "/" + "spark");
+                        f = new File(TempDir + File.separator + "spark");
                         break;
                     case "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/":
                         // Set Ceefax temp directory
-                        f = new File(TempDir + "/" + "ceefax");
+                        f = new File(TempDir + File.separator + "ceefax");
                         break;
                     case "http://teastop.plus.com/svn/teletext/":
                         // Set Teefax temp directory
-                        f = new File(TempDir + "/" + "teefax");
+                        f = new File(TempDir + File.separator + "teefax");
                         break;
                     default:
                         if (dUrl.startsWith("https://internal.nathanmediaservices.co.uk/svn/ceefax/")) {
                             // This is most likely a Ceefax region
-                            f = new File(TempDir + "/" + "ceefax_region");
+                            f = new File(TempDir + File.separator + "ceefax_region");
                         }
                         else {
                             System.err.println("Unknown teletext URL");
@@ -4997,7 +5037,7 @@ public class GUI extends javax.swing.JFrame {
                             }
                             publish(j);
                             // Do the actual downloading
-                            SharedInst.download(dUrl + TeletextLinks.get(i), TeletextPath + "/" + TeletextLinks.get(i));
+                            SharedInst.download(dUrl + TeletextLinks.get(i), TeletextPath + File.separator + TeletextLinks.get(i));
                             // Stop when the integer value reaches the size of the teletext array
                             if (j == TeletextLinks.size()) return 0;
                         }
@@ -5055,7 +5095,7 @@ public class GUI extends javax.swing.JFrame {
                                 File[] files = rd.listFiles();
                                 for (File file : files) {
                                     try {
-                                        Files.move(file.toPath(), Path.of(nd + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+                                        Files.move(file.toPath(), Path.of(nd + File.separator + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                                     }
                                     catch (IOException e) {
                                         messageBox("An error occurred when merging the regional Ceefax data with the national data.\n"
@@ -5198,14 +5238,49 @@ public class GUI extends javax.swing.JFrame {
                 resetAllControls();
                 return;
             }
-            // Enable pre-emphasis filter and set FM deviation to 10 MHz
+            // Set custom frequency
+            radCustom.doClick();
+            // Enable pre-emphasis filter and enable FM deviation option
             chkVideoFilter.doClick();
             chkFMDev.doClick();
-            txtFMDev.setText("10");
-            // Set IF to Sky News
-            txtFrequency.setText(String.format("%.2f",(11.377 - localOscillator) * 1000));
-            messageBox("Template values have been loaded. Tune your receiver to Sky News"
-                    + " (11.377 GHz) and run hacktv.", JOptionPane.INFORMATION_MESSAGE);    
+            // Get selected frequency and set deviation
+            // fg is the STB frequency, we default to the old frequency for
+            // The Children's Channel (10.994 GHz)
+            double fg = 10.994;
+            // Convert fg to MHx for clarity, we'll use this value internally
+            int f = (int) (fg * 1000);
+            int lo = (int) ((double) localOscillator * 1000);
+            int of;
+            switch (Integer.parseInt(TemplateButtonGroup.getSelection().getActionCommand())) {
+                case 0:
+                    // IF
+                    of = f - lo;
+                    txtFMDev.setText("10");
+                    break;
+                case 1:
+                    // Ku band
+                    of = f / 2;
+                    txtFMDev.setText("8");
+                    break;
+                case 2:
+                    // Ka band LNB at 21.2 GHz LO (Saorsat Inverto)
+                    // Below is a formula to select the transmission frequency
+                    // based on the receiver's IF
+                    // (((Ku frequency - Ku local oscillator) * -1) + Ka local oscillator) / 4
+                    of = (((f - lo) * -1) + 21200) / 4;
+                    txtFMDev.setText("4");
+                    // Invert video polarity, a 21.2 GHz Ka LNB is negative IF
+                    chkInvertVideo.doClick();
+                    break;
+                default:
+                    of = -999;
+                    System.err.println("Frequency error");
+                    break;
+            }
+            // Set frequency to the value we got above
+            txtFrequency.setText(String.valueOf(of));
+            messageBox("Template values have been loaded. Tune your receiver to "
+                    + fg + " GHz and run hacktv.", JOptionPane.INFORMATION_MESSAGE);    
         }
     }    
     
@@ -6117,7 +6192,7 @@ public class GUI extends javax.swing.JFrame {
                         + "This could cause subtitles to be unreliable. Please move these files "
                         + "if you encounter problems.";
                 // If the teletext source is set to SPARK with subtitles enabled, delete their page 888 to avoid issues
-                if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + "/" + "spark")) ) {
+                if ( (TempDir != null) && (txtTeletextSource.getText().contains(TempDir + File.separator + "spark")) ) {
                     if ( (Files.exists(Path.of(TempDir + "/spark/P888.tti"))) || (Files.exists(Path.of(TempDir + "/spark/p888.tti"))) ) {
                         try {
                             SharedInst.deleteFSObject(Path.of(TempDir + "/spark/P888.tti"));
@@ -6259,10 +6334,10 @@ public class GUI extends javax.swing.JFrame {
             ChannelArray = bp.substring(bp.indexOf("\n") +1).split("\\r?\\n");
             // Populate FrequencyArray by reading ModesFile using what we added
             // to ChannelArray.
-            FrequencyArray = new int[ChannelArray.length];
+            FrequencyArray = new long[ChannelArray.length];
             for (int i = 0; i < ChannelArray.length; i++) {
-                if (INI.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]) != null) {
-                    FrequencyArray[i] = INI.getIntegerFromINI(ModesFile,  bpname, ChannelArray[i]);
+                if (INI.getLongFromINI(ModesFile,  bpname, ChannelArray[i]) != null) {
+                    FrequencyArray[i] = INI.getLongFromINI(ModesFile,  bpname, ChannelArray[i]);
                 }
                 else {
                      messageBox("Invalid data returned from Modes.ini, section name: "
@@ -8432,8 +8507,8 @@ public class GUI extends javax.swing.JFrame {
             PlaylistAL.add(txtSource.getText());
         }
         else if (radTest.isSelected()) {
-            for (int i = 0; i < PlaylistAL.size(); i++) {
-                if (PlaylistAL.get(i).startsWith("test:")) {
+            for (String s : PlaylistAL) {
+                if (s.startsWith("test:")) {
                     messageBox("Only one test card can be added to the playlist.\n"
                         + "It should also be placed as the last item in the playlist.", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -8651,9 +8726,9 @@ public class GUI extends javax.swing.JFrame {
                 try {
                     createTempDirectory();
                     String t = TempDir.toString();
-                    String downloadPath = t + "/" + "hacktv.zip";
-                    String tmpExePath = t + "/" + "hacktv.exe";
-                    String exePath = JarDir + "/" + "hacktv.exe";
+                    String downloadPath = t + File.separator + "hacktv.zip";
+                    String tmpExePath = t + File.separator + "hacktv.exe";
+                    String exePath = JarDir + File.separator + "hacktv.exe";
                     // Download hacktv.zip from Captain Jack
                     SharedInst.download("https://filmnet.plus/hacktv/hacktv.zip", downloadPath);
                     // Unzip what we got to the temp directory
@@ -8971,6 +9046,28 @@ public class GUI extends javax.swing.JFrame {
     private void menuUpdateCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUpdateCheckActionPerformed
         checkForUpdates(false);
     }//GEN-LAST:event_menuUpdateCheckActionPerformed
+
+    private void menuKuBandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKuBandActionPerformed
+        // Disable harmonic options on BSB receivers until I get the chance to test
+        menuBSBTemplate.setEnabled(false);
+        if (Prefs.getInt("SuppressWarnings", 0) != 1) {
+            messageBox("Care is advised when using harmonics.\n" +
+                    "Please be aware of local laws regarding interference.", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_menuKuBandActionPerformed
+
+    private void menuKaBandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKaBandActionPerformed
+        // Disable harmonic options on BSB receivers until I get the chance to test
+        menuBSBTemplate.setEnabled(false);
+        if (Prefs.getInt("SuppressWarnings", 0) != 1) {
+            messageBox("Care is advised when using harmonics.\n" +
+                    "Please be aware of local laws regarding interference.", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_menuKaBandActionPerformed
+
+    private void menuIFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuIFActionPerformed
+        menuBSBTemplate.setEnabled(true);
+    }//GEN-LAST:event_menuIFActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AdditionalOptionsPanel;
@@ -8984,6 +9081,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel RunButtonGrid;
     private javax.swing.ButtonGroup SourceButtonGroup;
     private javax.swing.JPanel SourcePanel;
+    private javax.swing.ButtonGroup TemplateButtonGroup;
     private javax.swing.JPanel VBIPanel;
     private javax.swing.ButtonGroup VideoFormatButtonGroup;
     private javax.swing.JPanel VideoFormatPanel;
@@ -9111,7 +9209,11 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem menuDownloadUpdate;
     private javax.swing.JMenuItem menuExit;
+    private javax.swing.JMenu menuFreqSelect;
     private javax.swing.JMenuItem menuGithubRepo;
+    private javax.swing.JRadioButtonMenuItem menuIF;
+    private javax.swing.JRadioButtonMenuItem menuKaBand;
+    private javax.swing.JRadioButtonMenuItem menuKuBand;
     private javax.swing.JMenuItem menuMRUFile1;
     private javax.swing.JMenuItem menuMRUFile2;
     private javax.swing.JMenuItem menuMRUFile3;
