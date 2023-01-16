@@ -3425,9 +3425,9 @@ public class GUI extends javax.swing.JFrame {
             // Do nothing
         }
         else {
-            if (!ConfigFile3.isEmpty()) { Prefs.put("File4", ConfigFile3); }
-            if (!ConfigFile2.isEmpty()) { Prefs.put("File3", ConfigFile2); }
-            if (!ConfigFile1.isEmpty()) { Prefs.put("File2", ConfigFile1); }
+            if (!ConfigFile3.isEmpty()) Prefs.put("File4", ConfigFile3);
+            if (!ConfigFile2.isEmpty()) Prefs.put("File3", ConfigFile2);
+            if (!ConfigFile1.isEmpty()) Prefs.put("File2", ConfigFile1);
             Prefs.put("File1", FilePath);
             checkMRUList();
         }
@@ -4009,8 +4009,8 @@ public class GUI extends javax.swing.JFrame {
                 String ImportedCardNumber;
                 String Imported13Prefix;
                 if ( (ImportedEMM.equals(1)) || (ImportedEMM.equals(2)) ){
-                    if (ImportedEMM.equals(1)) { chkActivateCard.doClick() ;}
-                    if (ImportedEMM.equals(2)) { chkDeactivateCard.doClick() ;}
+                    if (ImportedEMM.equals(1)) chkActivateCard.doClick();
+                    if (ImportedEMM.equals(2)) chkDeactivateCard.doClick();
                     ImportedCardNumber = INI.getStringFromINI(fileContents, "hacktv", "cardnumber", "", false);
                     Imported13Prefix = INI.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
                     // The ImportedCardNumber value only contains 8 digits of the card number
@@ -4084,11 +4084,11 @@ public class GUI extends javax.swing.JFrame {
         }
         // Audio
         if (INI.getBooleanFromINI(fileContents, "hacktv", "audio") == false) {
-            if (chkAudio.isSelected() ) { chkAudio.doClick(); }
+            if (chkAudio.isSelected() ) chkAudio.doClick();
         }
         // NICAM
         if (INI.getBooleanFromINI(fileContents, "hacktv", "nicam") == false) {
-            if (chkNICAM.isSelected() ) { chkNICAM.doClick(); }
+            if (chkNICAM.isSelected() ) chkNICAM.doClick();
         }
         // A2 Stereo
         if (INI.getBooleanFromINI(fileContents, "hacktv", "a2stereo") == true) {
@@ -4370,25 +4370,25 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
         }
         // RF Amp
-        if (chkAmp.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "amp", 1); }
+        if (chkAmp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "amp", 1);
         // Output level
-        if (chkOutputLevel.isSelected()) { FileContents = INI.setINIValue(FileContents, "hacktv", "level", txtOutputLevel.getText());}
+        if (chkOutputLevel.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "level", txtOutputLevel.getText());
         // FM deviation
-        if (chkFMDev.isSelected()) { FileContents = INI.setLongINIValue(FileContents, "hacktv", "deviation", (long) (Double.parseDouble(txtFMDev.getText()) * 1000000)); }
+        if (chkFMDev.isSelected()) FileContents = INI.setLongINIValue(FileContents, "hacktv", "deviation", (long) (Double.parseDouble(txtFMDev.getText()) * 1000000));
         // Gamma
-        if (chkGamma.isSelected()) { FileContents = INI.setINIValue(FileContents, "hacktv", "gamma", txtGamma.getText()); }
+        if (chkGamma.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "gamma", txtGamma.getText());
         // Repeat
-        if (chkRepeat.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "repeat", 1); }
+        if (chkRepeat.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "repeat", 1);
         // Position
-        if (chkPosition.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "position", Integer.parseInt(txtPosition.getText()));}
+        if (chkPosition.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "position", Integer.parseInt(txtPosition.getText()));
         // Verbose
-        if (chkVerbose.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "verbose", 1); }
+        if (chkVerbose.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "verbose", 1);
         // Logo
-        if (chkLogo.isSelected()) { FileContents = INI.setINIValue(FileContents, "hacktv", "logo", LogoArray[cmbLogo.getSelectedIndex()]) ; }
+        if (chkLogo.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "logo", LogoArray[cmbLogo.getSelectedIndex()]) ;
         // Timestamp
-        if (chkTimestamp.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "timestamp", 1); }
+        if (chkTimestamp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "timestamp", 1);
         // Interlace
-        if (chkInterlace.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "interlace", 1); }
+        if (chkInterlace.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "interlace", 1);
         // Teletext
         if (txtTeletextSource.getText().endsWith(".t42")) {
             FileContents = INI.setINIValue(FileContents, "hacktv", "teletext", "raw:" + txtTeletextSource.getText());
@@ -4400,9 +4400,9 @@ public class GUI extends javax.swing.JFrame {
          * We increase the value by one, because zero is interpreted as "option disabled" while 1 is
          * interpreted as "auto". We will subtract this again when opening.
         */
-        if (chkWSS.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "wss", cmbWSS.getSelectedIndex() + 1); }
+        if (chkWSS.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "wss", cmbWSS.getSelectedIndex() + 1);
         // AR Correction
-        if (chkARCorrection.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "arcorrection", cmbARCorrection.getSelectedIndex()); }
+        if (chkARCorrection.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "arcorrection", cmbARCorrection.getSelectedIndex());
         // Scrambling
         // VideoCrypt I+II
         if (cmbScramblingType.getSelectedIndex() == 3) {
@@ -4474,15 +4474,15 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-nodate", 1);
         }
         // Show card serial
-        if (chkShowCardSerial.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showserial", 1); }
+        if (chkShowCardSerial.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showserial", 1);
         // Brute force PPV key
-        if (chkFindKeys.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "findkey", 1); }
+        if (chkFindKeys.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "findkey", 1);
         // Scramble audio
-        if (chkScrambleAudio.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "scramble-audio", 1); }
+        if (chkScrambleAudio.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "scramble-audio", 1);
         // ACP
-        if (chkACP.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "acp", 1); }
+        if (chkACP.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "acp", 1);
         // Filter
-        if (chkVideoFilter.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "filter", 1); }
+        if (chkVideoFilter.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "filter", 1);
         // Audio
         if ( (chkAudio.isSelected()) && (chkAudio.isEnabled()) ) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "audio", 1);
@@ -4505,22 +4505,22 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "a2stereo", 0);
         }
         // Show ECMs
-        if (chkShowECM.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showecm", 1); }
+        if (chkShowECM.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showecm", 1);
         // Subtitles
         if (chkSubtitles.isSelected()) { 
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "subtitles", 1); 
             FileContents = INI.setINIValue(FileContents, "hacktv", "subtitleindex", txtSubtitleIndex.getText());
         }
         // VITS
-        if (chkVITS.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vits", 1); }
+        if (chkVITS.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vits", 1);
         // VITC
         if (chkVITC.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vitc", 1);
         // Disable colour
-        if (chkColour.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1); }
+        if (chkColour.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1);
         // Invert video
-        if (chkInvertVideo.isSelected()) { FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1); }
+        if (chkInvertVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1);
         // MAC channel ID
-        if (chkMacChId.isSelected()) { FileContents = INI.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText()); }
+        if (chkMacChId.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText());
         // MAC audio options
         if (radMacMono.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-mode", "mono");
         if (radMac16k.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-quality", "medium");
@@ -4877,7 +4877,7 @@ public class GUI extends javax.swing.JFrame {
         txtStatus.setText("");
         // Uncheck all checkboxes
         for(JCheckBox cb: CheckBoxes){
-            if ( cb.isSelected() ) { cb.doClick(); }
+            if ( cb.isSelected() ) cb.doClick();
         }
         // Hide M3U combobox if enabled, and set source to empty
         if (cmbM3USource.isEnabled()) {
@@ -4905,7 +4905,7 @@ public class GUI extends javax.swing.JFrame {
         // Reset gain to zero
         txtGain.setText("0");
         // Re-enable audio option
-        if (! chkAudio.isSelected() ) { chkAudio.doClick(); }
+        if (! chkAudio.isSelected() ) chkAudio.doClick();
         // Clear playlist
         btnRemove.setEnabled(false);
         btnPlaylistUp.setEnabled(false);
@@ -4913,9 +4913,9 @@ public class GUI extends javax.swing.JFrame {
         PlaylistAL.clear();
         populatePlaylist();
         // Restore title bar to default
-        if (TitleBarChanged) { this.setTitle(TitleBar); }
+        if (TitleBarChanged) this.setTitle(TitleBar);
         // Restore ellipsis to Save option
-        if (menuSave.getText().equals("Save")) { menuSave.setText("Save..."); }
+        if (menuSave.getText().equals("Save")) menuSave.setText("Save...");
     }
     
     private void addCeefaxRegions() {
@@ -5564,7 +5564,7 @@ public class GUI extends javax.swing.JFrame {
         // Enable card serial option
         if ( ((ScramblingType1).equals("--videocrypt")) || 
                 ((ScramblingType1).equals("--videocrypt2")) ) {
-            if (CaptainJack) { chkShowCardSerial.setEnabled(true); }
+            if (CaptainJack) chkShowCardSerial.setEnabled(true);
         }
         else {
             if (chkShowCardSerial.isSelected()) {
@@ -5586,8 +5586,8 @@ public class GUI extends javax.swing.JFrame {
             chkDeactivateCard.setEnabled(true);
         }
         else {
-            if (chkActivateCard.isSelected()) { chkActivateCard.doClick(); }
-            if (chkDeactivateCard.isSelected()) { chkDeactivateCard.doClick(); }
+            if (chkActivateCard.isSelected()) chkActivateCard.doClick();
+            if (chkDeactivateCard.isSelected()) chkDeactivateCard.doClick();
             chkActivateCard.setEnabled(false);
             chkDeactivateCard.setEnabled(false);
             lblEMMCardNumber.setEnabled(false);
@@ -5597,7 +5597,7 @@ public class GUI extends javax.swing.JFrame {
             chkFindKeys.setEnabled(true);
         }
         else {
-            if ( chkFindKeys.isSelected()) { chkFindKeys.doClick(); }
+            if ( chkFindKeys.isSelected()) chkFindKeys.doClick();
             chkFindKeys.setEnabled(false);
         }
         // Enable permutation table options (Syster-based modes)
@@ -5615,7 +5615,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Enable ECM option and disable ACP (if not a MAC mode)
         if (cmbScramblingType.getSelectedIndex() == 0) {
-            if ( chkShowECM.isSelected() ) { chkShowECM.doClick(); }
+            if ( chkShowECM.isSelected() ) chkShowECM.doClick();
             chkShowECM.setEnabled(false);
             if (ACPSupported) {
                 enableACP();
@@ -5625,7 +5625,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            if (CaptainJack) { chkShowECM.setEnabled(true); }
+            if (CaptainJack) chkShowECM.setEnabled(true);
             disableACP();
         }
     }
@@ -5656,7 +5656,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void disableWSS() {
-        if (chkWSS.isSelected()) { chkWSS.doClick(); }
+        if (chkWSS.isSelected()) chkWSS.doClick();
         chkWSS.setEnabled(false);
     }
     
@@ -7979,7 +7979,7 @@ public class GUI extends javax.swing.JFrame {
         txtSource.setEnabled(false);
         btnSourceBrowse.setEnabled(false);
         txtSource.setText("");
-        if (chkARCorrection.isSelected()) { chkARCorrection.doClick(); }
+        if (chkARCorrection.isSelected()) chkARCorrection.doClick();
         chkARCorrection.setEnabled(false);
         if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
         chkTextSubtitles.setEnabled(false);    
