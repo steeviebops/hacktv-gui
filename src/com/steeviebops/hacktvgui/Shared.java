@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,14 +43,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Shared {
+public class Shared implements Serializable {
+    
+    private static final long serialVersionUID = -8155770639405775482L;
   
-    public int CalculateLuhnCheckDigit(long input) {
+    public int calculateLuhnCheckDigit(long input) {
         // Calculates a check digit for the specified input using the Luhn algorithm
         long t = 0;
         // Read backwards, doubling every other digit
@@ -67,10 +71,10 @@ public class Shared {
         return (int) ((t * 9) % 10);
     }
         
-    public boolean LuhnCheck(Long input) {
+    public boolean luhnCheck(Long input) {
          // Feed the full number to this method and it will return true or 
          // false based on whether the check digit is valid or not.
-        return CalculateLuhnCheckDigit(input / 10) == (input % 10);
+        return calculateLuhnCheckDigit(input / 10) == (input % 10);
     }
     
     public boolean isNumeric(String strNum) {
@@ -112,8 +116,8 @@ public class Shared {
             if (listOfFile.isFile()) {
                 fileToFilter = listOfFile.getName();
                 // If a file is found, increment c by one
-                if (fileToFilter.toLowerCase().startsWith(startsWith)
-                        && fileToFilter.toLowerCase().endsWith(endsWith)) {
+                if (fileToFilter.toLowerCase(Locale.ENGLISH).startsWith(startsWith)
+                        && fileToFilter.toLowerCase(Locale.ENGLISH).endsWith(endsWith)) {
                     c = c + 1;
                 }
             }
@@ -121,7 +125,7 @@ public class Shared {
         return c;
     }    
     
-    public void deleteFSObject(Path pathToBeDeleted) throws IOException {
+    public static void deleteFSObject(Path pathToBeDeleted) throws IOException {
         // Deletes the path specified to this method
 	Files.walkFileTree(pathToBeDeleted, 
 	  new SimpleFileVisitor<Path>() {
@@ -163,8 +167,7 @@ public class Shared {
     }
     
     public Date getLastUpdatedTime(String jarFilePath, String classFilePath) {
-        try {
-            JarFile jar = new JarFile(jarFilePath);
+        try (var jar = new JarFile(jarFilePath)) {
             Enumeration<JarEntry> enumEntries = jar.entries();
             while (enumEntries.hasMoreElements()) {
                 JarEntry file = (JarEntry) enumEntries.nextElement();
@@ -173,7 +176,8 @@ public class Shared {
                     return time==-1?null: new Date(time);
                 }
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             return null;
         }
         return null;
@@ -197,7 +201,7 @@ public class Shared {
     }
     
     // Unzip code courtesy of https://www.baeldung.com/java-compress-and-uncompress
-    public void UnzipFile(String fileZip, String destination) throws IOException {
+    public void unzipFile(String fileZip, String destination) throws IOException {
         File destDir = new File(destination);
         byte[] buffer = new byte[1024];
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip))) {
@@ -223,7 +227,9 @@ public class Shared {
                         }
                     }
                     // Reset timestamp to original
-                    newFile.setLastModified(zipEntry.getTime());
+                    if (!newFile.setLastModified(zipEntry.getTime())) {
+                        System.err.println("Failed to set timestamp.");
+                    }
                 }
                 zipEntry = zis.getNextEntry();
             }

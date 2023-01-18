@@ -20,9 +20,11 @@ package com.steeviebops.hacktvgui;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -37,12 +39,13 @@ import java.util.stream.Stream;
  * string containing the contents of a file. The getINIValue function will
  * detect what you have provided and act accordingly.
  * 
- * Comments are allowed on their own lines or in-line with values, but not 
- * in-line with section names.
+ * Comments are allowed on their own lines or in-line with values or section names.
  * 
  */
 
-public class INIFile {
+public class INIFile implements Serializable {
+    
+    private static final long serialVersionUID = -2053155283451566314L;
     
     /**
      * Returns a Boolean of the specified INI setting. This can be true, false, 1, or 0.
@@ -54,7 +57,7 @@ public class INIFile {
      * @return              Returns a Boolean of the specified INI setting or a default value of false
      */
     public boolean getBooleanFromINI(String input, String section, String setting) {
-        String v = getINIValue(input, section, setting, "").toLowerCase();
+        String v = getINIValue(input, section, setting, "").toLowerCase(Locale.ENGLISH);
         switch (v) {
             case "0":
             case "false":
@@ -130,7 +133,7 @@ public class INIFile {
      */
     public String getStringFromINI(String input, String section, String setting, String defaultValue, boolean preserveCase) {
         if (!preserveCase) {
-            return getINIValue(input, section, setting, defaultValue).toLowerCase();
+            return getINIValue(input, section, setting, defaultValue).toLowerCase(Locale.ENGLISH);
         }
         else {
             return getINIValue(input, section, setting, defaultValue); 
@@ -374,16 +377,16 @@ public class INIFile {
             }
         }
         
-        // Merge all sections to a string named newContents
-        String newContents = "";
-        for (int i = 0; i < allSections.size(); i++) {
-            newContents = newContents + allSections.get(i).replace("\n\n", "\n");
+        // Merge all sections using a StringBuilder
+        var sb = new StringBuilder();
+        for (String s : allSections) {
+            sb.append(s.replace("\n\n", "\n"));
         }
-        // Make it look nicer by adding an empty line betwen sections
-        newContents = newContents.replaceAll("\n\\[", "\n\n\\[");
         
-        // Return changes
-        return newContents;
+        // Return the contents of the StringBuffer
+        // Also make it look nicer by adding an empty line betwen sections
+        return sb.toString().replaceAll("\n\\[", "\n\n\\[");
+        
     }
     
     /**

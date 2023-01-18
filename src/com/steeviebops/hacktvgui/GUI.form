@@ -2,21 +2,21 @@
 
 <Form version="1.9" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
-    <Component class="javax.swing.ButtonGroup" name="SourceButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="sourceButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="VideoFormatButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="modeButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="BandButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="bandButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="MacStereoButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="macStereoButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="MacSRButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="macSRButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="MacCompressionButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="macCompressionButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="MacProtectionButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="macProtectionButtonGroup">
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="TemplateButtonGroup">
+    <Component class="javax.swing.ButtonGroup" name="templateButtonGroup">
     </Component>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <SubComponents>
@@ -131,7 +131,7 @@
                 <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuIF">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="TemplateButtonGroup"/>
+                      <ComponentRef name="templateButtonGroup"/>
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="Intermediate frequency (IF)"/>
@@ -144,7 +144,7 @@
                 <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKuBand">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="TemplateButtonGroup"/>
+                      <ComponentRef name="templateButtonGroup"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Second harmonic (Ku band)"/>
                     <Property name="actionCommand" type="java.lang.String" value="1"/>
@@ -156,7 +156,7 @@
                 <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKaBand">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="TemplateButtonGroup"/>
+                      <ComponentRef name="templateButtonGroup"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Fourth harmonic (Ka band)"/>
                     <Property name="actionCommand" type="java.lang.String" value="2"/>
@@ -318,7 +318,7 @@
     </Component>
     <Component class="javax.swing.JFileChooser" name="hacktvFileChooser">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xa;hacktvFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));&#xa;hacktvFileChooser.setFileFilter(new FileFilter() {&#xa;    @Override&#xa;    public boolean accept(File file) {&#xa;// always accept directories&#xa;if (file.isDirectory())&#xa;    return true;&#xa;// but only files with specific name&#xa;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;    return file.getName().equals(&quot;hacktv&quot;);&#xa;}&#xa;else {&#xa;    return file.getName().equals(&quot;hacktv.exe&quot;);&#xa;}&#xa;    }&#xa;    @Override&#xa;    public String getDescription() {&#xa;&#x9;if (!System.getProperty(&quot;os.name&quot;).contains(&quot;Windows&quot;)) {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv)&quot;;&#xa;&#x9;}&#xa;        else {&#xa;&#x9;&#x9;return &quot;hacktv binaries (hacktv.exe)&quot;;&#xa;&#x9;}&#xa;    }&#xa;});"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JFileChooser();&#xd;&#xa;hacktvFileChooser.setCurrentDirectory(new File(System.getProperty(&quot;user.home&quot;)));&#xd;&#xa;hacktvFileChooser.setFileFilter(createFileFilter())"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JFileChooser" name="outputFileChooser">
@@ -338,7 +338,7 @@
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
                               <Component id="tabPane" max="32767" attributes="0"/>
-                              <Component id="RunButtonGrid" max="32767" attributes="0"/>
+                              <Component id="runButtonGrid" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Component id="consoleOutputPanel" max="32767" attributes="0"/>
@@ -356,7 +356,7 @@
                       <Group type="102" attributes="0">
                           <Component id="tabPane" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="RunButtonGrid" min="-2" pref="95" max="-2" attributes="0"/>
+                          <Component id="runButtonGrid" min="-2" pref="95" max="-2" attributes="0"/>
                       </Group>
                       <Component id="consoleOutputPanel" max="32767" attributes="0"/>
                   </Group>
@@ -443,7 +443,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="SourcePanel" max="32767" attributes="0"/>
+                          <Component id="sourcePanel" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -452,14 +452,14 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="SourcePanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="sourcePanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Container class="javax.swing.JPanel" name="SourcePanel">
+                <Container class="javax.swing.JPanel" name="sourcePanel">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -510,27 +510,22 @@
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" attributes="0">
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="playlistScrollPane" pref="426" max="32767" attributes="0"/>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
-                                                      <Component id="radTest" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                                      <Component id="cmbTest" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                                  </Group>
-                                              </Group>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="playlistScrollPane" pref="426" max="32767" attributes="0"/>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
+                                              <Component id="radTest" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                                              <Component id="cmbTest" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
                                           <Group type="102" attributes="0">
                                               <Component id="txtSource" pref="389" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="cmbM3USource" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
+                                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                           <Component id="btnRemove" alignment="1" max="32767" attributes="0"/>
                                           <Component id="btnPlaylistUp" alignment="1" max="32767" attributes="0"/>
@@ -611,7 +606,7 @@
                     <Component class="javax.swing.JRadioButton" name="radLocalSource">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="SourceButtonGroup"/>
+                          <ComponentRef name="sourceButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Local or internet source"/>
                       </Properties>
@@ -622,7 +617,7 @@
                     <Component class="javax.swing.JRadioButton" name="radTest">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="SourceButtonGroup"/>
+                          <ComponentRef name="sourceButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Test card"/>
                       </Properties>
@@ -870,8 +865,8 @@
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="VideoFormatPanel" max="32767" attributes="0"/>
-                              <Component id="FrequencyPanel" alignment="1" max="32767" attributes="0"/>
+                              <Component id="modePanel" max="32767" attributes="0"/>
+                              <Component id="frequencyPanel" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -881,16 +876,16 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="VideoFormatPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="modePanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="FrequencyPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="frequencyPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Container class="javax.swing.JPanel" name="FrequencyPanel">
+                <Container class="javax.swing.JPanel" name="frequencyPanel">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -1056,7 +1051,7 @@
                         <Component class="javax.swing.JRadioButton" name="radCustom">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                              <ComponentRef name="BandButtonGroup"/>
+                              <ComponentRef name="bandButtonGroup"/>
                             </Property>
                             <Property name="text" type="java.lang.String" value="Custom"/>
                           </Properties>
@@ -1067,7 +1062,7 @@
                         <Component class="javax.swing.JRadioButton" name="radVHF">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                              <ComponentRef name="BandButtonGroup"/>
+                              <ComponentRef name="bandButtonGroup"/>
                             </Property>
                             <Property name="text" type="java.lang.String" value="VHF"/>
                           </Properties>
@@ -1078,7 +1073,7 @@
                         <Component class="javax.swing.JRadioButton" name="radUHF">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                              <ComponentRef name="BandButtonGroup"/>
+                              <ComponentRef name="bandButtonGroup"/>
                             </Property>
                             <Property name="text" type="java.lang.String" value="UHF"/>
                           </Properties>
@@ -1206,7 +1201,7 @@
                     </Component>
                   </SubComponents>
                 </Container>
-                <Container class="javax.swing.JPanel" name="VideoFormatPanel">
+                <Container class="javax.swing.JPanel" name="modePanel">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -1347,7 +1342,7 @@
                     <Component class="javax.swing.JRadioButton" name="radPAL">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="VideoFormatButtonGroup"/>
+                          <ComponentRef name="modeButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="PAL"/>
                       </Properties>
@@ -1358,7 +1353,7 @@
                     <Component class="javax.swing.JRadioButton" name="radNTSC">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="VideoFormatButtonGroup"/>
+                          <ComponentRef name="modeButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="NTSC"/>
                       </Properties>
@@ -1369,7 +1364,7 @@
                     <Component class="javax.swing.JRadioButton" name="radSECAM">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="VideoFormatButtonGroup"/>
+                          <ComponentRef name="modeButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="SECAM"/>
                       </Properties>
@@ -1380,7 +1375,7 @@
                     <Component class="javax.swing.JRadioButton" name="radBW">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="VideoFormatButtonGroup"/>
+                          <ComponentRef name="modeButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Black and white"/>
                       </Properties>
@@ -1391,7 +1386,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMAC">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="VideoFormatButtonGroup"/>
+                          <ComponentRef name="modeButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="MAC"/>
                       </Properties>
@@ -1521,7 +1516,7 @@
                 </Container>
               </SubComponents>
             </Container>
-            <Container class="javax.swing.JPanel" name="PlaybackTab">
+            <Container class="javax.swing.JPanel" name="playbackTab">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
                   <JTabbedPaneConstraints tabName="Playback">
@@ -1537,8 +1532,8 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" attributes="0">
                               <Component id="macPanel" max="32767" attributes="0"/>
-                              <Component id="VBIPanel" alignment="0" max="32767" attributes="0"/>
-                              <Component id="AdditionalOptionsPanel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="vbiPanel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="additionalOptionsPanel" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1548,9 +1543,9 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="VBIPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="vbiPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="AdditionalOptionsPanel" min="-2" max="-2" attributes="0"/>
+                          <Component id="additionalOptionsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="macPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace pref="87" max="32767" attributes="0"/>
@@ -1559,7 +1554,7 @@
                 </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Container class="javax.swing.JPanel" name="VBIPanel">
+                <Container class="javax.swing.JPanel" name="vbiPanel">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -1645,7 +1640,7 @@
                     </Component>
                   </SubComponents>
                 </Container>
-                <Container class="javax.swing.JPanel" name="AdditionalOptionsPanel">
+                <Container class="javax.swing.JPanel" name="additionalOptionsPanel">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -1847,7 +1842,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacStereo">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacStereoButtonGroup"/>
+                          <ComponentRef name="macStereoButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Stereo"/>
                       </Properties>
@@ -1855,7 +1850,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMac32k">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacSRButtonGroup"/>
+                          <ComponentRef name="macSRButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="32 kHz"/>
                       </Properties>
@@ -1863,7 +1858,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacCompanded">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacCompressionButtonGroup"/>
+                          <ComponentRef name="macCompressionButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Companded"/>
                       </Properties>
@@ -1871,7 +1866,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacMono">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacStereoButtonGroup"/>
+                          <ComponentRef name="macStereoButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Mono"/>
                       </Properties>
@@ -1879,7 +1874,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMac16k">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacSRButtonGroup"/>
+                          <ComponentRef name="macSRButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="16 kHz"/>
                       </Properties>
@@ -1887,7 +1882,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacLinear">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacCompressionButtonGroup"/>
+                          <ComponentRef name="macCompressionButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Linear"/>
                       </Properties>
@@ -1895,7 +1890,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacL1">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacProtectionButtonGroup"/>
+                          <ComponentRef name="macProtectionButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Level 1"/>
                       </Properties>
@@ -1903,7 +1898,7 @@
                     <Component class="javax.swing.JRadioButton" name="radMacL2">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="MacProtectionButtonGroup"/>
+                          <ComponentRef name="macProtectionButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Level 2"/>
                       </Properties>
@@ -3042,7 +3037,7 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtStatus.addMouseListener(new ContextMenuListener());"/>
           </AuxValues>
         </Component>
-        <Container class="javax.swing.JPanel" name="RunButtonGrid">
+        <Container class="javax.swing.JPanel" name="runButtonGrid">
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout"/>
           <SubComponents>
