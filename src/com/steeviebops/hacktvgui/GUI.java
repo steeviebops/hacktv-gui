@@ -182,6 +182,7 @@ public class GUI extends javax.swing.JFrame {
     private String scramblingKey1 = "";
     private String scramblingType2 = "";
     private String scramblingKey2 = "";
+    private int dualVC;
     
     // Class instances
     final Shared SharedInst = new Shared();
@@ -1629,66 +1630,91 @@ public class GUI extends javax.swing.JFrame {
         String ImportedKey = INI.getStringFromINI(fileContents, "hacktv", "scramblingkey", "", false);
         String ImportedKey2 = INI.getStringFromINI(fileContents, "hacktv", "scramblingkey2", "", false);
         if ((radPAL.isSelected()) || radSECAM.isSelected()) {
+            int i;
             switch (ImportedScramblingSystem) {
                 case "":
-                    cmbScramblingType.setSelectedIndex(0);
+                    i = 0;
                     break;
                 case "videocrypt":
-                    cmbScramblingType.setSelectedIndex(1);
+                    i = scramblingTypeArray.indexOf("--videocrypt");
                     break;
                 case "videocrypt2":
-                    cmbScramblingType.setSelectedIndex(2);
+                    i = scramblingTypeArray.indexOf("--videocrypt2");
                     break;
                 case "videocrypt1+2":
-                    cmbScramblingType.setSelectedIndex(3);
+                    if (dualVC != -1) {
+                        i = dualVC;
+                    }
+                    else {
+                        i = -1;
+                    }
                     break;
                 case "videocrypts":
-                    cmbScramblingType.setSelectedIndex(4);
+                    i = scramblingTypeArray.indexOf("--videocrypts");
                     break;
                 case "syster":
-                    cmbScramblingType.setSelectedIndex(5);
+                    i = scramblingTypeArray.indexOf("--syster");
                     break;
                 case "d11":
                     if (captainJack) {
-                        cmbScramblingType.setSelectedIndex(6);
-                        break;
+                        i = scramblingTypeArray.indexOf("--d11");
                     }
-                    // WARNING: NO BREAK, move on to default
+                    else {
+                        i = -1;
+                    }
+                    break;
                 case "systercnr":
                     if (captainJack) {
-                        cmbScramblingType.setSelectedIndex(7);
-                        break;
+                        i = scramblingTypeArray.indexOf("--systercnr");
                     }
-                    // WARNING: NO BREAK, move on to default
+                    else {
+                        i = -1;
+                    }
+                    break;
                 case "systerls+cnr":
                     if (captainJack) {
-                        cmbScramblingType.setSelectedIndex(8);
-                        break;
+                        i = scramblingTypeArray.indexOf("--systercnr") + 1;
                     }
-                    // WARNING: NO BREAK, move on to default
-                default:
-                    invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
-                    ImportedScramblingSystem = "";
+                    else {
+                        i = -1;
+                    }
                     break;
+                default:
+                    i = -1;
+                    break;
+            }
+            if (i == -1) {
+                invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
+                ImportedScramblingSystem = "";
+            }
+            else {
+                cmbScramblingType.setSelectedIndex(i);
             }
         }
         else if (radMAC.isSelected()) {
+            int i;
             switch (ImportedScramblingSystem) {
                 case "":
-                    cmbScramblingType.setSelectedIndex(0);
+                    i = 0;
                     break;
                 case "single-cut":
-                    cmbScramblingType.setSelectedIndex(1);
+                    i = scramblingTypeArray.indexOf("--single-cut");
                     break;
                 case "double-cut":
-                    cmbScramblingType.setSelectedIndex(2);
+                    i = scramblingTypeArray.indexOf("--double-cut");
                     break;
                 default:
-                    invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
-                    ImportedScramblingSystem = "";
+                    i = -1;
                     break;
             }
-        }
+            if (i == -1) {
+                invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
+                ImportedScramblingSystem = "";
+            }
+            else {
+                cmbScramblingType.setSelectedIndex(i);
+            }
+        }            
         // Scrambling key/viewing card type (including VC1 side of dual VC1/2 mode)
         if ( (!ImportedScramblingSystem.isEmpty()) ) {
             if (ImportedKey.isEmpty()) ImportedKey = ImportedKey.replace("", "blank");
@@ -2117,36 +2143,51 @@ public class GUI extends javax.swing.JFrame {
         // AR Correction
         if (chkARCorrection.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "arcorrection", cmbARCorrection.getSelectedIndex());
         // Scrambling
-        // VideoCrypt I+II
-        if (cmbScramblingType.getSelectedIndex() == 3) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "videocrypt1+2");
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey2", scramblingKey2);
-        }
-        // Syster dual mode (line shuffling + cut-and-rotate)
-        else if ( cmbScramblingType.getSelectedIndex() == 8) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "systerls+cnr");
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
-        }
-        else if ( (scramblingType1.equals("--single-cut")) || (scramblingType1.equals("--double-cut")) ) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
-            if (!scramblingType2.isEmpty()) {
-                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingType2.substring(2) + '\u0020' + scramblingKey2);
-            }
-            else {
-                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", "");
-            }
-        }
-        else if (cmbScramblingType.getSelectedIndex() != 0) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
-            FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+        switch (scramblingTypeArray.get(cmbScramblingType.getSelectedIndex())) {
+            case (""):
+                // Scrambling disabled, do nothing
+                break;
+            case ("--videocrypt"):
+                if (scramblingType2.isEmpty()) {
+                    // VideoCrypt I only
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                }
+                else {
+                    // VideoCrypt I+II
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "videocrypt1+2");
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey2", scramblingKey2);
+                }
+                break;
+            case ("--syster"):
+                if (scramblingType2.isEmpty()) {
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                }
+                else {
+                    // Syster dual mode (line shuffling + cut-and-rotate)
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "systerls+cnr");
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);   
+                }
+                break;
+            case ("--single-cut"):
+            case ("--double-cut"):
+                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
+                if (!scramblingType2.isEmpty()) {
+                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingType2.substring(2) + '\u0020' + scramblingKey2);
+                }
+                break;
+            default:
+                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
+                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                break;
         }
         if (chkActivateCard.isSelected()) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "emm", 1);
         }
         else if (chkDeactivateCard.isSelected()) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "emm", 2);
-
         }
         if (SharedInst.isNumeric(txtCardNumber.getText())) {
             switch (txtCardNumber.getText().length()) {
@@ -3050,52 +3091,75 @@ public class GUI extends javax.swing.JFrame {
     private void add625ScramblingTypes() {
         ArrayList<String> ScramblingTypeAL = new ArrayList<>();
         ScramblingTypeAL.add("No scrambling");
-        ScramblingTypeAL.add("VideoCrypt I");
-        ScramblingTypeAL.add("VideoCrypt II");
-        ScramblingTypeAL.add("VideoCrypt I+II");
-        ScramblingTypeAL.add("VideoCrypt S");
-        ScramblingTypeAL.add("Nagravision Syster");
-        if (captainJack) { 
-            ScramblingTypeAL.add("Discret 11");
-            ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
-            ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
-        }
         scramblingTypeArray = new ArrayList<>();
         scramblingTypeArray.add("");
-        scramblingTypeArray.add("--videocrypt");
-        scramblingTypeArray.add("--videocrypt2");
-        scramblingTypeArray.add("--videocrypt");
-        scramblingTypeArray.add("--videocrypts");
-        scramblingTypeArray.add("--syster");
-        if (captainJack) {
-            scramblingTypeArray.add("--d11");
-            scramblingTypeArray.add("--systercnr");
+        dualVC = -2;
+        // Check if Modes.ini contains a section for these scrambling systems
+        String vc1 = INI.splitINIfile(modesFile, "videocrypt");
+        String vc2 = INI.splitINIfile(modesFile, "videocrypt2");
+        String vcs = INI.splitINIfile(modesFile, "videocrypts");
+        String syster = INI.splitINIfile(modesFile, "syster");
+        if (vc1 != null) {
+            ScramblingTypeAL.add("VideoCrypt I");
+            scramblingTypeArray.add("--videocrypt");
+        }
+        if (vc2 != null) {
+            ScramblingTypeAL.add("VideoCrypt II");
+            scramblingTypeArray.add("--videocrypt2");
+        }
+        if ((vc1 != null) && (vc2 != null)) {
+            ScramblingTypeAL.add("VideoCrypt I+II");
+            scramblingTypeArray.add("--videocrypt");
+            // Specify that both key fields should be enabled for this system
+            dualVC = scramblingTypeArray.size() - 1;
+        }
+        if (vcs != null) {
+            ScramblingTypeAL.add("VideoCrypt S");
+            scramblingTypeArray.add("--videocrypts");
+        }
+        if (syster != null) {
+            ScramblingTypeAL.add("Nagravision Syster");
             scramblingTypeArray.add("--syster");
+            if (captainJack) { 
+                ScramblingTypeAL.add("Discret 11");
+                ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
+                ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
+                scramblingTypeArray.add("--d11");
+                scramblingTypeArray.add("--systercnr");
+                scramblingTypeArray.add("--syster");
+            }   
+        }
+        if (ScramblingTypeAL.size() == 1) {
+            // No systems found, disable the scrambling tab
+            disableScrambling();
         }
         cmbScramblingType.removeAllItems();
-        
         // Convert to an array so we can populate
         String[] ScramblingType = new String[ScramblingTypeAL.size()];
-        for(int i = 0; i < ScramblingType.length; i++) {
+        for (int i = 0; i < ScramblingType.length; i++) {
             ScramblingType[i] = ScramblingTypeAL.get(i);
-        } 
+        }
         cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
         cmbScramblingType.setSelectedIndex(0);
     }
     
     private void addMACScramblingTypes() {
         ArrayList<String> ScramblingTypeAL = new ArrayList<>();
-        ScramblingTypeAL.add("No scrambling");
-        ScramblingTypeAL.add("Single cut");
-        ScramblingTypeAL.add("Double cut");
-        
         scramblingTypeArray = new ArrayList<>();
-            scramblingTypeArray.add("");
+        ScramblingTypeAL.add("No scrambling");
+        scramblingTypeArray.add("");
+        dualVC = -2;
+        if (INI.splitINIfile(modesFile, "eurocrypt") != null) {
+            ScramblingTypeAL.add("Single cut");
+            ScramblingTypeAL.add("Double cut");
             scramblingTypeArray.add("--single-cut");
-            scramblingTypeArray.add("--double-cut");
-            
+            scramblingTypeArray.add("--double-cut");            
+        }
+        if (ScramblingTypeAL.size() == 1) {
+            // No systems found, disable the scrambling tab
+            disableScrambling();
+        }
         cmbScramblingType.removeAllItems();
-        
         // Convert to an array so we can populate
         String[] ScramblingType = new String[ScramblingTypeAL.size()];
         for(int i = 0; i < ScramblingType.length; i++) {
@@ -3175,7 +3239,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Extract (from modesFile) the scrambling key section that we need
         String slist = INI.splitINIfile(modesFile, sconf);
-        if (slist == null) {
+        // If the INI section is present but no data is contained in it, stop
+        if ((slist.trim().lines().count()) <= 1) {
             scramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
@@ -3206,8 +3271,8 @@ public class GUI extends javax.swing.JFrame {
         cmbScramblingKey1.setSelectedIndex(0);
         
         // VC1+2 dual mode    
-        if (cmbScramblingType.getSelectedIndex() == 3) {
-            final String sconf2 = "videocrypt2";
+        if (cmbScramblingType.getSelectedIndex() == dualVC) {
+            String sconf2 = "videocrypt2";
             if (captainJack) {
                 enableScramblingKey1();
                 enableScramblingKey2();
