@@ -3250,18 +3250,9 @@ public class GUI extends javax.swing.JFrame {
         }
         // We just want the commands so remove everything after =
         slist = slist.replaceAll("\\=.*", "");       
-        // Remove commented out lines
-        slist = Stream.of(slist.split("\n"))
-                .filter(f -> !f.contains(";"))
-                .collect(Collectors.joining("\n"));
         String[] ScramblingKey = slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n");
         // Extract friendly names and add commands to an ArrayList
         scramblingKeyArray = new ArrayList<>();
-        if ( (sconf.equals("single-cut"))|| (sconf.equals("double-cut")) ) {
-            ScramblingKey[0] = ("No conditional access (free");
-            scramblingKeyArray.clear();
-            scramblingKeyArray.add("");
-        }
         for (int i = 0; i < ScramblingKey.length; i++) {
             scramblingKeyArray.add(ScramblingKey[i]);
             ScramblingKey[i] = INI.getStringFromINI(modesFile , sconf, ScramblingKey[i], "", true);
@@ -3292,10 +3283,6 @@ public class GUI extends javax.swing.JFrame {
             }
             // We just want the commands so remove everything after =
             slist2 = slist2.replaceAll("\\=.*", "");       
-            // Remove commented out lines
-            slist2 = Stream.of(slist2.split("\n"))
-                    .filter(f -> !f.contains(";"))
-                    .collect(Collectors.joining("\n"));
             String[] ScramblingKey2A = slist2.substring(slist2.indexOf("\n") +1).split("\\r?\\n");
             // Extract friendly names and add commands to an ArrayList
             scramblingKey2Array = new ArrayList<>();
@@ -3513,11 +3500,7 @@ public class GUI extends javax.swing.JFrame {
             return;
         }
         // We just want the commands so remove everything after =
-        logos = logos.replaceAll("\\=.*", "");       
-        // Remove commented out lines
-        logos = Stream.of(logos.split("\n"))
-                .filter(f -> !f.contains(";"))
-                .collect(Collectors.joining("\n"));     
+        logos = logos.replaceAll("\\=.*", "");          
         // Add a headerless string to logoArray by splitting off the first line
         logoArray = logos.substring(logos.indexOf("\n") +1).split("\\r?\\n");
         // Populate LogoNames by reading modesFile using what we added
@@ -4124,11 +4107,7 @@ public class GUI extends javax.swing.JFrame {
                  return;
             }
             // We just want the channel names/numbers so remove everything after =
-            bp = bp.replaceAll("\\=.*", "");       
-            // Remove commented out lines
-            bp = Stream.of(bp.split("\n"))
-                    .filter(f -> !f.contains(";"))
-                    .collect(Collectors.joining("\n"));
+            bp = bp.replaceAll("\\=.*", "");
             // Remove region identifier line and chid line if they exist
             bp = Stream.of(bp.split("\n"))
                     .filter(g -> !g.contains("region"))
@@ -5998,7 +5977,7 @@ public class GUI extends javax.swing.JFrame {
             hackTVPath = SharedInst.stripQuotes(file.toString());
             txtHackTVPath.setText(hackTVPath);
             // Store the specified path.
-            PREFS.put("hackTVPath", hackTVPath);
+            PREFS.put("HackTVPath", hackTVPath);
             // Load the full path to a variable so we can use getParent on it
             // and get its parent directory path
             hackTVDirectory = new File(hackTVPath).getParent();
@@ -6601,7 +6580,7 @@ public class GUI extends javax.swing.JFrame {
                         hackTVPath = exePath;
                         txtHackTVPath.setText(exePath);
                         // Store the specified path in the preferences store.
-                        PREFS.put("hackTVPath", hackTVPath);
+                        PREFS.put("HackTVPath", hackTVPath);
                         // Load the full path to a variable so we can use getParent on it
                         // and get its parent directory path
                         hackTVDirectory = new File(hackTVPath).getParent();    
