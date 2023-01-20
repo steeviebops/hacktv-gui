@@ -3248,20 +3248,23 @@ public class GUI extends javax.swing.JFrame {
                     + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        // We just want the commands so remove everything after =
-        slist = slist.replaceAll("\\=.*", "");       
-        String[] ScramblingKey = slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n");
-        // Extract friendly names and add commands to an ArrayList
+        else {
+            // We just want the commands so remove everything after =
+            slist = slist.replaceAll("\\=.*", "");
+        }
+        // Add commands to an ArrayList
         scramblingKeyArray = new ArrayList<>();
-        for (int i = 0; i < ScramblingKey.length; i++) {
-            scramblingKeyArray.add(ScramblingKey[i]);
-            ScramblingKey[i] = INI.getStringFromINI(modesFile , sconf, ScramblingKey[i], "", true);
+        scramblingKeyArray.addAll(Arrays.asList(slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n")));
+        // Extract friendly names and populate the combobox with them
+        String[] skn = new String[scramblingKeyArray.size()];
+        for (int i = 0; i < scramblingKeyArray.size(); i++) {
+            skn[i] = INI.getStringFromINI(modesFile , sconf, scramblingKeyArray.get(i), "", true);
         }
         // Populate key 1 combobox
-        cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(ScramblingKey));
+        cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(skn));
         cmbScramblingKey1.setSelectedIndex(0);
         
-        // VC1+2 dual mode    
+        // VC1+2 dual mode
         if (cmbScramblingType.getSelectedIndex() == dualVC) {
             String sconf2 = "videocrypt2";
             if (captainJack) {
@@ -3275,23 +3278,26 @@ public class GUI extends javax.swing.JFrame {
             cmbScramblingKey2.removeAllItems();
             // Extract (from modesFile) the VC2 scrambling key section
             String slist2 = INI.splitINIfile(modesFile, sconf2);
-            if (slist2 == null) {
-                messageBox("The scrambling key information in Modes.ini appears to be "
-                        + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
+            if ((slist2.trim().lines().count()) <= 1) {
+                scramblingType1 = "";
                 cmbScramblingType.setSelectedIndex(0);
+                addScramblingKey();
+                messageBox("The scrambling key information in Modes.ini appears to be "
+                        + "missing or corrupt for the secondary scrambling type.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             // We just want the commands so remove everything after =
-            slist2 = slist2.replaceAll("\\=.*", "");       
-            String[] ScramblingKey2A = slist2.substring(slist2.indexOf("\n") +1).split("\\r?\\n");
-            // Extract friendly names and add commands to an ArrayList
+            slist2 = slist2.replaceAll("\\=.*", "");
+            // Add commands to an ArrayList
             scramblingKey2Array = new ArrayList<>();
-            for (int i = 0; i < ScramblingKey2A.length; i++) {
-                scramblingKey2Array.add(ScramblingKey2A[i]);
-                ScramblingKey2A[i] = INI.getStringFromINI(modesFile , sconf2, ScramblingKey2A[i], "", true);
+            scramblingKey2Array.addAll(Arrays.asList(slist2.substring(slist2.indexOf("\n") + 1).split("\\r?\\n")));
+            // Extract friendly names and populate the combobox with them
+            String[] skn2 = new String[scramblingKey2Array.size()];
+            for (int i = 0; i < scramblingKey2Array.size(); i++) {
+                skn2[i] = INI.getStringFromINI(modesFile , sconf2, scramblingKey2Array.get(i), "", true);
             }
             // Populate key 2 combobox
-            cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(ScramblingKey2A));
+            cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(skn2));
             cmbScramblingKey2.setSelectedIndex(0);
         }
     }
