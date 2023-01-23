@@ -1548,7 +1548,7 @@
                           <Component id="additionalOptionsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="macPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="87" max="32767" attributes="0"/>
+                          <EmptySpace pref="64" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1577,6 +1577,7 @@
                                   <Component id="chkACP" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkVITS" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkVITC" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkSecamId" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -1595,6 +1596,8 @@
                               <Component id="chkVITS" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkVITC" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="chkSecamId" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -1636,6 +1639,11 @@
                     <Component class="javax.swing.JCheckBox" name="chkVITC">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="VITC (Vertical Interval Time Code)"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkSecamId">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="SECAM field ID"/>
                       </Properties>
                     </Component>
                   </SubComponents>

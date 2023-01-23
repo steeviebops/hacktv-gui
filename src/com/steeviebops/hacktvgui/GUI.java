@@ -460,7 +460,8 @@ public class GUI extends javax.swing.JFrame {
             chkRandom,
             chkNoDate,
             chkInvertVideo,
-            chkVITC
+            chkVITC,
+            chkSecamId
         };
     }
     
@@ -1509,6 +1510,10 @@ public class GUI extends javax.swing.JFrame {
                 }  
             }
         }
+        // SECAM field ID
+        if ((INI.getBooleanFromINI(fileContents, "hacktv", "secam-field-id")) && radSECAM.isSelected()) {
+            chkSecamId.doClick();
+        }
         // Gain
         if (INI.getIntegerFromINI(fileContents, "hacktv", "gain") != null) {
             txtGain.setText(INI.getIntegerFromINI(fileContents, "hacktv", "gain").toString());
@@ -2103,6 +2108,10 @@ public class GUI extends javax.swing.JFrame {
         // Pixel rate
         if (SharedInst.isNumeric(txtPixelRate.getText())) {
             FileContents = INI.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
+        }
+        // SECAM field ID
+        if (chkSecamId.isSelected()) {
+            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id", 1);
         }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -3650,6 +3659,13 @@ public class GUI extends javax.swing.JFrame {
         else if (radMAC.isSelected()) {
             mode = macModeArray[cmbMode.getSelectedIndex()];
         }
+        if (radSECAM.isSelected()) {
+            chkSecamId.setEnabled(true);
+        }
+        else {
+            if (chkSecamId.isSelected()) chkSecamId.doClick();
+            chkSecamId.setEnabled(false);
+        }
         // Save the line count from the previously selected mode
         int oldLines = lines;
         // Start reading the section we found above, starting with line count
@@ -4722,6 +4738,8 @@ public class GUI extends javax.swing.JFrame {
         else {
             return;
         }
+        // SECAM field ID
+        if (chkSecamId.isSelected()) allArgs.add("--secam-field-id");
         // Only add gain for HackRF or SoapySDR
         if (txtGain.isEnabled()) {
             if (checkGain() != null) {
@@ -6993,6 +7011,7 @@ public class GUI extends javax.swing.JFrame {
         chkWSS = new javax.swing.JCheckBox();
         cmbWSS = new javax.swing.JComboBox<>();
         chkVITC = new javax.swing.JCheckBox();
+        chkSecamId = new javax.swing.JCheckBox();
         additionalOptionsPanel = new javax.swing.JPanel();
         chkGamma = new javax.swing.JCheckBox();
         txtGamma = new javax.swing.JTextField();
@@ -7930,6 +7949,8 @@ public class GUI extends javax.swing.JFrame {
 
         chkVITC.setText("VITC (Vertical Interval Time Code)");
 
+        chkSecamId.setText("SECAM field ID");
+
         javax.swing.GroupLayout vbiPanelLayout = new javax.swing.GroupLayout(vbiPanel);
         vbiPanel.setLayout(vbiPanelLayout);
         vbiPanelLayout.setHorizontalGroup(
@@ -7943,7 +7964,8 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
                     .addComponent(chkVITS)
-                    .addComponent(chkVITC))
+                    .addComponent(chkVITC)
+                    .addComponent(chkSecamId))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         vbiPanelLayout.setVerticalGroup(
@@ -7958,6 +7980,8 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkVITS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVITC)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSecamId)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -8158,7 +8182,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addContainerGap(64, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Playback", playbackTab);
@@ -9211,6 +9235,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkRandom;
     private javax.swing.JCheckBox chkRepeat;
     private javax.swing.JCheckBox chkScrambleAudio;
+    private javax.swing.JCheckBox chkSecamId;
     private javax.swing.JCheckBox chkShowCardSerial;
     private javax.swing.JCheckBox chkShowECM;
     private javax.swing.JCheckBox chkSubtitles;
