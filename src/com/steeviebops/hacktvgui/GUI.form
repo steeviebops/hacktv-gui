@@ -485,7 +485,7 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkSubtitles" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="113" max="32767" attributes="0"/>
+                                              <EmptySpace pref="114" max="32767" attributes="0"/>
                                               <Component id="lblSubtitleIndex" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="separate" max="-2" attributes="0"/>
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
@@ -510,7 +510,7 @@
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="playlistScrollPane" pref="426" max="32767" attributes="0"/>
+                                          <Component id="playlistScrollPane" pref="427" max="32767" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
@@ -520,7 +520,7 @@
                                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
                                           <Group type="102" attributes="0">
-                                              <Component id="txtSource" pref="389" max="32767" attributes="0"/>
+                                              <Component id="txtSource" pref="390" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="cmbM3USource" max="32767" attributes="0"/>
                                           </Group>
@@ -986,7 +986,7 @@
                                               <Component id="txtAntennaName" max="32767" attributes="0"/>
                                               <Group type="102" attributes="0">
                                                   <Component id="cmbFileType" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="0" pref="122" max="32767" attributes="0"/>
+                                                  <EmptySpace min="0" pref="123" max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -1240,7 +1240,7 @@
                                                   <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
                                                   <Component id="chkColour" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" pref="142" max="32767" attributes="0"/>
+                                              <EmptySpace type="unrelated" pref="143" max="32767" attributes="0"/>
                                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -1569,17 +1569,19 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="chkWSS" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="cmbWSS" min="-2" pref="128" max="-2" attributes="0"/>
-                                  </Group>
                                   <Component id="chkACP" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkVITS" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkVITC" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkSecamId" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                          <Component id="chkWSS" max="32767" attributes="0"/>
+                                          <Component id="chkVITC" alignment="1" max="32767" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="cmbWSS" min="-2" pref="128" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace pref="203" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1591,7 +1593,7 @@
                                   <Component id="cmbWSS" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                              <Component id="chkACP" min="-2" pref="23" max="-2" attributes="0"/>
+                              <Component id="chkACP" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                               <Component id="chkVITS" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
@@ -1616,7 +1618,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkWSS">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Widescreen signalling (WSS) on line 23"/>
+                        <Property name="text" type="java.lang.String" value="Widescreen signalling (WSS)"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkWSSActionPerformed"/>
@@ -1678,7 +1680,7 @@
                                   <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="120" max="32767" attributes="0"/>
+                              <EmptySpace pref="121" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1987,12 +1989,12 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="chkTeletext" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="286" pref="420" max="32767" attributes="0"/>
+                                      <EmptySpace min="286" pref="421" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <Component id="txtTeletextSource" pref="391" max="32767" attributes="0"/>
+                                              <Component id="txtTeletextSource" pref="392" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
                                           </Group>
@@ -2116,7 +2118,7 @@
                                           <Component id="lblSpark" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="lblNMSCeefax" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="90" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="91" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -2406,7 +2408,7 @@
                                       </Group>
                                       <Component id="chkShowCardSerial" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="95" max="32767" attributes="0"/>
+                                  <EmptySpace pref="96" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -2758,7 +2760,7 @@
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="btnDownloadHackTV" max="32767" attributes="0"/>
+                                          <Component id="btnDownloadHackTV" pref="92" max="32767" attributes="0"/>
                                           <Component id="btnHackTVPath" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
@@ -2853,7 +2855,7 @@
                                   <Component id="lblClearAll" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblClearMRU" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="191" max="32767" attributes="0"/>
+                              <EmptySpace pref="192" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>

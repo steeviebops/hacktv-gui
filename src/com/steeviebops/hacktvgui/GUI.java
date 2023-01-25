@@ -49,10 +49,13 @@ import java.awt.Image;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -6540,17 +6543,88 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_lstPlaylistKeyPressed
 
     private void btnDownloadHackTVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadHackTVActionPerformed
-        SwingWorker<String, Void> downloadHackTV = new SwingWorker<String, Void>() {
+        if (downloadInProgress) {
+            btnDownloadHackTV.setEnabled(false);
+            downloadCancelled = true;
+            return;
+        }
+        // Downloads the latest pre-compiled Windows build from my Github repo
+        // Captain Jack's download URL is https://filmnet.plus/hacktv/hacktv.zip
+        // but this hasn't been updated for a while so we'll put it aside.
+        final String selectedBuild;
+        String prompt = "This will download the latest build of hacktv from the author's Github repository.\n"
+                    + "This requires an internet connection and will only work if you have write access "
+                    + "to the directory where this application is located.\n"
+                    + "Please select the build to download.";
+        String opts[] = {
+            "fsphil",
+            "Captain Jack",
+            "Cancel"
+        };
+        int q = JOptionPane.showOptionDialog(
+                null,
+                prompt,
+                APP_NAME,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opts,
+                opts[2]
+        );
+        switch (q) {
+            case 0:
+                selectedBuild = "fsphil";
+                break;
+            case 1:
+                selectedBuild = "captainjack";
+                break;
+            default:
+                return;
+        }
+        String dUrl = "https://github.com/steeviebops/hacktv/releases/latest/"
+                + "download/hacktv-" + selectedBuild + ".zip";
+        btnDownloadHackTV.setText("Cancel");
+        downloadInProgress = true;
+        txtStatus.setText("Connecting to " + dUrl);
+        SwingWorker<String, Integer> downloadHackTV = new SwingWorker<String, Integer>() {
+            long p;
+            long size;
             @Override
             protected String doInBackground() throws Exception {
-                try {
-                    createTempDirectory();
-                    String t = tempDir.toString();
-                    String downloadPath = t + File.separator + "hacktv.zip";
-                    String tmpExePath = t + File.separator + "hacktv.exe";
-                    String exePath = jarDir + File.separator + "hacktv.exe";
-                    // Download hacktv.zip from Captain Jack
-                    SharedInst.download("https://filmnet.plus/hacktv/hacktv.zip", downloadPath);
+                createTempDirectory();
+                String t = tempDir.toString();
+                String downloadPath = t + File.separator + "hacktv.zip";
+                String tmpExePath = t + File.separator + "hacktv.exe";
+                String exePath = jarDir + File.separator + "hacktv.exe";
+                var con = new URL(dUrl);
+                size = con.openConnection().getContentLengthLong();
+                try (BufferedInputStream in = new BufferedInputStream(con.openStream());
+                    FileOutputStream fileOutputStream = new FileOutputStream(downloadPath)) {
+                    byte buffer[] = new byte[1024];
+                    int b;
+                    while (((b = in.read(buffer, 0, 1024)) != -1) && (!downloadCancelled)) {
+                        publish(b);
+                        fileOutputStream.write(buffer, 0, b);
+                    }
+                    fileOutputStream.close();
+                }
+                catch (IOException ex) {
+                    System.err.println(ex);
+                    var err = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(err));
+                    if (err.toString().contains("CertificateExpiredException")) {
+                        return "CertificateExpiredException";
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                if (downloadCancelled) {
+                    // Delete the partially downloaded file and return
+                    Files.deleteIfExists(Path.of(downloadPath));
+                    return "";
+                }
+                else {
                     // Unzip what we got to the temp directory
                     SharedInst.unzipFile(downloadPath, t);
                     // If hacktv.exe exists in the temp directory, delete the zip
@@ -6564,36 +6638,57 @@ public class GUI extends javax.swing.JFrame {
                         return null;
                     }
                 }
-                catch (IOException ex) {
-                    System.err.println(ex);
-                    var err = new StringWriter();
-                    ex.printStackTrace(new PrintWriter(err));
-                    if (err.toString().contains("CertificateExpiredException")) {
-                        return "CertificateExpiredException";
-                    }
-                    else {
-                        return null;
-                    }
-                }
             } // End doInBackground()
             @Override
+            protected void process(List<Integer> c) {
+                for (int i : c) {
+                    p = p + i;
+                    double d = (double) p / size * 100;
+                    txtStatus.setText("Downloading: " + (int) d + "%");
+                    if (Taskbar.isTaskbarSupported()) {
+                        var t = Taskbar.getTaskbar();
+                        if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                            t.setWindowProgressValue(GUI.this, (short) d);
+                        }
+                        else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                            t.setProgressValue((short) d);
+                        }
+                    } 
+                }
+            }
+            @Override
             protected void done() {
+                downloadInProgress = false;
+                if (!btnDownloadHackTV.isEnabled()) btnDownloadHackTV.setEnabled(true);
+                btnDownloadHackTV.setText("Download...");
+                if (Taskbar.isTaskbarSupported()) {
+                    var t = Taskbar.getTaskbar();
+                    if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                        t.setWindowProgressState(GUI.this, Taskbar.State.OFF);
+                    }
+                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                        t.setProgressValue(-1);
+                    }
+                }
                 // Retrieve the return value of doInBackground.
                 String exePath;
                 try {
                     exePath = get();
                 }
                 catch (InterruptedException | ExecutionException ex) {
-                    exePath = null;   
+                    System.err.println(ex);
+                    exePath = null;
                 }
                 if (exePath == null) {
                     messageBox("An error occurred while downloading hacktv.\n"
                             + "Please ensure that you have write permissions to the "
                             + "application directory and that you have internet access.", JOptionPane.WARNING_MESSAGE);
-                    btnDownloadHackTV.setEnabled(true);
-                    return;
                 }
-                if (exePath.equals("CertificateExpiredException")) {
+                else if (exePath.isEmpty()) {
+                    txtStatus.setText("Cancelled");
+                    downloadCancelled = false;
+                }
+                else if (exePath.equals("CertificateExpiredException")) {
                     messageBox("Download failed due to an expired SSL/TLS certificate.\n"
                             + "Please ensure that your system date is correct. "
                             + "Otherwise, please try again later.", JOptionPane.WARNING_MESSAGE);
@@ -6619,19 +6714,12 @@ public class GUI extends javax.swing.JFrame {
                             fsphil();
                         }
                         addTestCardOptions();
+                        txtStatus.setText("Done");
                     }
                 }
-                btnDownloadHackTV.setEnabled(true);
             } // End done()
         }; // End SwingWorker
-        int q = JOptionPane.showConfirmDialog(null, 
-                "Would you like to download the latest build of hacktv from Captain Jack's repository?\n"
-                    + "This requires an internet connection and will only work if you have write access "
-                    + "to the directory where this application is located.", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) {
-            btnDownloadHackTV.setEnabled(false);
-            downloadHackTV.execute();
-        }
+        downloadHackTV.execute();
     }//GEN-LAST:event_btnDownloadHackTVActionPerformed
 
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
@@ -7349,7 +7437,7 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(sourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 113, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 114, Short.MAX_VALUE)
                                 .addComponent(lblSubtitleIndex)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -7367,7 +7455,7 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(cmbARCorrection, 0, 148, Short.MAX_VALUE)))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sourcePanelLayout.createSequentialGroup()
                         .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
+                            .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
                             .addGroup(sourcePanelLayout.createSequentialGroup()
                                 .addComponent(radLocalSource)
                                 .addGap(39, 39, 39)
@@ -7376,7 +7464,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(sourcePanelLayout.createSequentialGroup()
-                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(6, 6, 6)
@@ -7595,7 +7683,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtAntennaName)
                             .addGroup(rfPanelLayout.createSequentialGroup()
                                 .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 122, Short.MAX_VALUE))))
+                                .addGap(0, 123, Short.MAX_VALUE))))
                     .addGroup(rfPanelLayout.createSequentialGroup()
                         .addComponent(chkAmp)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -7842,7 +7930,7 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(chkNICAM)
                                     .addComponent(chkA2Stereo)
                                     .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 142, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 143, Short.MAX_VALUE)
                                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(modePanelLayout.createSequentialGroup()
                                         .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -7933,7 +8021,7 @@ public class GUI extends javax.swing.JFrame {
 
         chkACP.setText("Macrovision ACP");
 
-        chkWSS.setText("Widescreen signalling (WSS) on line 23");
+        chkWSS.setText("Widescreen signalling (WSS)");
         chkWSS.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkWSSActionPerformed(evt);
@@ -7958,15 +8046,16 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(vbiPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(vbiPanelLayout.createSequentialGroup()
-                        .addComponent(chkWSS)
-                        .addGap(18, 18, 18)
-                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkACP)
                     .addComponent(chkVITS)
-                    .addComponent(chkVITC)
-                    .addComponent(chkSecamId))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkSecamId)
+                    .addGroup(vbiPanelLayout.createSequentialGroup()
+                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(203, Short.MAX_VALUE))
         );
         vbiPanelLayout.setVerticalGroup(
             vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -7975,7 +8064,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkWSS)
                     .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0)
-                .addComponent(chkACP, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chkACP)
                 .addGap(0, 0, 0)
                 .addComponent(chkVITS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -8055,7 +8144,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkVerbose)
                     .addComponent(chkDownmix))
-                .addContainerGap(120, Short.MAX_VALUE))
+                .addContainerGap(121, Short.MAX_VALUE))
         );
         additionalOptionsPanelLayout.setVerticalGroup(
             additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8235,11 +8324,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addComponent(chkTeletext)
-                        .addGap(286, 420, Short.MAX_VALUE))
+                        .addGap(286, 421, Short.MAX_VALUE))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(teletextPanelLayout.createSequentialGroup()
-                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
+                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(teletextPanelLayout.createSequentialGroup()
@@ -8327,7 +8416,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblSpark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblNMSCeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 90, Short.MAX_VALUE)))
+                        .addGap(0, 91, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloadPanelLayout.setVerticalGroup(
@@ -8473,7 +8562,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkShowCardSerial))
-                .addContainerGap(95, Short.MAX_VALUE))
+                .addContainerGap(96, Short.MAX_VALUE))
         );
         emmPanelLayout.setVerticalGroup(
             emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8731,7 +8820,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                             .addComponent(btnHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
@@ -8786,7 +8875,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblClearAll)
                     .addComponent(lblClearMRU))
-                .addContainerGap(191, Short.MAX_VALUE))
+                .addContainerGap(192, Short.MAX_VALUE))
         );
         resetSettingsPanelLayout.setVerticalGroup(
             resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
