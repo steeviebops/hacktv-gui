@@ -2981,6 +2981,8 @@ public class GUI extends javax.swing.JFrame {
         txtTeletextSource.setEnabled(true);
         btnTeletextBrowse.setEnabled(true);
         btnRun.setEnabled(true);
+        // Reset hacktv download button
+        if (runningOnWindows) btnDownloadHackTV.setEnabled(true);
         // Reset taskbar/dock progress bars
         if (Taskbar.isTaskbarSupported()) {
             var t = Taskbar.getTaskbar();
@@ -5453,6 +5455,8 @@ public class GUI extends javax.swing.JFrame {
             lblNMSCeefax.setEnabled(false);
             btnRun.setEnabled(false);
             downloadCancelled = false;
+            // Disable hacktv download button so it doesn't interfere
+            if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "https://github.com/spark-teletext/spark-teletext/";
             String HTMLString = ".tti\">(.*?)</a>";
@@ -5477,6 +5481,8 @@ public class GUI extends javax.swing.JFrame {
             lblNMSCeefax.setEnabled(false);
             btnRun.setEnabled(false);
             downloadCancelled = false;
+            // Disable hacktv download button so it doesn't interfere
+            if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "http://teastop.plus.com/svn/teletext/";
             String HTMLString = "\">(.*?)</a>";
@@ -6584,6 +6590,17 @@ public class GUI extends javax.swing.JFrame {
         String dUrl = "https://github.com/steeviebops/hacktv/releases/latest/"
                 + "download/hacktv-" + selectedBuild + ".zip";
         btnDownloadHackTV.setText("Cancel");
+        // Disable Teletext download options so they don't interfere
+        if (chkTeletext.isSelected()) {
+            btnTeefax.setEnabled(false);
+            btnSpark.setEnabled(false);
+            btnNMSCeefax.setEnabled(false);
+            lblTeefax.setEnabled(false);
+            lblSpark.setEnabled(false);
+            lblNMSCeefax.setEnabled(false);
+            lblDownload.setEnabled(false);
+            downloadPanel.setEnabled(false);            
+        }
         downloadInProgress = true;
         txtStatus.setText("Connecting to " + dUrl);
         SwingWorker<String, Integer> downloadHackTV = new SwingWorker<String, Integer>() {
@@ -6661,6 +6678,18 @@ public class GUI extends javax.swing.JFrame {
                 downloadInProgress = false;
                 if (!btnDownloadHackTV.isEnabled()) btnDownloadHackTV.setEnabled(true);
                 btnDownloadHackTV.setText("Download...");
+                // Re-enable Teletext download options
+                if (chkTeletext.isSelected()) {
+                    btnTeefax.setEnabled(true);
+                    btnSpark.setEnabled(true);
+                    btnNMSCeefax.setEnabled(true);
+                    lblTeefax.setEnabled(true);
+                    lblSpark.setEnabled(true);
+                    lblNMSCeefax.setEnabled(true);
+                    lblDownload.setEnabled(true);
+                    downloadPanel.setEnabled(true);                    
+                }
+                // Reset taskbar/dock progress bars
                 if (Taskbar.isTaskbarSupported()) {
                     var t = Taskbar.getTaskbar();
                     if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
@@ -6884,6 +6913,8 @@ public class GUI extends javax.swing.JFrame {
             lblSpark.setEnabled(false);
             btnRun.setEnabled(false);
             downloadCancelled = false;
+            // Disable hacktv download button so it doesn't interfere
+            if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/";
             String HTMLString = "name=\"(.*?)\"";
