@@ -161,7 +161,7 @@ public class INIFile implements Serializable {
         long lines = input.chars().filter(x -> x == '\n').count() + 1;
         if (lines == 1) {
             // Load the specified file to a string named fileContents
-            File f = new File(input);
+            var f = new File(input);
             try {
                 fileContents = Files.readString(f.toPath(), StandardCharsets.UTF_8);
             }
@@ -350,13 +350,13 @@ public class INIFile implements Serializable {
         Pattern p = Pattern.compile(r, Pattern.MULTILINE);
         Matcher m = p.matcher(fileContents);
         // Add the results to an ArrayList so we can read it later
-        ArrayList <String> iniSectionNames = new ArrayList<>();
+        var iniSectionNames = new ArrayList<String>();
         while (m.find()) {
             iniSectionNames.add(m.group().substring(1,m.group().length() -1));
         }
         
         // Retrieve all sections, including data
-        ArrayList <String> allSections = new ArrayList<>();
+        var allSections = new ArrayList<String>();
         for (int i = 0; i < iniSectionNames.size(); i++) {
             allSections.add(splitINIfile(fileContents, iniSectionNames.get(i)));
         }

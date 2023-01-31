@@ -107,7 +107,7 @@ public class Shared implements Serializable {
         // Returns the number of files found in a directory with the specified start and end strings
         // Case insensitive, feed it with lowercase filenames
         String fileToFilter;
-        File folderToScan = new File(pathToScan);
+        var folderToScan = new File(pathToScan);
         File[] listOfFiles = folderToScan.listFiles();
         int c = 0;
         // If the specified directory does not exist, return 0 and stop
@@ -193,7 +193,7 @@ public class Shared implements Serializable {
     
     public String downloadToString(String url) throws IOException {
         // Downloads a file directly to a string, bypassing the file system
-        URLConnection connection = new URL(url).openConnection();
+        var connection = new URL(url).openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -202,25 +202,25 @@ public class Shared implements Serializable {
     
     // Unzip code courtesy of https://www.baeldung.com/java-compress-and-uncompress
     public void unzipFile(String fileZip, String destination) throws IOException {
-        File destDir = new File(destination);
-        byte[] buffer = new byte[1024];
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip))) {
-            ZipEntry zipEntry = zis.getNextEntry();
+        var destDir = new File(destination);
+        var buffer = new byte[1024];
+        try (var zis = new ZipInputStream(new FileInputStream(fileZip))) {
+            var zipEntry = zis.getNextEntry();
             while (zipEntry != null) {
-                File newFile = newFile(destDir, zipEntry);
+                var newFile = newFile(destDir, zipEntry);
                 if (zipEntry.isDirectory()) {
                     if (!newFile.isDirectory() && !newFile.mkdirs()) {
                         throw new IOException("Failed to create directory " + newFile);
                     }
                 } else {
                     // fix for Windows-created archives
-                    File parent = newFile.getParentFile();
+                    var parent = newFile.getParentFile();
                     if (!parent.isDirectory() && !parent.mkdirs()) {
                         throw new IOException("Failed to create directory " + parent);
                     }
                     
                     try ( // write file content
-                            FileOutputStream fos = new FileOutputStream(newFile)) {
+                        var fos = new FileOutputStream(newFile)) {
                         int len;
                         while ((len = zis.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
@@ -238,7 +238,7 @@ public class Shared implements Serializable {
     }
     
     public File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
+        var destFile = new File(destinationDir, zipEntry.getName());
 
         String destDirPath = destinationDir.getCanonicalPath();
         String destFilePath = destFile.getCanonicalPath();
@@ -254,7 +254,7 @@ public class Shared implements Serializable {
         try {
             // Get the current directory path
             CodeSource codeSource = GUI.class.getProtectionDomain().getCodeSource();
-            File jarFile = new File(codeSource.getLocation().toURI().getPath());
+            var jarFile = new File(codeSource.getLocation().toURI().getPath());
             return jarFile.getParentFile().getPath();         
         }
         catch (URISyntaxException ex) {
@@ -271,7 +271,7 @@ public class Shared implements Serializable {
         }
         else {
             // Try using xdg-open
-            ProcessBuilder p = new ProcessBuilder("xdg-open", u);
+            var p = new ProcessBuilder("xdg-open", u);
             p.start();            
         }
     }

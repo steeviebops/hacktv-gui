@@ -143,7 +143,6 @@ public class GUI extends javax.swing.JFrame {
     private String[] otherModeArray;
     private String[] macModeArray;
     private String[] channelArray;
-    private String[] wssModeArray;
     private ArrayList<String> scramblingTypeArray;
     private ArrayList<String> scramblingKeyArray;
     private ArrayList<String> scramblingKey2Array;
@@ -391,7 +390,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void setIcons() {
-        List<Image> icons = new ArrayList<>();
+        var icons = new ArrayList<Image>();
         try {
             icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/test.gif")));
             /* WIP
@@ -512,8 +511,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void populateLafList() {
-        ArrayList<String> LAF = new ArrayList <> ();
-        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
+        var LAF = new ArrayList<String>();
+        var lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             // Get the name of the look and feel
             LAF.add(lookAndFeel.getName());
@@ -525,7 +524,7 @@ public class GUI extends javax.swing.JFrame {
             LAF.add("FlatLaf (IntelliJ-style)");
             LAF.add("FlatLaf (Darcula-style)");
         }
-        String[] lf = new String[LAF.size()];
+        var lf = new String[LAF.size()];
         for (int i = 0; i < LAF.size(); i++) {
             lf[i] = LAF.get(i);
         }
@@ -552,7 +551,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void checkForUpdates(boolean Silent) {
         // Queries the Github API for the latest release
-        SwingWorker<Integer, Void> updateWorker = new SwingWorker<Integer, Void>() {
+        var updateWorker = new SwingWorker<Integer, Void>() {
             @Override
             protected Integer doInBackground() throws Exception {
                 try {
@@ -645,7 +644,7 @@ public class GUI extends javax.swing.JFrame {
             cp = cp.substring(0, cp.indexOf(";"));
         }
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            var sdf = new SimpleDateFormat("yyyy-MM-dd");
             String classFilePath = "/com/steeviebops/hacktvgui/GUI.class";
             Date date;
             if (Files.exists(Path.of(cp))) {
@@ -779,7 +778,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Read the modes.ini we specified previously
-            File f = new File(modesFilePath);
+            var f = new File(modesFilePath);
             try {
                 modesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
                 modesFileLocation = "external";
@@ -865,7 +864,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Check if the specified modes are defined, if not, don't add them
-            ArrayList <String> ml = new ArrayList <> ();
+            var ml = new ArrayList<String>();
             for (String s : q) {
                 String a = INI.getStringFromINI(modesFile, s, "name", "", true);
                 if (!a.isBlank()) {
@@ -878,7 +877,7 @@ public class GUI extends javax.swing.JFrame {
                 }                
             }
             // Convert the ArrayList to an array to populate the combobox
-            String[] b = new String[ml.size()];
+            var b = new String[ml.size()];
             for(int i = 0; i < b.length; i++) {
                 b[i] = ml.get(i);    
             }
@@ -943,7 +942,7 @@ public class GUI extends javax.swing.JFrame {
          *  If larger than 100MB, call the fsphil method and don't go any further.
          *  This is to avoid memory leaks or hangs by loading a bad file.
          */
-        File f = new File(hackTVPath);
+        var f = new File(hackTVPath);
         if (f.length() > 104857600) {
             lblFork.setText("Invalid file (too large)");
             captainJack = false;
@@ -1046,7 +1045,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void populatePlaylist() {
         // Convert playlistAL to an array so we can populate lstPlaylist with it
-        String[] pl = new String[playlistAL.size()];
+        var pl = new String[playlistAL.size()];
         for(int i = 0; i < pl.length; i++) {
             if ((startPoint == i) && (startPoint != -1)) {
                 // Add an asterisk to the start of the string to designate it
@@ -1411,7 +1410,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else if (!M3USource.isEmpty()) {
-            File M3UFile = new File(M3USource);
+            var M3UFile = new File(M3USource);
             // If the source is an M3U file...
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             // Spawn M3UHandler using the index value we got above.
@@ -2313,7 +2312,7 @@ public class GUI extends javax.swing.JFrame {
         // The playlist doesn't follow a standard INI format. We just dump the
         // playlist array into the file as-is.
         if (playlistAL.size() > 0) {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             FileContents = FileContents + "\n\n[playlist]\n";
             for (int i = 1; i <= playlistAL.size(); i++) {
                 sb.append(playlistAL.get(i - 1)).append("\n");
@@ -2321,7 +2320,7 @@ public class GUI extends javax.swing.JFrame {
             FileContents = FileContents + sb.toString();
         }
         // Commit to disk
-        try (FileWriter fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8)) {
+        try (var fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8)) {
             fw.write(FileContents);
         }
         catch (IOException e) {
@@ -2350,14 +2349,14 @@ public class GUI extends javax.swing.JFrame {
         *  number to select in the combobox.
         */
         String fileHeader;
-        try (BufferedReader br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
+        try (var br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
             try (var lnr2 = new LineNumberReader(br2)) {
                 fileHeader = lnr2.readLine();
             }
         }
         catch (MalformedInputException mie) {
             // Retry using ISO-8859-1
-            try (BufferedReader br3 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.ISO_8859_1))) {
+            try (var br3 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.ISO_8859_1))) {
                 try (var lnr3 = new LineNumberReader(br3)) {
                     fileHeader = lnr3.readLine();
                 }
@@ -2417,7 +2416,7 @@ public class GUI extends javax.swing.JFrame {
                 return;
             }
             // Define an ArrayList and a string to include missing paths
-            List<String> toRemove = new ArrayList<>();
+            var toRemove = new ArrayList<String>();
             String removed = "";
             // Run through the imported playlist to check if the paths exist
             int i = 0;
@@ -2431,10 +2430,10 @@ public class GUI extends javax.swing.JFrame {
                             // We may have encountered an encoding bug so retry
                             // by converting the files string to MS-DOS CP 850
                             try {
-                                String f850 = new String(file.getBytes("ISO-8859-1"), "CP850");
+                                var f850 = new String(file.getBytes("ISO-8859-1"), "CP850");
                                 if (Files.exists(Path.of(f850))) {
                                     // Worked! Change the item in pls.
-                                    String f8 = new String(f850.getBytes("UTF-8"), "UTF-8");
+                                    var f8 = new String(f850.getBytes("UTF-8"), "UTF-8");
                                     pls.set(i, f8);
                                 }
                                 else {
@@ -2489,17 +2488,17 @@ public class GUI extends javax.swing.JFrame {
         fileMenu.setEnabled(false);
         templatesMenu.setEnabled(false);
         // Prevent the comobobox from auto-resizing
-        Dimension d = new Dimension(360,22);
+        var d = new Dimension(360,22);
         cmbM3USource.setPreferredSize(d);
         // Remove any existing items from the combobox
         cmbM3USource.removeAllItems();
         cmbM3USource.addItem("Loading playlist file, please wait...");
         // Create a SwingWorker to do the disruptive stuff
-        SwingWorker<Boolean, Double> m3uWorker = new SwingWorker<Boolean, Double>() {
+        var m3uWorker = new SwingWorker<Boolean, Double>() {
             @Override
             protected Boolean doInBackground() throws Exception {
                 String M3UNames = "";
-                ArrayList<String> playlistNamesAL = new ArrayList <> ();
+                var playlistNamesAL = new ArrayList<String>();
                 playlistURLsAL = new ArrayList <> ();
                 try {
                     // Read source file to a list.
@@ -2723,7 +2722,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void downloadTeletext(String url, String destinationFile, String HTMLString) {
-        ArrayList<String> TeletextLinks = new ArrayList<>();
+        var TeletextLinks = new ArrayList<String>();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         // Downloads the specified file from URL and saves it to DestinationFile
         // Create temp directory if it does not exist
@@ -2733,7 +2732,7 @@ public class GUI extends javax.swing.JFrame {
         try {
             downloadInProgress = true;
             // If the file already exists from a previous attempt, delete it
-            File f = new File(DownloadPath);
+            var f = new File(DownloadPath);
             if (f.exists()) Shared.deleteFSObject(f.toPath());
             // Download the index page
             txtStatus.setText("Downloading index page from " + url);
@@ -2748,7 +2747,7 @@ public class GUI extends javax.swing.JFrame {
             return;
         }
         // Create a SwingWorker to do the disruptive stuff
-        SwingWorker<Integer, Integer> downloadPages = new SwingWorker<Integer, Integer>() {
+        var downloadPages = new SwingWorker<Integer, Integer>() {
             @Override
             protected Integer doInBackground() throws Exception {
                 File f;
@@ -2859,7 +2858,7 @@ public class GUI extends javax.swing.JFrame {
                         // Check if we just downloaded Ceefax
                         if (url.equals("https://internal.nathanmediaservices.co.uk/svn/ceefax/national/")) {
                             // It's not enough to just download the national files, we also need a region
-                            String[] CeefaxRegionArray = new String[] {
+                            var CeefaxRegionArray = new String[] {
                                 "East",
                                 "EastMidlands",
                                 "London",
@@ -2880,10 +2879,10 @@ public class GUI extends javax.swing.JFrame {
                         }
                         else if (htmlTempFile.equals("ceefax_region.xml")) {
                             // Move the regional files to the national directory
-                            File rd = new File(tempDir + File.separator + "ceefax_region");
-                            File nd = new File(tempDir + File.separator + "ceefax");
+                            var rd = new File(tempDir + File.separator + "ceefax_region");
+                            var nd = new File(tempDir + File.separator + "ceefax");
                             if ( (rd.isDirectory()) && (nd.isDirectory()) ) {
-                                File[] files = rd.listFiles();
+                                var files = rd.listFiles();
                                 if (files != null) {
                                     for (File f : files) {
                                         try {
@@ -3085,13 +3084,13 @@ public class GUI extends javax.swing.JFrame {
     }    
     
     private void disableScrambling() {
-        ArrayList<String> ScramblingTypeAL = new ArrayList<>();
+        var ScramblingTypeAL = new ArrayList<String>();
         ScramblingTypeAL.add("No scrambling");
         scramblingTypeArray = new ArrayList<>();
         scramblingTypeArray.add("");
         cmbScramblingType.removeAllItems();
         // Convert to an array so we can populate
-        String[] ScramblingType = new String[ScramblingTypeAL.size()];
+        var ScramblingType = new String[ScramblingTypeAL.size()];
         for(int i = 0; i < ScramblingType.length; i++) {
             ScramblingType[i] = ScramblingTypeAL.get(i);
         } 
@@ -3103,7 +3102,7 @@ public class GUI extends javax.swing.JFrame {
     }      
     
     private void add625ScramblingTypes() {
-        ArrayList<String> ScramblingTypeAL = new ArrayList<>();
+        var ScramblingTypeAL = new ArrayList<String>();
         ScramblingTypeAL.add("No scrambling");
         scramblingTypeArray = new ArrayList<>();
         scramblingTypeArray.add("");
@@ -3149,7 +3148,7 @@ public class GUI extends javax.swing.JFrame {
         }
         cmbScramblingType.removeAllItems();
         // Convert to an array so we can populate
-        String[] ScramblingType = new String[ScramblingTypeAL.size()];
+        var ScramblingType = new String[ScramblingTypeAL.size()];
         for (int i = 0; i < ScramblingType.length; i++) {
             ScramblingType[i] = ScramblingTypeAL.get(i);
         }
@@ -3158,7 +3157,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addMACScramblingTypes() {
-        ArrayList<String> ScramblingTypeAL = new ArrayList<>();
+        var ScramblingTypeAL = new ArrayList<String>();
         scramblingTypeArray = new ArrayList<>();
         ScramblingTypeAL.add("No scrambling");
         scramblingTypeArray.add("");
@@ -3175,7 +3174,7 @@ public class GUI extends javax.swing.JFrame {
         }
         cmbScramblingType.removeAllItems();
         // Convert to an array so we can populate
-        String[] ScramblingType = new String[ScramblingTypeAL.size()];
+        var ScramblingType = new String[ScramblingTypeAL.size()];
         for(int i = 0; i < ScramblingType.length; i++) {
             ScramblingType[i] = ScramblingTypeAL.get(i);
         } 
@@ -3270,7 +3269,7 @@ public class GUI extends javax.swing.JFrame {
         scramblingKeyArray = new ArrayList<>();
         scramblingKeyArray.addAll(Arrays.asList(slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n")));
         // Extract friendly names and populate the combobox with them
-        String[] skn = new String[scramblingKeyArray.size()];
+        var skn = new String[scramblingKeyArray.size()];
         for (int i = 0; i < scramblingKeyArray.size(); i++) {
             skn[i] = INI.getStringFromINI(modesFile , sconf, scramblingKeyArray.get(i), "", true);
         }
@@ -3306,7 +3305,7 @@ public class GUI extends javax.swing.JFrame {
             scramblingKey2Array = new ArrayList<>();
             scramblingKey2Array.addAll(Arrays.asList(slist2.substring(slist2.indexOf("\n") + 1).split("\\r?\\n")));
             // Extract friendly names and populate the combobox with them
-            String[] skn2 = new String[scramblingKey2Array.size()];
+            var skn2 = new String[scramblingKey2Array.size()];
             for (int i = 0; i < scramblingKey2Array.size(); i++) {
                 skn2[i] = INI.getStringFromINI(modesFile , sconf2, scramblingKey2Array.get(i), "", true);
             }
@@ -3453,19 +3452,12 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addWSSModes() {
-        String[] WSSMode = {
+        var WSSMode = new String[] {
             "auto",
             "4:3",
             "16:9",
             "14:9 letterbox",
             "16:9 letterbox"
-        };
-        wssModeArray = new String[] {
-            "auto",
-            "4:3",
-            "16:9",
-            "14:9-letterbox",
-            "16:9-letterbox"
         };
         cmbWSS.removeAllItems();
         cmbWSS.setModel(new DefaultComboBoxModel<>(WSSMode));
@@ -3474,10 +3466,17 @@ public class GUI extends javax.swing.JFrame {
     
     private ArrayList<String> checkWSS() {
         // Populate WSS parameters if enabled
+        var wssModes = new String[] {
+            "auto",
+            "4:3",
+            "16:9",
+            "14:9-letterbox",
+            "16:9-letterbox"
+        };
         var al = new ArrayList<String>();
         if (chkWSS.isSelected()) {
             al.add("--wss");
-            al.add(wssModeArray[cmbWSS.getSelectedIndex()]);
+            al.add(wssModes[cmbWSS.getSelectedIndex()]);
         }
         return al;
     }
@@ -3525,7 +3524,7 @@ public class GUI extends javax.swing.JFrame {
         logoArray = logos.substring(logos.indexOf("\n") +1).split("\\r?\\n");
         // Populate LogoNames by reading modesFile using what we added
         // to logoArray.
-        String[] LogoNames = new String[logoArray.length];
+        var LogoNames = new String[logoArray.length];
         for (int i = 0; i < logoArray.length; i++) {
             LogoNames[i] = (INI.getStringFromINI(modesFile, "logos", logoArray[i], "", true));
         }
@@ -3571,7 +3570,7 @@ public class GUI extends javax.swing.JFrame {
             tcArray = testcards.substring(testcards.indexOf("\n") +1).split("\\r?\\n");
             // Populate TCNames by reading modesFile using what we added
             // to tcArray.
-            String[] TCNames = new String[tcArray.length];
+            var TCNames = new String[tcArray.length];
             for (int i = 0; i < tcArray.length; i++) {
                 TCNames[i] = INI.getStringFromINI(modesFile, "testcards" + l, tcArray[i], "", true);
             }
@@ -4204,16 +4203,16 @@ public class GUI extends javax.swing.JFrame {
             btnRun.setEnabled(false);
             txtStatus.setText("Checking URL, please wait...");
             // Check if the provided URL is a live stream or not
-            SwingWorker <String, Void> checkYTDL = new SwingWorker <String, Void> () {
+            var checkYTDL = new SwingWorker <String, Void> () {
                 @Override
                 protected String doInBackground() throws Exception {
-                    ProcessBuilder yt = new ProcessBuilder(ytp, "-g", url);
+                    var yt = new ProcessBuilder(ytp, "-g", url);
                     yt.redirectErrorStream(true);
                     String f = null;
                     // Try to start the process
                     try {
                         Process pr = yt.start();
-                        try (BufferedReader br = new BufferedReader(new InputStreamReader(pr.getInputStream(), StandardCharsets.UTF_8))) {
+                        try (var br = new BufferedReader(new InputStreamReader(pr.getInputStream(), StandardCharsets.UTF_8))) {
                             // Capture the output
                             String a;
                             while ((a = br.readLine()) != null) {
@@ -4339,7 +4338,7 @@ public class GUI extends javax.swing.JFrame {
         // and return true if the custom radio button is not selected
         if (radCustom.isSelected()) {
             BigDecimal CustomFreq;
-            BigDecimal Multiplier = new BigDecimal(1000000);
+            var Multiplier = new BigDecimal(1000000);
             String InvalidInput = "Please specify a frequency between 1 MHz and 7250 MHz.";
             if ( (SharedInst.isNumeric( txtFrequency.getText())) && (!txtFrequency.getText().contains(" ")) ){
                 CustomFreq = new BigDecimal(txtFrequency.getText());
@@ -4986,11 +4985,11 @@ public class GUI extends javax.swing.JFrame {
     
     private void runHackTV(ArrayList<String> allArgs) {
         // Spawn a new SwingWorker to run hacktv
-        SwingWorker <Boolean, String> runTV = new SwingWorker <Boolean, String> () {
+        var runTV = new SwingWorker <Boolean, String> () {
             @Override
             protected Boolean doInBackground() {
                 // Create process with the ArrayList we populated above
-                ProcessBuilder pb = new ProcessBuilder(allArgs);
+                var pb = new ProcessBuilder(allArgs);
                 pb.redirectErrorStream(true);
                 pb.directory(new File(hackTVDirectory));
                 // Try to start the process
@@ -5000,7 +4999,7 @@ public class GUI extends javax.swing.JFrame {
                     hpid = p.pid();
                     // Capture the output of hacktv
                     int a;
-                    try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                    try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
                         while ( (a = br.read()) != -1 ) {
                             // br.read() returns an integer value 'a' which is the ASCII
                             // number of a character it has received from the process.
@@ -5096,7 +5095,7 @@ public class GUI extends javax.swing.JFrame {
             txtStatus.setText(txtStatus.getText() + '\u0020' + allArgs.get(i));
         }
         // Spawn a new SwingWorker to run yt-dlp and hacktv
-        SwingWorker <Boolean, String> runTV = new SwingWorker <Boolean, String> () {
+        var runTV = new SwingWorker <Boolean, String> () {
             @Override
             protected Boolean doInBackground() {
                 // Create two processes, one for yt-dlp and the other for hacktv
@@ -5120,7 +5119,7 @@ public class GUI extends javax.swing.JFrame {
                     hpid = h.pid();
                     // Capture the output of hacktv
                     int a;
-                    try (BufferedReader br = new BufferedReader(new InputStreamReader(h.getInputStream(), StandardCharsets.UTF_8))) {
+                    try (var br = new BufferedReader(new InputStreamReader(h.getInputStream(), StandardCharsets.UTF_8))) {
                         while ( (a = br.read()) != -1 ) {
                             publish(String.valueOf((char)a));
                         }
@@ -5197,7 +5196,7 @@ public class GUI extends javax.swing.JFrame {
             if (chkWindowsKill.isSelected()) {
                 try {
                     // Run windows-kill.exe from this path and feed the PID to it
-                    ProcessBuilder StopHackTV = new ProcessBuilder
+                    var StopHackTV = new ProcessBuilder
                         (jarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
                     StopHackTV.start();
                 }
@@ -5224,7 +5223,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             try {
                 // Run kill and feed the PID to it
-                ProcessBuilder StopHackTV = new ProcessBuilder
+                var StopHackTV = new ProcessBuilder
                     ("kill", "-2", Long.toString(pid));
                 StopHackTV.start();
             }
@@ -5254,11 +5253,11 @@ public class GUI extends javax.swing.JFrame {
                 +     "}';"
                 + "[steeviebops.hacktvgui]::SendCtrlC(" + pid + ")";
         // Run powershell.exe and feed the above command string to it
-        ProcessBuilder pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1);
+        var pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1);
         pb.start();
         // Redirect PowerShell output to stderr for troubleshooting
         /*int a;
-        BufferedReader br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        var br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
         while ( (a = br.read()) != -1 ) {
             System.err.print(String.valueOf((char)a));
         }*/
@@ -5746,7 +5745,7 @@ public class GUI extends javax.swing.JFrame {
                 populatePlaylist();
             }
             else {
-                File file = new File (SharedInst.stripQuotes(f[0].toString()));
+                var file = new File (SharedInst.stripQuotes(f[0].toString()));
                 if(file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
                     // If the source is an M3U file, pass it to the M3U handler
                     txtSource.setText(file.getAbsolutePath());
@@ -5837,7 +5836,7 @@ public class GUI extends javax.swing.JFrame {
         if ( cmbChannel.getSelectedIndex() != -1) {
             frequency = frequencyArray[cmbChannel.getSelectedIndex()];
             // Convert the imported value so we can display it in MHz on-screen
-            DecimalFormat df = new DecimalFormat("0.00");
+            var df = new DecimalFormat("0.00");
             double input = frequency;
             txtFrequency.setText((df.format(input / 1000000)));
             // Retrieve MAC channel ID
@@ -6603,7 +6602,7 @@ public class GUI extends javax.swing.JFrame {
         }
         downloadInProgress = true;
         txtStatus.setText("Connecting to " + dUrl);
-        SwingWorker<String, Integer> downloadHackTV = new SwingWorker<String, Integer>() {
+        var downloadHackTV = new SwingWorker<String, Integer>() {
             long p;
             long size;
             @Override
@@ -6615,15 +6614,15 @@ public class GUI extends javax.swing.JFrame {
                 String exePath = jarDir + File.separator + "hacktv.exe";
                 var con = new URL(dUrl);
                 size = con.openConnection().getContentLengthLong();
-                try (BufferedInputStream in = new BufferedInputStream(con.openStream());
-                    FileOutputStream fileOutputStream = new FileOutputStream(downloadPath)) {
+                try (var in = new BufferedInputStream(con.openStream());
+                    var out = new FileOutputStream(downloadPath)) {
                     byte buffer[] = new byte[1024];
                     int b;
                     while (((b = in.read(buffer, 0, 1024)) != -1) && (!downloadCancelled)) {
                         publish(b);
-                        fileOutputStream.write(buffer, 0, b);
+                        out.write(buffer, 0, b);
                     }
-                    fileOutputStream.close();
+                    out.close();
                 }
                 catch (IOException ex) {
                     System.err.println(ex);
