@@ -344,11 +344,11 @@ public class GUI extends javax.swing.JFrame {
         // If any command line parameters were specified, handle them
         if (args.length > 0) {
             // If the specified file has a .htv extension, open it
-            if (args[0].endsWith(".htv")) {
+            if (args[0].toLowerCase(Locale.ENGLISH).endsWith(".htv")) {
                 selectedFile = new File(args[0]);
                 checkselectedFile(selectedFile);
             }
-            else if (args[0].endsWith(".m3u")) {
+            else if (args[0].toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
                 txtSource.setText(args[0]);
                 m3uHandler(args[0],0);
             }
