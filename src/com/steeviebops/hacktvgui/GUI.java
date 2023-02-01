@@ -3754,7 +3754,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             disableVITS();
         }
-        if ((lines == 625) || (lines == 525)) {
+        if ( (!radMAC.isSelected()) && ((lines == 625) || (lines == 525)) ) {
             chkVITC.setEnabled(true);
         }
         else {
