@@ -74,6 +74,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
 import java.util.Locale;
 import java.util.Random;
+import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.KeyStroke;
 
@@ -259,7 +260,7 @@ public class GUI extends javax.swing.JFrame {
         initComponents();
     }
     
-    public boolean populateUI(String[] args) {
+    private boolean populateUI(String[] args) {
         // Set the jarDir variable so we know where we're located
         jarDir = Path.of(SharedInst.getCurrentDirectory());
         // Check operating system and set OS-specific options
@@ -346,7 +347,7 @@ public class GUI extends javax.swing.JFrame {
             // If the specified file has a .htv extension, open it
             if (args[0].toLowerCase(Locale.ENGLISH).endsWith(".htv")) {
                 selectedFile = new File(args[0]);
-                checkselectedFile(selectedFile);
+                checkSelectedFile(selectedFile);
             }
             else if (args[0].toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
                 txtSource.setText(args[0]);
@@ -621,8 +622,8 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     default:
                         // Unknown error
-                        if (Silent) return;
                         System.err.println("Error code: " + status);
+                        if (Silent) return;
                         messageBox("An unknown error occurred while attempting to contact the Github server.", JOptionPane.ERROR_MESSAGE);
                         break;
                 }
@@ -650,7 +651,7 @@ public class GUI extends javax.swing.JFrame {
             if (Files.exists(Path.of(cp))) {
                 date = SharedInst.getLastUpdatedTime(cp, classFilePath);
                 if (date != null) {
-                    return "\nCompilation date: " + sdf.format(date);
+                    return "\nBuild date: " + sdf.format(date);
                 }
                 else {
                     return "";
@@ -900,26 +901,14 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private static void resetPreferences() {
-        // Delete everything from the preference store
-        if ( PREFS.get("HackTVPath", null) != null ) PREFS.remove("HackTVPath");
-        if ( PREFS.get("File1", null) != null ) PREFS.remove("File1");
-        if ( PREFS.get("File2", null) != null ) PREFS.remove("File2");
-        if ( PREFS.get("File3", null) != null ) PREFS.remove("File3");
-        if ( PREFS.get("File4", null) != null ) PREFS.remove("File4");
-        if ( PREFS.get("UseLocalModesFile", null) != null ) PREFS.remove("UseLocalModesFile");
-        if ( PREFS.get("LookAndFeel", null) != null ) PREFS.remove("LookAndFeel");
-        if ( PREFS.get("CeefaxRegion", null) != null ) PREFS.remove("CeefaxRegion");
-        if ( PREFS.get("SuppressWarnings", null) != null ) PREFS.remove("SuppressWarnings");
-        if ( PREFS.get("windows-kill", null) != null ) PREFS.remove("windows-kill");
-        if ( PREFS.get("lastdir", null) != null ) PREFS.remove("lastdir");
-        if ( PREFS.get("lastfdir", null) != null ) PREFS.remove("lastfdir");
-        if ( PREFS.get("lasttxdir", null) != null ) PREFS.remove("lasttxdir");
-        if ( PREFS.get("lasthtvdir", null) != null ) PREFS.remove("lasthtvdir");
-        if ( PREFS.get("noupdatecheck", null) != null ) PREFS.remove("noupdatecheck");
-        // Not used anymore but we should still remove it if present
-        if ( PREFS.get("MissingKillWarningShown", null) != null ) PREFS.remove("MissingKillWarningShown");
-        if ( PREFS.get("ytdl", null) != null ) PREFS.remove("ytdl");
-        System.out.println("All preferences have been reset to defaults.");
+        // Delete the preference store and everything in it
+        try {
+            PREFS.removeNode();
+            System.out.println("All preferences have been reset to defaults.");
+        }
+        catch (BackingStoreException e) {
+            System.err.println("Reset failed: " + e.getMessage());
+        }
     }
     
     private void detectFork() {
@@ -1190,7 +1179,7 @@ public class GUI extends javax.swing.JFrame {
         }    
     }
     
-    private void checkselectedFile(File SourceFile) {
+    private void checkSelectedFile(File SourceFile) {
         String f;
         try {
             // Check if the file is too large. We really don't need to read
@@ -1440,7 +1429,6 @@ public class GUI extends javax.swing.JFrame {
         }
         // Frequency or channel number
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            // Return a value of -250 if the value is null so we can handle it
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
             String ImportedChannel = INI.getStringFromINI(fileContents, "hacktv-gui3", "channel", "", true);
             String ImportedBandPlan = INI.getStringFromINI(fileContents, "hacktv-gui3", "bandplan", "", false);
@@ -1449,6 +1437,7 @@ public class GUI extends javax.swing.JFrame {
                 ImportedFrequency = INI.getDoubleFromINI(fileContents, "hacktv", "frequency");
             }
             else {
+                // Return a value of -250 if the value is null so we can handle it
                 ImportedFrequency = Double.parseDouble("-250");
             }
             if ((ImportedChannel.isEmpty()) && (ImportedFrequency == -250)) {
@@ -3466,15 +3455,15 @@ public class GUI extends javax.swing.JFrame {
     
     private ArrayList<String> checkWSS() {
         // Populate WSS parameters if enabled
-        var wssModes = new String[] {
-            "auto",
-            "4:3",
-            "16:9",
-            "14:9-letterbox",
-            "16:9-letterbox"
-        };
         var al = new ArrayList<String>();
         if (chkWSS.isSelected()) {
+            var wssModes = new String[] {
+                "auto",
+                "4:3",
+                "16:9",
+                "14:9-letterbox",
+                "16:9-letterbox"
+            };
             al.add("--wss");
             al.add(wssModes[cmbWSS.getSelectedIndex()]);
         }
@@ -5071,7 +5060,7 @@ public class GUI extends javax.swing.JFrame {
         var ytargs = new ArrayList<String>();
         ytargs.add(ytp);
         ytargs.add("--ignore-config");
-        ytargs.add("-q");
+        //ytargs.add("-q");
         ytargs.add("-o");
         ytargs.add("-");
         ytargs.add(u);
@@ -5101,7 +5090,7 @@ public class GUI extends javax.swing.JFrame {
                 // Create two processes, one for yt-dlp and the other for hacktv
                 List<ProcessBuilder> pb = Arrays.asList(
                     new ProcessBuilder(ytargs)
-                        // Redirect any yt-dlp errors to the Java console
+                        // Redirect yt-dlp status to the Java console
                         .redirectError(ProcessBuilder.Redirect.INHERIT),
                     new ProcessBuilder(allArgs)
                         .redirectOutput(ProcessBuilder.Redirect.PIPE)
@@ -6036,7 +6025,7 @@ public class GUI extends javax.swing.JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             selectedFile = configFileChooser.getSelectedFile();
             selectedFile = new File(SharedInst.stripQuotes(selectedFile.toString()));
-            checkselectedFile(selectedFile);
+            checkSelectedFile(selectedFile);
         }
     }//GEN-LAST:event_menuOpenActionPerformed
 
@@ -6055,22 +6044,22 @@ public class GUI extends javax.swing.JFrame {
 
     private void menuMRUFile2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMRUFile2ActionPerformed
         selectedFile = new File(menuMRUFile2.getText());
-        checkselectedFile(selectedFile);
+        checkSelectedFile(selectedFile);
     }//GEN-LAST:event_menuMRUFile2ActionPerformed
 
     private void menuMRUFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMRUFile1ActionPerformed
         selectedFile = new File(menuMRUFile1.getText());
-        checkselectedFile(selectedFile);
+        checkSelectedFile(selectedFile);
     }//GEN-LAST:event_menuMRUFile1ActionPerformed
 
     private void menuMRUFile3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMRUFile3ActionPerformed
         selectedFile = new File(menuMRUFile3.getText());
-        checkselectedFile(selectedFile);
+        checkSelectedFile(selectedFile);
     }//GEN-LAST:event_menuMRUFile3ActionPerformed
 
     private void menuMRUFile4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMRUFile4ActionPerformed
         selectedFile = new File(menuMRUFile4.getText());
-        checkselectedFile(selectedFile);
+        checkSelectedFile(selectedFile);
     }//GEN-LAST:event_menuMRUFile4ActionPerformed
 
     private void btnClearMRUListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearMRUListActionPerformed
