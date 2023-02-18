@@ -267,26 +267,10 @@ public class GUI extends javax.swing.JFrame {
         if (System.getProperty("os.name").contains("Windows")) {
             runningOnWindows = true;
             defaultHackTVPath = System.getProperty("user.dir") + File.separator + "hacktv.exe";
-            // Does windows-kill.exe exist in the current directory?
-            if ( !Files.exists(Path.of(jarDir + File.separator + "windows-kill.exe")) ) {
-                // Disable the "Use windows-kill instead of PowerShell" option
-                chkWindowsKill.setSelected(false);
-                chkWindowsKill.setEnabled(false);
-            }
-            else {
-                if (PREFS.getInt("windows-kill", 0) == 1) {
-                    chkWindowsKill.setSelected(true);
-                }
-                else {
-                    chkWindowsKill.setSelected(false);
-                }
-            }
         }
         else {
             runningOnWindows = false;
             defaultHackTVPath = "/usr/local/bin/hacktv";
-            // Hide the "Use windows-kill instead of PowerShell" option
-            chkWindowsKill.setVisible(false);
             // Hide the Download button on the GUI Settings tab
             btnDownloadHackTV.setVisible(false);
         }
@@ -5181,48 +5165,40 @@ public class GUI extends javax.swing.JFrame {
          */
         // Don't do anything if the PID is zero
         if (pid == 0) return;
-        if (runningOnWindows) {
-            if (chkWindowsKill.isSelected()) {
-                try {
-                    // Run windows-kill.exe from this path and feed the PID to it
-                    var StopHackTV = new ProcessBuilder
-                        (jarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
-                    StopHackTV.start();
-                }
-                catch (IOException ex)  {
-                    System.err.println(ex);
-                    messageBox("An error occurred while attempting to stop hacktv using windows-kill.\n"
-                            + "Try using PowerShell instead, see help for details.", JOptionPane.ERROR_MESSAGE);
-                    btnRun.setEnabled(true);
-                }
-            }
-            else {
-                // Call the PowerShell method and feed the PID to it
-                try {
-                    psKill(pid);
-                }
-                catch (IOException ex) {
-                    System.err.println(ex);
-                    messageBox("An error occurred while attempting to stop hacktv using PowerShell.\n"
-                            + "Try using windows-kill instead, see help for details.", JOptionPane.ERROR_MESSAGE);
-                    btnRun.setEnabled(true);
-                }
-            }
-        }
-        else {
+        if (!runningOnWindows) {
             try {
                 // Run kill and feed the PID to it
-                var StopHackTV = new ProcessBuilder
+                var stopHackTV = new ProcessBuilder
                     ("kill", "-2", Long.toString(pid));
-                StopHackTV.start();
+                stopHackTV.start();
             }
             catch (IOException ex)  {
                 System.err.println(ex);
             }
         }
+        else {
+            // Does windows-kill.exe exist in our directory?
+            if (Files.exists(Path.of(jarDir + "\\windows-kill.exe"))) {
+                try {
+                    // Run windows-kill.exe from this path and feed the PID to it
+                    var windowsKill = new ProcessBuilder
+                        (jarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
+                    windowsKill.start();
+                }
+                catch (IOException ex)  {
+                    System.err.println(ex.getMessage());
+                    // Retry with PowerShell, if that fails then force kill.
+                    if (!psKill(pid)) taskKill(pid);
+                }
+            }
+            else {
+                // Otherwise use PowerShell. If that fails then force kill.
+                if (!psKill(pid)) taskKill(pid);
+            }
+        }
     }
     
-    private void psKill(long pid) throws IOException {
+    private boolean psKill(long pid) {
         // Uses PowerShell to gracefully close hacktv on Windows
         // The following string is PowerShell/C# code to implement the
         // Win32 GenerateConsoleCtrlEvent API.
@@ -5230,8 +5206,9 @@ public class GUI extends javax.swing.JFrame {
         // I decided to use a single clear string (with escape characters where
         // necessary) rather than risking triggering AV software by using
         // EncodedCommand. I've divided the string into lines here for clarity.
-        String ps1 = 
-                "Add-Type -Namespace 'steeviebops' -Name 'hacktvgui' -MemberDefinition '"
+        btnRun.setEnabled(false);
+        String ps1 =
+                "& {Add-Type -Namespace 'steeviebops' -Name 'hacktvgui' -MemberDefinition '"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool FreeConsole();"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool AttachConsole(uint p);"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool GenerateConsoleCtrlEvent(uint e, uint p);"
@@ -5240,16 +5217,43 @@ public class GUI extends javax.swing.JFrame {
                 +         "AttachConsole(p);"
                 +         "GenerateConsoleCtrlEvent(0, 0);"
                 +     "}';"
-                + "[steeviebops.hacktvgui]::SendCtrlC(" + pid + ")";
+                + "[steeviebops.hacktvgui]::SendCtrlC($args[0])}";
         // Run powershell.exe and feed the above command string to it
-        var pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1);
-        pb.start();
-        // Redirect PowerShell output to stderr for troubleshooting
-        /*int a;
-        var br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        while ( (a = br.read()) != -1 ) {
-            System.err.print(String.valueOf((char)a));
-        }*/
+        var pb = new ProcessBuilder("powershell.exe", "-noprofile", "-nologo", "-command", ps1, Long.toString(pid))
+                // Redirect PowerShell output to stderr for troubleshooting
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
+        try {
+            pb.start();
+            return true;
+        }
+        catch (IOException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+    
+    private void taskKill(long pid) {
+        // Last resort option on Windows if the other stop options have failed.
+        // This will forcibly terminate hacktv using taskkill.exe.
+        int q = JOptionPane.showConfirmDialog(
+            null,
+            "An error occurred while attempting to stop hacktv gracefully.\n"
+            + "As a last resort, we can kill the hacktv process. This may "
+            + "require your ouput device to be reset.\n"
+            + "Would you like to forcibly kill the hacktv process?",
+            APP_NAME,
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+        if (q == JOptionPane.YES_OPTION) {
+            var k = new ProcessBuilder("taskkill.exe", "/pid", Long.toString(pid), "/f");
+            try {
+                k.start();
+            }
+            catch (IOException e) {
+                System.err.println(e);
+            }
+        }
     }
     
     private void preRunTasks() {
@@ -5302,10 +5306,6 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            // Disable the stop button if using PowerShell to close
-            if ((runningOnWindows) && (!chkWindowsKill.isSelected())) {
-                btnRun.setEnabled(false);
-            }
             stopTV(hpid);
         }
     }//GEN-LAST:event_btnRunActionPerformed
@@ -6937,15 +6937,6 @@ public class GUI extends javax.swing.JFrame {
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRegion);
     }//GEN-LAST:event_cmbRegionMouseWheelMoved
 
-    private void chkWindowsKillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkWindowsKillActionPerformed
-        if (chkWindowsKill.isSelected()) {
-            PREFS.putInt("windows-kill", 1);
-        }
-        else {
-            PREFS.putInt("windows-kill", 0);
-        }
-    }//GEN-LAST:event_chkWindowsKillActionPerformed
-
     private void cmbM3USourceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbM3USourceMouseWheelMoved
         mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbM3USource);
     }//GEN-LAST:event_cmbM3USourceMouseWheelMoved
@@ -7206,7 +7197,6 @@ public class GUI extends javax.swing.JFrame {
         cmbLookAndFeel = new javax.swing.JComboBox<>();
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
-        chkWindowsKill = new javax.swing.JCheckBox();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
         txtStatus = new javax.swing.JTextField();
         runButtonGrid = new javax.swing.JPanel();
@@ -8952,13 +8942,6 @@ public class GUI extends javax.swing.JFrame {
 
         lblNMSCeefaxRegion.setText("Ceefax (NMS) region");
 
-        chkWindowsKill.setText("Use windows-kill instead of PowerShell for stopping hacktv");
-        chkWindowsKill.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkWindowsKillActionPerformed(evt);
-            }
-        });
-
         chkNoUpdateCheck.setText("Do not check for updates on startup");
         chkNoUpdateCheck.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -8974,7 +8957,6 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkNoUpdateCheck)
-                    .addComponent(chkWindowsKill)
                     .addComponent(chkSyntaxOnly)
                     .addComponent(chkLocalModes)
                     .addGroup(generalSettingsPanelLayout.createSequentialGroup()
@@ -8993,8 +8975,6 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkSyntaxOnly)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkLocalModes)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkWindowsKill)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkNoUpdateCheck)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -9029,7 +9009,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(43, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -9357,7 +9337,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVideoFilter;
     private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
-    private javax.swing.JCheckBox chkWindowsKill;
     private javax.swing.JComboBox<String> cmbARCorrection;
     private javax.swing.JComboBox<String> cmbChannel;
     private javax.swing.JComboBox<String> cmbECMaturity;

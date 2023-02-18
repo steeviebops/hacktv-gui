@@ -2723,7 +2723,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="43" max="32767" attributes="0"/>
+                          <EmptySpace pref="66" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2923,7 +2923,6 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="chkNoUpdateCheck" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkWindowsKill" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkSyntaxOnly" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkLocalModes" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
@@ -2948,8 +2947,6 @@
                               <Component id="chkSyntaxOnly" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkLocalModes" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="chkWindowsKill" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkNoUpdateCheck" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
@@ -3016,14 +3013,6 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Ceefax (NMS) region"/>
                       </Properties>
-                    </Component>
-                    <Component class="javax.swing.JCheckBox" name="chkWindowsKill">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Use windows-kill instead of PowerShell for stopping hacktv"/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkWindowsKillActionPerformed"/>
-                      </Events>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkNoUpdateCheck">
                       <Properties>
