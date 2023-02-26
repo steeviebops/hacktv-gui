@@ -6415,6 +6415,19 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         int[] ia = lstPlaylist.getSelectedIndices();
+        // If only one item was selected, put it back in the source box
+        if (ia.length == 1) {
+            if (radLocalSource.isSelected()) {
+                txtSource.setText(playlistAL.get(ia[0]));
+            }
+            else if (radTest.isSelected()) {
+                for (int i = 0; i < tcArray.length; i++) {
+                    if (tcArray[i].equals(playlistAL.get(ia[0]).substring(5))) {
+                        cmbTest.setSelectedIndex(i);
+                    }
+                }
+            }
+        }
         // Process the selection array in reverse order and remove the items from the arraylist
         for (int j = ia.length -1; j >= 0; j--) {
             // Remove the requested item from the arraylist
