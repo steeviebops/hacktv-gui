@@ -525,6 +525,15 @@ public class GUI extends javax.swing.JFrame {
                 UIManager.setLookAndFeel(l);
                 SwingUtilities.updateComponentTreeUI(this);
                 this.pack();
+                // Colour of JList resets on L&F change so reset it
+                if (this.isVisible() && (playlistAL.isEmpty())) {
+                    // Set the background colour of the JList to disabledBackground
+                    lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
+                }
+                else if (this.isVisible()) {
+                    // Set tie background colour of the JList to background (enabled)
+                    lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.background"));
+                }
                 PREFS.putInt("LookAndFeel", i);
             }
             catch (ClassNotFoundException | IllegalAccessException | 
@@ -1017,6 +1026,14 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void populatePlaylist() {
+        if (playlistAL.isEmpty()) {
+            // Set the background colour of the JList to disabledBackground
+            lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
+        }
+        else {
+            // Set tie background colour of the JList to background (enabled)
+            lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.background"));
+        }
         // Convert playlistAL to an array so we can populate lstPlaylist with it
         var pl = new String[playlistAL.size()];
         for(int i = 0; i < pl.length; i++) {
@@ -2951,6 +2968,7 @@ public class GUI extends javax.swing.JFrame {
         lblNMSCeefax.setEnabled(true);
         chkTeletext.setEnabled(true);
         txtTeletextSource.setEnabled(true);
+        txtTeletextSource.setEditable(true);
         btnTeletextBrowse.setEnabled(true);
         btnRun.setEnabled(true);
         // Reset hacktv download button
@@ -3584,6 +3602,7 @@ public class GUI extends javax.swing.JFrame {
     private void enableRFOptions() {
         txtGain.setText("0");
         txtGain.setEnabled(true);
+        txtGain.setEditable(true);
         lblGain.setEnabled(true);
         radCustom.setEnabled(true);
         txtFrequency.setEnabled(true);
@@ -3596,6 +3615,7 @@ public class GUI extends javax.swing.JFrame {
     private void disableRFOptions() {
         txtGain.setText("");
         txtGain.setEnabled(false);
+        txtGain.setEditable(false);
         lblGain.setEnabled(false);
         radUHF.setEnabled(false);
         radVHF.setEnabled(false);
@@ -3607,6 +3627,7 @@ public class GUI extends javax.swing.JFrame {
         lblFrequency.setEnabled(false);
         txtFrequency.setText("");
         txtFrequency.setEnabled(false);
+        txtFrequency.setEditable(false);
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         // Add a blank item to prevent the combobox from enlarging on some L&Fs
@@ -3616,6 +3637,7 @@ public class GUI extends javax.swing.JFrame {
         lblAntennaName.setEnabled(false);
         txtAntennaName.setText("");
         txtAntennaName.setEnabled(false);
+        txtAntennaName.setEditable(false);
     }
     
     private void checkMode() {
@@ -4086,6 +4108,7 @@ public class GUI extends javax.swing.JFrame {
         chkFMDev.setEnabled(false);
         txtFMDev.setText("");
         txtFMDev.setEnabled(false);
+        txtFMDev.setEditable(false);
         if (chkVideoFilter.isSelected()) {
             chkVideoFilter.setSelected(false);
             txtSampleRate.setText(defaultSampleRate);
@@ -5338,6 +5361,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkDeactivateCard.isSelected()) {
             chkActivateCard.setSelected(false);
             txtCardNumber.setEnabled(true);
+            txtCardNumber.setEditable(true);
             lblEMMCardNumber.setEnabled(true);
             showEMMWarning();
         }
@@ -5345,6 +5369,7 @@ public class GUI extends javax.swing.JFrame {
             if ( !chkActivateCard.isSelected()) {
                 txtCardNumber.setText("");
                 txtCardNumber.setEnabled(false);
+                txtCardNumber.setEditable(false);
                 lblEMMCardNumber.setEnabled(false);
             }
         }
@@ -5354,6 +5379,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkActivateCard.isSelected()) {
             chkDeactivateCard.setSelected(false);
             txtCardNumber.setEnabled(true);
+            txtCardNumber.setEditable(true);
             lblEMMCardNumber.setEnabled(true);
             showEMMWarning();
         }
@@ -5361,6 +5387,7 @@ public class GUI extends javax.swing.JFrame {
             if ( !chkDeactivateCard.isSelected()) {
                 txtCardNumber.setText("");
                 txtCardNumber.setEnabled(false);
+                txtCardNumber.setEditable(false);
                 lblEMMCardNumber.setEnabled(false);
             }
         }
@@ -5436,6 +5463,7 @@ public class GUI extends javax.swing.JFrame {
             btnSpark.setText("Stop");
             chkTeletext.setEnabled(false);
             txtTeletextSource.setEnabled(false);
+            txtTeletextSource.setEditable(false);
             btnTeletextBrowse.setEnabled(false);
             btnTeefax.setEnabled(false);
             lblTeefax.setEnabled(false);
@@ -5462,6 +5490,7 @@ public class GUI extends javax.swing.JFrame {
             btnTeefax.setText("Stop");
             chkTeletext.setEnabled(false);
             txtTeletextSource.setEnabled(false);
+            txtTeletextSource.setEditable(false);
             btnTeletextBrowse.setEnabled(false);
             btnSpark.setEnabled(false);
             lblSpark.setEnabled(false);
@@ -5499,6 +5528,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkTeletext.isSelected()) {
             btnTeletextBrowse.setEnabled(true);
             txtTeletextSource.setEnabled(true);
+            txtTeletextSource.setEditable(true);
             downloadPanel.setEnabled(true);
             btnTeefax.setEnabled(true);
             btnSpark.setEnabled(true);
@@ -5512,6 +5542,7 @@ public class GUI extends javax.swing.JFrame {
             btnTeletextBrowse.setEnabled(false);
             txtTeletextSource.setText("");
             txtTeletextSource.setEnabled(false);
+            txtTeletextSource.setEditable(false);
             downloadPanel.setEnabled(false);
             btnTeefax.setEnabled(false);
             btnSpark.setEnabled(false);
@@ -5526,20 +5557,24 @@ public class GUI extends javax.swing.JFrame {
     private void chkOutputLevelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOutputLevelActionPerformed
         if (chkOutputLevel.isSelected()) {
             txtOutputLevel.setEnabled(true);
+            txtOutputLevel.setEditable(true);
         }
         else {
             txtOutputLevel.setText("");
             txtOutputLevel.setEnabled(false);
+            txtOutputLevel.setEditable(false);
         }
     }//GEN-LAST:event_chkOutputLevelActionPerformed
 
     private void chkGammaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkGammaActionPerformed
         if (chkGamma.isSelected()) {
             txtGamma.setEnabled(true);
+            txtGamma.setEditable(true);
         }
         else {
             txtGamma.setText("");
             txtGamma.setEnabled(false);
+            txtGamma.setEditable(false);
         }
     }//GEN-LAST:event_chkGammaActionPerformed
 
@@ -5569,11 +5604,13 @@ public class GUI extends javax.swing.JFrame {
     private void chkPixelRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPixelRateActionPerformed
         if (chkPixelRate.isSelected()) {
             txtPixelRate.setEnabled(true);
+            txtPixelRate.setEditable(true);
             txtPixelRate.setText(txtSampleRate.getText());
         }
         else {
             txtPixelRate.setText("");
             txtPixelRate.setEnabled(false);
+            txtPixelRate.setEditable(false);
         }
     }//GEN-LAST:event_chkPixelRateActionPerformed
 
@@ -5595,10 +5632,12 @@ public class GUI extends javax.swing.JFrame {
     private void chkMacChIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMacChIdActionPerformed
         if (chkMacChId.isSelected()) {
             txtMacChId.setEnabled(true);
+            txtMacChId.setEditable(true);
         }
         else {
             txtMacChId.setText("");
             txtMacChId.setEnabled(false);
+            txtMacChId.setEditable(false);
         }
     }//GEN-LAST:event_chkMacChIdActionPerformed
 
@@ -5684,11 +5723,13 @@ public class GUI extends javax.swing.JFrame {
         if (chkSubtitles.isSelected()) {
             lblSubtitleIndex.setEnabled(true);
             txtSubtitleIndex.setEnabled(true);
+            txtSubtitleIndex.setEditable(true);
         }
         else {
             lblSubtitleIndex.setEnabled(false);
             txtSubtitleIndex.setText("");
             txtSubtitleIndex.setEnabled(false);
+            txtSubtitleIndex.setEditable(false);
         }
     }//GEN-LAST:event_chkSubtitlesActionPerformed
 
@@ -5707,10 +5748,12 @@ public class GUI extends javax.swing.JFrame {
     private void chkPositionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPositionActionPerformed
         if (chkPosition.isSelected()) {
             txtPosition.setEnabled(true);
+            txtPosition.setEditable(true);
         }
         else {
             txtPosition.setText("");
             txtPosition.setEnabled(false);
+            txtPosition.setEditable(false);
         }
     }//GEN-LAST:event_chkPositionActionPerformed
 
@@ -5771,9 +5814,10 @@ public class GUI extends javax.swing.JFrame {
         chkSubtitles.setEnabled(false);
         chkDownmix.setEnabled(false);
         chkVolume.setEnabled(false);
-        txtSource.setEnabled(false);
         btnSourceBrowse.setEnabled(false);
+        txtSource.setEnabled(false);
         txtSource.setText("");
+        txtSource.setEditable(false);
         if (chkARCorrection.isSelected()) chkARCorrection.doClick();
         chkARCorrection.setEnabled(false);
         if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
@@ -5795,6 +5839,7 @@ public class GUI extends javax.swing.JFrame {
         chkRepeat.setEnabled(true);
         chkInterlace.setEnabled(true);
         txtSource.setEnabled(true);
+        txtSource.setEditable(true);
         btnSourceBrowse.setEnabled(true);
         if (captainJack) {
             chkPosition.setEnabled(true);
@@ -6113,12 +6158,14 @@ public class GUI extends javax.swing.JFrame {
                     checkMode();
                 }
                 txtGain.setEnabled(true);
+                txtGain.setEditable(true);
                 txtGain.setText("0");
                 lblGain.setEnabled(true);
                 chkAmp.setEnabled(true);
                 lblAntennaName.setEnabled(false);
                 txtAntennaName.setEnabled(false);
                 txtAntennaName.setText("");
+                txtAntennaName.setEditable(false);
                 lblFileType.setEnabled(false);
                 cmbFileType.setEnabled(false);
                 cmbFileType.setSelectedIndex(-1);
@@ -6135,11 +6182,13 @@ public class GUI extends javax.swing.JFrame {
                     checkMode();
                 }
                 txtGain.setEnabled(true);
+                txtGain.setEditable(true);
                 txtGain.setText("0");
                 lblGain.setEnabled(true);
                 chkAmp.setEnabled(false);
                 lblAntennaName.setEnabled(true);
                 txtAntennaName.setEnabled(true);
+                txtAntennaName.setEditable(true);
                 lblFileType.setEnabled(false);
                 cmbFileType.setEnabled(false);
                 cmbFileType.setSelectedIndex(-1);
@@ -6183,10 +6232,12 @@ public class GUI extends javax.swing.JFrame {
     private void chkVolumeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVolumeActionPerformed
         if (chkVolume.isSelected()) {
             txtVolume.setEnabled(true);
+            txtVolume.setEditable(true);
         }
         else {
             txtVolume.setEnabled(false);
             txtVolume.setText("");
+            txtVolume.setEditable(false);
         }
     }//GEN-LAST:event_chkVolumeActionPerformed
 
@@ -6194,10 +6245,12 @@ public class GUI extends javax.swing.JFrame {
         if (chkTextSubtitles.isSelected()) {
             lblTextSubtitleIndex.setEnabled(true);
             txtTextSubtitleIndex.setEnabled(true); 
+            txtTextSubtitleIndex.setEditable(true);
         }
         else {
             txtTextSubtitleIndex.setEnabled(false);
             txtTextSubtitleIndex.setText("");
+            txtTextSubtitleIndex.setEditable(false);
             lblTextSubtitleIndex.setEnabled(false);
         }
     }//GEN-LAST:event_chkTextSubtitlesActionPerformed
@@ -6224,10 +6277,12 @@ public class GUI extends javax.swing.JFrame {
     private void chkFMDevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFMDevActionPerformed
         if (chkFMDev.isSelected()) {
             txtFMDev.setEnabled(true);
+            txtFMDev.setEditable(true);
         }
         else {
             txtFMDev.setText("");
             txtFMDev.setEnabled(false);
+            txtFMDev.setEditable(false);
         }
     }//GEN-LAST:event_chkFMDevActionPerformed
 
@@ -6757,16 +6812,20 @@ public class GUI extends javax.swing.JFrame {
         if (chkECppv.isSelected()) {
             lblECprognum.setEnabled(true);
             txtECprognum.setEnabled(true);
+            txtECprognum.setEditable(true);
             lblECprogcost.setEnabled(true);
             txtECprogcost.setEnabled(true);
+            txtECprogcost.setEditable(true);
         }
         else {
             lblECprognum.setEnabled(false);
             txtECprognum.setText("");
             txtECprognum.setEnabled(false);
+            txtECprognum.setEditable(false);
             lblECprogcost.setEnabled(false);
             txtECprogcost.setText("");
             txtECprogcost.setEnabled(false);
+            txtECprogcost.setEditable(false);
         }
     }//GEN-LAST:event_chkECppvActionPerformed
 
@@ -6894,6 +6953,7 @@ public class GUI extends javax.swing.JFrame {
             btnNMSCeefax.setText("Stop");
             chkTeletext.setEnabled(false);
             txtTeletextSource.setEnabled(false);
+            txtTeletextSource.setEditable(false);
             btnTeletextBrowse.setEnabled(false);
             btnTeefax.setEnabled(false);
             lblTeefax.setEnabled(false);
@@ -7258,7 +7318,7 @@ public class GUI extends javax.swing.JFrame {
         consoleOutputPanel.setLayout(consoleOutputPanelLayout);
         consoleOutputPanelLayout.setHorizontalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
+            .addComponent(consoleScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
         );
         consoleOutputPanelLayout.setVerticalGroup(
             consoleOutputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -7310,6 +7370,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtPosition.setEditable(false);
         txtPosition.setEnabled(false);
         txtPosition.addMouseListener(new ContextMenuListener());
         txtPosition.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -7326,6 +7387,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtSubtitleIndex.setEditable(false);
         txtSubtitleIndex.setEnabled(false);
         txtSubtitleIndex.addMouseListener(new ContextMenuListener());
         txtSubtitleIndex.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -7359,6 +7421,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
         lstPlaylist.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 lstPlaylistKeyPressed(evt);
@@ -7442,11 +7505,11 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(chkTimestamp)
                             .addComponent(chkInterlace)
                             .addComponent(chkRandom))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
                         .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(sourcePanelLayout.createSequentialGroup()
                                 .addComponent(chkSubtitles)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 114, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 116, Short.MAX_VALUE)
                                 .addComponent(lblSubtitleIndex)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtSubtitleIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -7464,7 +7527,7 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(cmbARCorrection, 0, 148, Short.MAX_VALUE)))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sourcePanelLayout.createSequentialGroup()
                         .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
+                            .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
                             .addGroup(sourcePanelLayout.createSequentialGroup()
                                 .addComponent(radLocalSource)
                                 .addGap(39, 39, 39)
@@ -7473,7 +7536,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(sourcePanelLayout.createSequentialGroup()
-                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(6, 6, 6)
@@ -7692,7 +7755,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtAntennaName)
                             .addGroup(rfPanelLayout.createSequentialGroup()
                                 .addComponent(cmbFileType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 123, Short.MAX_VALUE))))
+                                .addGap(0, 127, Short.MAX_VALUE))))
                     .addGroup(rfPanelLayout.createSequentialGroup()
                         .addComponent(chkAmp)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -7853,6 +7916,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtPixelRate.setEditable(false);
         txtPixelRate.setEnabled(false);
         txtPixelRate.addMouseListener(new ContextMenuListener());
         txtPixelRate.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -7885,6 +7949,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtFMDev.setEditable(false);
         txtFMDev.setEnabled(false);
         txtFMDev.addMouseListener(new ContextMenuListener());
         txtFMDev.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -7903,6 +7968,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtMacChId.setEditable(false);
         txtMacChId.setEnabled(false);
         txtMacChId.addMouseListener(new ContextMenuListener());
         txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -7939,7 +8005,7 @@ public class GUI extends javax.swing.JFrame {
                                     .addComponent(chkNICAM)
                                     .addComponent(chkA2Stereo)
                                     .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 143, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 147, Short.MAX_VALUE)
                                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(modePanelLayout.createSequentialGroup()
                                         .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8064,7 +8130,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(203, Short.MAX_VALUE))
+                .addContainerGap(207, Short.MAX_VALUE))
         );
         vbiPanelLayout.setVerticalGroup(
             vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8092,6 +8158,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtGamma.setEditable(false);
         txtGamma.setEnabled(false);
         txtGamma.addMouseListener(new ContextMenuListener());
         txtGamma.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -8108,6 +8175,7 @@ public class GUI extends javax.swing.JFrame {
         });
 
         txtOutputLevel.addMouseListener(new ContextMenuListener());
+        txtOutputLevel.setEditable(false);
         txtOutputLevel.setEnabled(false);
         txtOutputLevel.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -8126,6 +8194,7 @@ public class GUI extends javax.swing.JFrame {
 
         chkDownmix.setText("Downmix 5.1 audio to 2.0");
 
+        txtVolume.setEditable(false);
         txtVolume.setEnabled(false);
         txtVolume.addMouseListener(new ContextMenuListener());
         txtVolume.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -8153,7 +8222,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkVerbose)
                     .addComponent(chkDownmix))
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addContainerGap(125, Short.MAX_VALUE))
         );
         additionalOptionsPanelLayout.setVerticalGroup(
             additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8294,6 +8363,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtTeletextSource.setEditable(false);
         txtTeletextSource.setEnabled(false);
         txtTeletextSource.addMouseListener(new ContextMenuListener());
 
@@ -8316,6 +8386,7 @@ public class GUI extends javax.swing.JFrame {
         lblTextSubtitleIndex.setText("Subtitle index (optional)");
         lblTextSubtitleIndex.setEnabled(false);
 
+        txtTextSubtitleIndex.setEditable(false);
         txtTextSubtitleIndex.setEnabled(false);
         txtTextSubtitleIndex.addMouseListener(new ContextMenuListener());
         txtTextSubtitleIndex.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -8333,11 +8404,11 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addComponent(chkTeletext)
-                        .addGap(286, 421, Short.MAX_VALUE))
+                        .addGap(286, 425, Short.MAX_VALUE))
                     .addGroup(teletextPanelLayout.createSequentialGroup()
                         .addGroup(teletextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(teletextPanelLayout.createSequentialGroup()
-                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+                                .addComponent(txtTeletextSource, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnTeletextBrowse, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(teletextPanelLayout.createSequentialGroup()
@@ -8403,7 +8474,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        lblNMSCeefax.setText("<html>Download a Ceefax recreation from Nathan Media Services<br>https://www.nathanmediaservices.co.uk/</html>");
+        lblNMSCeefax.setText("<html>Download a Ceefax recreation from <a href=\"https://www.nathanmediaservices.co.uk/\">Nathan Media Services</a></html>");
         lblNMSCeefax.setEnabled(false);
 
         javax.swing.GroupLayout downloadPanelLayout = new javax.swing.GroupLayout(downloadPanel);
@@ -8425,7 +8496,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(lblTeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblSpark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblNMSCeefax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 91, Short.MAX_VALUE)))
+                        .addGap(0, 95, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloadPanelLayout.setVerticalGroup(
@@ -8543,6 +8614,7 @@ public class GUI extends javax.swing.JFrame {
         lblEMMCardNumber.setText("Card number");
         lblEMMCardNumber.setEnabled(false);
 
+        txtCardNumber.setEditable(false);
         txtCardNumber.setEnabled(false);
         txtCardNumber.addMouseListener(new ContextMenuListener());
         txtCardNumber.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -8571,7 +8643,7 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(lblEMMCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtCardNumber, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkShowCardSerial))
-                .addContainerGap(96, Short.MAX_VALUE))
+                .addContainerGap(100, Short.MAX_VALUE))
         );
         emmPanelLayout.setVerticalGroup(
             emmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -8634,6 +8706,7 @@ public class GUI extends javax.swing.JFrame {
         lblECprogcost.setText("Programme cost");
         lblECprogcost.setEnabled(false);
 
+        txtECprognum.setEditable(false);
         txtECprognum.setEnabled(false);
         txtECprognum.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -8641,6 +8714,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        txtECprogcost.setEditable(false);
         txtECprogcost.setEnabled(false);
         txtECprogcost.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -8826,7 +8900,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(lblFork)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE))
+                            .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
@@ -8884,7 +8958,7 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblClearAll)
                     .addComponent(lblClearMRU))
-                .addContainerGap(192, Short.MAX_VALUE))
+                .addContainerGap(196, Short.MAX_VALUE))
         );
         resetSettingsPanelLayout.setVerticalGroup(
             resetSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

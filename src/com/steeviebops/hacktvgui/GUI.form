@@ -380,7 +380,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="consoleScrollPane" pref="352" max="32767" attributes="0"/>
+                  <Component id="consoleScrollPane" pref="348" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -481,11 +481,11 @@
                                           <Component id="chkInterlace" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="chkRandom" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace pref="73" max="32767" attributes="0"/>
+                                      <EmptySpace pref="75" max="32767" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="chkSubtitles" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="114" max="32767" attributes="0"/>
+                                              <EmptySpace pref="116" max="32767" attributes="0"/>
                                               <Component id="lblSubtitleIndex" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="separate" max="-2" attributes="0"/>
                                               <Component id="txtSubtitleIndex" min="-2" pref="48" max="-2" attributes="0"/>
@@ -510,7 +510,7 @@
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="playlistScrollPane" pref="427" max="32767" attributes="0"/>
+                                          <Component id="playlistScrollPane" pref="431" max="32767" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="radLocalSource" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
@@ -520,7 +520,7 @@
                                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
                                           <Group type="102" attributes="0">
-                                              <Component id="txtSource" pref="390" max="32767" attributes="0"/>
+                                              <Component id="txtSource" pref="392" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="cmbM3USource" max="32767" attributes="0"/>
                                           </Group>
@@ -666,6 +666,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtPosition">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -693,6 +694,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtSubtitleIndex">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -755,6 +757,9 @@
                       <SubComponents>
                         <Component class="javax.swing.JList" name="lstPlaylist">
                           <Properties>
+                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                              <Color blue="f0" green="f0" id="TextArea.disabledBackground" palette="3" red="f0" type="palette"/>
+                            </Property>
                             <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
                               <StringArray count="0"/>
                             </Property>
@@ -986,7 +991,7 @@
                                               <Component id="txtAntennaName" max="32767" attributes="0"/>
                                               <Group type="102" attributes="0">
                                                   <Component id="cmbFileType" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="0" pref="123" max="32767" attributes="0"/>
+                                                  <EmptySpace min="0" pref="127" max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -1240,7 +1245,7 @@
                                                   <Component id="chkA2Stereo" min="-2" max="-2" attributes="0"/>
                                                   <Component id="chkColour" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" pref="143" max="32767" attributes="0"/>
+                                              <EmptySpace type="unrelated" pref="147" max="32767" attributes="0"/>
                                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -1437,6 +1442,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtPixelRate">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1478,6 +1484,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtFMDev">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1503,6 +1510,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtMacChId">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1581,7 +1589,7 @@
                                       <Component id="cmbWSS" min="-2" pref="128" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace pref="203" max="32767" attributes="0"/>
+                              <EmptySpace pref="207" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1680,7 +1688,7 @@
                                   <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="121" max="32767" attributes="0"/>
+                              <EmptySpace pref="125" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1719,6 +1727,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtGamma">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1738,6 +1747,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtOutputLevel">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1767,6 +1777,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtVolume">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -1989,12 +2000,12 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="chkTeletext" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="286" pref="421" max="32767" attributes="0"/>
+                                      <EmptySpace min="286" pref="425" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <Component id="txtTeletextSource" pref="392" max="32767" attributes="0"/>
+                                              <Component id="txtTeletextSource" pref="396" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="btnTeletextBrowse" min="-2" pref="112" max="-2" attributes="0"/>
                                           </Group>
@@ -2045,6 +2056,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtTeletextSource">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <AuxValues>
@@ -2077,6 +2089,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtTextSubtitleIndex">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -2118,7 +2131,7 @@
                                           <Component id="lblSpark" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="lblNMSCeefax" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="91" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="95" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -2206,7 +2219,7 @@
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblNMSCeefax">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download a Ceefax recreation from Nathan Media Services&lt;br&gt;https://www.nathanmediaservices.co.uk/&lt;/html&gt;"/>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download a Ceefax recreation from &lt;a href=&quot;https://www.nathanmediaservices.co.uk/&quot;&gt;Nathan Media Services&lt;/a&gt;&lt;/html&gt;"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
@@ -2408,7 +2421,7 @@
                                       </Group>
                                       <Component id="chkShowCardSerial" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="96" max="32767" attributes="0"/>
+                                  <EmptySpace pref="100" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -2460,6 +2473,7 @@
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtCardNumber">
                           <Properties>
+                            <Property name="editable" type="boolean" value="false"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -2659,6 +2673,7 @@
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtECprognum">
                           <Properties>
+                            <Property name="editable" type="boolean" value="false"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -2667,6 +2682,7 @@
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtECprogcost">
                           <Properties>
+                            <Property name="editable" type="boolean" value="false"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -2756,7 +2772,7 @@
                                               <Component id="lblFork" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
-                                          <Component id="txtHackTVPath" pref="414" max="32767" attributes="0"/>
+                                          <Component id="txtHackTVPath" pref="418" max="32767" attributes="0"/>
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -2855,7 +2871,7 @@
                                   <Component id="lblClearAll" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblClearMRU" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="192" max="32767" attributes="0"/>
+                              <EmptySpace pref="196" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
