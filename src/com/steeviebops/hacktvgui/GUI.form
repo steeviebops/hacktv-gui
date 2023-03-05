@@ -2219,7 +2219,7 @@
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblNMSCeefax">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download a Ceefax recreation from &lt;a href=&quot;https://www.nathanmediaservices.co.uk/&quot;&gt;Nathan Media Services&lt;/a&gt;&lt;/html&gt;"/>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Download a Ceefax recreation from Nathan Media Services&lt;br&gt;https://www.nathanmediaservices.co.uk/&lt;/html&gt;"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
