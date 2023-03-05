@@ -464,15 +464,26 @@ public class GUI extends javax.swing.JFrame {
         }
         // Add FlatLaf
         // Not enabled by default, needs FlatLaf JAR dependency in classpath
-        // https://search.maven.org/artifact/com.formdev/flatlaf/2.2/jar
+        // https://repo1.maven.org/maven2/com/formdev/flatlaf/
         try {
             // Check to see if the FlatLaf class is available to us
             Class.forName("com.formdev.flatlaf.FlatLightLaf");
-            // Add the L&Fs
+            // Version 3?
+            boolean v3;
+            try {
+                Class.forName("com.formdev.flatlaf.themes.FlatMacLightLaf");
+                v3 = true;
+            }
+            catch (ClassNotFoundException e) {
+                v3 = false;
+            }
+            // Add the look and feels
             lafAL.add("com.formdev.flatlaf.FlatLightLaf");
             lafAL.add("com.formdev.flatlaf.FlatDarkLaf");
             lafAL.add("com.formdev.flatlaf.FlatIntelliJLaf");
             lafAL.add("com.formdev.flatlaf.FlatDarculaLaf");
+            if (v3) lafAL.add("com.formdev.flatlaf.themes.FlatMacLightLaf");
+            if (v3) lafAL.add("com.formdev.flatlaf.themes.FlatMacDarkLaf");
             System.setProperty("flatlaf.menuBarEmbedded", "false");
             //System.setProperty("flatlaf.useWindowDecorations", "false");
         }
@@ -507,6 +518,10 @@ public class GUI extends javax.swing.JFrame {
             LAF.add("FlatLaf (dark)");
             LAF.add("FlatLaf (IntelliJ-style)");
             LAF.add("FlatLaf (Darcula-style)");
+            if (lafAL.contains("com.formdev.flatlaf.themes.FlatMacLightLaf")) {
+                LAF.add("FlatLaf (Cupertino Light)");
+                LAF.add("FlatLaf (Cupertino Dark)");
+            }
         }
         var lf = new String[LAF.size()];
         for (int i = 0; i < LAF.size(); i++) {
