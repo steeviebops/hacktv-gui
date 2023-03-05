@@ -24,7 +24,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import java.text.DecimalFormat;
 import java.io.IOException;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -1439,7 +1438,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Return a value of -250 if the value is null so we can handle it
-                ImportedFrequency = Double.parseDouble("-250");
+                ImportedFrequency = Double.valueOf("-250");
             }
             if ((ImportedChannel.isEmpty()) && (ImportedFrequency == -250)) {
                 messageBox(NoFrequencyOrChannel, JOptionPane.WARNING_MESSAGE);
@@ -1950,7 +1949,7 @@ public class GUI extends javax.swing.JFrame {
             ImportedSampleRate = (INI.getDoubleFromINI(fileContents, "hacktv", "samplerate") / 1000000);
         }
         else {
-            ImportedSampleRate = Double.parseDouble("16");
+            ImportedSampleRate = Double.valueOf("16");
             messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
         }
         txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
@@ -2042,7 +2041,7 @@ public class GUI extends javax.swing.JFrame {
         // Save current fork if applicable
         if (captainJack) FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "fork", "captainJack");
         // Input source or test card
-        if (playlistAL.size() > 0) {
+        if (!playlistAL.isEmpty()) {
             // We'll populate the playlist section later
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
             // Set start point of playlist
@@ -2107,7 +2106,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.parseInt(txtGain.getText()));
+            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.valueOf(txtGain.getText()));
         }
         // RF Amp
         if (chkAmp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "amp", 1);
@@ -2120,7 +2119,7 @@ public class GUI extends javax.swing.JFrame {
         // Repeat
         if (chkRepeat.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "repeat", 1);
         // Position
-        if (chkPosition.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "position", Integer.parseInt(txtPosition.getText()));
+        if (chkPosition.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "position", Integer.valueOf(txtPosition.getText()));
         // Verbose
         if (chkVerbose.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "verbose", 1);
         // Logo
@@ -2218,10 +2217,10 @@ public class GUI extends javax.swing.JFrame {
         if (chkECppv.isSelected()) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv", 1);
             if (!txtECprognum.getText().isBlank()) {
-                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-num", Integer.parseInt(txtECprognum.getText()));
+                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-num", Integer.valueOf(txtECprognum.getText()));
             }
             if (!txtECprogcost.getText().isBlank()) {
-                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-cost", Integer.parseInt(txtECprogcost.getText()));
+                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-cost", Integer.valueOf(txtECprogcost.getText()));
             }
         }
         // EuroCrypt "No Date" setting
@@ -2301,7 +2300,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // The playlist doesn't follow a standard INI format. We just dump the
         // playlist array into the file as-is.
-        if (playlistAL.size() > 0) {
+        if (!playlistAL.isEmpty()) {
             var sb = new StringBuilder();
             FileContents = FileContents + "\n\n[playlist]\n";
             for (int i = 1; i <= playlistAL.size(); i++) {
@@ -2310,8 +2309,8 @@ public class GUI extends javax.swing.JFrame {
             FileContents = FileContents + sb.toString();
         }
         // Commit to disk
-        try (var fw = new FileWriter(DestinationFileName, StandardCharsets.UTF_8)) {
-            fw.write(FileContents);
+        try {
+            Files.writeString(DestinationFileName.toPath(), FileContents, StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             messageBox("An error occurred while writing to this file. "
@@ -2451,7 +2450,7 @@ public class GUI extends javax.swing.JFrame {
                 i++;
             }
             // Did we add any files to be removed? If so, remove them and alert.
-            if (toRemove.size() > 0) {
+            if (!toRemove.isEmpty()) {
                 pls.removeAll(toRemove);
                 messageBox("Some files could not be found and have been removed from the playlist.\n" +
                         removed, JOptionPane.WARNING_MESSAGE);
@@ -4248,7 +4247,7 @@ public class GUI extends javax.swing.JFrame {
 
     private String checkInput() {
         // Skip this method if the playlist is populated
-        if (playlistAL.size() > 0) return "";
+        if (!playlistAL.isEmpty()) return "";
         if (radLocalSource.isSelected()) {
             if (cmbM3USource.isVisible()) {
                 return playlistURLsAL.get(cmbM3USource.getSelectedIndex());
@@ -4283,7 +4282,7 @@ public class GUI extends javax.swing.JFrame {
     
     private Integer checkSampleRate() {
         if (SharedInst.isNumeric( txtSampleRate.getText())) {
-            Double SR = Double.parseDouble(txtSampleRate.getText());
+            Double SR = Double.valueOf(txtSampleRate.getText());
             return (int) (SR * 1000000);
         }
         else {
@@ -4297,7 +4296,7 @@ public class GUI extends javax.swing.JFrame {
         var al = new ArrayList<String>();
         if (chkPixelRate.isSelected()) {
             try {
-                Double PR = Double.parseDouble(txtPixelRate.getText());
+                Double PR = Double.valueOf(txtPixelRate.getText());
                 int PixelRate = (int) (PR * 1000000);
                 al.add("--pixelrate");
                 al.add(Integer.toString(PixelRate));
@@ -4316,7 +4315,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkFMDev.isSelected()) {
             if (SharedInst.isNumeric(txtFMDev.getText())) {
                 al.add("--deviation");
-                Double d = Double.parseDouble(txtFMDev.getText());
+                Double d = Double.valueOf(txtFMDev.getText());
                 int i = (int) (d * 1000000);
                 al.add(Integer.toString(i));
             }
@@ -4466,7 +4465,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else if (txtCardNumber.getText().length() == 9) {
                 // Do a Luhn check on the provided card number
-                if (!SharedInst.luhnCheck(Long.parseLong(txtCardNumber.getText()))) {
+                if (!SharedInst.luhnCheck(Long.valueOf(txtCardNumber.getText()))) {
                     messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
                     return null;
                 }
@@ -4481,7 +4480,7 @@ public class GUI extends javax.swing.JFrame {
                 // Only digits 4-13 of 13-digit card numbers are checked, so we
                 // need to strip out the first four digits.
                 TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
-                if (!SharedInst.luhnCheck(Long.parseLong(TruncatedCardNumber))) {
+                if (!SharedInst.luhnCheck(Long.valueOf(TruncatedCardNumber))) {
                     messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
                     return null;
                 }
@@ -4875,7 +4874,7 @@ public class GUI extends javax.swing.JFrame {
         if (ytdl.isBlank()) {
             String InputSource = checkInput();
             if (InputSource == null) return;
-            if (playlistAL.size() > 0) {
+            if (!playlistAL.isEmpty()) {
                 if (chkRandom.isSelected()) {
                     // Set the start point as the first item
                     if (startPoint != -1) {
@@ -8487,7 +8486,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        lblNMSCeefax.setText("<html>Download a Ceefax recreation from <a href=\"https://www.nathanmediaservices.co.uk/\">Nathan Media Services</a></html>");
+        lblNMSCeefax.setText("<html>Download a Ceefax recreation from Nathan Media Services<br>https://www.nathanmediaservices.co.uk/</html>");
         lblNMSCeefax.setEnabled(false);
 
         javax.swing.GroupLayout downloadPanelLayout = new javax.swing.GroupLayout(downloadPanel);
