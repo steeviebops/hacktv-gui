@@ -299,7 +299,6 @@ public class GUI extends javax.swing.JFrame {
         selectModesFile();
         if (!openModesFile()) return false;
         populateVideoModes();
-        addWSSModes();
         addARCorrectionOptions();
         addOutputDevices();
         addCeefaxRegions();
@@ -447,7 +446,8 @@ public class GUI extends javax.swing.JFrame {
             chkNoDate,
             chkInvertVideo,
             chkVITC,
-            chkSecamId
+            chkSecamId,
+            chkOffset
         };
     }
     
@@ -1874,16 +1874,16 @@ public class GUI extends javax.swing.JFrame {
         // MAC audio options
         if (radMAC.isSelected()) {
             if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-mode", "stereo", false).equals("mono")) {
-                radMacMono.setSelected(true);
+                chkMacMono.setSelected(true);
             }
             if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-quality", "high", false).equals("medium")) {
-                radMac16k.setSelected(true);
+                chkMac16k.setSelected(true);
             }
             if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-compression", "companded", false).equals("linear")) {
-                radMacLinear.setSelected(true);
+                chkMacLinear.setSelected(true);
             }
             if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-protection", "l1", false).equals("l2")) {
-                radMacL2.setSelected(true);
+                chkMacL2.setSelected(true);
             }
         }
         // Disable colour
@@ -1948,6 +1948,13 @@ public class GUI extends javax.swing.JFrame {
             if ( (INI.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex")) != null ) {
                 txtTextSubtitleIndex.setText(Integer.toString((INI.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex"))));
             }
+        }
+        // Offset
+        Double ImportedOffset;
+        if ((INI.getDoubleFromINI(fileContents, "hacktv", "offset")) != null) {
+            if (!chkOffset.isSelected()) chkOffset.doClick();
+            ImportedOffset = (INI.getDoubleFromINI(fileContents, "hacktv", "offset") / 1000000);
+            txtOffset.setText(ImportedOffset.toString().replace(".0","")); 
         }
         // Pixel rate
         Double ImportedPixelRate;
@@ -2054,7 +2061,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
         // Save current fork if applicable
-        if (captainJack) FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "fork", "captainJack");
+        if (captainJack) FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
         // Input source or test card
         if (!playlistAL.isEmpty()) {
             // We'll populate the playlist section later
@@ -2114,6 +2121,10 @@ public class GUI extends javax.swing.JFrame {
         // Pixel rate
         if (SharedInst.isNumeric(txtPixelRate.getText())) {
             FileContents = INI.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
+        }
+        // Offset
+        if (SharedInst.isNumeric(txtOffset.getText())) {
+            FileContents = INI.setLongINIValue(FileContents, "hacktv", "offset", (long) (Double.parseDouble(txtOffset.getText()) * 1000000));
         }
         // SECAM field ID
         if (chkSecamId.isSelected()) {
@@ -2291,10 +2302,10 @@ public class GUI extends javax.swing.JFrame {
         // MAC channel ID
         if (chkMacChId.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText());
         // MAC audio options
-        if (radMacMono.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-mode", "mono");
-        if (radMac16k.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-quality", "medium");
-        if (radMacLinear.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-compression", "linear");
-        if (radMacL2.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-protection", "l2");
+        if (chkMacMono.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-mode", "mono");
+        if (chkMac16k.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-quality", "medium");
+        if (chkMacLinear.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-compression", "linear");
+        if (chkMacL2.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-protection", "l2");
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
             if (!txtAntennaName.getText().isBlank())
@@ -3368,8 +3379,9 @@ public class GUI extends javax.swing.JFrame {
             }
             chkShowCardSerial.setEnabled(false);
         }
-        // Enable EMM options on sky07, sky09 and VC2 conditional modes
-        if ( ((scramblingKey1).equals("sky07")) ||
+        // Enable EMM options on sky06, sky07, sky09 and VC2 conditional modes
+        if ( ((scramblingKey1).equals("sky06")) ||
+                ((scramblingKey1).equals("sky07")) ||
                 ((scramblingKey1).equals("sky09")) )
         {
             chkActivateCard.setEnabled(true);
@@ -3454,19 +3466,6 @@ public class GUI extends javax.swing.JFrame {
     private void disableWSS() {
         if (chkWSS.isSelected()) chkWSS.doClick();
         chkWSS.setEnabled(false);
-    }
-    
-    private void addWSSModes() {
-        var WSSMode = new String[] {
-            "auto",
-            "4:3",
-            "16:9",
-            "14:9 letterbox",
-            "16:9 letterbox"
-        };
-        cmbWSS.removeAllItems();
-        cmbWSS.setModel(new DefaultComboBoxModel<>(WSSMode));
-        cmbWSS.setSelectedIndex(-1);
     }
     
     private ArrayList<String> checkWSS() {
@@ -4050,33 +4049,19 @@ public class GUI extends javax.swing.JFrame {
     private void configureMacPanel(boolean e) {
         // Enable or disable MAC video-related options based on the boolean
         // sent to this method
-        if (e) {
-            radMacStereo.setSelected(true);
-            radMac32k.setSelected(true);
-            radMacCompanded.setSelected(true);
-            radMacL1.setSelected(true);
-        }
-        else {
+        if (!e) {
             if (chkMacChId.isSelected()) chkMacChId.doClick();
-            macStereoButtonGroup.clearSelection();
-            macSRButtonGroup.clearSelection();
-            macCompressionButtonGroup.clearSelection();
-            macProtectionButtonGroup.clearSelection();
+            if (chkMacMono.isSelected()) chkMacMono.doClick();
+            if (chkMac16k.isSelected()) chkMac16k.doClick();
+            if (chkMacLinear.isSelected()) chkMacLinear.doClick();
+            if (chkMacL2.isSelected()) chkMacL2.doClick();
         }
         macPanel.setEnabled(e);
         chkMacChId.setEnabled(e);
-        lblMacAudioMode.setEnabled(e);
-        radMacStereo.setEnabled(e);
-        radMacMono.setEnabled(e);
-        lblMacSampleRate.setEnabled(e);
-        radMac32k.setEnabled(e);
-        radMac16k.setEnabled(e);
-        lblMacCompression.setEnabled(e);
-        radMacCompanded.setEnabled(e);
-        radMacLinear.setEnabled(e);
-        lblMacProtection.setEnabled(e);
-        radMacL1.setEnabled(e);
-        radMacL2.setEnabled(e);
+        chkMacMono.setEnabled(e);
+        chkMac16k.setEnabled(e);
+        chkMacLinear.setEnabled(e);
+        chkMacL2.setEnabled(e);
     }
     
     private void enableNICAM() {
@@ -4319,6 +4304,24 @@ public class GUI extends javax.swing.JFrame {
             catch (NumberFormatException nfe) {
                 tabPane.setSelectedIndex(1);
                 messageBox("Please specify a valid pixel rate in MHz.", JOptionPane.WARNING_MESSAGE);
+                return null;
+            }
+        }
+        return al;
+    }
+    
+    private ArrayList<String> checkOffset() {
+        var al = new ArrayList<String>();
+        if (chkOffset.isSelected()) {
+            try {
+                Double PR = Double.valueOf(txtOffset.getText());
+                int offset = (int) (PR * 1000000);
+                al.add("--offset");
+                al.add(Integer.toString(offset));
+            }
+            catch (NumberFormatException nfe) {
+                tabPane.setSelectedIndex(1);
+                messageBox("Please specify a valid offset in MHz.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
         }
@@ -4685,14 +4688,14 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private ArrayList<String> checkMacOptions() {
-        // If any of these radio buttons are selected, return their arguments.
-        // We don't need to return the arguments for the other options (such as
+        // If any of these options are selected, return their arguments.
+        // We don't need to return the arguments for unchecked options (such as
         // 32 kHz audio or stereo) because they're defaults anyway).
         var al = new ArrayList<String>();
-        if (radMacMono.isSelected()) al.add("--mac-audio-mono");
-        if (radMac16k.isSelected()) al.add("--mac-audio-medium-quality");
-        if (radMacLinear.isSelected()) al.add("--mac-audio-linear");
-        if (radMacL2.isSelected()) al.add("--mac-audio-l2-protection");
+        if (chkMacMono.isSelected()) al.add("--mac-audio-mono");
+        if (chkMac16k.isSelected()) al.add("--mac-audio-medium-quality");
+        if (chkMacLinear.isSelected()) al.add("--mac-audio-linear");
+        if (chkMacL2.isSelected()) al.add("--mac-audio-l2-protection");
         return al;
     }
     
@@ -4752,6 +4755,13 @@ public class GUI extends javax.swing.JFrame {
         else {
             return;
         }
+        // Offset
+        if (checkOffset() != null) {
+            allArgs.addAll(checkOffset());
+        }
+        else {
+            return;
+        }        
         // SECAM field ID
         if (chkSecamId.isSelected()) allArgs.add("--secam-field-id");
         // Only add gain for HackRF or SoapySDR
@@ -6434,7 +6444,7 @@ public class GUI extends javax.swing.JFrame {
             if (radLocalSource.isSelected()) {
                 txtSource.setText(playlistAL.get(ia[0]));
             }
-            else if (radTest.isSelected()) {
+            else if ((radTest.isSelected()) && cmbTest.isEnabled()) {
                 for (int i = 0; i < tcArray.length; i++) {
                     if (tcArray[i].equals(playlistAL.get(ia[0]).substring(5))) {
                         cmbTest.setSelectedIndex(i);
@@ -7146,7 +7156,53 @@ public class GUI extends javax.swing.JFrame {
         txtSource = new javax.swing.JTextField();
         cmbM3USource = new javax.swing.JComboBox<>();
         btnSourceBrowse = new javax.swing.JButton();
+        modeTab = new javax.swing.JPanel();
+        modePanel = new javax.swing.JPanel();
+        modeButtonPanel = new javax.swing.JPanel();
+        radPAL = new javax.swing.JRadioButton();
+        radNTSC = new javax.swing.JRadioButton();
+        radSECAM = new javax.swing.JRadioButton();
+        radBW = new javax.swing.JRadioButton();
+        radMAC = new javax.swing.JRadioButton();
+        cmbMode = new javax.swing.JComboBox<>();
+        lblSampleRate = new javax.swing.JLabel();
+        txtSampleRate = new javax.swing.JTextField();
+        chkAudio = new javax.swing.JCheckBox();
+        chkNICAM = new javax.swing.JCheckBox();
+        chkPixelRate = new javax.swing.JCheckBox();
+        txtPixelRate = new javax.swing.JTextField();
+        chkVideoFilter = new javax.swing.JCheckBox();
+        chkColour = new javax.swing.JCheckBox();
+        chkA2Stereo = new javax.swing.JCheckBox();
+        chkFMDev = new javax.swing.JCheckBox();
+        txtFMDev = new javax.swing.JTextField();
+        chkInvertVideo = new javax.swing.JCheckBox();
+        chkOffset = new javax.swing.JCheckBox();
+        txtOffset = new javax.swing.JTextField();
+        vbiPanel = new javax.swing.JPanel();
+        chkVITS = new javax.swing.JCheckBox();
+        chkACP = new javax.swing.JCheckBox();
+        chkWSS = new javax.swing.JCheckBox();
+        cmbWSS = new javax.swing.JComboBox<>();
+        chkVITC = new javax.swing.JCheckBox();
+        chkSecamId = new javax.swing.JCheckBox();
+        macPanel = new javax.swing.JPanel();
+        chkMacChId = new javax.swing.JCheckBox();
+        txtMacChId = new javax.swing.JTextField();
+        chkMacMono = new javax.swing.JCheckBox();
+        chkMac16k = new javax.swing.JCheckBox();
+        chkMacLinear = new javax.swing.JCheckBox();
+        chkMacL2 = new javax.swing.JCheckBox();
         outputTab = new javax.swing.JPanel();
+        additionalOptionsPanel = new javax.swing.JPanel();
+        chkGamma = new javax.swing.JCheckBox();
+        txtGamma = new javax.swing.JTextField();
+        chkOutputLevel = new javax.swing.JCheckBox();
+        txtOutputLevel = new javax.swing.JTextField();
+        chkVerbose = new javax.swing.JCheckBox();
+        chkVolume = new javax.swing.JCheckBox();
+        chkDownmix = new javax.swing.JCheckBox();
+        txtVolume = new javax.swing.JTextField();
         frequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
         cmbOutputDevice = new javax.swing.JComboBox<>();
@@ -7168,57 +7224,6 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion = new javax.swing.JComboBox<>();
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
-        modePanel = new javax.swing.JPanel();
-        cmbMode = new javax.swing.JComboBox<>();
-        radPAL = new javax.swing.JRadioButton();
-        radNTSC = new javax.swing.JRadioButton();
-        radSECAM = new javax.swing.JRadioButton();
-        radBW = new javax.swing.JRadioButton();
-        radMAC = new javax.swing.JRadioButton();
-        lblSampleRate = new javax.swing.JLabel();
-        txtSampleRate = new javax.swing.JTextField();
-        chkAudio = new javax.swing.JCheckBox();
-        chkNICAM = new javax.swing.JCheckBox();
-        chkPixelRate = new javax.swing.JCheckBox();
-        txtPixelRate = new javax.swing.JTextField();
-        chkVideoFilter = new javax.swing.JCheckBox();
-        chkColour = new javax.swing.JCheckBox();
-        chkA2Stereo = new javax.swing.JCheckBox();
-        chkFMDev = new javax.swing.JCheckBox();
-        txtFMDev = new javax.swing.JTextField();
-        chkInvertVideo = new javax.swing.JCheckBox();
-        chkMacChId = new javax.swing.JCheckBox();
-        txtMacChId = new javax.swing.JTextField();
-        playbackTab = new javax.swing.JPanel();
-        vbiPanel = new javax.swing.JPanel();
-        chkVITS = new javax.swing.JCheckBox();
-        chkACP = new javax.swing.JCheckBox();
-        chkWSS = new javax.swing.JCheckBox();
-        cmbWSS = new javax.swing.JComboBox<>();
-        chkVITC = new javax.swing.JCheckBox();
-        chkSecamId = new javax.swing.JCheckBox();
-        additionalOptionsPanel = new javax.swing.JPanel();
-        chkGamma = new javax.swing.JCheckBox();
-        txtGamma = new javax.swing.JTextField();
-        chkOutputLevel = new javax.swing.JCheckBox();
-        txtOutputLevel = new javax.swing.JTextField();
-        chkVerbose = new javax.swing.JCheckBox();
-        chkVolume = new javax.swing.JCheckBox();
-        chkDownmix = new javax.swing.JCheckBox();
-        txtVolume = new javax.swing.JTextField();
-        macPanel = new javax.swing.JPanel();
-        radMacStereo = new javax.swing.JRadioButton();
-        radMac32k = new javax.swing.JRadioButton();
-        radMacCompanded = new javax.swing.JRadioButton();
-        radMacMono = new javax.swing.JRadioButton();
-        radMac16k = new javax.swing.JRadioButton();
-        radMacLinear = new javax.swing.JRadioButton();
-        radMacL1 = new javax.swing.JRadioButton();
-        radMacL2 = new javax.swing.JRadioButton();
-        lblMacAudioMode = new javax.swing.JLabel();
-        lblMacSampleRate = new javax.swing.JLabel();
-        lblMacCompression = new javax.swing.JLabel();
-        lblMacProtection = new javax.swing.JLabel();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -7563,7 +7568,7 @@ public class GUI extends javax.swing.JFrame {
                                 .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(sourcePanelLayout.createSequentialGroup()
-                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+                                .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(6, 6, 6)
@@ -7645,6 +7650,489 @@ public class GUI extends javax.swing.JFrame {
         );
 
         tabPane.addTab("Source", sourceTab);
+
+        modePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video mode options"));
+
+        modeButtonPanel.setLayout(new java.awt.GridLayout(1, 0));
+
+        modeButtonGroup.add(radPAL);
+        radPAL.setText("PAL");
+        radPAL.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radPALActionPerformed(evt);
+            }
+        });
+        modeButtonPanel.add(radPAL);
+
+        modeButtonGroup.add(radNTSC);
+        radNTSC.setText("NTSC");
+        radNTSC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radNTSCActionPerformed(evt);
+            }
+        });
+        modeButtonPanel.add(radNTSC);
+
+        modeButtonGroup.add(radSECAM);
+        radSECAM.setText("SECAM");
+        radSECAM.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radSECAMActionPerformed(evt);
+            }
+        });
+        modeButtonPanel.add(radSECAM);
+
+        modeButtonGroup.add(radBW);
+        radBW.setText("Black and white");
+        radBW.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radBWActionPerformed(evt);
+            }
+        });
+        modeButtonPanel.add(radBW);
+
+        modeButtonGroup.add(radMAC);
+        radMAC.setText("MAC");
+        radMAC.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        radMAC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radMACActionPerformed(evt);
+            }
+        });
+        modeButtonPanel.add(radMAC);
+
+        cmbMode.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbModeMouseWheelMoved(evt);
+            }
+        });
+        cmbMode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbModeActionPerformed(evt);
+            }
+        });
+
+        lblSampleRate.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblSampleRate.setText("Sample rate (MHz)");
+
+        txtSampleRate.setToolTipText("");
+        txtSampleRate.addMouseListener(new ContextMenuListener());
+        txtSampleRate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSampleRateKeyTyped(evt);
+            }
+        });
+
+        chkAudio.setText("Audio enabled");
+        chkAudio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkAudioActionPerformed(evt);
+            }
+        });
+
+        chkNICAM.setText("NICAM stereo");
+        chkNICAM.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkNICAMActionPerformed(evt);
+            }
+        });
+
+        chkPixelRate.setText("Pixel rate (MHz)");
+        chkPixelRate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkPixelRateActionPerformed(evt);
+            }
+        });
+
+        txtPixelRate.setEditable(false);
+        txtPixelRate.setEnabled(false);
+        txtPixelRate.addMouseListener(new ContextMenuListener());
+        txtPixelRate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtPixelRateKeyTyped(evt);
+            }
+        });
+
+        chkVideoFilter.setText("VSB-AM filter");
+        chkVideoFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkVideoFilterActionPerformed(evt);
+            }
+        });
+
+        chkColour.setText("Disable colour");
+
+        chkA2Stereo.setText("A2 (Zweikanalton) stereo");
+        chkA2Stereo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkA2StereoActionPerformed(evt);
+            }
+        });
+
+        chkFMDev.setText("FM deviation (MHz)");
+        chkFMDev.setEnabled(false);
+        chkFMDev.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkFMDevActionPerformed(evt);
+            }
+        });
+
+        txtFMDev.setEditable(false);
+        txtFMDev.setEnabled(false);
+        txtFMDev.addMouseListener(new ContextMenuListener());
+        txtFMDev.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFMDevKeyTyped(evt);
+            }
+        });
+
+        chkInvertVideo.setText("Invert video polarity");
+
+        chkOffset.setText("Offset (MHz)");
+        chkOffset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkOffsetActionPerformed(evt);
+            }
+        });
+
+        txtOffset.setEditable(false);
+        txtOffset.setEnabled(false);
+        txtOffset.addMouseListener(new ContextMenuListener());
+        txtOffset.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtOffsetKeyTyped(evt);
+            }
+        });
+
+        javax.swing.GroupLayout modePanelLayout = new javax.swing.GroupLayout(modePanel);
+        modePanel.setLayout(modePanelLayout);
+        modePanelLayout.setHorizontalGroup(
+            modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(modePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cmbMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(modePanelLayout.createSequentialGroup()
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkAudio)
+                            .addComponent(chkNICAM)
+                            .addComponent(chkA2Stereo)
+                            .addComponent(chkColour))
+                        .addGap(18, 147, Short.MAX_VALUE)
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(modePanelLayout.createSequentialGroup()
+                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkPixelRate)
+                                    .addComponent(lblSampleRate))
+                                .addGap(74, 74, 74))
+                            .addGroup(modePanelLayout.createSequentialGroup()
+                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(modePanelLayout.createSequentialGroup()
+                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkFMDev)
+                                            .addComponent(chkOffset))
+                                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtOffset)
+                            .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
+                            .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(modePanelLayout.createSequentialGroup()
+                        .addComponent(chkInvertVideo)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        modePanelLayout.setVerticalGroup(
+            modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(modePanelLayout.createSequentialGroup()
+                .addGap(6, 6, 6)
+                .addComponent(modeButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbMode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSampleRate)
+                    .addComponent(chkAudio)
+                    .addComponent(txtSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(2, 2, 2)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(modePanelLayout.createSequentialGroup()
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtPixelRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(chkPixelRate))
+                        .addGap(2, 2, 2)
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkA2Stereo)
+                            .addComponent(chkFMDev)
+                            .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(chkNICAM))
+                .addGap(2, 2, 2)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkColour)
+                    .addComponent(chkOffset)
+                    .addComponent(txtOffset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(2, 2, 2)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkInvertVideo)
+                    .addComponent(chkVideoFilter))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        vbiPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VBI options"));
+
+        chkVITS.setText("VITS test signal");
+
+        chkACP.setText("Macrovision ACP");
+
+        chkWSS.setText("Widescreen signalling (WSS)");
+        chkWSS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkWSSActionPerformed(evt);
+            }
+        });
+
+        cmbWSS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "auto", "4:3", "16:9", "14:9 letterbox", "16:9 letterbox" }));
+        cmbWSS.setSelectedIndex(-1);
+        cmbWSS.setEnabled(false);
+        cmbWSS.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbWSSMouseWheelMoved(evt);
+            }
+        });
+
+        chkVITC.setText("VITC (Vertical Interval Time Code)");
+
+        chkSecamId.setText("SECAM field ID");
+
+        javax.swing.GroupLayout vbiPanelLayout = new javax.swing.GroupLayout(vbiPanel);
+        vbiPanel.setLayout(vbiPanelLayout);
+        vbiPanelLayout.setHorizontalGroup(
+            vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(vbiPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkACP)
+                    .addComponent(chkVITS)
+                    .addComponent(chkSecamId)
+                    .addGroup(vbiPanelLayout.createSequentialGroup()
+                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        vbiPanelLayout.setVerticalGroup(
+            vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(vbiPanelLayout.createSequentialGroup()
+                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkWSS)
+                    .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
+                .addComponent(chkACP)
+                .addGap(0, 0, 0)
+                .addComponent(chkVITS)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkVITC)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSecamId)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC options"));
+
+        chkMacChId.setText("Override channel ID");
+        chkMacChId.setEnabled(false);
+        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMacChIdActionPerformed(evt);
+            }
+        });
+
+        txtMacChId.setEditable(false);
+        txtMacChId.setEnabled(false);
+        txtMacChId.addMouseListener(new ContextMenuListener());
+        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyTyped(evt);
+            }
+        });
+
+        chkMacMono.setText("Mono audio");
+        chkMacMono.setEnabled(false);
+
+        chkMac16k.setText("16 kHz audio sample rate");
+        chkMac16k.setEnabled(false);
+
+        chkMacLinear.setText("Linear audio");
+        chkMacLinear.setEnabled(false);
+
+        chkMacL2.setText("Level 2 audio protection");
+        chkMacL2.setEnabled(false);
+
+        javax.swing.GroupLayout macPanelLayout = new javax.swing.GroupLayout(macPanel);
+        macPanel.setLayout(macPanelLayout);
+        macPanelLayout.setHorizontalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(macPanelLayout.createSequentialGroup()
+                        .addComponent(chkMacChId)
+                        .addGap(28, 28, 28)
+                        .addComponent(txtMacChId))
+                    .addGroup(macPanelLayout.createSequentialGroup()
+                        .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkMacMono)
+                            .addComponent(chkMac16k)
+                            .addComponent(chkMacLinear)
+                            .addComponent(chkMacL2))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        macPanelLayout.setVerticalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkMacChId)
+                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacMono)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMac16k)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacLinear)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacL2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout modeTabLayout = new javax.swing.GroupLayout(modeTab);
+        modeTab.setLayout(modeTabLayout);
+        modeTabLayout.setHorizontalGroup(
+            modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(modeTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(modePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(modeTabLayout.createSequentialGroup()
+                        .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        modeTabLayout.setVerticalGroup(
+            modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(modeTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(modePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(vbiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(92, Short.MAX_VALUE))
+        );
+
+        tabPane.addTab("Mode", modeTab);
+
+        additionalOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Additional options"));
+
+        chkGamma.setText("Gamma correction");
+        chkGamma.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkGammaActionPerformed(evt);
+            }
+        });
+
+        txtGamma.setEditable(false);
+        txtGamma.setEnabled(false);
+        txtGamma.addMouseListener(new ContextMenuListener());
+        txtGamma.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtGammaKeyTyped(evt);
+            }
+        });
+
+        chkOutputLevel.setText("Output level");
+        chkOutputLevel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkOutputLevelActionPerformed(evt);
+            }
+        });
+
+        txtOutputLevel.addMouseListener(new ContextMenuListener());
+        txtOutputLevel.setEditable(false);
+        txtOutputLevel.setEnabled(false);
+        txtOutputLevel.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtOutputLevelKeyTyped(evt);
+            }
+        });
+
+        chkVerbose.setText("Verbose output");
+
+        chkVolume.setText("Adjust volume");
+        chkVolume.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkVolumeActionPerformed(evt);
+            }
+        });
+
+        chkDownmix.setText("Downmix 5.1 audio to 2.0");
+
+        txtVolume.setEditable(false);
+        txtVolume.setEnabled(false);
+        txtVolume.addMouseListener(new ContextMenuListener());
+        txtVolume.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtVolumeKeyTyped(evt);
+            }
+        });
+
+        javax.swing.GroupLayout additionalOptionsPanelLayout = new javax.swing.GroupLayout(additionalOptionsPanel);
+        additionalOptionsPanel.setLayout(additionalOptionsPanelLayout);
+        additionalOptionsPanelLayout.setHorizontalGroup(
+            additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(additionalOptionsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(additionalOptionsPanelLayout.createSequentialGroup()
+                        .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkGamma)
+                            .addComponent(chkVolume))
+                        .addGap(18, 18, 18)
+                        .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtOutputLevel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
+                            .addComponent(txtGamma, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtVolume, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addComponent(chkOutputLevel))
+                .addGap(18, 18, 18)
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkDownmix)
+                    .addComponent(chkVerbose))
+                .addContainerGap())
+        );
+        additionalOptionsPanelLayout.setVerticalGroup(
+            additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(additionalOptionsPanelLayout.createSequentialGroup()
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkGamma)
+                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkDownmix))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkOutputLevel)
+                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkVerbose))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkVolume))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         frequencyPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Frequency and TX options"));
 
@@ -7795,13 +8283,13 @@ public class GUI extends javax.swing.JFrame {
         rfPanelLayout.setVerticalGroup(
             rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rfPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(6, 6, 6)
                 .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(radCustom)
                     .addComponent(radUHF)
                     .addComponent(radVHF)
                     .addComponent(cmbRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(rfPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblAntennaName)
@@ -7858,242 +8346,6 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        modePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Video mode options"));
-
-        cmbMode.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                cmbModeMouseWheelMoved(evt);
-            }
-        });
-        cmbMode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbModeActionPerformed(evt);
-            }
-        });
-
-        modeButtonGroup.add(radPAL);
-        radPAL.setText("PAL");
-        radPAL.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radPALActionPerformed(evt);
-            }
-        });
-
-        modeButtonGroup.add(radNTSC);
-        radNTSC.setText("NTSC");
-        radNTSC.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radNTSCActionPerformed(evt);
-            }
-        });
-
-        modeButtonGroup.add(radSECAM);
-        radSECAM.setText("SECAM");
-        radSECAM.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radSECAMActionPerformed(evt);
-            }
-        });
-
-        modeButtonGroup.add(radBW);
-        radBW.setText("Black and white");
-        radBW.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radBWActionPerformed(evt);
-            }
-        });
-
-        modeButtonGroup.add(radMAC);
-        radMAC.setText("MAC");
-        radMAC.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radMACActionPerformed(evt);
-            }
-        });
-
-        lblSampleRate.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lblSampleRate.setText("Sample rate (MHz)");
-
-        txtSampleRate.setToolTipText("");
-        txtSampleRate.addMouseListener(new ContextMenuListener());
-        txtSampleRate.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtSampleRateKeyTyped(evt);
-            }
-        });
-
-        chkAudio.setText("Audio enabled");
-        chkAudio.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkAudioActionPerformed(evt);
-            }
-        });
-
-        chkNICAM.setText("NICAM stereo");
-        chkNICAM.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkNICAMActionPerformed(evt);
-            }
-        });
-
-        chkPixelRate.setText("Pixel rate (MHz)");
-        chkPixelRate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkPixelRateActionPerformed(evt);
-            }
-        });
-
-        txtPixelRate.setEditable(false);
-        txtPixelRate.setEnabled(false);
-        txtPixelRate.addMouseListener(new ContextMenuListener());
-        txtPixelRate.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtPixelRateKeyTyped(evt);
-            }
-        });
-
-        chkVideoFilter.setText("VSB-AM filter");
-        chkVideoFilter.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkVideoFilterActionPerformed(evt);
-            }
-        });
-
-        chkColour.setText("Disable colour");
-
-        chkA2Stereo.setText("A2 (Zweikanalton) stereo");
-        chkA2Stereo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkA2StereoActionPerformed(evt);
-            }
-        });
-
-        chkFMDev.setText("FM deviation (MHz)");
-        chkFMDev.setEnabled(false);
-        chkFMDev.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkFMDevActionPerformed(evt);
-            }
-        });
-
-        txtFMDev.setEditable(false);
-        txtFMDev.setEnabled(false);
-        txtFMDev.addMouseListener(new ContextMenuListener());
-        txtFMDev.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtFMDevKeyTyped(evt);
-            }
-        });
-
-        chkInvertVideo.setText("Invert video polarity");
-
-        chkMacChId.setText("Override MAC channel ID");
-        chkMacChId.setEnabled(false);
-        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkMacChIdActionPerformed(evt);
-            }
-        });
-
-        txtMacChId.setEditable(false);
-        txtMacChId.setEnabled(false);
-        txtMacChId.addMouseListener(new ContextMenuListener());
-        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyTyped(evt);
-            }
-        });
-
-        javax.swing.GroupLayout modePanelLayout = new javax.swing.GroupLayout(modePanel);
-        modePanel.setLayout(modePanelLayout);
-        modePanelLayout.setHorizontalGroup(
-            modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(modePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(modePanelLayout.createSequentialGroup()
-                        .addComponent(chkInvertVideo)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(cmbMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(modePanelLayout.createSequentialGroup()
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(modePanelLayout.createSequentialGroup()
-                                .addComponent(radPAL)
-                                .addGap(18, 18, Short.MAX_VALUE)
-                                .addComponent(radNTSC)
-                                .addGap(18, 18, Short.MAX_VALUE)
-                                .addComponent(radSECAM)
-                                .addGap(18, 18, Short.MAX_VALUE)
-                                .addComponent(radBW)
-                                .addGap(18, 18, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, modePanelLayout.createSequentialGroup()
-                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkAudio)
-                                    .addComponent(chkNICAM)
-                                    .addComponent(chkA2Stereo)
-                                    .addComponent(chkColour))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 147, Short.MAX_VALUE)
-                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addGroup(modePanelLayout.createSequentialGroup()
-                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(chkPixelRate)
-                                            .addComponent(lblSampleRate))
-                                        .addGap(74, 74, 74))
-                                    .addGroup(modePanelLayout.createSequentialGroup()
-                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(chkFMDev)
-                                            .addComponent(chkMacChId))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))))
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(radMAC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtMacChId))))
-                .addContainerGap())
-        );
-        modePanelLayout.setVerticalGroup(
-            modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(modePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radPAL)
-                    .addComponent(radNTSC)
-                    .addComponent(radSECAM)
-                    .addComponent(radBW)
-                    .addComponent(radMAC))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbMode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblSampleRate)
-                    .addComponent(chkAudio)
-                    .addComponent(txtSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(modePanelLayout.createSequentialGroup()
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtPixelRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkPixelRate))
-                        .addGap(2, 2, 2)
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkA2Stereo)
-                            .addComponent(chkFMDev)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(chkNICAM))
-                .addGap(2, 2, 2)
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkColour)
-                    .addComponent(chkMacChId)
-                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkInvertVideo)
-                    .addComponent(chkVideoFilter))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         javax.swing.GroupLayout outputTabLayout = new javax.swing.GroupLayout(outputTab);
         outputTab.setLayout(outputTabLayout);
         outputTabLayout.setHorizontalGroup(
@@ -8101,285 +8353,21 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(outputTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(modePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(frequencyPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(frequencyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         outputTabLayout.setVerticalGroup(
             outputTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, outputTabLayout.createSequentialGroup()
+            .addGroup(outputTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(modePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(frequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(137, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
-
-        vbiPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("VBI options"));
-
-        chkVITS.setText("VITS test signal");
-
-        chkACP.setText("Macrovision ACP");
-
-        chkWSS.setText("Widescreen signalling (WSS)");
-        chkWSS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkWSSActionPerformed(evt);
-            }
-        });
-
-        cmbWSS.setEnabled(false);
-        cmbWSS.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                cmbWSSMouseWheelMoved(evt);
-            }
-        });
-
-        chkVITC.setText("VITC (Vertical Interval Time Code)");
-
-        chkSecamId.setText("SECAM field ID");
-
-        javax.swing.GroupLayout vbiPanelLayout = new javax.swing.GroupLayout(vbiPanel);
-        vbiPanel.setLayout(vbiPanelLayout);
-        vbiPanelLayout.setHorizontalGroup(
-            vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(vbiPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkACP)
-                    .addComponent(chkVITS)
-                    .addComponent(chkSecamId)
-                    .addGroup(vbiPanelLayout.createSequentialGroup()
-                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(207, Short.MAX_VALUE))
-        );
-        vbiPanelLayout.setVerticalGroup(
-            vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(vbiPanelLayout.createSequentialGroup()
-                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkWSS)
-                    .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0)
-                .addComponent(chkACP)
-                .addGap(0, 0, 0)
-                .addComponent(chkVITS)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkVITC)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkSecamId)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        additionalOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Additional options"));
-
-        chkGamma.setText("Gamma correction");
-        chkGamma.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkGammaActionPerformed(evt);
-            }
-        });
-
-        txtGamma.setEditable(false);
-        txtGamma.setEnabled(false);
-        txtGamma.addMouseListener(new ContextMenuListener());
-        txtGamma.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtGammaKeyTyped(evt);
-            }
-        });
-
-        chkOutputLevel.setText("Output level");
-        chkOutputLevel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkOutputLevelActionPerformed(evt);
-            }
-        });
-
-        txtOutputLevel.addMouseListener(new ContextMenuListener());
-        txtOutputLevel.setEditable(false);
-        txtOutputLevel.setEnabled(false);
-        txtOutputLevel.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtOutputLevelKeyTyped(evt);
-            }
-        });
-
-        chkVerbose.setText("Verbose output");
-
-        chkVolume.setText("Adjust volume");
-        chkVolume.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkVolumeActionPerformed(evt);
-            }
-        });
-
-        chkDownmix.setText("Downmix 5.1 audio to 2.0");
-
-        txtVolume.setEditable(false);
-        txtVolume.setEnabled(false);
-        txtVolume.addMouseListener(new ContextMenuListener());
-        txtVolume.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtVolumeKeyTyped(evt);
-            }
-        });
-
-        javax.swing.GroupLayout additionalOptionsPanelLayout = new javax.swing.GroupLayout(additionalOptionsPanel);
-        additionalOptionsPanel.setLayout(additionalOptionsPanelLayout);
-        additionalOptionsPanelLayout.setHorizontalGroup(
-            additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(additionalOptionsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkGamma)
-                    .addComponent(chkOutputLevel)
-                    .addComponent(chkVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
-                    .addComponent(txtVolume))
-                .addGap(18, 18, 18)
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkVerbose)
-                    .addComponent(chkDownmix))
-                .addContainerGap(125, Short.MAX_VALUE))
-        );
-        additionalOptionsPanelLayout.setVerticalGroup(
-            additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(additionalOptionsPanelLayout.createSequentialGroup()
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkGamma)
-                    .addComponent(txtGamma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkDownmix))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkOutputLevel)
-                    .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkVerbose))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkVolume))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC audio options"));
-
-        macStereoButtonGroup.add(radMacStereo);
-        radMacStereo.setText("Stereo");
-
-        macSRButtonGroup.add(radMac32k);
-        radMac32k.setText("32 kHz");
-
-        macCompressionButtonGroup.add(radMacCompanded);
-        radMacCompanded.setText("Companded");
-
-        macStereoButtonGroup.add(radMacMono);
-        radMacMono.setText("Mono");
-
-        macSRButtonGroup.add(radMac16k);
-        radMac16k.setText("16 kHz");
-
-        macCompressionButtonGroup.add(radMacLinear);
-        radMacLinear.setText("Linear");
-
-        macProtectionButtonGroup.add(radMacL1);
-        radMacL1.setText("Level 1");
-
-        macProtectionButtonGroup.add(radMacL2);
-        radMacL2.setText("Level 2");
-
-        lblMacAudioMode.setText("Audio channels");
-
-        lblMacSampleRate.setText("Audio sample rate");
-
-        lblMacCompression.setText("Compression");
-
-        lblMacProtection.setText("Protection level");
-
-        javax.swing.GroupLayout macPanelLayout = new javax.swing.GroupLayout(macPanel);
-        macPanel.setLayout(macPanelLayout);
-        macPanelLayout.setHorizontalGroup(
-            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(macPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblMacAudioMode)
-                    .addComponent(lblMacSampleRate)
-                    .addComponent(lblMacCompression)
-                    .addComponent(lblMacProtection))
-                .addGap(18, 18, 18)
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radMacCompanded)
-                    .addComponent(radMacL1)
-                    .addComponent(radMac32k)
-                    .addComponent(radMacStereo))
-                .addGap(18, 18, 18)
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radMacL2)
-                    .addComponent(radMacLinear)
-                    .addComponent(radMac16k)
-                    .addComponent(radMacMono))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        macPanelLayout.setVerticalGroup(
-            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(macPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radMacStereo)
-                    .addComponent(radMacMono)
-                    .addComponent(lblMacAudioMode))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radMac32k)
-                    .addComponent(radMac16k)
-                    .addComponent(lblMacSampleRate))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radMacCompanded)
-                    .addComponent(radMacLinear)
-                    .addComponent(lblMacCompression))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radMacL1)
-                    .addComponent(radMacL2)
-                    .addComponent(lblMacProtection))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout playbackTabLayout = new javax.swing.GroupLayout(playbackTab);
-        playbackTab.setLayout(playbackTabLayout);
-        playbackTabLayout.setHorizontalGroup(
-            playbackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, playbackTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(playbackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(vbiPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        playbackTabLayout.setVerticalGroup(
-            playbackTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(playbackTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(64, Short.MAX_VALUE))
-        );
-
-        tabPane.addTab("Playback", playbackTab);
 
         teletextPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Teletext options"));
 
@@ -8880,7 +8868,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(86, Short.MAX_VALUE))
+                .addContainerGap(88, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -9110,7 +9098,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -9378,6 +9366,29 @@ public class GUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void chkOffsetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOffsetActionPerformed
+        if (chkOffset.isSelected()) {
+            txtOffset.setEnabled(true);
+            txtOffset.setEditable(true);
+        }
+        else {
+            txtOffset.setText("");
+            txtOffset.setEnabled(false);
+            txtOffset.setEditable(false);
+        }
+    }//GEN-LAST:event_chkOffsetActionPerformed
+
+    private void txtOffsetKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtOffsetKeyTyped
+        if (evt.getKeyChar() == '\u002e') {
+            if (txtOffset.getText().contains(".")) {
+                evt.consume();
+            }
+        }
+        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtOffsetKeyTyped
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -9414,10 +9425,15 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkInvertVideo;
     private javax.swing.JCheckBox chkLocalModes;
     private javax.swing.JCheckBox chkLogo;
+    private javax.swing.JCheckBox chkMac16k;
     private javax.swing.JCheckBox chkMacChId;
+    private javax.swing.JCheckBox chkMacL2;
+    private javax.swing.JCheckBox chkMacLinear;
+    private javax.swing.JCheckBox chkMacMono;
     private javax.swing.JCheckBox chkNICAM;
     private javax.swing.JCheckBox chkNoDate;
     private javax.swing.JCheckBox chkNoUpdateCheck;
+    private javax.swing.JCheckBox chkOffset;
     private javax.swing.JCheckBox chkOutputLevel;
     private javax.swing.JCheckBox chkPixelRate;
     private javax.swing.JCheckBox chkPosition;
@@ -9481,10 +9497,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
     private javax.swing.JLabel lblLookAndFeel;
-    private javax.swing.JLabel lblMacAudioMode;
-    private javax.swing.JLabel lblMacCompression;
-    private javax.swing.JLabel lblMacProtection;
-    private javax.swing.JLabel lblMacSampleRate;
     private javax.swing.JLabel lblNMSCeefax;
     private javax.swing.JLabel lblNMSCeefaxRegion;
     private javax.swing.JLabel lblOutputDevice;
@@ -9528,25 +9540,18 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuUpdateCheck;
     private javax.swing.JMenuItem menuWiki;
     private javax.swing.ButtonGroup modeButtonGroup;
+    private javax.swing.JPanel modeButtonPanel;
     private javax.swing.JPanel modePanel;
+    private javax.swing.JPanel modeTab;
     private javax.swing.JFileChooser outputFileChooser;
     private javax.swing.JPanel outputTab;
     private javax.swing.JPanel pathPanel;
     private javax.swing.JProgressBar pbTeletext;
-    private javax.swing.JPanel playbackTab;
     private javax.swing.JScrollPane playlistScrollPane;
     private javax.swing.JRadioButton radBW;
     private javax.swing.JRadioButton radCustom;
     private javax.swing.JRadioButton radLocalSource;
     private javax.swing.JRadioButton radMAC;
-    private javax.swing.JRadioButton radMac16k;
-    private javax.swing.JRadioButton radMac32k;
-    private javax.swing.JRadioButton radMacCompanded;
-    private javax.swing.JRadioButton radMacL1;
-    private javax.swing.JRadioButton radMacL2;
-    private javax.swing.JRadioButton radMacLinear;
-    private javax.swing.JRadioButton radMacMono;
-    private javax.swing.JRadioButton radMacStereo;
     private javax.swing.JRadioButton radNTSC;
     private javax.swing.JRadioButton radPAL;
     private javax.swing.JRadioButton radSECAM;
@@ -9584,6 +9589,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField txtGamma;
     private javax.swing.JTextField txtHackTVPath;
     private javax.swing.JTextField txtMacChId;
+    private javax.swing.JTextField txtOffset;
     private javax.swing.JTextField txtOutputDevice;
     private javax.swing.JTextField txtOutputLevel;
     private javax.swing.JTextField txtPixelRate;
