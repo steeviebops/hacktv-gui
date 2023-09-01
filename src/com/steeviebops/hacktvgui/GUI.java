@@ -4473,9 +4473,9 @@ public class GUI extends javax.swing.JFrame {
          *  any checks.
          */
         if ( (txtCardNumber.isEnabled()) && (scramblingType1.equals("--videocrypt")) ) {
-            String TruncatedCardNumber;
             String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
-            String InvalidCardNumber = "Card number should be exactly 8, 9 or 13 digits.";
+            String InvalidCardNumber = "Card number should be exactly 9 or 13 digits.\n"
+                    + "BSkyB Quick Start cards are not currently supported.";
             // Make sure that the input is numeric only
             if (!SharedInst.isNumeric(txtCardNumber.getText())) {
                  messageBox(InvalidCardNumber, JOptionPane.WARNING_MESSAGE);
@@ -4495,25 +4495,18 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else if (txtCardNumber.getText().length() == 13) {
-                // Only digits 4-13 of 13-digit card numbers are checked, so we
-                // need to strip out the first four digits.
-                TruncatedCardNumber = txtCardNumber.getText().substring(4,13);
-                if (!SharedInst.luhnCheck(Long.valueOf(TruncatedCardNumber))) {
+                // Only digits 4-13 of 13-digit card numbers are Luhn checked.
+                // We need to strip out the first four digits.
+                if (!SharedInst.luhnCheck(Long.valueOf(txtCardNumber.getText().substring(4,13)))) {
                     messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
                     return null;
                 }
                 else {
                     // Make sure that we're not trying to send EMMs to the wrong card type.
-                    if (!checkEMMCardType(TruncatedCardNumber)) return null;
+                    if (!checkEMMCardType(txtCardNumber.getText())) return null;
                     // hacktv doesn't use the check digit so strip it out
                     return txtCardNumber.getText().substring(4,12);
                 }
-            }
-            else if (txtCardNumber.getText().length() == 8) {
-                // Make sure that we're not trying to send EMMs to the wrong card type.
-                if (!checkEMMCardType(txtCardNumber.getText())) return null;
-                // Pass the digits unaltered and without Luhn checking
-                return txtCardNumber.getText();
             }
             else {
                 tabPane.setSelectedIndex(4);
@@ -4540,8 +4533,35 @@ public class GUI extends javax.swing.JFrame {
         String WrongCardType = "The card number you entered appears to be for a different issue.\n"
                 + "Using EMMs on the wrong card type may irreparably damage the card.";
         switch (scramblingKey1) {
+            case "sky06":
+                short s6 = Short.parseShort(cardNumber.substring(0,2));
+                // Carry out a basic card number check, ensure it starts with 06.
+                if ((cardNumber.length() != 13) || (s6 != 6)) {
+                    messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    return true;
+                }
             case "sky07":
-                short s7 = Short.parseShort(cardNumber.substring(0,3));
+                // Only digits 4-13 of a 13-digit card numbers are checked on 07.
+                // We need to strip out the first four digits.
+                short s7;
+                switch(txtCardNumber.getText().length()) {
+                    case 13:
+                        if (!txtCardNumber.getText().substring(0,2).equals("07")) {
+                            messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
+                            return false;
+                        }
+                        s7 = Short.parseShort(txtCardNumber.getText().substring(4,7));
+                        break;
+                    case 9:
+                        s7 = Short.parseShort(cardNumber.substring(0,3));
+                        break;
+                    default:
+                        System.err.println("Unexpected card number length");
+                        return false;
+                }              
                 if ((s7 > 30) && (s7 < 800)) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
@@ -4551,7 +4571,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             case "sky09":
                 short s9 = Short.parseShort(cardNumber.substring(0,3));
-                if ((s9 < 190) || (s9 > 250)) {
+                if ((cardNumber.length() != 9) || ((s9 < 190) || (s9 > 250))) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -4876,15 +4896,14 @@ public class GUI extends javax.swing.JFrame {
         if (chkVerbose.isSelected()) allArgs.add("--verbose");
         if (txtCardNumber.isEnabled()) {
             String c = checkCardNumber();
-            if (c != null) {
-                if (chkActivateCard.isSelected()) {
-                    allArgs.add("--enableemm");
-                }
-                else if (chkDeactivateCard.isSelected()) {
-                    allArgs.add("--disableemm");
-                }
-                allArgs.add(c);
+            if (c == null) return;
+            if (chkActivateCard.isSelected()) {
+                allArgs.add("--enableemm");
             }
+            else if (chkDeactivateCard.isSelected()) {
+                allArgs.add("--disableemm");
+            }
+            allArgs.add(c);
         }
         if (chkShowECM.isSelected()) allArgs.add("--showecm");
         if (chkInterlace.isSelected()) allArgs.add("--interlace");
