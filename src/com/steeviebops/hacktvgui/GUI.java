@@ -612,9 +612,9 @@ public class GUI extends javax.swing.JFrame {
                             updateMenu.setVisible(true);
                             return;
                         }
-                        int q = JOptionPane.showConfirmDialog(null, "An update is available.\n"
-                                + "Would you like to find out more?", APP_NAME, JOptionPane.YES_NO_OPTION);
-                        if (q == JOptionPane.YES_OPTION) menuDownloadUpdate.doClick();
+                        if (JOptionPane.showConfirmDialog(null, "An update is available.\n"
+                                + "Would you like to find out more?", APP_NAME, JOptionPane.YES_NO_OPTION)
+                                == JOptionPane.YES_OPTION) menuDownloadUpdate.doClick();
                         break;
                     case 1:
                         // No update available
@@ -727,10 +727,10 @@ public class GUI extends javax.swing.JFrame {
         }
         else if ( (Files.exists(Path.of(jarDir + File.separator + "Modes.ini"))) &&
                 (cmbOutputDevice.getItemCount() == 0) ) {
-            int q = JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
+            if (JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
                     + "Do you want to use this file?\n"
-                    + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION);
-            if (q == JOptionPane.YES_OPTION) {
+                    + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION)
+                    == JOptionPane.YES_OPTION) {
                 // Use the local file
                 modesFilePath = jarDir + File.separator + "Modes.ini";
             }
@@ -1175,9 +1175,9 @@ public class GUI extends javax.swing.JFrame {
                      * appear to support file overwrite prompts in its dialogues
                      * so this is a workaround/hack.
                     */
-                    int q = JOptionPane.showConfirmDialog(null, selectedFile.getName() + " already exists.\n"
-                            + "Do you want to overwrite it?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if (q == JOptionPane.YES_OPTION) {
+                    if (JOptionPane.showConfirmDialog(null, selectedFile.getName() + " already exists.\n"
+                            + "Do you want to overwrite it?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)
+                            == JOptionPane.YES_OPTION) {
                         saveConfigFile(selectedFile);
                     }
                     else {
@@ -2357,21 +2357,27 @@ public class GUI extends javax.swing.JFrame {
          
     private void m3uHandler(String SourceFile, int M3UIndex) {
         /** Basic M3U file parser.
-        *  This reads the channel name from each even-numbered line and the
-        *  URL from each odd-numbered line. They're added to arrays to populate
-        *  a combobox.
-        *  The M3UIndex variable is an integer value which specifies the index
-        *  number to select in the combobox.
+        *   The M3UIndex variable is an integer value which specifies the index
+        *   number to select in the combobox.
         */
+        File f = new File(SourceFile);
+        // Prompt if the file is larger than 5 MB as it could take a while...
+        if (f.length() > 5242880) {
+            if (JOptionPane.showConfirmDialog(null, "The selected file is quite large and may take a long time to open.\n" +
+                    "Do you want to continue anyway?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                txtSource.setText("");
+                return;                
+            }
+        }
         String fileHeader;
-        try (var br2 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.UTF_8))) {
+        try (var br2 = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
             try (var lnr2 = new LineNumberReader(br2)) {
                 fileHeader = lnr2.readLine();
             }
         }
         catch (MalformedInputException mie) {
             // Retry using ISO-8859-1
-            try (var br3 = new BufferedReader(new FileReader(SourceFile, StandardCharsets.ISO_8859_1))) {
+            try (var br3 = new BufferedReader(new FileReader(f, StandardCharsets.ISO_8859_1))) {
                 try (var lnr3 = new LineNumberReader(br3)) {
                     fileHeader = lnr3.readLine();
                 }
@@ -2403,16 +2409,15 @@ public class GUI extends javax.swing.JFrame {
         else if (!fileHeader.endsWith("#EXTM3U") ) {
             boolean utf8;
             // Treat the file as a standard text-only playlist
-            Path fp = Paths.get(SourceFile);
             List<String> pls;
             try {
-                pls = Files.readAllLines(fp, StandardCharsets.UTF_8);
+                pls = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
                 utf8 = true;
             }
             catch (MalformedInputException mie){
                 // Retry using ISO-8859-1
                 try {
-                    pls = Files.readAllLines(fp, StandardCharsets.ISO_8859_1);
+                    pls = Files.readAllLines(f.toPath(), StandardCharsets.ISO_8859_1);
                     utf8 = false;
                 }
                 catch (IOException ioe) {
@@ -2517,7 +2522,7 @@ public class GUI extends javax.swing.JFrame {
                 playlistURLsAL = new ArrayList <> ();
                 try {
                     // Read source file to a list.
-                    List<String> fl = Files.readAllLines(Path.of(SourceFile));
+                    List<String> fl = Files.readAllLines(f.toPath());
                     // Remove the first line as this contains the #EXTM3U header
                     // We don't need it and if there's a BOM in front, it'll
                     // just mess things up.
@@ -3027,10 +3032,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void astraTemplate(Double localOscillator) {
-        int q = JOptionPane.showConfirmDialog(null, "This will load template values for an Astra satellite receiver configured for a "
+        if (JOptionPane.showConfirmDialog(null, "This will load template values for an Astra satellite receiver configured for a "
                 + localOscillator + " GHz LO LNB.\n"
-                        + "All current settings will be cleared. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) {
+                        + "All current settings will be cleared. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             // Reset all controls
             resetAllControls();
             // Select PAL-FM mode
@@ -4175,10 +4179,9 @@ public class GUI extends javax.swing.JFrame {
     private void youtubedl(String input) {
         // yt-dlp frontend. Pass the download URL as a string.
         // youtube-dl is no longer supported
-        int q = JOptionPane.showConfirmDialog(null, "We will now attempt to use"
+        if (JOptionPane.showConfirmDialog(null, "We will now attempt to use"
                 + " yt-dlp to stream the requested video.\n" +
-            "Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) {
+            "Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             final String ytp;
             String url;
             if (runningOnWindows) {
@@ -5301,17 +5304,12 @@ public class GUI extends javax.swing.JFrame {
     private void taskKill(long pid) {
         // Last resort option on Windows if the other stop options have failed.
         // This will forcibly terminate hacktv using taskkill.exe.
-        int q = JOptionPane.showConfirmDialog(
-            null,
-            "An error occurred while attempting to stop hacktv gracefully.\n"
+        if (JOptionPane.showConfirmDialog(
+            null, "An error occurred while attempting to stop hacktv gracefully.\n"
             + "As a last resort, we can kill the hacktv process. This may "
             + "require your ouput device to be reset.\n"
             + "Would you like to forcibly kill the hacktv process?",
-            APP_NAME,
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE
-        );
-        if (q == JOptionPane.YES_OPTION) {
+            APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
             var k = new ProcessBuilder("taskkill.exe", "/pid", Long.toString(pid), "/f");
             try {
                 k.start();
@@ -6026,9 +6024,9 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuAstra10TemplateActionPerformed
 
     private void menuBSBTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBSBTemplateActionPerformed
-        int q = JOptionPane.showConfirmDialog(null, "This will load template values for a BSB satellite receiver.\n"
-                + "All current settings will be cleared. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(null, "This will load template values for a BSB satellite receiver.\n"
+                + "All current settings will be cleared. Do you wish to continue?",
+                APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             // Reset all controls
             resetAllControls();
             // Select D-MAC FM mode
@@ -6151,9 +6149,8 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuMRUFile4ActionPerformed
 
     private void btnClearMRUListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearMRUListActionPerformed
-        int q = JOptionPane.showConfirmDialog(null, "This will clear the list of most recently used "
-                + "files from the File menu. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION);
-        if (q == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(null, "This will clear the list of most recently used "
+                + "files from the File menu. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION)  == JOptionPane.YES_OPTION) {
             if ( PREFS.get("File1", null) != null ) PREFS.remove("File1");
             if ( PREFS.get("File2", null) != null ) PREFS.remove("File2");
             if ( PREFS.get("File3", null) != null ) PREFS.remove("File3");
@@ -6163,9 +6160,9 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearMRUListActionPerformed
 
     private void btnResetAllSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetAllSettingsActionPerformed
-        int q = JOptionPane.showConfirmDialog(null, "This will remove all of this application's "
-                + "saved settings and exit. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (q == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(null, "This will remove all of this application's "
+                + "saved settings and exit. Do you wish to continue?",
+                APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
             resetPreferences();
             this.dispose();
         }
