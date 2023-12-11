@@ -5310,7 +5310,7 @@ public class GUI extends javax.swing.JFrame {
         if (JOptionPane.showConfirmDialog(
             null, "An error occurred while attempting to stop hacktv gracefully.\n"
             + "As a last resort, we can kill the hacktv process. This may "
-            + "require your ouput device to be reset.\n"
+            + "require your output device to be reset.\n"
             + "Would you like to forcibly kill the hacktv process?",
             APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
             var k = new ProcessBuilder("taskkill.exe", "/pid", Long.toString(pid), "/f");
@@ -7737,7 +7737,6 @@ public class GUI extends javax.swing.JFrame {
         lblSampleRate.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblSampleRate.setText("Sample rate (MHz)");
 
-        txtSampleRate.setToolTipText("");
         txtSampleRate.addMouseListener(new ContextMenuListener());
         txtSampleRate.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
