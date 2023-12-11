@@ -2363,10 +2363,13 @@ public class GUI extends javax.swing.JFrame {
         File f = new File(SourceFile);
         // Prompt if the file is larger than 5 MB as it could take a while...
         if (f.length() > 5242880) {
-            if (JOptionPane.showConfirmDialog(null, "The selected file is quite large and may take a long time to open.\n" +
-                    "Do you want to continue anyway?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+            if (JOptionPane.showConfirmDialog(null,
+                    "The selected file is quite large and may take a long time to open.\n" +
+                    "Do you want to continue anyway?",
+                    APP_NAME, JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
                 txtSource.setText("");
-                return;                
+                return;
             }
         }
         String fileHeader;
@@ -6650,10 +6653,9 @@ public class GUI extends javax.swing.JFrame {
             downloadCancelled = true;
             return;
         }
-        // Downloads the latest pre-compiled Windows build from my Github repo
+        // Downloads the latest pre-compiled Windows build from my OneDrive
         // Captain Jack's download URL is https://filmnet.plus/hacktv/hacktv.zip
         // but this hasn't been updated for a while so we'll put it aside.
-        final String selectedBuild;
         String prompt = "This will download the latest build of hacktv from the author's Github repository.\n"
                     + "This requires an internet connection and will only work if you have write access "
                     + "to the directory where this application is located.\n"
@@ -6673,18 +6675,19 @@ public class GUI extends javax.swing.JFrame {
                 opts,
                 opts[2]
         );
+        String dUrl;
         switch (q) {
             case 0:
-                selectedBuild = "fsphil";
+                // fsphil download
+                dUrl = "https://onedrive.live.com/download?resid=3B8F875287BC6601%217039&authkey=!ALgWHhPB50SLYso";
                 break;
             case 1:
-                selectedBuild = "captainjack";
+                // Captain Jack download
+                dUrl = "https://onedrive.live.com/download?resid=3B8F875287BC6601%217040&authkey=!ALVUZc72L6Gcirs";
                 break;
             default:
                 return;
         }
-        String dUrl = "https://github.com/steeviebops/hacktv/releases/latest/"
-                + "download/hacktv-" + selectedBuild + ".zip";
         btnDownloadHackTV.setText("Cancel");
         // Disable Teletext download options so they don't interfere
         if (chkTeletext.isSelected()) {
@@ -6709,9 +6712,12 @@ public class GUI extends javax.swing.JFrame {
                 String downloadPath = t + File.separator + "hacktv.zip";
                 String tmpExePath = t + File.separator + "hacktv.exe";
                 String exePath = jarDir + File.separator + "hacktv.exe";
-                var con = new URL(dUrl);
-                size = con.openConnection().getContentLengthLong();
-                try (var in = new BufferedInputStream(con.openStream());
+                // Spoof user agent as wget. OneDrive is picky...
+                String ua = "Wget/1.21.4 (mingw32)";
+                var con = new URL(dUrl).openConnection();
+                con.setRequestProperty("User-Agent", ua);
+                size = con.getContentLengthLong();
+                try (var in = new BufferedInputStream(con.getInputStream());
                     var out = new FileOutputStream(downloadPath)) {
                     byte buffer[] = new byte[1024];
                     int b;
