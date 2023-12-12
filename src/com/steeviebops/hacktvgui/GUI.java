@@ -447,7 +447,8 @@ public class GUI extends javax.swing.JFrame {
             chkInvertVideo,
             chkVITC,
             chkSecamId,
-            chkOffset
+            chkOffset,
+            chkSwapIQ
         };
     }
     
@@ -1520,6 +1521,11 @@ public class GUI extends javax.swing.JFrame {
         if ((INI.getBooleanFromINI(fileContents, "hacktv", "secam-field-id")) && radSECAM.isSelected()) {
             chkSecamId.doClick();
         }
+        // Swap IQ
+        if ((INI.getBooleanFromINI(fileContents, "hacktv", "swap-iq")) &&
+                (!INI.getStringFromINI(modesFile, mode, "modulation", "", false).equals("baseband")) ) {
+            chkSwapIQ.doClick();
+        }
         // Gain
         if (INI.getIntegerFromINI(fileContents, "hacktv", "gain") != null) {
             txtGain.setText(INI.getIntegerFromINI(fileContents, "hacktv", "gain").toString());
@@ -2129,6 +2135,10 @@ public class GUI extends javax.swing.JFrame {
         // SECAM field ID
         if (chkSecamId.isSelected()) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id", 1);
+        }
+        // Swap IQ
+        if (chkSwapIQ.isSelected()) {
+            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "swap-iq", 1);
         }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -3705,10 +3715,12 @@ public class GUI extends javax.swing.JFrame {
         switch (INI.getStringFromINI(modesFile, mode, "modulation", "", false)) {
             case "vsb":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
+                if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
                 disableFMDeviation();
                 break;
             case "fm":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
+                if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
                 enableFMDeviation();
                 break;
             case "baseband":
@@ -3901,6 +3913,8 @@ public class GUI extends javax.swing.JFrame {
             disableRFOptions();
             if (chkVideoFilter.isSelected()) chkVideoFilter.doClick();
             chkVideoFilter.setEnabled(false);
+            if (chkSwapIQ.isSelected()) chkSwapIQ.doClick();
+            chkSwapIQ.setEnabled(false);
             return true;
         }
         else {
@@ -4800,6 +4814,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         if (chkAmp.isSelected()) allArgs.add("--amp");
+        if (chkSwapIQ.isSelected()) allArgs.add("--swap-iq");
         allArgs.addAll(checkWSS());
         allArgs.addAll(checkARCorrectionOptions());
         allArgs.addAll(checkLogo());
@@ -7201,6 +7216,7 @@ public class GUI extends javax.swing.JFrame {
         chkInvertVideo = new javax.swing.JCheckBox();
         chkOffset = new javax.swing.JCheckBox();
         txtOffset = new javax.swing.JTextField();
+        chkSwapIQ = new javax.swing.JCheckBox();
         vbiPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -7825,6 +7841,9 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkSwapIQ.setText("Swap I and Q samples");
+        chkSwapIQ.setToolTipText("");
+
         javax.swing.GroupLayout modePanelLayout = new javax.swing.GroupLayout(modePanel);
         modePanel.setLayout(modePanelLayout);
         modePanelLayout.setHorizontalGroup(
@@ -7860,10 +7879,12 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
                             .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(modePanelLayout.createSequentialGroup()
-                        .addComponent(chkInvertVideo)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkSwapIQ)
+                            .addComponent(chkInvertVideo))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         modePanelLayout.setVerticalGroup(
@@ -7899,6 +7920,8 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkInvertVideo)
                     .addComponent(chkVideoFilter))
+                .addGap(2, 2, 2)
+                .addComponent(chkSwapIQ)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -8051,10 +8074,10 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(modePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(vbiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Mode", modeTab);
@@ -8385,7 +8408,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(frequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(137, Short.MAX_VALUE))
+                .addContainerGap(138, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -8889,7 +8912,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(88, Short.MAX_VALUE))
+                .addContainerGap(89, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -9119,7 +9142,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(68, Short.MAX_VALUE))
+                .addContainerGap(69, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -9465,6 +9488,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkShowCardSerial;
     private javax.swing.JCheckBox chkShowECM;
     private javax.swing.JCheckBox chkSubtitles;
+    private javax.swing.JCheckBox chkSwapIQ;
     private javax.swing.JCheckBox chkSyntaxOnly;
     private javax.swing.JCheckBox chkTeletext;
     private javax.swing.JCheckBox chkTextSubtitles;
