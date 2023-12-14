@@ -13,7 +13,7 @@ The application has been tested on:
 - macOS Catalina and Ventura.
 
 ### Pre-requisites
-- A Java 11 or later runtime environment is required. Java 8 will not work. https://adoptopenjdk.net">AdoptOpenJDK</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
+- A Java 11 or later runtime environment is required. Java 8 will not work. <a href="https://adoptopenjdk.net">AdoptOpenJDK</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
 - To use yt-dlp features, a copy of <a href="https://github.com/yt-dlp/yt-dlp/releases/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file.
 
 ### Licence information
