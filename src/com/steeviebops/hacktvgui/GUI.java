@@ -897,7 +897,23 @@ public class GUI extends javax.swing.JFrame {
     private void loadPreferences(){
         // Check preferences node for the path to hacktv
         // If not found, use the default
-        hackTVPath = PREFS.get("HackTVPath", defaultHackTVPath);
+        if (runningOnWindows) {
+            hackTVPath = PREFS.get("HackTVPath", defaultHackTVPath);
+        }
+        else {
+            hackTVPath = PREFS.get("HackTVPath", null);
+            if (hackTVPath == null) {
+                // Check if hacktv exists at /usr/bin/hacktv, which is the
+                // package manager's path. Otherwise use the default.
+                if (Files.exists(Path.of("/usr/bin/hacktv"))) {
+                    hackTVPath = "/usr/bin/hacktv";
+                }
+                else {
+                    hackTVPath = defaultHackTVPath;
+                }
+            }
+        }
+        
         // Load the full path to a variable so we can use getParent on it and
         // get its parent directory path
         hackTVDirectory = new File(hackTVPath).getParent();
