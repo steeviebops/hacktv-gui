@@ -5075,14 +5075,29 @@ public class GUI extends javax.swing.JFrame {
                     hpid = p.pid();
                     // Capture the output of hacktv
                     int a;
+                    String b;
+                    String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
                     try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
-                        while ( (a = br.read()) != -1 ) {
-                            // br.read() returns an integer value 'a' which is the ASCII
-                            // number of a character it has received from the process.
-                            // We convert 'a' to the actual character and publish it.
-                            // When the process has closed, br.read() will return -1
-                            // which will exit this loop.
-                            publish(String.valueOf((char)a));
+                        if (!captainJack) {
+                                while ( (a = br.read()) != -1 ) {
+                                // br.read() returns an integer value 'a' which is the ASCII
+                                // number of a character it has received from the process.
+                                // We convert 'a' to the actual character and publish it.
+                                // When the process has closed, br.read() will return -1
+                                // which will exit this loop.
+                                publish(String.valueOf((char)a));
+                            }
+                        }
+                        else {
+                            // A (hopefully) temporary workaround for the display bug as a result
+                            // of the introduction of a timestamp to Captain Jack's fork.
+                            // Use br.readLine() instead. If the received line matches a single 
+                            // timestamp (as detected by regex) then do not publish it.
+                            // As we're reading by line, this unfortunately breaks the buffer
+                            // underrun indicator.
+                            while ( (b = br.readLine()) != null ) {
+                                if (!b.matches(r)) publish(b + "\n");
+                            }
                         }
                     }
                     publish("\n" + "hacktv stopped");
