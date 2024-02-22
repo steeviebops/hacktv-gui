@@ -5074,12 +5074,10 @@ public class GUI extends javax.swing.JFrame {
                     // Get the PID of the process we just started
                     hpid = p.pid();
                     // Capture the output of hacktv
-                    int a;
-                    String b;
-                    String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
                     try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
                         if (!captainJack) {
-                                while ( (a = br.read()) != -1 ) {
+                            int a;
+                            while ( (a = br.read()) != -1 ) {
                                 // br.read() returns an integer value 'a' which is the ASCII
                                 // number of a character it has received from the process.
                                 // We convert 'a' to the actual character and publish it.
@@ -5095,6 +5093,8 @@ public class GUI extends javax.swing.JFrame {
                             // timestamp (as detected by regex) then do not publish it.
                             // As we're reading by line, this unfortunately breaks the buffer
                             // underrun indicator.
+                            String b;
+                            String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
                             while ( (b = br.readLine()) != null ) {
                                 if (!b.matches(r)) publish(b + "\n");
                             }
