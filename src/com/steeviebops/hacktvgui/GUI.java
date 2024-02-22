@@ -5209,10 +5209,19 @@ public class GUI extends javax.swing.JFrame {
                     // Get the PID of hacktv
                     hpid = h.pid();
                     // Capture the output of hacktv
-                    int a;
                     try (var br = new BufferedReader(new InputStreamReader(h.getInputStream(), StandardCharsets.UTF_8))) {
-                        while ( (a = br.read()) != -1 ) {
-                            publish(String.valueOf((char)a));
+                        if (!captainJack) {
+                            int a;
+                            while ( (a = br.read()) != -1 ) {
+                                publish(String.valueOf((char)a));
+                            }
+                        }
+                        else {
+                            String b;
+                            String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
+                            while ( (b = br.readLine()) != null ) {
+                                if (!b.matches(r)) publish(b + "\n");
+                            }
                         }
                     }
                     publish("\n" + "hacktv stopped");
