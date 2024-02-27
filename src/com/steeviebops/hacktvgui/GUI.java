@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Stephen McGarry
+ * Copyright (C) 2024 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -4307,8 +4307,8 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 tabPane.setSelectedIndex(0);
-                 messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
-                 return null;
+                messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
         }
         else {
@@ -4393,7 +4393,7 @@ public class GUI extends javax.swing.JFrame {
                 CustomFreq = new BigDecimal(txtFrequency.getText());
                 if ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) {
                     messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
-                    tabPane.setSelectedIndex(1);
+                    tabPane.setSelectedIndex(2);
                     return false;
                 }
                 else {
@@ -4406,7 +4406,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(1);
+                tabPane.setSelectedIndex(2);
                 return false;  
             }
         }
@@ -4488,13 +4488,13 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(1);
+                tabPane.setSelectedIndex(2);
                 return null;
             }
         }
         else {
             messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
-            tabPane.setSelectedIndex(1);
+            tabPane.setSelectedIndex(2);
             return null;
         }
         return al;
@@ -4660,7 +4660,7 @@ public class GUI extends javax.swing.JFrame {
             case 3:
                 // If File is selected, check if the path is blank
                 if (txtOutputDevice.getText().isBlank()) {
-                    tabPane.setSelectedIndex(1);
+                    tabPane.setSelectedIndex(2);
                      messageBox("Please select an output file or change the output device.",
                              JOptionPane.WARNING_MESSAGE);
                      return null;
@@ -5141,7 +5141,13 @@ public class GUI extends javax.swing.JFrame {
                 // Here we receive the values from publish() and display
                 // them in the console
                 for (String o : chunks) {
-                    txtConsoleOutput.append(o);
+                    if (o.contains("Caught signal")) {
+                        // Strip out the timestamp from the "Caught signal" message
+                        txtConsoleOutput.append(o.substring(o.indexOf("C")));
+                    }
+                    else {
+                        txtConsoleOutput.append(o);
+                    }
                 }
             }// End of process
         }; // End of SwingWorker
