@@ -1008,14 +1008,12 @@ public class GUI extends javax.swing.JFrame {
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkLogo.isSelected()) chkLogo.doClick();
         if (chkSubtitles.isSelected()) chkSubtitles.doClick();
-        if (chkARCorrection.isSelected()) chkARCorrection.doClick();
         if (chkPosition.isSelected()) chkPosition.doClick();
         if (chkVolume.isSelected()) chkVolume.doClick();
         if (chkDownmix.isSelected()) chkDownmix.doClick();
         chkTimestamp.setEnabled(false);
         chkLogo.setEnabled(false);
         chkSubtitles.setEnabled(false);
-        chkARCorrection.setEnabled(false);
         chkPosition.setEnabled(false);
         chkVolume.setEnabled(false);
         chkDownmix.setEnabled(false);
@@ -1040,7 +1038,6 @@ public class GUI extends javax.swing.JFrame {
             chkTimestamp.setEnabled(true);
             chkPosition.setEnabled(true);
             chkSubtitles.setEnabled(true);
-            chkARCorrection.setEnabled(true);
             chkVolume.setEnabled(true);
             chkDownmix.setEnabled(true);
         }
@@ -1651,12 +1648,10 @@ public class GUI extends javax.swing.JFrame {
          * If the arcorrection value is not defined, leave the option unchecked
          * Otherwise, check the option and process it as normal
          */
-        if (chkARCorrection.isEnabled()) {
-            if ((INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection")) != null) {
-                Integer ImportedAR = (INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection"));
-                chkARCorrection.doClick();
-                cmbARCorrection.setSelectedIndex(ImportedAR);
-            }
+        if ((INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection")) != null) {
+            Integer ImportedAR = (INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection"));
+            chkARCorrection.doClick();
+            cmbARCorrection.setSelectedIndex(ImportedAR);
         }
         // Scrambling system
         String ImportedScramblingSystem = INI.getStringFromINI(fileContents, "hacktv", "scramblingtype", "", false);
@@ -3519,11 +3514,23 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addARCorrectionOptions() {
-        String[] ARCorrectionMode = {
-            "Stretched",
-            "Letterboxed",
-            "Cropped"
-        };
+        var ARModesAL = new ArrayList<String>();
+        if (!captainJack) {
+            ARModesAL.add("Stretched");
+            ARModesAL.add("Fit");
+            ARModesAL.add("Fill");
+            ARModesAL.add("None");
+        }
+        else {
+            ARModesAL.add("Stretched");
+            ARModesAL.add("Letterboxed");
+            ARModesAL.add("Cropped");
+        }
+        // Convert to an array so we can populate
+        var ARCorrectionMode = new String[ARModesAL.size()];
+        for(int i = 0; i < ARCorrectionMode.length; i++) {
+            ARCorrectionMode[i] = ARModesAL.get(i);
+        } 
         cmbARCorrection.removeAllItems();
         cmbARCorrection.setModel(new DefaultComboBoxModel<>(ARCorrectionMode));
         cmbARCorrection.setSelectedIndex(0);
@@ -3532,16 +3539,36 @@ public class GUI extends javax.swing.JFrame {
     private ArrayList<String> checkARCorrectionOptions() {
         var al = new ArrayList<String>();
         if (chkARCorrection.isSelected()) {
-            switch (cmbARCorrection.getSelectedIndex()) {
-                case 1:
-                    al.add("--letterbox");
-                    break;
-                case 2:
-                    al.add("--pillarbox");
-                    break;
-                default:
-                    break;
+            if (!captainJack) {
+                switch (cmbARCorrection.getSelectedIndex()) {
+                    case 1:
+                        al.add("--fit");
+                        al.add("fit");
+                        break;
+                    case 2:
+                        al.add("--fit");
+                        al.add("fill");
+                        break;
+                    case 3:
+                        al.add("--fit");
+                        al.add("none");
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                switch (cmbARCorrection.getSelectedIndex()) {
+                    case 1:
+                        al.add("--letterbox");
+                        break;
+                    case 2:
+                        al.add("--pillarbox");
+                        break;
+                    default:
+                        break;
+                }
             }
+
         }
         return al;
     }
@@ -5946,10 +5973,10 @@ public class GUI extends javax.swing.JFrame {
         txtSource.setEnabled(true);
         txtSource.setEditable(true);
         btnSourceBrowse.setEnabled(true);
+        chkARCorrection.setEnabled(true);
         if (captainJack) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
-            chkARCorrection.setEnabled(true);
             chkVolume.setEnabled(true);
             chkDownmix.setEnabled(true);
             chkSubtitles.setEnabled(true);
@@ -6165,6 +6192,7 @@ public class GUI extends javax.swing.JFrame {
             else {
                 fsphil();
             }
+            addARCorrectionOptions();
             addTestCardOptions();
         }
     }//GEN-LAST:event_btnHackTVPathActionPerformed
@@ -7515,7 +7543,7 @@ public class GUI extends javax.swing.JFrame {
         lblSubtitleIndex.setText("Index (optional)");
         lblSubtitleIndex.setEnabled(false);
 
-        chkARCorrection.setText("16:9 source on 4:3 display");
+        chkARCorrection.setText("Aspect ratio scaling");
         chkARCorrection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkARCorrectionActionPerformed(evt);

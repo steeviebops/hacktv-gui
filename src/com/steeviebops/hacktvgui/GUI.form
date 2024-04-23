@@ -712,7 +712,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkARCorrection">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="16:9 source on 4:3 display"/>
+                        <Property name="text" type="java.lang.String" value="Aspect ratio scaling"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkARCorrectionActionPerformed"/>
