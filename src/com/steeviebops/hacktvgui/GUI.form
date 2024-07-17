@@ -1487,9 +1487,10 @@
                                   <Component id="chkOutputLevel" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="chkDownmix" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="chkDownmix" max="32767" attributes="0"/>
                                   <Component id="chkVerbose" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkSiS" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1507,12 +1508,13 @@
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="chkOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtOutputLevel" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="chkVerbose" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkSiS" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="txtVolume" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="chkVolume" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="chkVerbose" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -1589,6 +1591,11 @@
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtVolume.addMouseListener(new ContextMenuListener());"/>
                       </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkSiS">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Sound-in-Syncs"/>
+                      </Properties>
                     </Component>
                   </SubComponents>
                 </Container>

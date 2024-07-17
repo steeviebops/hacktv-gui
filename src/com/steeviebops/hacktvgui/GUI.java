@@ -448,7 +448,8 @@ public class GUI extends javax.swing.JFrame {
             chkVITC,
             chkSecamId,
             chkOffset,
-            chkSwapIQ
+            chkSwapIQ,
+            chkSiS
         };
     }
     
@@ -1875,6 +1876,10 @@ public class GUI extends javax.swing.JFrame {
         if (INI.getBooleanFromINI(fileContents, "hacktv", "vitc")) {
             chkVITC.doClick();
         }
+        // SiS
+        if (INI.getBooleanFromINI(fileContents, "hacktv", "sis")) {
+            chkSiS.doClick();
+        }
         // Subtitles
         if (INI.getBooleanFromINI(fileContents, "hacktv", "subtitles")) {
             chkSubtitles.doClick();
@@ -2316,6 +2321,12 @@ public class GUI extends javax.swing.JFrame {
         if (chkVITS.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vits", 1);
         // VITC
         if (chkVITC.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vitc", 1);
+        // SiS
+        if (chkSiS.isSelected()) {
+            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "sis", 1);
+            // This setting has been added for possible future use but is not currently read
+            FileContents = INI.setINIValue(FileContents, "hacktv", "sismode", "dcsis");
+        }
         // Disable colour
         if (chkColour.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1);
         // Invert video
@@ -3859,6 +3870,13 @@ public class GUI extends javax.swing.JFrame {
         else {
             configureMacPanel(false);
         }
+        if (lines == 625) {
+            chkSiS.setEnabled(true);
+        }
+        else {
+            if (chkSiS.isSelected()) chkSiS.doClick();
+            chkSiS.setEnabled(false);
+        }
         // Check if the line count varies from the previous mode
         // If so, refresh the available test cards
         if (oldLines != lines) addTestCardOptions();
@@ -4978,6 +4996,10 @@ public class GUI extends javax.swing.JFrame {
         if (chkColour.isSelected()) allArgs.add("--nocolour");
         if (chkInvertVideo.isSelected()) allArgs.add("--invert-video");
         if (chkDownmix.isSelected()) allArgs.add("--downmix");
+        if (chkSiS.isSelected()) {
+            allArgs.add("--sis");
+            allArgs.add("dcsis");
+        }
         // Finally, add the source video or test option
         if (ytdl.isBlank()) {
             String InputSource = checkInput();
@@ -6801,6 +6823,7 @@ public class GUI extends javax.swing.JFrame {
                 String downloadPath = t + File.separator + "hacktv.zip";
                 String tmpExePath = t + File.separator + "hacktv.exe";
                 String exePath = jarDir + File.separator + "hacktv.exe";
+                String readmePath = t + File.separator + "readme.txt";
                 // Spoof user agent as wget. OneDrive is picky...
                 String ua = "Wget/1.21.4 (mingw32)";
                 var con = new URL(dUrl).openConnection();
@@ -6838,6 +6861,10 @@ public class GUI extends javax.swing.JFrame {
                     // If hacktv.exe exists in the temp directory, delete the zip
                     // and attempt to move it to the working directory
                     if (Files.exists(Path.of(tmpExePath))) {
+                        // Delete the readme file that was extracted from the zip
+                        if (Files.exists((Path.of(readmePath)))) {
+                            Shared.deleteFSObject(Path.of(readmePath));
+                        }
                         Shared.deleteFSObject(Path.of(downloadPath));
                         Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
                         return exePath;
@@ -7315,6 +7342,7 @@ public class GUI extends javax.swing.JFrame {
         chkVolume = new javax.swing.JCheckBox();
         chkDownmix = new javax.swing.JCheckBox();
         txtVolume = new javax.swing.JTextField();
+        chkSiS = new javax.swing.JCheckBox();
         frequencyPanel = new javax.swing.JPanel();
         lblOutputDevice = new javax.swing.JLabel();
         cmbOutputDevice = new javax.swing.JComboBox<>();
@@ -8210,6 +8238,8 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkSiS.setText("Sound-in-Syncs");
+
         javax.swing.GroupLayout additionalOptionsPanelLayout = new javax.swing.GroupLayout(additionalOptionsPanel);
         additionalOptionsPanel.setLayout(additionalOptionsPanelLayout);
         additionalOptionsPanelLayout.setHorizontalGroup(
@@ -8228,9 +8258,10 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtVolume, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addComponent(chkOutputLevel))
                 .addGap(18, 18, 18)
-                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkDownmix)
-                    .addComponent(chkVerbose))
+                .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(chkDownmix, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkVerbose)
+                    .addComponent(chkSiS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         additionalOptionsPanelLayout.setVerticalGroup(
@@ -8244,11 +8275,12 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOutputLevel)
                     .addComponent(txtOutputLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkVerbose))
+                    .addComponent(chkSiS))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(additionalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkVolume))
+                    .addComponent(chkVolume)
+                    .addComponent(chkVerbose))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -9561,6 +9593,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkSecamId;
     private javax.swing.JCheckBox chkShowCardSerial;
     private javax.swing.JCheckBox chkShowECM;
+    private javax.swing.JCheckBox chkSiS;
     private javax.swing.JCheckBox chkSubtitles;
     private javax.swing.JCheckBox chkSwapIQ;
     private javax.swing.JCheckBox chkSyntaxOnly;
