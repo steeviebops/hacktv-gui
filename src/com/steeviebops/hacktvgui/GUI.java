@@ -300,6 +300,7 @@ public class GUI extends javax.swing.JFrame {
         if (!openModesFile()) return false;
         populateVideoModes();
         addARCorrectionOptions();
+        populateWSS();
         addOutputDevices();
         addCeefaxRegions();
         if (captainJack) {
@@ -660,18 +661,18 @@ public class GUI extends javax.swing.JFrame {
             if (Files.exists(Path.of(cp))) {
                 date = SharedInst.getLastUpdatedTime(cp, classFilePath);
                 if (date != null) {
-                    return "\nBuild date: " + sdf.format(date);
+                    return sdf.format(date);
                 }
                 else {
-                    return "";
+                    return "n/a";
                 }
             }
             else {
-                return "";
+                return "n/a";
             }
         }
         catch (NumberFormatException | InvalidPathException e) {
-              return "";
+              return "n/a";
         }
     }
     
@@ -1455,7 +1456,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            if (!ImportedSource.endsWith(".m3u")) txtSource.setText(ImportedSource);
+            if ( (!ImportedSource.endsWith(".m3u")) || (!ImportedSource.endsWith(".m3u8")) ) txtSource.setText(ImportedSource);
         }
         // Frequency or channel number
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -2102,7 +2103,8 @@ public class GUI extends javax.swing.JFrame {
                     FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
                 }
             }
-            else if (txtSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
+            else if ((txtSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".m3u")) ||
+                    (txtSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".m3u8"))) {
                 // Check if the M3U exists
                 if (Files.exists(Path.of(txtSource.getText()))) {
                     // Save the selected item from the Extended M3U file
@@ -2440,8 +2442,8 @@ public class GUI extends javax.swing.JFrame {
             return;
         }
         // Check that the file is in the correct format by loading its first line
-        // We use endsWith to avoid problems caused by Unicode BOMs
-        else if (!fileHeader.endsWith("#EXTM3U") ) {
+        // We use 'contains' rather than 'startsWith' to avoid problems caused by Unicode BOMs
+        else if (!fileHeader.contains("#EXTM3U") ) {
             boolean utf8;
             // Treat the file as a standard text-only playlist
             List<String> pls;
@@ -3507,6 +3509,27 @@ public class GUI extends javax.swing.JFrame {
         chkWSS.setEnabled(false);
     }
     
+    private void populateWSS() {
+        var WSSModesAL = new ArrayList<String>();
+        WSSModesAL.add("auto");
+        WSSModesAL.add("4:3");
+        WSSModesAL.add("14:9 letterbox");
+        WSSModesAL.add("14:9 top");
+        WSSModesAL.add("16:9 letterbox");
+        WSSModesAL.add("16:9 top");
+        WSSModesAL.add("16:9+-letterbox");
+        WSSModesAL.add("14:9 window");
+        WSSModesAL.add("16:9");
+        // Convert to an array so we can populate
+        var WSSModes = new String[WSSModesAL.size()];
+        for(int i = 0; i < WSSModes.length; i++) {
+            WSSModes[i] = WSSModesAL.get(i);
+        } 
+        cmbWSS.removeAllItems();
+        cmbWSS.setModel(new DefaultComboBoxModel<>(WSSModes));
+        cmbWSS.setSelectedIndex(0);
+    }
+    
     private ArrayList<String> checkWSS() {
         // Populate WSS parameters if enabled
         var al = new ArrayList<String>();
@@ -3514,9 +3537,13 @@ public class GUI extends javax.swing.JFrame {
             var wssModes = new String[] {
                 "auto",
                 "4:3",
-                "16:9",
                 "14:9-letterbox",
-                "16:9-letterbox"
+                "14:9-top",
+                "16:9-letterbox",
+                "16:9-top",
+                "16:9+-letterbox",
+                "14:9-window",
+                "16:9"
             };
             al.add("--wss");
             al.add(wssModes[cmbWSS.getSelectedIndex()]);
@@ -5488,11 +5515,19 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRunActionPerformed
              
     private void menuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAboutActionPerformed
+        String v = getVersion();
+        // Get the current year for copyright notice.
+        String y;
+        if (v.equals("n/a")) {
+            y = "";
+        } else {
+            y = " 2020-" + v.substring(0, 4);
+        }
         JOptionPane.showMessageDialog(null,
                 APP_NAME +
-                getVersion() +
+                "\nBuild date: " + v +
                 "\nUsing " + modesFileLocation + " Modes.ini file, version " + modesFileVersion +
-                "\n\nCreated 2020-2023 by Stephen McGarry.\n" +
+                "\n\nCreated" + y + " by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n",
             "About " + APP_NAME, JOptionPane.INFORMATION_MESSAGE);
@@ -5923,7 +5958,8 @@ public class GUI extends javax.swing.JFrame {
             PREFS.put("lastdir", sourceFileChooser.getCurrentDirectory().toString());
             if (f.length > 1) {
                 for (File fn : f) {
-                    if ((!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".m3u"))
+                    if (((!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".m3u"))
+                            || (!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".m3u8")))
                             && (!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".htv"))) {
                         playlistAL.add(fn.toString());
                     }
@@ -5932,7 +5968,8 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 var file = new File (SharedInst.stripQuotes(f[0].toString()));
-                if(file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
+                if ( (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u"))
+                      || (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u8")) ) {
                     // If the source is an M3U file, pass it to the M3U handler
                     txtSource.setText(file.getAbsolutePath());
                     m3uHandler(file.getAbsolutePath(),0);
@@ -8040,7 +8077,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbWSS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "auto", "4:3", "16:9", "14:9 letterbox", "16:9 letterbox" }));
         cmbWSS.setSelectedIndex(-1);
         cmbWSS.setEnabled(false);
         cmbWSS.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
