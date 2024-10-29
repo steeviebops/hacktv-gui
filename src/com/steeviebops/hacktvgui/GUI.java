@@ -2831,7 +2831,7 @@ public class GUI extends javax.swing.JFrame {
                     return 3;
                 }
                 switch (dUrl) {
-                    case "https://github.com/spark-teletext/spark-teletext/":
+                    case "https://api.github.com/repos/spark-teletext/spark-teletext/contents/":
                         // Set SPARK prerequisites - change URL first
                         dUrl = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
                         f = new File(tempDir + File.separator + "spark");
@@ -5663,9 +5663,9 @@ public class GUI extends javax.swing.JFrame {
             // Disable hacktv download button so it doesn't interfere
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
-            String dUrl = "https://github.com/spark-teletext/spark-teletext/";
-            String HTMLString = ".tti\">(.*?)</a>";
-            htmlTempFile = "spark.html";
+            String dUrl = "https://api.github.com/repos/spark-teletext/spark-teletext/contents/";
+            String HTMLString = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)"; //".tti\">(.*?)</a>";
+            htmlTempFile = "spark.json";
             // Download index page
             downloadTeletext(dUrl, htmlTempFile, HTMLString);
         }
