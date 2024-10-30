@@ -123,64 +123,12 @@
             <Property name="text" type="java.lang.String" value="Templates"/>
           </Properties>
           <SubComponents>
-            <Menu class="javax.swing.JMenu" name="menuFreqSelect">
+            <MenuItem class="javax.swing.JMenuItem" name="menuAstraTemplate">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Frequency selection"/>
-              </Properties>
-              <SubComponents>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuIF">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="templateButtonGroup"/>
-                    </Property>
-                    <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="Intermediate frequency (IF)"/>
-                    <Property name="actionCommand" type="java.lang.String" value="0"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuIFActionPerformed"/>
-                  </Events>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKuBand">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="templateButtonGroup"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="Second harmonic (Ku band)"/>
-                    <Property name="actionCommand" type="java.lang.String" value="1"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuKuBandActionPerformed"/>
-                  </Events>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="menuKaBand">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="templateButtonGroup"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="Fourth harmonic (Ka band)"/>
-                    <Property name="actionCommand" type="java.lang.String" value="2"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuKaBandActionPerformed"/>
-                  </Events>
-                </MenuItem>
-              </SubComponents>
-            </Menu>
-            <MenuItem class="javax.swing.JMenuItem" name="menuAstra975Template">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Astra analogue STB (9.75 GHz)..."/>
+                <Property name="text" type="java.lang.String" value="Astra analogue STB..."/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuAstra975TemplateActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="menuAstra10Template">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Astra analogue STB (10 GHz)..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuAstra10TemplateActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuAstraTemplateActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="menuBSBTemplate">
@@ -1290,7 +1238,6 @@
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                           <StringArray count="0"/>
                         </Property>
-                        <Property name="selectedIndex" type="int" value="-1"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -2700,9 +2647,9 @@
                           <Component id="pathPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="69" max="32767" attributes="0"/>
+                          <EmptySpace pref="44" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2898,7 +2845,7 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
+                          <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="chkNoUpdateCheck" min="-2" max="-2" attributes="0"/>
@@ -2915,6 +2862,7 @@
                                           <Component id="cmbLookAndFeel" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
+                                  <Component id="btnSatSettings" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -2928,7 +2876,7 @@
                               <Component id="chkLocalModes" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="chkNoUpdateCheck" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="cmbNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblNMSCeefaxRegion" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -2939,6 +2887,8 @@
                                   <Component id="cmbLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
+                              <Component id="btnSatSettings" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2954,7 +2904,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkLocalModes">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Always use local copy of Modes.ini (restart required)"/>
+                        <Property name="text" type="java.lang.String" value="Always use local copy of modes files (do not download)"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLocalModesActionPerformed"/>
@@ -2999,6 +2949,14 @@
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkNoUpdateCheckActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnSatSettings">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Satellite receiver settings..."/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSatSettingsActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>

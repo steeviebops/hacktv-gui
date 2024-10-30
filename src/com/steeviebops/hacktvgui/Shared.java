@@ -47,6 +47,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.swing.JComboBox;
 
 public class Shared implements Serializable {
     
@@ -81,7 +82,7 @@ public class Shared implements Serializable {
 	    return false;
 	}
 	try {
-	    Double.parseDouble(strNum);
+	    Double.valueOf(strNum);
 	}
         catch (NumberFormatException nfe) {
 	    return false;
@@ -94,7 +95,7 @@ public class Shared implements Serializable {
 	    return false;
 	}
 	try {
-	    Long.parseLong(strHex, 16);
+	    Long.valueOf(strHex, 16);
 	}
         catch (NumberFormatException nfe) {
 	    return false;
@@ -272,6 +273,25 @@ public class Shared implements Serializable {
             // Try using xdg-open
             var p = new ProcessBuilder("xdg-open", u);
             p.start();            
+        }
+    }
+    
+    public void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
+        /*
+         * evt contains the number of clicks from the mouse wheel
+         * A single spin upwards reports -1
+         * A aingle spin downwards reports 1
+         *
+         * jcb is the name of the JComboBox that you want to manipulate
+         */
+        if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
+            if (evt < 0) {
+                int p = evt * -1; // negative * negative = positive
+                if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
+            }
+            else if (evt > 0) {
+                if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
+            }
         }
     }
     

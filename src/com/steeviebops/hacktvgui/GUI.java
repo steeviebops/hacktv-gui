@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
@@ -79,7 +78,7 @@ import javax.swing.KeyStroke;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
-    private static final String APP_NAME = "hacktv-gui";
+    public static final String APP_NAME = "hacktv-gui";
     
     // Pseudo-random number generator, used for the Randomise playlist option
     private static final Random RND = new Random();
@@ -94,11 +93,15 @@ public class GUI extends javax.swing.JFrame {
     // String to set the directory where this application's JAR is located
     private Path jarDir;
     
-    // Strings to set the location and contents of the Modes.ini file
+    // Strings to set the location and contents of the modes file
     private String modesFilePath;
     private String modesFile;
     private String modesFileVersion;
     private String modesFileLocation;
+    private String bpFilePath;
+    private String bpFile;
+    private String bpFileVersion;
+    private String bpFileLocation;
     
     // Declare variables for supported features
     private boolean nicamSupported = false;
@@ -156,7 +159,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox[] checkBoxes;
     
     // Preferences node
-    private static final Preferences PREFS = Preferences.userNodeForPackage(GUI.class);
+    public static final Preferences PREFS = Preferences.userNodeForPackage(GUI.class);
     
     // Process ID, used to gracefully close hacktv via the Stop button
     private long hpid;
@@ -185,6 +188,10 @@ public class GUI extends javax.swing.JFrame {
     private String scramblingType2 = "";
     private String scramblingKey2 = "";
     private int dualVC;
+    private boolean sat;
+    
+    // Default LNB local oscillator frequency in GHz
+    public static final double DEFAULT_LO = 9.75;
     
     // Class instances
     final Shared SharedInst = new Shared();
@@ -298,6 +305,7 @@ public class GUI extends javax.swing.JFrame {
         detectFork();
         selectModesFile();
         if (!openModesFile()) return false;
+        if (!openBandPlanFile()) return false;
         populateVideoModes();
         addARCorrectionOptions();
         populateWSS();
@@ -676,25 +684,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void mouseWheelComboBoxHandler(int evt, JComboBox jcb) {
-        /*
-         * evt contains the number of clicks from the mouse wheel
-         * A single spin upwards reports -1
-         * A aingle spin downwards reports 1
-         *
-         * jcb is the name of the JComboBox that you want to manipulate
-         */
-        if (jcb.isEnabled()) { // Don't do anything if the combobox is disabled
-            if (evt < 0) {
-                int p = evt * -1; // negative * negative = positive
-                if (jcb.getSelectedIndex() - p >= 0) jcb.setSelectedIndex(jcb.getSelectedIndex() - p);
-            }
-            else if (evt > 0) {
-                if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
-            }
-        }
-    }
-    
     private void messageBox(String msg, int type) {
         // type can be any of the following (from -1 to 3)
         // PLAIN_MESSAGE, ERROR_MESSAGE, INFORMATION_MESSAGE, WARNING_MESSAGE
@@ -718,50 +707,102 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void selectModesFile() {
-        if ((PREFS.getInt("UseLocalModesFile", 0)) == 1) {
-            if (Files.exists(Path.of(jarDir + File.separator + "Modes.ini"))) {
+        int q;
+        // Does a modes file exist in the application directory?
+        if ( ((Files.exists(Path.of(jarDir + File.separator + getFork() + ".ini"))) ||
+                (Files.exists(Path.of(jarDir + "/bandplans.ini"))) ||
+                (Files.exists(Path.of(jarDir + "/Modes.ini")))) ) {
+            // If yes, and UseLocalModesFile is 1, use local file.
+            if ((PREFS.getInt("UseLocalModesFile", 0)) == 1) {
+                q = JOptionPane.YES_OPTION;
+            }
+            // If yes, and UseLocalModesFile is 0, prompt.
+            else {
+                q = JOptionPane.showConfirmDialog(null, "A modes file was found in the current directory.\n"
+                    + "Do you want to use this file?\n"
+                    + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION);
+            }
+        }
+        // If no, and "UseLocalModesFile" is 0, download
+        else if ((PREFS.getInt("UseLocalModesFile", 0)) == 0) {
+            q = JOptionPane.NO_OPTION;
+        }
+        // If no, and UseLocalModesFile is 1, use embedded file
+        else {
+            q = JOptionPane.YES_OPTION;
+        }
+        if (q == JOptionPane.YES_OPTION) {
+            // Use embedded or local file, depending on what is available
+            if (Files.exists(Path.of(jarDir + File.separator + getFork() + ".ini"))) {
                 // Use the local file
-                modesFilePath = jarDir + File.separator + "Modes.ini";
+                modesFilePath = jarDir + File.separator + getFork() + ".ini";
+            }
+            else if (Files.exists(Path.of(jarDir + "/Modes.ini"))) {
+                // Use the local Modes.ini (v4 or earlier) file
+                modesFilePath = jarDir + "/Modes.ini";  
             }
             else {
                 // Use the embedded copy
-                modesFilePath = "com/steeviebops/resources/" + getFork() + "/Modes.ini";
+                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
             }
-        }
-        else if ( (Files.exists(Path.of(jarDir + File.separator + "Modes.ini"))) &&
-                (cmbOutputDevice.getItemCount() == 0) ) {
-            if (JOptionPane.showConfirmDialog(null, "A Modes.ini file was found in the current directory.\n"
-                    + "Do you want to use this file?\n"
-                    + "You can suppress this prompt on the GUI settings tab.", APP_NAME, JOptionPane.YES_NO_OPTION)
-                    == JOptionPane.YES_OPTION) {
+            if (Files.exists(Path.of(jarDir + "/bandplans.ini"))) {
                 // Use the local file
-                modesFilePath = jarDir + File.separator + "Modes.ini";
+                bpFilePath = jarDir + "/bandplans.ini";
             }
             else {
-                // Download from Github
-                downloadModesFile();
+                // Use the embedded copy
+                bpFilePath = "com/steeviebops/resources/bandplans.ini";
             }
         }
         else {
             // Download from Github
-            downloadModesFile();
+            String v = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + ".ini";
+            String b = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/bandplans.ini";
+            modesFile = downloadModesFile(v);
+            bpFile = downloadModesFile(b);
+        }
+        // Reopen modes file after config change
+        if (this.isVisible()) {
+            openModesFile();
+            openBandPlanFile();
+            cmbRegion.setEnabled(false);
+            populateVideoModes();
+            selectDefaultMode();
         }
     }
     
-    private void downloadModesFile() {
-        // Download modes.ini directly to the modesFile string
-        String u = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + "/Modes.ini";
+    private String downloadModesFile(String url) {
+        // Downloads files directly to a string
+        String v = getFork() + ".ini";
+        String b = "bandplans.ini";
+        String targetFile;
         try {
-            modesFile = SharedInst.downloadToString(u);
-            modesFilePath = "";
+            targetFile = SharedInst.downloadToString(url);
+            if (url.endsWith(v)) {
+                modesFilePath = "";
+            }
+            else if (url.endsWith(b)) {
+                bpFilePath = "";
+            }
         }
         catch (IOException ex) {
-                System.err.println("Error downloading modes.ini... " + ex);
-                messageBox("Unable to download the modes file from Github.\n"
-                        + "Using embedded copy instead, which may not be up to date.", JOptionPane.ERROR_MESSAGE);
-                // Use the embedded copy
-                modesFilePath = "com/steeviebops/resources/" + getFork() + "/Modes.ini";
+            // Use the embedded copy
+            String f = "";
+            if (url.endsWith(v)) {
+                System.err.println("Error downloading " + v + "...\n" + ex);
+                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
+                f = v;
+            }
+            else if (url.endsWith(b)) {
+                System.err.println("Error downloading " + b + "...\n" + ex);
+                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                f = b;
+            }
+            messageBox("Unable to download the " + f + " file from Github.\n"
+                    + "Using embedded copy instead, which may not be up to date.", JOptionPane.ERROR_MESSAGE);
+            return "";
         }
+        return targetFile;
     } 
     
     private boolean openModesFile() {
@@ -769,7 +810,7 @@ public class GUI extends javax.swing.JFrame {
             modesFileLocation = "online";
         }
         else if (modesFilePath.startsWith("com/steeviebops/resources/")) {
-            // Read the embedded modes.ini to the modesFile string
+            // Read the embedded videomodes.ini to the modesFile string
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
                 if (is == null) {
                     throw new FileSystemNotFoundException("Unable to open embedded resource " + modesFilePath);
@@ -788,7 +829,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            // Read the modes.ini we specified previously
+            // Read the videomodes.ini we specified previously
             var f = new File(modesFilePath);
             try {
                 modesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
@@ -798,13 +839,71 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the modes file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                modesFilePath = "com/steeviebops/resources/" + getFork() + "Modes.ini";
+                modesFilePath = "com/steeviebops/resources/" + getFork() + getFork() + ".ini";
                 modesFileLocation = "embedded";
                 openModesFile();
             }
         }
-        // Read modes.ini file version
+        // Read modes file version
         modesFileVersion = INI.getStringFromINI(modesFile, "Modes.ini", "FileVersion", "unknown", true);
+        return true;
+    }
+    
+    private boolean openBandPlanFile() {
+        String m = modesFileVersion.replace("c","");
+        if ( (SharedInst.isNumeric(m)) && (Double.parseDouble(m) < 5.00) ) {
+            // This is a v4 or older Modes.ini file
+            // The main difference between v5 and the earlier formats is that
+            // v5 split out the band plans into a separate file.
+            // So the easiest way to read an older version is to simply
+            // duplicate modesFile to bpFile.
+            System.out.println("Version 4.x or earlier modes file detected.");
+            bpFile = modesFile;
+            bpFileLocation = "legacy";
+            bpFileVersion = modesFileVersion;
+        }
+        else if ( (bpFilePath.isEmpty()) && (bpFile != null) ) {
+            bpFileLocation = "online";
+        }
+        else if (bpFilePath.startsWith("com/steeviebops/resources/")) {
+            // Read the embedded bandplans.ini to the bpFile string
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
+                if (is == null) {
+                    throw new FileSystemNotFoundException("Unable to open embedded resource " + bpFilePath);
+                }
+                else {
+                    bpFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    bpFileLocation = "embedded";                            
+                }
+            }
+            catch (IOException | FileSystemNotFoundException ex) {
+                // No modes file to load, we cannot continue
+                messageBox("Critical error, unable to read the embedded band plans file.\n"
+                        + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ex);
+                return false;
+            }
+        }
+        else {
+            // Read the bandplans.ini we specified previously
+            var f = new File(bpFilePath);
+            try {
+                bpFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+                bpFileLocation = "external";
+            }
+            catch (IOException e) {
+                // Load failed, retry with the embedded file
+                messageBox("Unable to read the band plans file.\n"
+                        + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
+                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFileLocation = "embedded";
+                openBandPlanFile();
+            }
+        }
+        // Read bandplans.ini file version if not in legacy mode
+        if (!bpFileLocation.equals("legacy")) {
+            bpFileVersion = INI.getStringFromINI(bpFile, "bandplans.ini", "Version", "unknown", true);
+        }        
         return true;
     }
     
@@ -838,7 +937,7 @@ public class GUI extends javax.swing.JFrame {
             radMAC.doClick();
         }
         else {
-            messageBox("No video systems were found. The Modes.ini file may be invalid or corrupted.\n"
+            messageBox("No video systems were found. The " + getFork() + ".ini file may be invalid or corrupted.\n"
                     + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -867,7 +966,7 @@ public class GUI extends javax.swing.JFrame {
         
         String regex = "(,\\s*)";
         
-        // q contains the modes defined in modes.ini for the specified standard
+        // q contains the modes defined in modes file for the specified standard
         q = m.split(regex);
         
         if (returnValue == 1) {
@@ -993,12 +1092,12 @@ public class GUI extends javax.swing.JFrame {
         if (!b) {
             lblFork.setText("Invalid file (not hacktv?)");
             captainJack = false;
-        }     
+        }
     }
     
     private String getFork() {
         if (captainJack) {
-            return "CaptainJack";
+            return "captainjack";
         }
         else {
             return "fsphil";
@@ -1484,40 +1583,63 @@ public class GUI extends javax.swing.JFrame {
             else {
                 // Try to find the channel name by trying UHF first
                 boolean ChannelFound = false;
+                boolean bpFound = false;
                 radUHF.doClick();
-                // Check the available bandplans for the one specified and set the region accordingly
-                for (int ub = 0; ub < uhfAL.size(); ub++) {
-                    if (uhfAL.get(ub).equals(ImportedBandPlan)) {
-                        cmbRegion.setSelectedIndex(ub);
-                    }
-                }
-                // Search for the specified channel
-                for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
-                    if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
-                        cmbChannel.setSelectedIndex(i);
-                        ChannelFound = true;
-                    }
-                }                    
-                // If not found, try VHF
-                if (!ChannelFound) {
-                    radVHF.doClick();
-                    // Check the available bandplans for the one specified and set the region accordingly
-                    for (int vb = 0; vb < vhfAL.size(); vb++) {
-                        if (vhfAL.get(vb).equals(ImportedBandPlan)) {
-                            cmbRegion.setSelectedIndex(vb);
+                // Check the available band plans for the one specified and set the region accordingly
+                if (uhfAL.contains(ImportedBandPlan)) {
+                    bpFound = true;
+                    for (int ub = 0; ub < uhfAL.size(); ub++) {
+                        if (uhfAL.get(ub).equals(ImportedBandPlan)) {
+                            cmbRegion.setSelectedIndex(ub);
+                            // Search for the specified channel
+                            for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
+                                if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
+                                    cmbChannel.setSelectedIndex(i);
+                                    ChannelFound = true;
+                                }
+                            }
                         }
                     }
-                    // Search for the specified channel
-                    for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
-                        if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
-                            cmbChannel.setSelectedIndex(i);
-                            ChannelFound = true;
+                }
+                // If not found, try VHF
+                else if (!ChannelFound) {
+                    radVHF.doClick();
+                    // Check the available band plans for the one specified and set the region accordingly
+                    if (vhfAL.contains(ImportedBandPlan)) {
+                        bpFound = true;
+                        for (int vb = 0; vb < vhfAL.size(); vb++) {
+                            if (vhfAL.get(vb).equals(ImportedBandPlan)) {
+                                cmbRegion.setSelectedIndex(vb);
+                                // Search for the specified channel
+                                for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
+                                    if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
+                                        cmbChannel.setSelectedIndex(i);
+                                        ChannelFound = true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 // If still not found, generate an error and use the frequency instead of the channel
                 if (!ChannelFound) {
-                    if (ImportedFrequency != -250) {
+                    if (!bpFound) {
+                        /* 
+                            Versions 2024-09-01 and earlier did not properly check for
+                            band plans while parsing HTV files. Save files from older 
+                            versions, from before the addition of multiple band plans,
+                            could load an incorrect band plan as a result (if more
+                            than one had a matching channel number). These files will
+                            now return an error but the fix is simple, the correct
+                            region/band/channel just needs to be selected and
+                            the file resaved.
+                        */
+                        radCustom.doClick();
+                        Double Freq = ImportedFrequency / 1000000;
+                        txtFrequency.setText(Double.toString(Freq).replace(".0",""));
+                        invalidConfigFileValue("band plan", ImportedBandPlan);                        
+                    }
+                    else if (ImportedFrequency != -250) {
                         radCustom.doClick();
                         Double Freq = ImportedFrequency / 1000000;
                         txtFrequency.setText(Double.toString(Freq).replace(".0",""));
@@ -1529,7 +1651,7 @@ public class GUI extends javax.swing.JFrame {
                         resetAllControls();
                         return false;
                     }
-                }  
+                }
             }
         }
         // SECAM field ID
@@ -2006,7 +2128,7 @@ public class GUI extends javax.swing.JFrame {
     
     private boolean checkAltModeNames(String modeToCheck, String alt) {
         /*
-         * Modes.ini now supports an alt (meaning 'alternative') setting, which
+         * The modes file supports an alt (meaning 'alternative') setting, which
          * can be used to report a second option that represents that mode.
          * This is used by B/G and D/K so both options are accepted.
          *
@@ -2031,7 +2153,7 @@ public class GUI extends javax.swing.JFrame {
         }
         messageBox("The " + settingName + '\u0020' + '\u0022' + value + '\u0022' + 
                 " specified in the configuration file could not be found.\n" +
-                "The file may have been created in a newer version or the value is invalid.",
+                "The file may have been created in a different version of the application, or the value is invalid.",
                 JOptionPane.WARNING_MESSAGE);
     }
     
@@ -2128,7 +2250,7 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!radCustom.isSelected()) {
                 FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
-                // Save band plan identifier, this uses the section name from modes.ini
+                // Save band plan identifier, this uses the section name from modes file
                 if (radUHF.isSelected()) {
                     FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "bandplan", uhfAL.get(cmbRegion.getSelectedIndex()));
                 }
@@ -2136,7 +2258,22 @@ public class GUI extends javax.swing.JFrame {
                     FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "bandplan", vhfAL.get(cmbRegion.getSelectedIndex()));
                 }
             }
-            FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", frequency);
+            if (sat) {
+                // Save the IF to the frequency field for backwards compatibility
+                // The Ku frequency will be retrieved from the band plan if it exists
+                long f = calculateFrequency(frequency);
+                if (f == ((Long.MIN_VALUE + 256))) {
+                    return;
+                }
+                else {
+                    FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", f);
+                    // This setting is not yet used for anything, but we may need it in future
+                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "satellite", "1");
+                }
+            }
+            else {
+                FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", frequency);
+            }
         }
         // Sample rate
         if (SharedInst.isNumeric(txtSampleRate.getText())) {
@@ -2751,6 +2888,12 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addCeefaxRegions() {
+        // Regional Ceefax data is currently unavailable, disable for now
+        lblNMSCeefaxRegion.setEnabled(false);
+        cmbNMSCeefaxRegion.setEnabled(false);
+        lblNMSCeefaxRegion.setVisible(false);
+        cmbNMSCeefaxRegion.setVisible(false);
+        /*
         // Populate the Ceefax regions to the combobox in GUI settings
         String[] CeefaxRegions = {
             "East",
@@ -2776,6 +2919,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             cmbNMSCeefaxRegion.setSelectedIndex(9);
         }
+        */
     }
 
     private void downloadTeletext(String url, String destinationFile, String HTMLString) {
@@ -2836,7 +2980,7 @@ public class GUI extends javax.swing.JFrame {
                         dUrl = "https://raw.githubusercontent.com/spark-teletext/spark-teletext/master/";
                         f = new File(tempDir + File.separator + "spark");
                         break;
-                    case "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/":
+                    case "https://feeds.nmsni.co.uk/svn/ceefax/national/":
                         // Set Ceefax temp directory
                         f = new File(tempDir + File.separator + "ceefax");
                         break;
@@ -2912,6 +3056,8 @@ public class GUI extends javax.swing.JFrame {
                         // All good
                         txtStatus.setText("Done");
                         txtTeletextSource.setText(teletextPath);
+                        // Regional Ceefax data is currently unavailable, disable for now
+                        /*
                         // Check if we just downloaded Ceefax
                         if (url.equals("https://internal.nathanmediaservices.co.uk/svn/ceefax/national/")) {
                             // It's not enough to just download the national files, we also need a region
@@ -2956,7 +3102,7 @@ public class GUI extends javax.swing.JFrame {
                             // Reset the source directory to the national directory,
                             // which hopefully now has the regional files merged into it
                             txtTeletextSource.setText(teletextPath.substring(0, teletextPath.length() - 7));
-                        }
+                        }*/
                         break;
                     case 1:
                         // Download cancelled by the user
@@ -3067,72 +3213,6 @@ public class GUI extends javax.swing.JFrame {
             chkColour.setEnabled(false);
         }        
     }
-
-    private void astraTemplate(Double localOscillator) {
-        if (JOptionPane.showConfirmDialog(null, "This will load template values for an Astra satellite receiver configured for a "
-                + localOscillator + " GHz LO LNB.\n"
-                        + "All current settings will be cleared. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            // Reset all controls
-            resetAllControls();
-            // Select PAL-FM mode
-            int a = -1;
-            for (int i = 0; i < palModeArray.length; i++) {
-                if (palModeArray[i].equals("pal-fm")) {
-                    a = i;
-                }
-            }
-            if (a != -1) {
-                cmbMode.setSelectedIndex(a);
-            }
-            else {
-                messageBox("Unable to find the PAL-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
-                resetAllControls();
-                return;
-            }
-            // Set custom frequency
-            radCustom.doClick();
-            // Enable pre-emphasis filter and enable FM deviation option
-            chkVideoFilter.doClick();
-            chkFMDev.doClick();
-            // Get selected frequency and set deviation
-            // fg is the STB frequency, we default to the old frequency for
-            // The Children's Channel (10.994 GHz)
-            double fg = 10.994;
-            // Convert fg to MHz for clarity, we'll use this value internally
-            int f = (int) (fg * 1000);
-            int lo = (int) ((double) localOscillator * 1000);
-            int of;
-            switch (Integer.parseInt(templateButtonGroup.getSelection().getActionCommand())) {
-                case 0:
-                    // IF
-                    of = f - lo;
-                    txtFMDev.setText("10");
-                    break;
-                case 1:
-                    // Ku band
-                    of = f / 2;
-                    txtFMDev.setText("8");
-                    break;
-                case 2:
-                    // Ka band LNB at 21.2 GHz LO (Saorsat Inverto)
-                    // Below is a formula to select the transmission frequency
-                    // based on the receiver's IF
-                    // (((Ku frequency - Ku local oscillator) * -1) + Ka local oscillator) / 4
-                    of = (((f - lo) * -1) + 21200) / 4;
-                    txtFMDev.setText("4");
-                    // Invert video polarity, a 21.2 GHz Ka LNB is negative IF
-                    chkInvertVideo.doClick();
-                    break;
-                default:
-                    System.err.println("Frequency error");
-                    return;
-            }
-            // Set frequency to the value we got above
-            txtFrequency.setText(String.valueOf(of));
-            messageBox("Template values have been loaded. Tune your receiver to "
-                    + fg + " GHz and run hacktv.", JOptionPane.INFORMATION_MESSAGE);    
-        }
-    }    
     
     private void enableScrambling() {
         cmbScramblingType.setEnabled(true);
@@ -3164,7 +3244,7 @@ public class GUI extends javax.swing.JFrame {
         scramblingTypeArray = new ArrayList<>();
         scramblingTypeArray.add("");
         dualVC = -2;
-        // Check if Modes.ini contains a section for these scrambling systems
+        // Check if modes file contains a section for these scrambling systems
         String vc1 = INI.splitINIfile(modesFile, "videocrypt");
         String vc2 = INI.splitINIfile(modesFile, "videocrypt2");
         String vcs = INI.splitINIfile(modesFile, "videocrypts");
@@ -3314,7 +3394,7 @@ public class GUI extends javax.swing.JFrame {
             scramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
-            messageBox("The scrambling key information in Modes.ini appears to be "
+            messageBox("The scrambling key information in " + getFork() + ".ini appears to be "
                     + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -3352,7 +3432,7 @@ public class GUI extends javax.swing.JFrame {
                 scramblingType1 = "";
                 cmbScramblingType.setSelectedIndex(0);
                 addScramblingKey();
-                messageBox("The scrambling key information in Modes.ini appears to be "
+                messageBox("The scrambling key information in " + getFork() + ".ini appears to be "
                         + "missing or corrupt for the secondary scrambling type.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -3650,7 +3730,7 @@ public class GUI extends javax.swing.JFrame {
         // Backwards compatibility. [testcards] refers to 625 line cards.
         // So we set l to a blank string on 625, otherwise we populate it with
         // the line count.
-        // e.g, if l is set to 525 we'll query Modes.ini for [testcards525].
+        // e.g, if l is set to 525 we'll query the modes file for [testcards525].
         String l = "";
         if (lines != 625) l = Integer.toString(lines);
         // Extract (from modesFile) the test card list
@@ -3798,14 +3878,17 @@ public class GUI extends javax.swing.JFrame {
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
                 disableFMDeviation();
+                sat = false;
                 break;
             case "fm":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
                 enableFMDeviation();
+                sat = true;
                 break;
             case "baseband":
                 if (!checkBasebandSupport()) return;
+                sat = false;
                 break;
             default:
                 messageBox("No modulation specified, defaulting to VSB.", JOptionPane.INFORMATION_MESSAGE);
@@ -3907,13 +3990,13 @@ public class GUI extends javax.swing.JFrame {
         // Check if the line count varies from the previous mode
         // If so, refresh the available test cards
         if (oldLines != lines) addTestCardOptions();
-        // Check for UHF and VHF bandplans
-        // We now support up to five bandplans per band. uhf and vhf are the
+        // Check for UHF and VHF band plans
+        // We now support up to five band plans per band. uhf and vhf are the
         // default and these names are retained for backwards compatibility.
-        // Additional bandplans can be added from uhf2 to uhf5, or vhf2 to vhf5.
+        // Additional band plans can be added from uhf2 to uhf5, or vhf2 to vhf5.
         uhfAL = new ArrayList<>();
         vhfAL = new ArrayList<>();
-        for (int i = 0; i <=5; i++) {
+        for (int i = 0; i <= 5; i++) {
             // The string below is merged below to find uhf2-5
             String s;
             switch (i) {
@@ -3930,13 +4013,26 @@ public class GUI extends javax.swing.JFrame {
             }
             String u = INI.getStringFromINI(modesFile, mode, "uhf" + s, "0", false);
             if (!u.equals("0")) {
+                // If the UHF radio button label was renamed, set it back
+                if (radUHF.getText().equals("Satellite")) radUHF.setText("UHF");
+                sat = false;
                 uhfAL.add(u);
             }
             else {
-                break;
+                // Check if any satellite band plans are defined
+                u = INI.getStringFromINI(modesFile, mode, "sat" + s, "0", false);
+                if (!u.equals("0")) {
+                    // Rename the UHF radio button label to Satellite instead
+                    radUHF.setText("Satellite");
+                    sat = true;
+                    uhfAL.add(u);
+                }
+                else {
+                    break;
+                }
             }
         }
-        for (int j = 0; j <=5; j++) {
+        for (int j = 0; j <= 5; j++) {
             // The string below is merged below to find vhf2-vhf5
             String t;
             switch (j) {
@@ -4226,24 +4322,30 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void populateBandPlan(String band) {
+        // If a satellite band plan has been specified, change the band
+        if ((band).contains("uhf") && (sat)) band = band.replace("uhf", "sat");
         txtFrequency.setEditable(false);
         try {
-            // Get the bandplan list from the requested video mode and band
+            // Get the band plan list from the requested video mode and band
             String bpname = INI.getStringFromINI(modesFile, mode, band, "", false);
-            // Extract (from modesFile) the bandplan section that we need
-            String bp = INI.splitINIfile(modesFile, bpname);
+            // Extract (from bpFile) the band plan section that we need
+            String bp = INI.splitINIfile(bpFile, bpname);
             if (bp == null) {
-                 messageBox(band + " was not found in modes.ini", JOptionPane.ERROR_MESSAGE);
+                 messageBox(band + " was not found in bandplans.ini", JOptionPane.ERROR_MESSAGE);
                  return;
             }
             // We just want the channel names/numbers so remove everything after =
             bp = bp.replaceAll("\\=.*", "");
-            // Remove region identifier line and chid line if they exist
+            // Remove region identifier, chid and local oscillator lines if they exist.
+            // These should not be processed here.
             bp = Stream.of(bp.split("\n"))
                     .filter(g -> !g.contains("region"))
                     .collect(Collectors.joining("\n"));
             bp = Stream.of(bp.split("\n"))
                     .filter(g -> !g.contains("chid"))
+                    .collect(Collectors.joining("\n"));
+            bp = Stream.of(bp.split("\n"))
+                    .filter(g -> !g.contains("lo"))
                     .collect(Collectors.joining("\n"));
             // Add a headerless string to channelArray by splitting off the first line
             channelArray = bp.substring(bp.indexOf("\n") +1).split("\\r?\\n");
@@ -4251,15 +4353,15 @@ public class GUI extends javax.swing.JFrame {
             // to channelArray.
             frequencyArray = new long[channelArray.length];
             for (int i = 0; i < channelArray.length; i++) {
-                if (INI.getLongFromINI(modesFile,  bpname, channelArray[i]) != null) {
-                    frequencyArray[i] = INI.getLongFromINI(modesFile,  bpname, channelArray[i]);
+                if (INI.getLongFromINI(bpFile, bpname, channelArray[i]) != null) {
+                    frequencyArray[i] = INI.getLongFromINI(bpFile, bpname, channelArray[i]);
                 }
                 else {
-                     messageBox("Invalid data returned from Modes.ini, section name: "
+                     messageBox("Invalid data returned from bandplans.ini, section name: "
                              + bpname, JOptionPane.ERROR_MESSAGE);
                      return;
                 }
-            }
+            }        
             // Enable cmbChannel and populate it with the contents of channelArray
             cmbChannel.setEnabled(true);       
             cmbChannel.removeAllItems();
@@ -4268,7 +4370,7 @@ public class GUI extends javax.swing.JFrame {
         }
         catch (IllegalArgumentException ex) {
             System.err.println(ex);
-            messageBox("The bandplan data in Modes.ini appears to be "
+            messageBox("The band plan data in bandplans.ini appears to be "
                     + "missing or corrupt for the selected band.", JOptionPane.WARNING_MESSAGE);
             radCustom.doClick();
             // Disable the band that failed
@@ -4454,17 +4556,168 @@ public class GUI extends javax.swing.JFrame {
         return al;
     }
     
+    private long calculateFrequency(long inputFreq) {
+        // Calculates the intermediate frequency (IF) or harmonic frequency to
+        // be sent to hacktv, based on the specified LNB local oscillator or 
+        // harmonic settings.
+        String err = "The current configuration is not supported by the HackRF device.\n"
+            + "Please try a different frequency.";
+        // This is the value we'll return if an error is found
+        long errValue = Long.MIN_VALUE + 256;
+        int rxd = PREFS.getInt("rxdevice", 0);
+        if ((sat) && (rxd == 1)) {
+            // Direct reception from a Ku band LNB
+            // Divide Ku frequency by the chosen harmonic
+            long f = inputFreq / getHarmonic();
+            if ((f > 7250000000L) || (f < 1000000) ) {
+                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
+                messageBox(err, JOptionPane.WARNING_MESSAGE);
+                return errValue;
+            }
+            else {
+                return(f);
+            }
+        }
+        else if ((sat) && (rxd == 2)) {
+            // Direct reception from a standard Ku band LNB using a BSB receiver
+            // Recalculate the transmission frequency based on the IF
+            long bsbLO = 10769180000L; // Standard LO of BSB Squarials/LNBs
+            long vlo = (long) (PREFS.getDouble("localoscillator", DEFAULT_LO) * 1000000000);
+            long f = (inputFreq - bsbLO + vlo) / getHarmonic();
+            if ((f > 7250000000L) || (f < 1000000) ) {
+                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
+                messageBox(err, JOptionPane.WARNING_MESSAGE);
+                return errValue;
+            }
+            else {
+                return(f);
+            }
+        }
+        else if ((sat) && (rxd == 3)) {
+            /* Saorsat Ka band LNB mode
+               These LNBs aren't fully supported on the receivers that we're
+               targeting, you can't enter a 21.2 GHz LO. So we do some trickery
+               to calculate the first harmonic. Negate the Ku-band frequency 
+               from the band plan and add it to the Ka LO and the Ku LO.
+               As the Ka LO is higher than the input frequency, the resulting
+               IF is inverted. You should use the "Invert video" option to
+               cancel this out.
+               
+               An example of this LNB can be found at:
+               https://www.inverto.tv/lnb/130/twin-ka-circular-dual-polarity-lnb23mm-197-202ghz-lo212o-ghz
+            */
+            long kaLO = 21200000000L;
+            long f = (-inputFreq + kaLO + getLO()) / getHarmonic();
+            if ((f > 7250000000L) || (f < 1000000) ) {
+                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
+                messageBox(err, JOptionPane.WARNING_MESSAGE);
+                return errValue;
+            }
+            else {
+                return(f);
+            }
+        }
+        else {
+            long f = (inputFreq - getLO()) / getHarmonic();
+            // Convoluted if statement here...
+            if (
+              // Satellite mode enabled
+              (sat) &&
+              // And we're using the first harmonic
+              (PREFS.getInt("harmonic", 1) == 1) &&
+              // And if a custom frequency is selected and "apply LO to custom frequencies" is enabled,
+              // or if a custom frequency is not selected
+              ( ((radCustom.isSelected()) && (PREFS.get("applyloforcustomfreq", "0").equals("1"))) ||
+                  (!radCustom.isSelected()) ) &&
+              // And frequency is not between 950 and 2150 MHz
+              ((f < 950000000L) || (f > 2150000000L)) 
+            ) {
+                int q = JOptionPane.showConfirmDialog(null, 
+                        "This frequency may be outside of your receiver's tuning range.\n" +
+                        "Would you like to continue anyway?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (q == JOptionPane.NO_OPTION) {
+                    return errValue;
+                }
+            }
+            if ((f > 7250000000L) || (f < 1000000L) ) {
+                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
+                messageBox(err, JOptionPane.WARNING_MESSAGE);
+                return errValue;
+            }
+            else {
+                return(f);
+            }
+        }
+    }    
+    private long getLO() {
+        // Returns the local oscillator frequency to be used in calculating
+        // the IF or harmonic frequency. Only run on satellite modes.
+        if (!sat) return 0;
+        // If "Apply these settings to custom frequencies" is disabled, and
+        // the Custom radio button is selected, return zero.
+        if ( ((PREFS.get("applyloforcustomfreq", "0")).equals("0")) &&
+                (radCustom.isSelected()) ) return 0;
+        // Check first if there's a hardcoded LO in the band plan.
+        // This will override any user-defined LO.
+        // Retrieve the band plan by checking the region combobox index.
+        int i = cmbRegion.getSelectedIndex();
+        String b;
+        if (i > 0) {
+            b = "sat" + String.valueOf(i + 1);
+        }
+        else {
+            b = "sat";
+        }
+        String bp = INI.getStringFromINI(modesFile, mode, b, "", false);
+        if ((INI.getLongFromINI(bpFile, bp, "lo")) != null) {
+            long lo = INI.getLongFromINI(bpFile, bp, "lo");
+            return lo;
+        }
+        else {
+            Double ulo = PREFS.getDouble("localoscillator", DEFAULT_LO);
+            // Convert imported LO from GHz to Hz.
+            return (long) (ulo * 1000000000);
+        }
+    }
+    
+    private int getHarmonic() {
+        // Only run on satellite modes
+        if (!sat) return 1;
+        // Get harmonic setting
+        switch (PREFS.get("harmonic", "1")) {
+            case "1":
+            default:
+                return 1;
+            case "2":
+                return 2;
+            case "3":
+                return 3;
+            case "4":
+                return 4;
+        }
+    }
+    
     private boolean checkCustomFrequency(){
-        // This method is only required for custom frequencies, so we skip it
-        // and return true if the custom radio button is not selected
         if (radCustom.isSelected()) {
+            boolean s = false;
+            if ((sat) && (PREFS.get("applyloforcustomfreq", "0").equals("1"))) {
+                s = true;
+            }
             BigDecimal CustomFreq;
             var Multiplier = new BigDecimal(1000000);
             String InvalidInput = "Please specify a frequency between 1 MHz and 7250 MHz.";
-            if ( (SharedInst.isNumeric( txtFrequency.getText())) && (!txtFrequency.getText().contains(" ")) ){
-                CustomFreq = new BigDecimal(txtFrequency.getText());
-                if ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) {
-                    messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
+            String SatHint = "\nIf you're trying to use a frequency for a satellite receiver, " +
+                    "enable the \"Apply these settings for custom frequencies\" option in " +
+                    "\"Satellite receiver settings\" on the GUI Settings tab.";
+            if (SharedInst.isNumeric(txtFrequency.getText().trim())){
+                CustomFreq = new BigDecimal(txtFrequency.getText().trim());
+                if ( (!s) && ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) ) {
+                    if (sat) {
+                        messageBox(InvalidInput + SatHint, JOptionPane.WARNING_MESSAGE);
+                    }
+                    else {
+                        messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
+                    }
                     tabPane.setSelectedIndex(2);
                     return false;
                 }
@@ -4849,8 +5102,15 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) ||
                 (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!checkCustomFrequency()) return;
-            allArgs.add("-f");
-            allArgs.add(Long.toString(frequency));
+            long f = calculateFrequency(frequency);
+            if (f == ((Long.MIN_VALUE + 256))) {
+                return;
+            }
+            else {
+                allArgs.add("-f");
+                allArgs.add(Long.toString(f));
+            }
+            
         }
         // Add subtitles here, we need to make sure that subtitles is not the 
         // last parameter if no index is specified. Otherwise hacktv reports 
@@ -5526,7 +5786,8 @@ public class GUI extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(null,
                 APP_NAME +
                 "\nBuild date: " + v +
-                "\nUsing " + modesFileLocation + " Modes.ini file, version " + modesFileVersion +
+                "\nUsing " + modesFileLocation + " modes file, version " + modesFileVersion +
+                "\nUsing " + bpFileLocation + " band plan file version " + bpFileVersion +
                 "\n\nCreated" + y + " by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n",
@@ -5664,7 +5925,7 @@ public class GUI extends javax.swing.JFrame {
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "https://api.github.com/repos/spark-teletext/spark-teletext/contents/";
-            String HTMLString = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)"; //".tti\">(.*?)</a>";
+            String HTMLString = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)";
             htmlTempFile = "spark.json";
             // Download index page
             downloadTeletext(dUrl, htmlTempFile, HTMLString);
@@ -6067,19 +6328,22 @@ public class GUI extends javax.swing.JFrame {
             // Retrieve MAC channel ID
             if (radMAC.isSelected()) {
                 String b = "";
-                if (radUHF.isSelected()) {
+                if ((radUHF.isSelected()) && (!sat)) {
                     b = "uhf";
                 }
-                else if (radUHF.isSelected()) {
+                else if ((radUHF.isSelected()) && (sat)) {
+                    b = "sat";
+                }
+                else if (radVHF.isSelected()) {
                     b = "vhf";
                 }
-                // Retrieve bandplan
+                // Retrieve band plan
                 String bp = INI.getStringFromINI(modesFile, mode, b, "", false);
                 // Retrieve channel ID list
-                String c = INI.getStringFromINI(modesFile, bp, "chid", "", false);
+                String c = INI.getStringFromINI(bpFile, bp, "chid", "", false);
                 // Retrieve ID using the channel name from the ID list
-                // This name must be identical to the name specified in the bandplan
-                String id = INI.getStringFromINI(modesFile, c, channelArray[cmbChannel.getSelectedIndex()], "", false).toUpperCase(Locale.ENGLISH);
+                // This name must be identical to the name specified in the band plan
+                String id = INI.getStringFromINI(bpFile, c, channelArray[cmbChannel.getSelectedIndex()], "", false).toUpperCase(Locale.ENGLISH);
                 if (id.isBlank()) {
                     // Nothing found, deselect the channel ID checkbox
                     if (chkMacChId.isSelected()) chkMacChId.doClick();
@@ -6107,11 +6371,19 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < uhfAL.size(); i++) {
-            cmbRegion.addItem(INI.getStringFromINI(modesFile, uhfAL.get(i), "region", uhfAL.get(i), true));
+            cmbRegion.addItem(INI.getStringFromINI(bpFile, uhfAL.get(i), "region", uhfAL.get(i), true));
         }
         // Enable the region combobox if multiple options are available.
-        if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
-        populateBandPlan("uhf");
+        if (cmbRegion.getItemCount() > 1) {
+            cmbRegion.setEnabled(true);
+            if (!sat) {
+                populateBandPlan("uhf");
+            }
+            else {
+                // Populate satellite band plans instead of UHF ones
+                populateBandPlan("sat");
+            }
+        }
         // If multiple regions are available, see if there's a UHF region with the
         // same name as the previously selected VHF one. If so, select it.
         if ( (uhfAL.size() > 1) && (vhfAL.size() > 1) ) {
@@ -6133,11 +6405,13 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < vhfAL.size(); i++) {
-            cmbRegion.addItem(INI.getStringFromINI(modesFile, vhfAL.get(i), "region", vhfAL.get(i), true));
+            cmbRegion.addItem(INI.getStringFromINI(bpFile, vhfAL.get(i), "region", vhfAL.get(i), true));
         }
         // Enable the region combobox if multiple options are available.
-        if (cmbRegion.getItemCount() > 1) cmbRegion.setEnabled(true);
-        populateBandPlan("vhf");
+        if (cmbRegion.getItemCount() > 1) {
+            cmbRegion.setEnabled(true);
+            populateBandPlan("vhf");
+        }
         // If multiple regions are available, see if there's a VHF region with the
         // same name as the previously selected UHF one. If so, select it.
         if ( (uhfAL.size() > 1) && (vhfAL.size() > 1) ) {
@@ -6165,61 +6439,6 @@ public class GUI extends javax.swing.JFrame {
         resetAllControls();
     }//GEN-LAST:event_menuNewActionPerformed
 
-    private void menuAstra975TemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAstra975TemplateActionPerformed
-        astraTemplate(9.75);
-    }//GEN-LAST:event_menuAstra975TemplateActionPerformed
-
-    private void menuAstra10TemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAstra10TemplateActionPerformed
-        astraTemplate(10.0);
-    }//GEN-LAST:event_menuAstra10TemplateActionPerformed
-
-    private void menuBSBTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBSBTemplateActionPerformed
-        if (JOptionPane.showConfirmDialog(null, "This will load template values for a BSB satellite receiver.\n"
-                + "All current settings will be cleared. Do you wish to continue?",
-                APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            // Reset all controls
-            resetAllControls();
-            // Select D-MAC FM mode
-            radMAC.doClick();
-            int a = -1;
-            for (int i = 0; i < macModeArray.length; i++) {
-                if (macModeArray[i].equals("dmac-fm")) {
-                    a = i;
-                }
-            }
-            if (a != -1) {
-                cmbMode.setSelectedIndex(a);
-            }
-            else {
-                messageBox("Unable to find the DMAC-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
-                resetAllControls();
-                return;
-            }
-            // Enable pre-emphasis filter and set FM deviation to 11 MHz
-            int b = -1;
-            chkVideoFilter.doClick();
-            chkFMDev.doClick();
-            txtFMDev.setText("11");
-            // Set IF to Galaxy channel by looking it up in the frequency table
-            for (int i = 0; i < frequencyArray.length; i++) {
-                if (frequencyArray[i] == 1092560000) {
-                    b = i;
-                }
-            }
-            if (b != -1) {
-                cmbChannel.setSelectedIndex(b);
-            }
-            else {
-                messageBox("Unable to find the Galaxy channel, which is required for this template.", JOptionPane.ERROR_MESSAGE);
-                resetAllControls();
-                return;
-            }
-            
-            messageBox("Template values have been loaded. Tune your receiver to the Galaxy "
-                    + "channel, or change this in the channel dropdown box on the Output tab.", JOptionPane.INFORMATION_MESSAGE);    
-        }
-    }//GEN-LAST:event_menuBSBTemplateActionPerformed
-
     private void btnHackTVPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHackTVPathActionPerformed
         // Retrieve the last used directory from the prefs store if it exists
         hacktvFileChooser.setCurrentDirectory(
@@ -6239,12 +6458,8 @@ public class GUI extends javax.swing.JFrame {
             // and get its parent directory path
             hackTVDirectory = new File(hackTVPath).getParent();
             // Detect what were provided with
-            detectFork();   
+            detectFork();
             selectModesFile();
-            openModesFile();
-            cmbRegion.setEnabled(false);
-            populateVideoModes();
-            selectDefaultMode();
             if (captainJack) {
                 captainJack();
             }
@@ -6463,6 +6678,8 @@ public class GUI extends javax.swing.JFrame {
         else {
             PREFS.putInt("UseLocalModesFile", 0);
         }
+        // Reopen modes file with new settings
+        selectModesFile();
     }//GEN-LAST:event_chkLocalModesActionPerformed
 
     private void chkFMDevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFMDevActionPerformed
@@ -6719,51 +6936,51 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnPlaylistDownActionPerformed
 
     private void cmbModeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbModeMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbMode);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbMode);
     }//GEN-LAST:event_cmbModeMouseWheelMoved
 
     private void cmbWSSMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbWSSMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbWSS);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbWSS);
     }//GEN-LAST:event_cmbWSSMouseWheelMoved
 
     private void cmbLogoMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbLogoMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLogo);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLogo);
     }//GEN-LAST:event_cmbLogoMouseWheelMoved
 
     private void cmbARCorrectionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbARCorrectionMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbARCorrection);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbARCorrection);
     }//GEN-LAST:event_cmbARCorrectionMouseWheelMoved
 
     private void cmbOutputDeviceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbOutputDeviceMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbOutputDevice);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbOutputDevice);
     }//GEN-LAST:event_cmbOutputDeviceMouseWheelMoved
 
     private void cmbChannelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbChannelMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbChannel);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbChannel);
     }//GEN-LAST:event_cmbChannelMouseWheelMoved
 
     private void cmbFileTypeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbFileTypeMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbFileType);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbFileType);
     }//GEN-LAST:event_cmbFileTypeMouseWheelMoved
 
     private void cmbScramblingTypeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingTypeMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingType);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingType);
     }//GEN-LAST:event_cmbScramblingTypeMouseWheelMoved
 
     private void cmbScramblingKey1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingKey1MouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey1);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey1);
     }//GEN-LAST:event_cmbScramblingKey1MouseWheelMoved
 
     private void cmbScramblingKey2MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbScramblingKey2MouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey2);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbScramblingKey2);
     }//GEN-LAST:event_cmbScramblingKey2MouseWheelMoved
 
     private void cmbSysterPermTableMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbSysterPermTableMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbSysterPermTable);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbSysterPermTable);
     }//GEN-LAST:event_cmbSysterPermTableMouseWheelMoved
 
     private void cmbTestMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbTestMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbTest);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbTest);
     }//GEN-LAST:event_cmbTestMouseWheelMoved
 
     private void btnPlaylistStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistStartActionPerformed
@@ -6990,7 +7207,6 @@ public class GUI extends javax.swing.JFrame {
                         // Detect what were provided with
                         detectFork();
                         selectModesFile();
-                        openModesFile();
                         if (captainJack) {
                             captainJack();
                         }
@@ -7176,7 +7392,7 @@ public class GUI extends javax.swing.JFrame {
             // Disable hacktv download button so it doesn't interfere
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
-            String dUrl = "https://internal.nathanmediaservices.co.uk/svn/ceefax/national/";
+            String dUrl = "https://feeds.nmsni.co.uk/svn/ceefax/national/";
             String HTMLString = "name=\"(.*?)\"";
             htmlTempFile = "ceefax_national.xml";
             // Download index page
@@ -7185,11 +7401,11 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnNMSCeefaxActionPerformed
 
     private void cmbLookAndFeelMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbLookAndFeelMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLookAndFeel);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbLookAndFeel);
     }//GEN-LAST:event_cmbLookAndFeelMouseWheelMoved
 
     private void cmbNMSCeefaxRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbNMSCeefaxRegion);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbNMSCeefaxRegion);
     }//GEN-LAST:event_cmbNMSCeefaxRegionMouseWheelMoved
 
     private void cmbRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRegionActionPerformed
@@ -7206,15 +7422,15 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cmbRegionActionPerformed
 
     private void cmbRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRegionMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRegion);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRegion);
     }//GEN-LAST:event_cmbRegionMouseWheelMoved
 
     private void cmbM3USourceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbM3USourceMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbM3USource);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbM3USource);
     }//GEN-LAST:event_cmbM3USourceMouseWheelMoved
 
     private void cmbECMaturityMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbECMaturityMouseWheelMoved
-        mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbECMaturity);
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbECMaturity);
     }//GEN-LAST:event_cmbECMaturityMouseWheelMoved
 
     private void menuDownloadUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDownloadUpdateActionPerformed
@@ -7238,28 +7454,6 @@ public class GUI extends javax.swing.JFrame {
     private void menuUpdateCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUpdateCheckActionPerformed
         checkForUpdates(false);
     }//GEN-LAST:event_menuUpdateCheckActionPerformed
-
-    private void menuKuBandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKuBandActionPerformed
-        // Disable harmonic options on BSB receivers until I get the chance to test
-        menuBSBTemplate.setEnabled(false);
-        if (PREFS.getInt("SuppressWarnings", 0) != 1) {
-            messageBox("Care is advised when using harmonics.\n" +
-                    "Please be aware of local laws regarding interference.", JOptionPane.WARNING_MESSAGE);
-        }
-    }//GEN-LAST:event_menuKuBandActionPerformed
-
-    private void menuKaBandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKaBandActionPerformed
-        // Disable harmonic options on BSB receivers until I get the chance to test
-        menuBSBTemplate.setEnabled(false);
-        if (PREFS.getInt("SuppressWarnings", 0) != 1) {
-            messageBox("Care is advised when using harmonics.\n" +
-                    "Please be aware of local laws regarding interference.", JOptionPane.WARNING_MESSAGE);
-        }
-    }//GEN-LAST:event_menuKaBandActionPerformed
-
-    private void menuIFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuIFActionPerformed
-        menuBSBTemplate.setEnabled(true);
-    }//GEN-LAST:event_menuIFActionPerformed
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -7467,6 +7661,7 @@ public class GUI extends javax.swing.JFrame {
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
+        btnSatSettings = new javax.swing.JButton();
         txtStatus = new javax.swing.JTextField();
         runButtonGrid = new javax.swing.JPanel();
         btnRun = new javax.swing.JButton();
@@ -7484,12 +7679,7 @@ public class GUI extends javax.swing.JFrame {
         sepExitSeparator = new javax.swing.JPopupMenu.Separator();
         menuExit = new javax.swing.JMenuItem();
         templatesMenu = new javax.swing.JMenu();
-        menuFreqSelect = new javax.swing.JMenu();
-        menuIF = new javax.swing.JRadioButtonMenuItem();
-        menuKuBand = new javax.swing.JRadioButtonMenuItem();
-        menuKaBand = new javax.swing.JRadioButtonMenuItem();
-        menuAstra975Template = new javax.swing.JMenuItem();
-        menuAstra10Template = new javax.swing.JMenuItem();
+        menuAstraTemplate = new javax.swing.JMenuItem();
         menuBSBTemplate = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
         menuWiki = new javax.swing.JMenuItem();
@@ -8077,7 +8267,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbWSS.setSelectedIndex(-1);
         cmbWSS.setEnabled(false);
         cmbWSS.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -9184,7 +9373,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        chkLocalModes.setText("Always use local copy of Modes.ini (restart required)");
+        chkLocalModes.setText("Always use local copy of modes files (do not download)");
         chkLocalModes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkLocalModesActionPerformed(evt);
@@ -9224,6 +9413,13 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        btnSatSettings.setText("Satellite receiver settings...");
+        btnSatSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSatSettingsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -9241,7 +9437,8 @@ public class GUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(btnSatSettings))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
@@ -9252,7 +9449,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(chkLocalModes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkNoUpdateCheck)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblNMSCeefaxRegion))
@@ -9260,7 +9457,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblLookAndFeel)
                     .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSatSettings)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout settingsTabLayout = new javax.swing.GroupLayout(settingsTab);
@@ -9282,9 +9481,9 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(pathPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(2, 2, 2)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(69, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -9423,56 +9622,13 @@ public class GUI extends javax.swing.JFrame {
 
         templatesMenu.setText("Templates");
 
-        menuFreqSelect.setText("Frequency selection");
-
-        templateButtonGroup.add(menuIF);
-        menuIF.setSelected(true);
-        menuIF.setText("Intermediate frequency (IF)");
-        menuIF.setActionCommand("0");
-        menuIF.addActionListener(new java.awt.event.ActionListener() {
+        menuAstraTemplate.setText("Astra analogue STB...");
+        menuAstraTemplate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuIFActionPerformed(evt);
+                menuAstraTemplateActionPerformed(evt);
             }
         });
-        menuFreqSelect.add(menuIF);
-
-        templateButtonGroup.add(menuKuBand);
-        menuKuBand.setText("Second harmonic (Ku band)");
-        menuKuBand.setActionCommand("1");
-        menuKuBand.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuKuBandActionPerformed(evt);
-            }
-        });
-        menuFreqSelect.add(menuKuBand);
-
-        templateButtonGroup.add(menuKaBand);
-        menuKaBand.setText("Fourth harmonic (Ka band)");
-        menuKaBand.setActionCommand("2");
-        menuKaBand.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuKaBandActionPerformed(evt);
-            }
-        });
-        menuFreqSelect.add(menuKaBand);
-
-        templatesMenu.add(menuFreqSelect);
-
-        menuAstra975Template.setText("Astra analogue STB (9.75 GHz)...");
-        menuAstra975Template.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuAstra975TemplateActionPerformed(evt);
-            }
-        });
-        templatesMenu.add(menuAstra975Template);
-
-        menuAstra10Template.setText("Astra analogue STB (10 GHz)...");
-        menuAstra10Template.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuAstra10TemplateActionPerformed(evt);
-            }
-        });
-        templatesMenu.add(menuAstra10Template);
+        templatesMenu.add(menuAstraTemplate);
 
         menuBSBTemplate.setText("BSB D-MAC STB...");
         menuBSBTemplate.addActionListener(new java.awt.event.ActionListener() {
@@ -9575,6 +9731,126 @@ public class GUI extends javax.swing.JFrame {
             evt.consume();
         }
     }//GEN-LAST:event_txtOffsetKeyTyped
+
+    private void btnSatSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSatSettingsActionPerformed
+        var s = new SatSettingsDialogue(this, true);
+        s.setVisible(true);
+    }//GEN-LAST:event_btnSatSettingsActionPerformed
+
+    private void menuBSBTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBSBTemplateActionPerformed
+        if (JOptionPane.showConfirmDialog(null, "This will load template values for a BSB satellite receiver.\n"
+            + "All current settings will be cleared. Do you wish to continue?",
+            APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            // Reset all controls
+            resetAllControls();
+            // Select D-MAC FM mode
+            radMAC.doClick();
+            int a = -1;
+            for (int i = 0; i < macModeArray.length; i++) {
+                if (macModeArray[i].equals("dmac-fm")) {
+                    a = i;
+                }
+            }
+            if (a != -1) {
+                cmbMode.setSelectedIndex(a);
+            }
+            else {
+                messageBox("Unable to find the DMAC-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
+                resetAllControls();
+                return;
+            }
+            if ( (uhfAL.get(0).equals("bsb")) && channelArray.length >= 5) {
+                cmbChannel.setSelectedIndex(2);
+            }
+            else {
+                messageBox("Unable to find the BSB band plan, which is required for this template.", JOptionPane.ERROR_MESSAGE);
+                resetAllControls();
+                return;                
+            }
+            // Enable pre-emphasis filter and enable FM deviation option
+            chkVideoFilter.doClick();
+            chkFMDev.doClick();
+            // Set deviation according to the configured harmonic value.
+            switch (PREFS.get("harmonic", "1")) {
+                case "1":
+                default:
+                    txtFMDev.setText("11");
+                    break;
+                case "2":
+                    txtFMDev.setText("8");
+                    break;
+                case "3":
+                    txtFMDev.setText("6");
+                    break;
+                case "4":
+                    txtFMDev.setText("4");
+                    break;
+            }
+            messageBox("Template values have been loaded. Tune your receiver to the Galaxy "
+                + "channel, or change this in the channel dropdown box on the Output tab.", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_menuBSBTemplateActionPerformed
+
+    private void menuAstraTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAstraTemplateActionPerformed
+        if (JOptionPane.showConfirmDialog(null, "This will load template values for an Astra satellite receiver.\n"
+                        + "All current settings will be cleared. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            // Reset all controls
+            resetAllControls();
+            // Select PAL-FM mode
+            int a = -1;
+            for (int i = 0; i < palModeArray.length; i++) {
+                if (palModeArray[i].equals("pal-fm")) {
+                    a = i;
+                }
+            }
+            if (a != -1) {
+                cmbMode.setSelectedIndex(a);
+            }
+            else {
+                messageBox("Unable to find the PAL-FM mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
+                resetAllControls();
+                return;
+            }
+            boolean f = false;
+            for (int i = 0 ; i < frequencyArray.length; i++) {
+                if (frequencyArray[i] == 10993750000L) {
+                    cmbChannel.setSelectedIndex(i);
+                    f = true;
+                    break;
+                }
+            }
+            if (!f) {
+                messageBox("Unable to find the Astra band plan, which is required for this template.", JOptionPane.ERROR_MESSAGE);
+                resetAllControls();
+                return;                
+            }
+            // Enable pre-emphasis filter and enable FM deviation option
+            chkVideoFilter.doClick();
+            chkFMDev.doClick();
+            // Set deviation according to the configured harmonic value.
+            switch (PREFS.get("harmonic", "1")) {
+                case "1":
+                default:
+                    txtFMDev.setText("11");
+                    break;
+                case "2":
+                    txtFMDev.setText("8");
+                    break;
+                case "3":
+                    txtFMDev.setText("6");
+                    break;
+                case "4":
+                    txtFMDev.setText("4");
+                    break;
+            }
+            var df = new DecimalFormat("0.00000");
+            double input = frequency;
+            String s = df.format(input / 1000000000);
+            messageBox("Template values have been loaded. Tune your receiver to "
+                    + s + " GHz and run hacktv.", JOptionPane.INFORMATION_MESSAGE);
+            
+        }
+    }//GEN-LAST:event_menuAstraTemplateActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -9590,6 +9866,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnResetAllSettings;
     private javax.swing.JButton btnRun;
+    private javax.swing.JButton btnSatSettings;
     private javax.swing.JButton btnSourceBrowse;
     private javax.swing.JButton btnSpark;
     private javax.swing.JButton btnTeefax;
@@ -9706,17 +9983,12 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup macSRButtonGroup;
     private javax.swing.ButtonGroup macStereoButtonGroup;
     private javax.swing.JMenuItem menuAbout;
-    private javax.swing.JMenuItem menuAstra10Template;
-    private javax.swing.JMenuItem menuAstra975Template;
+    private javax.swing.JMenuItem menuAstraTemplate;
     private javax.swing.JMenuItem menuBSBTemplate;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem menuDownloadUpdate;
     private javax.swing.JMenuItem menuExit;
-    private javax.swing.JMenu menuFreqSelect;
     private javax.swing.JMenuItem menuGithubRepo;
-    private javax.swing.JRadioButtonMenuItem menuIF;
-    private javax.swing.JRadioButtonMenuItem menuKaBand;
-    private javax.swing.JRadioButtonMenuItem menuKuBand;
     private javax.swing.JMenuItem menuMRUFile1;
     private javax.swing.JMenuItem menuMRUFile2;
     private javax.swing.JMenuItem menuMRUFile3;
