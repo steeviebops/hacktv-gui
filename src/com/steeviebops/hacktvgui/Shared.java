@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -183,17 +182,17 @@ public class Shared implements Serializable {
         return null;
      }
 
-    public void download(String url, String fileName) throws IOException {
-        var connection = new URL(url).openConnection();
+    public void download(String url, String fileName) throws IOException, URISyntaxException {
+        var connection = new URI(url).toURL().openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
             Files.copy(in, Paths.get(fileName));  
         }
     }
     
-    public String downloadToString(String url) throws IOException {
+    public String downloadToString(String url) throws IOException, URISyntaxException {
         // Downloads a file directly to a string, bypassing the file system
-        var connection = new URL(url).openConnection();
+        var connection = new URI(url).toURL().openConnection();
         connection.setUseCaches(false);
         try (InputStream in = connection.getInputStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);

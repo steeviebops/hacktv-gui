@@ -54,7 +54,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
@@ -577,9 +578,9 @@ public class GUI extends javax.swing.JFrame {
                     // Get the current version's date code using getVersion and
                     // remove the dashes so we can use parseInt later.
                     String cv = getVersion().replaceAll("-", "");
+                    if (cv.equals("n/a")) return -1;
                     String a = SharedInst.downloadToString("https://api.github.com/repos/steeviebops/hacktv-gui/releases/latest");
                     String q = "tag_name";
-                    if (cv.isBlank()) return -1;
                     if (a.contains(q)) {
                         String nv = a.substring(a.indexOf(q) + 11, a.indexOf(q) + 19);
                         int nvi = Integer.parseInt(nv);
@@ -615,7 +616,8 @@ public class GUI extends javax.swing.JFrame {
                     case -1:
                         // No current version number found.
                         // This can happen if running directly from an IDE.
-                        // Don't do anything in this case.
+                        // Don't do anything in this case as we have no version
+                        // number to check against.
                         break;
                     case 0:
                         // Update available
@@ -785,7 +787,7 @@ public class GUI extends javax.swing.JFrame {
                 bpFilePath = "";
             }
         }
-        catch (IOException ex) {
+        catch (IOException | URISyntaxException ex) {
             // Use the embedded copy
             String f = "";
             if (url.endsWith(v)) {
@@ -2922,7 +2924,7 @@ public class GUI extends javax.swing.JFrame {
         */
     }
 
-    private void downloadTeletext(String url, String destinationFile, String HTMLString) {
+    private void downloadTeletext(String url, String destinationFile, String regex) {
         var TeletextLinks = new ArrayList<String>();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         // Downloads the specified file from URL and saves it to DestinationFile
@@ -2939,7 +2941,7 @@ public class GUI extends javax.swing.JFrame {
             txtStatus.setText("Downloading index page from " + url);
             SharedInst.download(url, DownloadPath);
         }
-        catch (IOException ex) {
+        catch (IOException | URISyntaxException ex) {
             System.err.println(ex);
             messageBox("An error occurred while downloading files. "
                     + "Please ensure that you are connected to the internet and try again.", JOptionPane.ERROR_MESSAGE);
@@ -2962,7 +2964,7 @@ public class GUI extends javax.swing.JFrame {
                     System.err.println(ex);
                 }
                 // Search the string for the pattern defined in the teletext button
-                Pattern pattern = Pattern.compile(HTMLString, Pattern.DOTALL);
+                Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
                 Matcher matcher = pattern.matcher(htmlFile);
                 while (matcher.find()) {
                     // Populate the results to the TeletextLinks array
@@ -3078,7 +3080,7 @@ public class GUI extends javax.swing.JFrame {
                             String nUrl = "https://internal.nathanmediaservices.co.uk/svn/ceefax/"
                                     + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/";
                             // Download regional index page
-                            downloadTeletext(nUrl, htmlTempFile, HTMLString);
+                            downloadTeletext(nUrl, htmlTempFile, regex);
                         }
                         else if (htmlTempFile.equals("ceefax_region.xml")) {
                             // Move the regional files to the national directory
@@ -5925,10 +5927,10 @@ public class GUI extends javax.swing.JFrame {
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "https://api.github.com/repos/spark-teletext/spark-teletext/contents/";
-            String HTMLString = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)";
+            String regex = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)";
             htmlTempFile = "spark.json";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, HTMLString);
+            downloadTeletext(dUrl, htmlTempFile, regex);
         }
     }//GEN-LAST:event_btnSparkActionPerformed
 
@@ -5952,10 +5954,10 @@ public class GUI extends javax.swing.JFrame {
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "http://teastop.plus.com/svn/teletext/";
-            String HTMLString = "\">(.*?)</a>";
+            String regex = "\">(.*?)</a>";
             htmlTempFile = "teefax.html";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, HTMLString);
+            downloadTeletext(dUrl, htmlTempFile, regex);
         }
     }//GEN-LAST:event_btnTeefaxActionPerformed
 
@@ -7080,7 +7082,7 @@ public class GUI extends javax.swing.JFrame {
                 String readmePath = t + File.separator + "readme.txt";
                 // Spoof user agent as wget. OneDrive is picky...
                 String ua = "Wget/1.21.4 (mingw32)";
-                var con = new URL(dUrl).openConnection();
+                var con = new URI(dUrl).toURL().openConnection();
                 con.setRequestProperty("User-Agent", ua);
                 size = con.getContentLengthLong();
                 try (var in = new BufferedInputStream(con.getInputStream());
@@ -7393,10 +7395,10 @@ public class GUI extends javax.swing.JFrame {
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
             String dUrl = "https://feeds.nmsni.co.uk/svn/ceefax/national/";
-            String HTMLString = "name=\"(.*?)\"";
+            String regex = "name=\"(.*?)\"";
             htmlTempFile = "ceefax_national.xml";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, HTMLString);
+            downloadTeletext(dUrl, htmlTempFile, regex);
         }
     }//GEN-LAST:event_btnNMSCeefaxActionPerformed
 
