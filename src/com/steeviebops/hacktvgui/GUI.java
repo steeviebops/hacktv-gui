@@ -2263,7 +2263,7 @@ public class GUI extends javax.swing.JFrame {
             if (sat) {
                 // Save the IF to the frequency field for backwards compatibility
                 // The Ku frequency will be retrieved from the band plan if it exists
-                long f = calculateFrequency(frequency);
+                long f = calculateFrequency(frequency, false);
                 if (f == ((Long.MIN_VALUE + 256))) {
                     return;
                 }
@@ -4558,7 +4558,7 @@ public class GUI extends javax.swing.JFrame {
         return al;
     }
     
-    private long calculateFrequency(long inputFreq) {
+    private long calculateFrequency(long inputFreq, boolean silent) {
         // Calculates the intermediate frequency (IF) or harmonic frequency to
         // be sent to hacktv, based on the specified LNB local oscillator or 
         // harmonic settings.
@@ -4571,7 +4571,7 @@ public class GUI extends javax.swing.JFrame {
             // Direct reception from a Ku band LNB
             // Divide Ku frequency by the chosen harmonic
             long f = inputFreq / getHarmonic();
-            if ((f > 7250000000L) || (f < 1000000) ) {
+            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
                 System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
                 messageBox(err, JOptionPane.WARNING_MESSAGE);
                 return errValue;
@@ -4586,7 +4586,7 @@ public class GUI extends javax.swing.JFrame {
             long bsbLO = 10769180000L; // Standard LO of BSB Squarials/LNBs
             long vlo = (long) (PREFS.getDouble("localoscillator", DEFAULT_LO) * 1000000000);
             long f = (inputFreq - bsbLO + vlo) / getHarmonic();
-            if ((f > 7250000000L) || (f < 1000000) ) {
+            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
                 System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
                 messageBox(err, JOptionPane.WARNING_MESSAGE);
                 return errValue;
@@ -4610,7 +4610,7 @@ public class GUI extends javax.swing.JFrame {
             */
             long kaLO = 21200000000L;
             long f = (-inputFreq + kaLO + getLO()) / getHarmonic();
-            if ((f > 7250000000L) || (f < 1000000) ) {
+            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
                 System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
                 messageBox(err, JOptionPane.WARNING_MESSAGE);
                 return errValue;
@@ -4625,6 +4625,8 @@ public class GUI extends javax.swing.JFrame {
             if (
               // Satellite mode enabled
               (sat) &&
+              // And we're not in silent mode
+              (!silent) &&
               // And we're using the first harmonic
               (PREFS.getInt("harmonic", 1) == 1) &&
               // And if a custom frequency is selected and "apply LO to custom frequencies" is enabled,
@@ -4641,7 +4643,7 @@ public class GUI extends javax.swing.JFrame {
                     return errValue;
                 }
             }
-            if ((f > 7250000000L) || (f < 1000000L) ) {
+            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
                 System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
                 messageBox(err, JOptionPane.WARNING_MESSAGE);
                 return errValue;
@@ -5104,7 +5106,7 @@ public class GUI extends javax.swing.JFrame {
         if ( (cmbOutputDevice.getSelectedIndex() == 0) ||
                 (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!checkCustomFrequency()) return;
-            long f = calculateFrequency(frequency);
+            long f = calculateFrequency(frequency, false);
             if (f == ((Long.MIN_VALUE + 256))) {
                 return;
             }
@@ -6325,7 +6327,15 @@ public class GUI extends javax.swing.JFrame {
             frequency = frequencyArray[cmbChannel.getSelectedIndex()];
             // Convert the imported value so we can display it in MHz on-screen
             var df = new DecimalFormat("0.00");
-            double input = frequency;
+            double input;
+            if (PREFS.getInt("showrealfrequency", 0) == 1) {
+                // Calculate TX frequency
+                input = calculateFrequency(frequency, true);
+            }
+            else {
+                // Use the frequency defined in the band plan
+                input = frequency;
+            }
             txtFrequency.setText((df.format(input / 1000000)));
             // Retrieve MAC channel ID
             if (radMAC.isSelected()) {
@@ -9735,8 +9745,13 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtOffsetKeyTyped
 
     private void btnSatSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSatSettingsActionPerformed
-        var s = new SatSettingsDialogue(this, true);
-        s.setVisible(true);
+        // Show the setting dialogue box
+        var sd = new SatSettingsDialogue(this, true);
+        sd.setVisible(true);
+        // See if a setting has changed. If so, refresh the channel combobox.
+        if ( (sd.settingsChanged) && (cmbChannel.isEnabled()) ) {
+            cmbChannel.setSelectedIndex(cmbChannel.getSelectedIndex());
+        }
     }//GEN-LAST:event_btnSatSettingsActionPerformed
 
     private void menuBSBTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBSBTemplateActionPerformed

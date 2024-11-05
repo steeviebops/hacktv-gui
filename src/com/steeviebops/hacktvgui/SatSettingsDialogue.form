@@ -77,14 +77,13 @@
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="txtLO" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Group type="103" alignment="0" groupAlignment="1" attributes="0">
-                                  <Group type="102" alignment="1" attributes="0">
-                                      <Component id="lblRxDevice" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="cmbRxDevice" min="-2" pref="133" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Component id="chkApplyToCustom" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="lblRxDevice" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="cmbRxDevice" min="-2" pref="133" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="chkShowRealFreq" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkApplyToCustom" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
@@ -105,6 +104,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkApplyToCustom" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkShowRealFreq" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="lblRxDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="cmbRxDevice" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -218,6 +219,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Apply these settings to custom frequencies"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkApplyToCustomActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblRxDevice">
           <Properties>
@@ -242,6 +246,14 @@
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
           </AuxValues>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkShowRealFreq">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Show real output frequency"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkShowRealFreqActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

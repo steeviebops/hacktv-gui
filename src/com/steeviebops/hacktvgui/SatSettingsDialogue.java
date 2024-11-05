@@ -21,6 +21,8 @@ import javax.swing.JOptionPane;
 
 public class SatSettingsDialogue extends javax.swing.JDialog {
     
+    public boolean settingsChanged;
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -43,6 +45,7 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         chkApplyToCustom = new javax.swing.JCheckBox();
         lblRxDevice = new javax.swing.JLabel();
         cmbRxDevice = new javax.swing.JComboBox<>();
+        chkShowRealFreq = new javax.swing.JCheckBox();
         buttonPanel = new javax.swing.JPanel();
         btnOK = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
@@ -108,6 +111,11 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         );
 
         chkApplyToCustom.setText("Apply these settings to custom frequencies");
+        chkApplyToCustom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkApplyToCustomActionPerformed(evt);
+            }
+        });
 
         lblRxDevice.setText("Reception device");
 
@@ -120,6 +128,13 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         cmbRxDevice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbRxDeviceActionPerformed(evt);
+            }
+        });
+
+        chkShowRealFreq.setText("Show real output frequency");
+        chkShowRealFreq.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkShowRealFreqActionPerformed(evt);
             }
         });
 
@@ -138,12 +153,12 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
                                 .addComponent(lblLO)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txtLO, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(satSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(satSettingsPanelLayout.createSequentialGroup()
-                                    .addComponent(lblRxDevice)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(cmbRxDevice, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(chkApplyToCustom, javax.swing.GroupLayout.Alignment.LEADING)))
+                            .addGroup(satSettingsPanelLayout.createSequentialGroup()
+                                .addComponent(lblRxDevice)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbRxDevice, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(chkShowRealFreq)
+                            .addComponent(chkApplyToCustom))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -158,6 +173,8 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkApplyToCustom)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkShowRealFreq)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(satSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblRxDevice)
                     .addComponent(cmbRxDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -204,9 +221,6 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    // Class instances
-    Shared sharedInst = new Shared();
     
     public SatSettingsDialogue(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -221,7 +235,10 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
             cmbRxDevice.setSelectedIndex(rx);
         }
         // Get checkbox preferences
-        if (GUI.PREFS.getInt("applyloforcustomfreq", 0) == 1) {
+        if (GUI.PREFS.getInt("showrealfrequency", 0) == 1) {
+            chkShowRealFreq.doClick();
+        }
+        else if (GUI.PREFS.getInt("applyloforcustomfreq", 0) == 1) {
             chkApplyToCustom.setSelected(true);
         }
         // Get harmonic setting
@@ -249,20 +266,24 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
-        var s = new Shared();
-        if (!s.isNumeric(txtLO.getText())) {
-            JOptionPane.showMessageDialog(null, "Please enter a numeric or decimal value.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        else {
-            // Commit local oscillator to preferences
+        // Commit local oscillator to preferences
+        String invalidLO = "Please enter a numeric or decimal value between 5 and 30 GHz.";
+        try {
             double d = Double.parseDouble(txtLO.getText());
-            if (Math.abs(d - GUI.DEFAULT_LO) < 0.000001) {
+            if ( (d < 5.0) || (d > 30.0) ) {
+                JOptionPane.showMessageDialog(null, invalidLO, GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            else if (Math.abs(d - GUI.DEFAULT_LO) < 0.000001) {
                 GUI.PREFS.remove("localoscillator");
             }
             else {
                 GUI.PREFS.putDouble("localoscillator", d);
             }
+        }
+        catch (NumberFormatException nfe) {
+            JOptionPane.showMessageDialog(null, invalidLO, GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            return;
         }
         // Commit harmonic to preferences
         switch (harmonicBG.getSelection().getActionCommand()) {
@@ -280,6 +301,12 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         else {
             GUI.PREFS.remove("applyloforcustomfreq");
         }
+        if (chkShowRealFreq.isSelected()) {
+            GUI.PREFS.putInt("showrealfrequency", 1);
+        }
+        else {
+            GUI.PREFS.remove("showrealfrequency");
+        }
         // Commit RX device to preferences
         switch (cmbRxDevice.getSelectedIndex()) {
             case 0:
@@ -289,6 +316,8 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
                 GUI.PREFS.putInt("rxdevice", cmbRxDevice.getSelectedIndex());
                 break;
         }
+        // Let the parent window know that we changed something...
+        settingsChanged = true;
         this.dispose();
     }//GEN-LAST:event_btnOKActionPerformed
 
@@ -327,14 +356,38 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
     }//GEN-LAST:event_cmbRxDeviceActionPerformed
 
     private void cmbRxDeviceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRxDeviceMouseWheelMoved
-        sharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRxDevice);
+        var s = new Shared();
+        s.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRxDevice);
     }//GEN-LAST:event_cmbRxDeviceMouseWheelMoved
+
+    private void chkShowRealFreqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowRealFreqActionPerformed
+        // This setting isn't compatible with "apply to custom frequencies"
+        if (chkShowRealFreq.isSelected()) {
+            if (chkApplyToCustom.isSelected()) chkApplyToCustom.doClick();
+            chkApplyToCustom.setEnabled(false);
+        }
+        else {
+            chkApplyToCustom.setEnabled(true);
+        }
+    }//GEN-LAST:event_chkShowRealFreqActionPerformed
+
+    private void chkApplyToCustomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkApplyToCustomActionPerformed
+        // This setting isn't compatible with "Show IF"
+        if (chkApplyToCustom.isSelected()) {
+            if (chkShowRealFreq.isSelected()) chkShowRealFreq.doClick();
+            chkShowRealFreq.setEnabled(false);
+        }
+        else {
+            chkShowRealFreq.setEnabled(true);
+        }
+    }//GEN-LAST:event_chkApplyToCustomActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOK;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JCheckBox chkApplyToCustom;
+    private javax.swing.JCheckBox chkShowRealFreq;
     private javax.swing.JComboBox<String> cmbRxDevice;
     private javax.swing.ButtonGroup harmonicBG;
     private javax.swing.JPanel harmonicPanel;
