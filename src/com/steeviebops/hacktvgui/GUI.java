@@ -3502,17 +3502,20 @@ public class GUI extends javax.swing.JFrame {
             }
             chkShowCardSerial.setEnabled(false);
         }
-        // Enable EMM options on sky06, sky07, sky09 and VC2 conditional modes
-        if ( ((scramblingKey1).equals("sky06")) ||
-                ((scramblingKey1).equals("sky07")) ||
-                ((scramblingKey1).equals("sky09")) )
-        {
-            chkActivateCard.setEnabled(true);
-            chkDeactivateCard.setEnabled(true);
+        // Enable EMM options on supported modes
+        boolean emmSupported;
+        switch (scramblingType1) {
+            case "--videocrypt":
+                emmSupported = (INI.getBooleanFromINI(modesFile, "emm_modes_vc1", scramblingKey1));
+                break;
+            case "--videocrypt2":
+                emmSupported = (INI.getBooleanFromINI(modesFile, "emm_modes_vc2", scramblingKey1));
+                break;
+            default:
+                emmSupported = false;
+                break;
         }
-        else if ( ((scramblingType1).equals("--videocrypt2")) &&
-                ((scramblingKey1).equals("conditional")) )
-        {
+        if (emmSupported) {
             chkActivateCard.setEnabled(true);
             chkDeactivateCard.setEnabled(true);
         }
@@ -3521,7 +3524,6 @@ public class GUI extends javax.swing.JFrame {
             if (chkDeactivateCard.isSelected()) chkDeactivateCard.doClick();
             chkActivateCard.setEnabled(false);
             chkDeactivateCard.setEnabled(false);
-            lblEMMCardNumber.setEnabled(false);
         }
         // Enable PPV findkey option
         if ( (scramblingKey1.equals("ppv")) ) {
