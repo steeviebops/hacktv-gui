@@ -9749,7 +9749,7 @@ public class GUI extends javax.swing.JFrame {
         var sd = new SatSettingsDialogue(this, true);
         sd.setVisible(true);
         // See if a setting has changed. If so, refresh the channel combobox.
-        if ( (sd.settingsChanged) && (cmbChannel.isEnabled()) ) {
+        if ( (sd.settingsChanged()) && (cmbChannel.isEnabled()) ) {
             cmbChannel.setSelectedIndex(cmbChannel.getSelectedIndex());
         }
     }//GEN-LAST:event_btnSatSettingsActionPerformed

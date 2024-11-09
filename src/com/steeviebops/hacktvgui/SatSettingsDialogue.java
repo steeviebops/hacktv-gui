@@ -21,7 +21,7 @@ import javax.swing.JOptionPane;
 
 public class SatSettingsDialogue extends javax.swing.JDialog {
     
-    public boolean settingsChanged;
+    private boolean changed;
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -261,6 +261,10 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         btnCancel.requestFocus();
     }
     
+    public boolean settingsChanged() {
+        return changed;
+    }
+    
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
@@ -317,7 +321,7 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
                 break;
         }
         // Let the parent window know that we changed something...
-        settingsChanged = true;
+        changed = true;
         this.dispose();
     }//GEN-LAST:event_btnOKActionPerformed
 
