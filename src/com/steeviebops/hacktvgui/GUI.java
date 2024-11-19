@@ -1907,11 +1907,18 @@ public class GUI extends javax.swing.JFrame {
                     if (ImportedEMM.equals(1)) chkActivateCard.doClick();
                     if (ImportedEMM.equals(2)) chkDeactivateCard.doClick();
                     ImportedCardNumber = INI.getStringFromINI(fileContents, "hacktv", "cardnumber", "", false);
-                    Imported13Prefix = INI.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
-                    // The ImportedCardNumber value only contains 8 digits of the card number
-                    // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
-                    if (SharedInst.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
-                            ImportedCardNumber + SharedInst.calculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
+                    // Handling of legacy files
+                    if (ImportedCardNumber.length() == 8) {
+                        Imported13Prefix = INI.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
+                        // The ImportedCardNumber value only contains 8 digits of the card number
+                        // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
+                        if (SharedInst.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
+                        ImportedCardNumber + SharedInst.calculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
+                    }
+                    else {
+                        // Pass the full card number through
+                        if (SharedInst.isNumeric(ImportedCardNumber)) txtCardNumber.setText(ImportedCardNumber);
+                    }
                 }
             }
         }
@@ -2383,20 +2390,7 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "emm", 2);
         }
         if (SharedInst.isNumeric(txtCardNumber.getText())) {
-            switch (txtCardNumber.getText().length()) {
-                case 9:
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(0, 8));
-                    break;
-                case 13:
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText().substring(4, 12));
-                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "13digitprefix", txtCardNumber.getText().substring(0, 4));
-                    break;
-                case 8:
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
-                    break;
-                default:
-                    break;
-            }
+            FileContents = INI.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
         }
         // Syster permutation table
         if ( (cmbSysterPermTable.getSelectedIndex() == 1) || (cmbSysterPermTable.getSelectedIndex() == 2) ) {
@@ -3504,17 +3498,21 @@ public class GUI extends javax.swing.JFrame {
         }
         // Enable EMM options on supported modes
         boolean emmSupported;
-        switch (scramblingType1) {
-            case "--videocrypt":
-                emmSupported = (INI.getBooleanFromINI(modesFile, "emm_modes_vc1", scramblingKey1));
-                break;
-            case "--videocrypt2":
-                emmSupported = (INI.getBooleanFromINI(modesFile, "emm_modes_vc2", scramblingKey1));
-                break;
-            default:
-                emmSupported = false;
-                break;
+        if (scramblingType1.equals("--videocrypt")) {
+            switch (scramblingKey1) {
+                case "sky06":
+                case "sky07":
+                case "sky09":
+                case "skynz01":
+                case "skynz02":
+                    emmSupported = true;
+                    break;
+                default:
+                    emmSupported = false;
+                    break;
+            }
         }
+        else emmSupported = (scramblingType1.equals("--videocrypt2")) && scramblingKey1.equals("conditional");
         if (emmSupported) {
             chkActivateCard.setEnabled(true);
             chkDeactivateCard.setEnabled(true);
@@ -4831,64 +4829,144 @@ public class GUI extends javax.swing.JFrame {
         return al;
     }
     
-    private String checkCardNumber() {
-        /*  Sky viewing cards use the Luhn algorithm to verify if the card
-         *  number is valid. So we will use it here too.
-         *  Issue 07 cards have either 13-digit or 9-digit numbers.
-         *  Issue 09 cards are 9-digit only. So we restrict input to these lengths.
-         *  If an 8-digit number is entered, this is passed to hacktv without
-         *  any checks.
-         */
-        if ( (txtCardNumber.isEnabled()) && (scramblingType1.equals("--videocrypt")) ) {
-            String LuhnCheckFailed = "Card number appears to be invalid (Luhn check failed).";
-            String InvalidCardNumber = "Card number should be exactly 9 or 13 digits.\n"
-                    + "BSkyB Quick Start cards are not currently supported.";
-            // Make sure that the input is numeric only
-            if (!SharedInst.isNumeric(txtCardNumber.getText())) {
-                 messageBox(InvalidCardNumber, JOptionPane.WARNING_MESSAGE);
-                 return null;
-            }
-            else if (txtCardNumber.getText().length() == 9) {
-                // Do a Luhn check on the provided card number
-                if (!SharedInst.luhnCheck(Long.valueOf(txtCardNumber.getText()))) {
-                    messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
-                    return null;
-                }
-                else {
-                    // Make sure that we're not trying to send EMMs to the wrong card type.
-                    if (!checkEMMCardType(txtCardNumber.getText())) return null;
-                    // hacktv doesn't use the check digit so strip it out
-                    return txtCardNumber.getText().substring(0,8);
-                }
-            }
-            else if (txtCardNumber.getText().length() == 13) {
-                // Only digits 4-13 of 13-digit card numbers are Luhn checked.
-                // We need to strip out the first four digits.
-                if (!SharedInst.luhnCheck(Long.valueOf(txtCardNumber.getText().substring(4,13)))) {
-                    messageBox(LuhnCheckFailed, JOptionPane.WARNING_MESSAGE);
-                    return null;
-                }
-                else {
-                    // Make sure that we're not trying to send EMMs to the wrong card type.
-                    if (!checkEMMCardType(txtCardNumber.getText())) return null;
-                    // hacktv doesn't use the check digit so strip it out
-                    return txtCardNumber.getText().substring(4,12);
-                }
-            }
-            else {
-                tabPane.setSelectedIndex(4);
-                messageBox(InvalidCardNumber, JOptionPane.WARNING_MESSAGE);
+    private String checkCardNumber(String cardNumber) {
+        switch (scramblingType1) {
+            case "--videocrypt":
+                return checkVC1CardNumber(cardNumber);
+            case "--videocrypt2":
+                return checkVC2CardNumber(cardNumber);
+            default:
                 return null;
-            }
         }
-        else if ( (txtCardNumber.isEnabled()) && (scramblingType1.equals("--videocrypt2")) ) {
-            // Pass the digits unaltered and without Luhn checking for MultiChoice cards
-            // This is temporary until I work out how to handle them
-            return txtCardNumber.getText();
+    }
+    
+    private String checkVC1CardNumber(String cardNumber) {
+        /* Sky UK/NZ viewing cards use the Luhn algorithm to verify if the
+         * card number is valid. So we will use it here too.
+         *
+         * UK 06/07 cards have either 13-digit or 9-digit numbers.
+         * UK 09 cards are 9-digit only.
+         * NZ and MultiChoice cards are 11 digits.
+         * So we restrict input to these lengths depending on the selected card.
+         */
+        int keyStart = -1;
+        int keyEnd = -1;
+        String length = "";
+        boolean qs = false;
+        switch (scramblingKey1) {
+            case "sky06":
+                // 13-digit (standard) or 9-digit (Quick Start) cards
+                length = "9 or 13";
+                if (cardNumber.length() == 13) {
+                    keyStart = 4;
+                    keyEnd = 13;
+                    break;
+                }
+                if (cardNumber.length() == 9) {
+                    if (checkQuickStartCard(cardNumber)) {
+                        qs = true;
+                        // Bogus value to get past length check
+                        keyStart = -2;
+                    }
+                    else {
+                        // Luhn check failed
+                        return null;
+                    }
+                    break;
+                }
+            case "sky07":
+                // 13-digit (standard) or 9-digit cards
+                length = "9 or 13";
+                if (cardNumber.length() == 13) {
+                    // Only digits 4-13 of 13-digit card numbers are Luhn checked.
+                    // We need to strip out the first four digits.
+                    keyStart = 4;
+                    keyEnd = 13;
+                    break;
+                }
+                if (cardNumber.length() == 9) {
+                    keyStart = 0;
+                    keyEnd = 9;
+                }
+                break;
+            case "sky09":
+                // 9 digit cards only
+                length = "9";
+                if (cardNumber.length() == 9) {
+                    keyStart = 0;
+                    keyEnd = 9;
+                }
+                break;
+            case "skynz01":
+            case "skynz02":
+                // 11-digit cards, only digits 4-11 are Luhn checked
+                length = "11";
+                if (cardNumber.length() == 11) {
+                    keyStart = 4;
+                    keyEnd = 11;
+                }
+                break;
+        }
+        if (!SharedInst.isNumeric(cardNumber) || keyStart == -1) {
+            tabPane.setSelectedIndex(4);
+            messageBox("Card number should be exactly " + length + " digits.", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        else if ((!qs) && (!SharedInst.luhnCheck(Long.valueOf(cardNumber.substring(keyStart, keyEnd))))) {
+            tabPane.setSelectedIndex(4);
+            messageBox("Card number appears to be invalid (Luhn check failed).", JOptionPane.WARNING_MESSAGE);
+            return null;
         }
         else {
-            // If the txtCardNumber textbox is disabled, return null and exit
+            // Make sure that we're not trying to send EMMs to the wrong card type.
+            if (!checkEMMCardType(cardNumber)) {
+                return null;
+            }
+            else if (qs) {
+                // Special handling for Quick Start cards
+                return cardNumber.substring(2);
+            }
+            else {
+                // hacktv doesn't use the check digit so strip it out
+                return cardNumber.substring(keyStart, keyEnd - 1);
+            }
+        }
+    }
+    
+    private String checkVC2CardNumber(String cardNumber) {
+        // 11-digit numbers only, no Luhn check on these cards
+        if (cardNumber.length() == 11) {
+            // This is probably wrong!
+            return cardNumber.substring(3);
+        }
+        else {
+            tabPane.setSelectedIndex(4);
+            messageBox("Card number should be exactly 11 digits.", JOptionPane.WARNING_MESSAGE);
             return null;
+        }
+    }
+    
+    private boolean checkQuickStartCard(String cardNumber) {
+        /*
+         * BSkyB Quick Start card algorithm, as explained to me by the author of settopbox.org.
+         *
+         * 1 - Remove the first two digits (issue number).
+         * 2 - The first digit of what's remaining is the check digit, so remove that too
+         * 3 - Invert the remaining digits (so 123456 becomes 654321)
+         * 4 - Prepend the issue number to the inverted digits
+         * 5 - Run that through the Luhn check, the result should be the digit
+         *     you removed in step 2.
+         */
+        String issueNumber = cardNumber.substring(0, 2);
+        int checkDigit = Integer.parseInt(cardNumber.substring(2, 3));
+        String reversedNumber = new StringBuilder(cardNumber.substring(3)).reverse().toString();
+        if (SharedInst.calculateLuhnCheckDigit(Long.parseLong(issueNumber + reversedNumber)) == checkDigit) {
+            return true;
+        }
+        else {
+            tabPane.setSelectedIndex(4);
+            messageBox("Card number appears to be invalid (Luhn check failed).", JOptionPane.WARNING_MESSAGE);
+            return false;
         }
     }
     
@@ -4901,9 +4979,9 @@ public class GUI extends javax.swing.JFrame {
                 + "Using EMMs on the wrong card type may irreparably damage the card.";
         switch (scramblingKey1) {
             case "sky06":
-                short s6 = Short.parseShort(cardNumber.substring(0,2));
+                String s6 = cardNumber.substring(0,2);
                 // Carry out a basic card number check, ensure it starts with 06.
-                if ((cardNumber.length() != 13) || (s6 != 6)) {
+                if (!s6.equals("06")) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -4926,7 +5004,7 @@ public class GUI extends javax.swing.JFrame {
                         s7 = Short.parseShort(cardNumber.substring(0,3));
                         break;
                     default:
-                        System.err.println("Unexpected card number length");
+                        messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                         return false;
                 }              
                 if ((s7 > 30) && (s7 < 800)) {
@@ -4939,6 +5017,26 @@ public class GUI extends javax.swing.JFrame {
             case "sky09":
                 short s9 = Short.parseShort(cardNumber.substring(0,3));
                 if ((cardNumber.length() != 9) || ((s9 < 190) || (s9 > 250))) {
+                    messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            case "skynz01":
+                short snz1 = Short.parseShort(cardNumber.substring(0,2));
+                // Carry out a basic card number check, ensure it starts with 01.
+                if ((cardNumber.length() != 11) || (snz1 != 1)) {
+                    messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            case "skynz02":
+                short snz2 = Short.parseShort(cardNumber.substring(0,2));
+                // Carry out a basic card number check, ensure it starts with 02.
+                if ((cardNumber.length() != 11) || (snz2 != 2)) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -5270,7 +5368,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkVideoFilter.isSelected()) allArgs.add("--filter");
         if (chkVerbose.isSelected()) allArgs.add("--verbose");
         if (txtCardNumber.isEnabled()) {
-            String c = checkCardNumber();
+            String c = checkCardNumber(txtCardNumber.getText());
             if (c == null) return;
             if (chkActivateCard.isSelected()) {
                 allArgs.add("--enableemm");
