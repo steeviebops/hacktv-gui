@@ -4100,9 +4100,9 @@ public class GUI extends javax.swing.JFrame {
         // for an addon board which allows the HackRF to output baseband modes.
         // It is not currently available to the public, hence why the setting 
         // isn't visible to the user.
-        if ( (cmbOutputDevice.getSelectedIndex() == 2) ||
-                (cmbOutputDevice.getSelectedIndex() == 3) ||
-                        (PREFS.getInt("hackdac", 0) == 1) ) {
+        if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (PREFS.getInt("hackdac", 0) == 1)) ||
+                (cmbOutputDevice.getSelectedIndex() == 2) ||
+                (cmbOutputDevice.getSelectedIndex() == 3) ) {
             disableRFOptions();
             if (chkVideoFilter.isSelected()) chkVideoFilter.doClick();
             chkVideoFilter.setEnabled(false);
