@@ -3879,12 +3879,14 @@ public class GUI extends javax.swing.JFrame {
             case "vsb":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
+                if (!chkAmp.isEnabled()) chkAmp.setEnabled(true);
                 disableFMDeviation();
                 sat = false;
                 break;
             case "fm":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
+                if (!chkAmp.isEnabled()) chkAmp.setEnabled(true);
                 enableFMDeviation();
                 sat = true;
                 break;
@@ -4093,9 +4095,14 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean checkBasebandSupport() {
-    // Check if the selected output device supports baseband modes or not
+        // Check if the selected output device supports baseband modes or not.
+        // We also check for a currently invisible setting - "hackdac" - this is
+        // for an addon board which allows the HackRF to output baseband modes.
+        // It is not currently available to the public, hence why the setting 
+        // isn't visible to the user.
         if ( (cmbOutputDevice.getSelectedIndex() == 2) ||
-                (cmbOutputDevice.getSelectedIndex() == 3) ) {
+                (cmbOutputDevice.getSelectedIndex() == 3) ||
+                        (PREFS.getInt("hackdac", 0) == 1) ) {
             disableRFOptions();
             if (chkVideoFilter.isSelected()) chkVideoFilter.doClick();
             chkVideoFilter.setEnabled(false);
@@ -4858,6 +4865,8 @@ public class GUI extends javax.swing.JFrame {
                 // 13-digit (standard) or 9-digit (Quick Start) cards
                 length = "9 or 13";
                 if (cardNumber.length() == 13) {
+                    // Only digits 4-13 of 13-digit card numbers are Luhn checked.
+                    // We need to strip out the first four digits.
                     keyStart = 4;
                     keyEnd = 13;
                     break;
@@ -5202,8 +5211,9 @@ public class GUI extends javax.swing.JFrame {
         // Video mode
         allArgs.add("-m");
         allArgs.add(mode);
-        // Only add frequency for HackRF or SoapySDR
-        if ( (cmbOutputDevice.getSelectedIndex() == 0) ||
+        // Only add frequency for HackRF (not in baseband mode) or SoapySDR
+        String mod = (INI.getStringFromINI(modesFile, mode, "modulation", "", false));        
+        if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (!mod.equals("baseband"))) ||
                 (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!checkCustomFrequency()) return;
             long f = calculateFrequency(frequency, false);
@@ -6665,8 +6675,9 @@ public class GUI extends javax.swing.JFrame {
             case 0:
                 lblOutputDevice2.setText("Serial number (optional)");
                 if (!radCustom.isEnabled()) {
-                    // If a baseband mode is selected, reset it to something else
-                    if (bb) {
+                    // If a baseband mode is selected and HackDAC is not enabled,
+                    // reset the mode to something else
+                    if ( (bb) && (PREFS.getInt("hackdac", 0) == 0) ) {
                         messageBox(ModeChanged, JOptionPane.WARNING_MESSAGE);
                         cmbMode.setSelectedIndex(0);
                     }
@@ -6675,11 +6686,13 @@ public class GUI extends javax.swing.JFrame {
                     enableRFOptions();
                     checkMode();
                 }
-                txtGain.setEnabled(true);
-                txtGain.setEditable(true);
-                txtGain.setText("0");
-                lblGain.setEnabled(true);
-                chkAmp.setEnabled(true);
+                if (!bb) {
+                    txtGain.setEnabled(true);
+                    txtGain.setEditable(true);
+                    txtGain.setText("0");
+                    lblGain.setEnabled(true);
+                    chkAmp.setEnabled(true);                    
+                }
                 lblAntennaName.setEnabled(false);
                 txtAntennaName.setEnabled(false);
                 txtAntennaName.setText("");
