@@ -3875,6 +3875,7 @@ public class GUI extends javax.swing.JFrame {
                 lines = 525;
             }
         }
+        boolean baseband = false;
         switch (INI.getStringFromINI(modesFile, mode, "modulation", "", false)) {
             case "vsb":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
@@ -3892,6 +3893,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
             case "baseband":
                 if (!checkBasebandSupport()) return;
+                baseband = true;
                 sat = false;
                 break;
             default:
@@ -3901,11 +3903,20 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
         if (INI.getDoubleFromINI(modesFile, mode, "sr") != null) {
-            defaultSampleRate = Double.toString(INI.getDoubleFromINI(modesFile, mode, "sr") / 1000000).replace(".0", "");
+            if ((cmbOutputDevice.getSelectedIndex() == 0) && (PREFS.getInt("hackdac", 0) == 1) && (baseband)) {
+                // HackDAC works at 13.5 MHz only 
+                defaultSampleRate = "13.5";
+                txtSampleRate.setEnabled(false);
+            }
+            else {
+                defaultSampleRate = Double.toString(INI.getDoubleFromINI(modesFile, mode, "sr") / 1000000).replace(".0", "");
+                if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
+            }
         }
         else {
             messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
             defaultSampleRate = "16";
+            if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
         }
         if (INI.getBooleanFromINI(modesFile, mode, "colour")) {
             enableColourControl();
