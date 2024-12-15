@@ -1118,7 +1118,6 @@ public class GUI extends javax.swing.JFrame {
         chkLogo.setEnabled(false);
         chkSubtitles.setEnabled(false);
         chkPosition.setEnabled(false);
-        chkVolume.setEnabled(false);
         chkDownmix.setEnabled(false);
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
             add625ScramblingTypes();
@@ -1141,7 +1140,6 @@ public class GUI extends javax.swing.JFrame {
             chkTimestamp.setEnabled(true);
             chkPosition.setEnabled(true);
             chkSubtitles.setEnabled(true);
-            chkVolume.setEnabled(true);
             chkDownmix.setEnabled(true);
         }
         if ( radPAL.isSelected() || radSECAM.isSelected() ) {
@@ -6419,10 +6417,10 @@ public class GUI extends javax.swing.JFrame {
         txtSource.setEditable(true);
         btnSourceBrowse.setEnabled(true);
         chkARCorrection.setEnabled(true);
+        chkVolume.setEnabled(true);
         if (captainJack) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
-            chkVolume.setEnabled(true);
             chkDownmix.setEnabled(true);
             chkSubtitles.setEnabled(true);
             // Disable test card dropdown
