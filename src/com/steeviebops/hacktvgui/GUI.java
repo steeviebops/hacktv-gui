@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Stephen McGarry
+ * Copyright (C) 2025 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -1657,6 +1657,12 @@ public class GUI extends javax.swing.JFrame {
         // SECAM field ID
         if ((INI.getBooleanFromINI(fileContents, "hacktv", "secam-field-id")) && radSECAM.isSelected()) {
             chkSecamId.doClick();
+            if (INI.getIntegerFromINI(fileContents, "hacktv", "secam-field-id-lines") != null) {
+                int id = INI.getIntegerFromINI(fileContents, "hacktv", "secam-field-id-lines");
+                if ((id >= 1) && (id <= 8)) {
+                    cmbSecamIdLines.setSelectedIndex(id - 1);
+                }
+            }
         }
         // Swap IQ
         if ((INI.getBooleanFromINI(fileContents, "hacktv", "swap-iq")) &&
@@ -2297,6 +2303,10 @@ public class GUI extends javax.swing.JFrame {
         // SECAM field ID
         if (chkSecamId.isSelected()) {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id", 1);
+            int id = cmbSecamIdLines.getSelectedIndex() + 1;
+            if ((id >= 1) && (id <= 8)) {
+                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id-lines", id);
+            }
         }
         // Swap IQ
         if (chkSwapIQ.isSelected()) {
@@ -5274,7 +5284,14 @@ public class GUI extends javax.swing.JFrame {
             return;
         }        
         // SECAM field ID
-        if (chkSecamId.isSelected()) allArgs.add("--secam-field-id");
+        if (chkSecamId.isSelected()) {
+            allArgs.add("--secam-field-id");
+            int l = cmbSecamIdLines.getSelectedIndex() + 1;
+            if (l != 9) {
+                allArgs.add("--secam-field-id-lines");
+                allArgs.add(String.valueOf(l));
+            }
+        }
         // Only add gain for HackRF or SoapySDR
         if (txtGain.isEnabled()) {
             if (checkGain() != null) {
@@ -7690,6 +7707,7 @@ public class GUI extends javax.swing.JFrame {
         cmbWSS = new javax.swing.JComboBox<>();
         chkVITC = new javax.swing.JCheckBox();
         chkSecamId = new javax.swing.JCheckBox();
+        cmbSecamIdLines = new javax.swing.JComboBox<>();
         macPanel = new javax.swing.JPanel();
         chkMacChId = new javax.swing.JCheckBox();
         txtMacChId = new javax.swing.JTextField();
@@ -8411,6 +8429,20 @@ public class GUI extends javax.swing.JFrame {
         chkVITC.setText("VITC (Vertical Interval Time Code)");
 
         chkSecamId.setText("SECAM field ID");
+        chkSecamId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSecamIdActionPerformed(evt);
+            }
+        });
+
+        cmbSecamIdLines.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" }));
+        cmbSecamIdLines.setSelectedIndex(-1);
+        cmbSecamIdLines.setEnabled(false);
+        cmbSecamIdLines.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbSecamIdLinesMouseWheelMoved(evt);
+            }
+        });
 
         javax.swing.GroupLayout vbiPanelLayout = new javax.swing.GroupLayout(vbiPanel);
         vbiPanel.setLayout(vbiPanelLayout);
@@ -8419,15 +8451,21 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(vbiPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkACP)
-                    .addComponent(chkVITS)
-                    .addComponent(chkSecamId)
                     .addGroup(vbiPanelLayout.createSequentialGroup()
-                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(chkSecamId)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(vbiPanelLayout.createSequentialGroup()
+                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkACP)
+                            .addComponent(chkVITS)
+                            .addGroup(vbiPanelLayout.createSequentialGroup()
+                                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         vbiPanelLayout.setVerticalGroup(
@@ -8443,7 +8481,9 @@ public class GUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVITC)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkSecamId)
+                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkSecamId)
+                    .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -8487,8 +8527,8 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(macPanelLayout.createSequentialGroup()
                         .addComponent(chkMacChId)
-                        .addGap(28, 28, 28)
-                        .addComponent(txtMacChId))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(macPanelLayout.createSequentialGroup()
                         .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkMacMono)
@@ -8873,7 +8913,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(frequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(138, Short.MAX_VALUE))
+                .addContainerGap(141, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -9377,7 +9417,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(89, Short.MAX_VALUE))
+                .addContainerGap(92, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -9617,7 +9657,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -9990,6 +10030,21 @@ public class GUI extends javax.swing.JFrame {
             
         }
     }//GEN-LAST:event_menuAstraTemplateActionPerformed
+
+    private void chkSecamIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSecamIdActionPerformed
+        if (chkSecamId.isSelected()) {
+            cmbSecamIdLines.setSelectedIndex(8);
+            cmbSecamIdLines.setEnabled(true);
+        }
+        else {
+            cmbSecamIdLines.setEnabled(false);
+            cmbSecamIdLines.setSelectedIndex(-1);
+        }
+    }//GEN-LAST:event_chkSecamIdActionPerformed
+
+    private void cmbSecamIdLinesMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbSecamIdLinesMouseWheelMoved
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbSecamIdLines);
+    }//GEN-LAST:event_cmbSecamIdLinesMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -10072,6 +10127,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbScramblingKey1;
     private javax.swing.JComboBox<String> cmbScramblingKey2;
     private javax.swing.JComboBox<String> cmbScramblingType;
+    private javax.swing.JComboBox<String> cmbSecamIdLines;
     private javax.swing.JComboBox<String> cmbSysterPermTable;
     private javax.swing.JComboBox<String> cmbTest;
     private javax.swing.JComboBox<String> cmbWSS;
