@@ -7195,11 +7195,11 @@ public class GUI extends javax.swing.JFrame {
         switch (q) {
             case 0:
                 // fsphil download
-                dUrl = "https://onedrive.live.com/download?resid=3B8F875287BC6601%217039&authkey=!ALgWHhPB50SLYso";
+                dUrl = "https://download.bops.ie/hacktv/fsphil.zip";
                 break;
             case 1:
                 // Captain Jack download
-                dUrl = "https://onedrive.live.com/download?resid=3B8F875287BC6601%217040&authkey=!ALVUZc72L6Gcirs";
+                dUrl = "https://download.bops.ie/hacktv/captainjack.zip";
                 break;
             default:
                 return;
@@ -7229,10 +7229,7 @@ public class GUI extends javax.swing.JFrame {
                 String tmpExePath = t + File.separator + "hacktv.exe";
                 String exePath = jarDir + File.separator + "hacktv.exe";
                 String readmePath = t + File.separator + "readme.txt";
-                // Spoof user agent as wget. OneDrive is picky...
-                String ua = "Wget/1.21.4 (mingw32)";
                 var con = new URI(dUrl).toURL().openConnection();
-                con.setRequestProperty("User-Agent", ua);
                 size = con.getContentLengthLong();
                 try (var in = new BufferedInputStream(con.getInputStream());
                     var out = new FileOutputStream(downloadPath)) {
@@ -7335,6 +7332,8 @@ public class GUI extends javax.swing.JFrame {
                     messageBox("An error occurred while downloading hacktv.\n"
                             + "Please ensure that you have write permissions to the "
                             + "application directory and that you have internet access.", JOptionPane.WARNING_MESSAGE);
+                    txtStatus.setText("Failed");
+                    downloadCancelled = false;
                 }
                 else if (exePath.isEmpty()) {
                     txtStatus.setText("Cancelled");
