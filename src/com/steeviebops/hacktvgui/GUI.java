@@ -2052,6 +2052,10 @@ public class GUI extends javax.swing.JFrame {
                 chkColour.doClick();
             }
         }
+        // S-Video mode
+        if (INI.getBooleanFromINI(fileContents, "hacktv", "s-video") ){
+            if (chkSVideo.isEnabled()) chkSVideo.doClick();
+        }
         // Invert video polarity
         if (INI.getBooleanFromINI(fileContents, "hacktv", "invert-video") ){
             chkInvertVideo.doClick();
@@ -2472,6 +2476,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Disable colour
         if (chkColour.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1);
+        // S-Video
+        if (chkSVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "s-video", 1);
         // Invert video
         if (chkInvertVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1);
         // MAC channel ID
@@ -3203,20 +3209,6 @@ public class GUI extends javax.swing.JFrame {
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         downloadInProgress = false;
     }
-      
-    private void enableColourControl() {
-        chkColour.setEnabled(true);
-    }
-    
-    private void disableColourControl() {
-        if (chkColour.isSelected()) {
-            chkColour.doClick();
-            chkColour.setEnabled(false);
-        }
-        else {
-            chkColour.setEnabled(false);
-        }        
-    }
     
     private void enableScrambling() {
         cmbScramblingType.setEnabled(true);
@@ -3926,11 +3918,21 @@ public class GUI extends javax.swing.JFrame {
             defaultSampleRate = "16";
             if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "colour")) {
-            enableColourControl();
+        if ( (INI.getBooleanFromINI(modesFile, mode, "colour")) &&
+                ( (radPAL.isSelected()) ||
+                  (radNTSC.isSelected()) ||
+                  (radSECAM.isSelected()) )
+                ) {
+            chkColour.setEnabled(true);
         }
         else {
-            disableColourControl();
+            if (chkColour.isSelected()) {
+                chkColour.doClick();
+                chkColour.setEnabled(false);
+            }
+            else {
+                chkColour.setEnabled(false);
+            }
         }
         if (INI.getBooleanFromINI(modesFile, mode, "audio")) {
             enableAudioOption();
@@ -4009,6 +4011,17 @@ public class GUI extends javax.swing.JFrame {
         else {
             if (chkSiS.isSelected()) chkSiS.doClick();
             chkSiS.setEnabled(false);
+        }
+        // Enable S-Video option for baseband modes for FL2K and file output
+        if ( (baseband) && ( (cmbOutputDevice.getSelectedIndex() == 2) ||
+                (cmbOutputDevice.getSelectedIndex() == 3) ) &&
+                ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                    (radSECAM.isSelected()) ) ) {
+            chkSVideo.setEnabled(true);
+        }
+        else {
+            if (chkSVideo.isSelected()) chkSVideo.doClick();
+            chkSVideo.setEnabled(false);
         }
         // Check if the line count varies from the previous mode
         // If so, refresh the available test cards
@@ -5427,6 +5440,7 @@ public class GUI extends javax.swing.JFrame {
             allArgs.add("--sis");
             allArgs.add("dcsis");
         }
+        if (chkSVideo.isSelected()) allArgs.add("--s-video");
         // Finally, add the source video or test option
         if (ytdl.isBlank()) {
             String InputSource = checkInput();
@@ -6756,12 +6770,18 @@ public class GUI extends javax.swing.JFrame {
                 // fl2k is baseband only for now so disable all RF options
                 disableRFOptions();
                 rfPanel.setEnabled(false);
+                // Enable S-Video option if a baseband mode is selected
+                if ( (bb) & ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                    (radSECAM.isSelected()) ) ) chkSVideo.setEnabled(true);
                 break;
             // Output to file
             case 3:
                 lblOutputDevice2.setText("Destination file");
                 disableRFOptions();
                 rfPanel.setEnabled(true);
+                // Enable S-Video option if a baseband mode is selected
+                if ( (bb) & ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                    (radSECAM.isSelected()) ) ) chkSVideo.setEnabled(true);
                 lblFileType.setEnabled(true);
                 cmbFileType.setEnabled(true);
                 cmbFileType.setSelectedIndex(3);
@@ -7699,6 +7719,7 @@ public class GUI extends javax.swing.JFrame {
         chkOffset = new javax.swing.JCheckBox();
         txtOffset = new javax.swing.JTextField();
         chkSwapIQ = new javax.swing.JCheckBox();
+        chkSVideo = new javax.swing.JCheckBox();
         vbiPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -8278,6 +8299,11 @@ public class GUI extends javax.swing.JFrame {
         });
 
         chkColour.setText("Disable colour");
+        chkColour.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkColourActionPerformed(evt);
+            }
+        });
 
         chkA2Stereo.setText("A2 (Zweikanalton) stereo");
         chkA2Stereo.addActionListener(new java.awt.event.ActionListener() {
@@ -8324,6 +8350,13 @@ public class GUI extends javax.swing.JFrame {
         chkSwapIQ.setText("Swap I and Q samples");
         chkSwapIQ.setToolTipText("");
 
+        chkSVideo.setText("S-Video");
+        chkSVideo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSVideoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout modePanelLayout = new javax.swing.GroupLayout(modePanel);
         modePanel.setLayout(modePanelLayout);
         modePanelLayout.setHorizontalGroup(
@@ -8332,39 +8365,39 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cmbMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(modePanelLayout.createSequentialGroup()
+                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, modePanelLayout.createSequentialGroup()
                         .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkAudio)
                             .addComponent(chkNICAM)
                             .addComponent(chkA2Stereo)
-                            .addComponent(chkColour))
-                        .addGap(18, 147, Short.MAX_VALUE)
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(modePanelLayout.createSequentialGroup()
-                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkPixelRate)
-                                    .addComponent(lblSampleRate))
-                                .addGap(74, 74, 74))
-                            .addGroup(modePanelLayout.createSequentialGroup()
-                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(modePanelLayout.createSequentialGroup()
-                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(chkFMDev)
-                                            .addComponent(chkOffset))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtOffset)
-                            .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                            .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(modePanelLayout.createSequentialGroup()
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkColour)
                             .addComponent(chkSwapIQ)
                             .addComponent(chkInvertVideo))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkSVideo)
+                            .addGroup(modePanelLayout.createSequentialGroup()
+                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(modePanelLayout.createSequentialGroup()
+                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkPixelRate)
+                                            .addComponent(lblSampleRate))
+                                        .addGap(74, 74, 74))
+                                    .addGroup(modePanelLayout.createSequentialGroup()
+                                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(chkVideoFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addGroup(modePanelLayout.createSequentialGroup()
+                                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(chkFMDev)
+                                                    .addComponent(chkOffset))
+                                                .addGap(0, 0, Short.MAX_VALUE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtOffset)
+                                    .addComponent(txtPixelRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
+                                    .addComponent(txtSampleRate, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtFMDev, javax.swing.GroupLayout.Alignment.TRAILING))))))
                 .addContainerGap())
         );
         modePanelLayout.setVerticalGroup(
@@ -8401,7 +8434,9 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkInvertVideo)
                     .addComponent(chkVideoFilter))
                 .addGap(2, 2, 2)
-                .addComponent(chkSwapIQ)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkSwapIQ)
+                    .addComponent(chkSVideo))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -10044,6 +10079,38 @@ public class GUI extends javax.swing.JFrame {
     private void cmbSecamIdLinesMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbSecamIdLinesMouseWheelMoved
         SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbSecamIdLines);
     }//GEN-LAST:event_cmbSecamIdLinesMouseWheelMoved
+
+    private void chkColourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkColourActionPerformed
+        // Disable "S-Video" option when "Disable colour" selected
+        if ((chkColour.isSelected()) && (chkSVideo.isEnabled())) {
+            if (chkSVideo.isSelected()) chkSVideo.doClick();
+            chkSVideo.setEnabled(false);
+        }
+        else {
+            if ( (INI.getStringFromINI(modesFile, mode, "modulation", "vsb", false).equals("baseband")) &&
+                ( (cmbOutputDevice.getSelectedIndex() == 2)  ||
+                (cmbOutputDevice.getSelectedIndex() == 3) ) &&
+                ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                    (radSECAM.isSelected()) ) ) {
+                chkSVideo.setEnabled(true);
+            }
+        }
+    }//GEN-LAST:event_chkColourActionPerformed
+
+    private void chkSVideoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSVideoActionPerformed
+        // Disable "Disable colour" option when S-Video selected
+        if (chkSVideo.isSelected()) {
+            if (chkColour.isSelected()) chkColour.doClick();
+            chkColour.setEnabled(false);
+        }
+        else {
+            if ( ((INI.getIntegerFromINI(modesFile, mode, "colour") == 1)) &&
+                ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                    (radSECAM.isSelected()) ) ){
+                chkColour.setEnabled(true);
+            }
+        }
+    }//GEN-LAST:event_chkSVideoActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -10095,6 +10162,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkPosition;
     private javax.swing.JCheckBox chkRandom;
     private javax.swing.JCheckBox chkRepeat;
+    private javax.swing.JCheckBox chkSVideo;
     private javax.swing.JCheckBox chkScrambleAudio;
     private javax.swing.JCheckBox chkSecamId;
     private javax.swing.JCheckBox chkShowCardSerial;
