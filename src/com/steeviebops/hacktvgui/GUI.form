@@ -691,6 +691,7 @@
                       </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbTestMouseWheelMoved"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbTestActionPerformed"/>
                       </Events>
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
@@ -1609,13 +1610,15 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="lblOutputDevice" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="cmbOutputDevice" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="lblOutputDevice2" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="txtOutputDevice" max="32767" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="chkHackDAC" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                           </Group>
                           <Component id="rfPanel" alignment="0" max="32767" attributes="0"/>
                       </Group>
@@ -1629,6 +1632,7 @@
                                   <Component id="cmbOutputDevice" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblOutputDevice2" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtOutputDevice" alignment="3" max="32767" attributes="0"/>
+                                  <Component id="chkHackDAC" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="rfPanel" min="-2" max="-2" attributes="0"/>
@@ -1907,6 +1911,14 @@
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtOutputDevice.addMouseListener(new ContextMenuListener());"/>
                       </AuxValues>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="chkHackDAC">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="HackDAC"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkHackDACActionPerformed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -2916,7 +2928,11 @@
                                           <Component id="cmbLookAndFeel" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <Component id="btnSatSettings" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="btnSatSettings" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnTestSettings" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -2941,7 +2957,10 @@
                                   <Component id="cmbLookAndFeel" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnSatSettings" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="btnSatSettings" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnTestSettings" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -3011,6 +3030,15 @@
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSatSettingsActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnTestSettings">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Test signal settings..."/>
+                        <Property name="actionCommand" type="java.lang.String" value=""/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTestSettingsActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>

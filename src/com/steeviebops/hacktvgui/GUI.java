@@ -111,6 +111,7 @@ public class GUI extends javax.swing.JFrame {
 
     // Declare a variable to determine the selected fork
     private boolean captainJack;
+    private boolean mattstvbarn;
 
     // Declare Teletext-related variables that are reused across multiple subs
     private String htmlTempFile;
@@ -131,7 +132,7 @@ public class GUI extends javax.swing.JFrame {
     private boolean titleBarChanged = false;
 
     // Array used for M3U files
-    private ArrayList<String> playlistURLsAL;
+    private final ArrayList<String> playlistURLsAL = new ArrayList<>();
     private String[] playlistNames;
 
     // Declare a variable for storing the default sample rate for the selected video mode
@@ -177,6 +178,9 @@ public class GUI extends javax.swing.JFrame {
     // Integer to save the previously selected item in the Mode combobox.
     // Used to revert back if a baseband mode is selected on an unsupported SDR.
     private int previousIndex = 0;
+    
+    // Allows us to recall the previously selected colour system
+    private String prevColour = "";
     
     // Start point in playlist
     private int startPoint = -1;
@@ -340,6 +344,7 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion = new javax.swing.JComboBox<>();
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
+        chkHackDAC = new javax.swing.JCheckBox();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -407,6 +412,7 @@ public class GUI extends javax.swing.JFrame {
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
         btnSatSettings = new javax.swing.JButton();
+        btnTestSettings = new javax.swing.JButton();
         txtStatus = new javax.swing.JTextField();
         runButtonGrid = new javax.swing.JPanel();
         btnRun = new javax.swing.JButton();
@@ -562,6 +568,11 @@ public class GUI extends javax.swing.JFrame {
         cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbTestMouseWheelMoved(evt);
+            }
+        });
+        cmbTest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbTestActionPerformed(evt);
             }
         });
 
@@ -1473,6 +1484,13 @@ public class GUI extends javax.swing.JFrame {
 
         txtOutputDevice.addMouseListener(new ContextMenuListener());
 
+        chkHackDAC.setText("HackDAC");
+        chkHackDAC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkHackDACActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout frequencyPanelLayout = new javax.swing.GroupLayout(frequencyPanel);
         frequencyPanel.setLayout(frequencyPanelLayout);
         frequencyPanelLayout.setHorizontalGroup(
@@ -1480,13 +1498,15 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(frequencyPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblOutputDevice)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblOutputDevice2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtOutputDevice)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkHackDAC)
+                .addGap(10, 10, 10))
             .addComponent(rfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         frequencyPanelLayout.setVerticalGroup(
@@ -1497,7 +1517,8 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblOutputDevice)
                     .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblOutputDevice2)
-                    .addComponent(txtOutputDevice))
+                    .addComponent(txtOutputDevice)
+                    .addComponent(chkHackDAC))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -2201,6 +2222,14 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        btnTestSettings.setText("Test signal settings...");
+        btnTestSettings.setActionCommand("");
+        btnTestSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTestSettingsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -2219,7 +2248,10 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(btnSatSettings))
+                    .addGroup(generalSettingsPanelLayout.createSequentialGroup()
+                        .addComponent(btnSatSettings)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnTestSettings)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
@@ -2239,7 +2271,9 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblLookAndFeel)
                     .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSatSettings)
+                .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSatSettings)
+                    .addComponent(btnTestSettings))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2540,10 +2574,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    /**
-     * Create new form
-     */
-    public GUI() {
+    private boolean populateUI(String[] args) {
         // Add a shutdown hook to run exit tasks
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -2557,9 +2588,6 @@ public class GUI extends javax.swing.JFrame {
         setLaf();
         // Initialise Swing components
         initComponents();
-    }
-    
-    private boolean populateUI(String[] args) {
         // Set the jarDir variable so we know where we're located
         jarDir = Path.of(SharedInst.getCurrentDirectory());
         // Check operating system and set OS-specific options
@@ -2751,7 +2779,8 @@ public class GUI extends javax.swing.JFrame {
             chkSecamId,
             chkOffset,
             chkSwapIQ,
-            chkSiS
+            chkSiS,
+            chkSVideo
         };
     }
     
@@ -3240,7 +3269,7 @@ public class GUI extends javax.swing.JFrame {
             if (nicamSupported) {
                 chkNICAM.setSelected(true);
             }
-            else if (a2Supported) {
+            else if ((a2Supported) && (lines == 625)) {
                 chkA2Stereo.setSelected(true);
             }
         }
@@ -3290,6 +3319,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void loadPreferences(){
+        if (PREFS.getInt("hackdac", 0) == 1) chkHackDAC.setSelected(true);
         // Check preferences node for the path to hacktv
         // If not found, use the default
         if (runningOnWindows) {
@@ -3339,11 +3369,13 @@ public class GUI extends javax.swing.JFrame {
         if (!Files.exists(Path.of(hackTVPath))) {
             lblFork.setText("Not found");
             captainJack = false;
+            mattstvbarn = false;
             return;
         }
         else if (Files.isDirectory(Path.of(hackTVPath))) {
             lblFork.setText("Invalid path");
             captainJack = false;
+            mattstvbarn = false;
             return;    
         }
         /*  Check the size of the specified file.
@@ -3354,6 +3386,7 @@ public class GUI extends javax.swing.JFrame {
         if (f.length() > 104857600) {
             lblFork.setText("Invalid file (too large)");
             captainJack = false;
+            mattstvbarn = false;
             return;
         }
         // Test the specified file by loading it into memory using a BufferedReader.
@@ -3361,21 +3394,33 @@ public class GUI extends javax.swing.JFrame {
         boolean b = false;
         try {
             String c;
+            boolean fsphil = false;
             try (var br1 = new BufferedReader(new FileReader(hackTVPath, StandardCharsets.ISO_8859_1))) {
                 while ((c = br1.readLine()) != null) {
                     if (c.contains("--enableemm")) {
                         b = true;
                         lblFork.setText("Captain Jack");
                         captainJack = true;
+                        mattstvbarn = false;
                     }
                     else if (c.contains("Both VC1 and VC2 cannot be used together")) {
-                        b = true;
                         lblFork.setText("fsphil");
                         captainJack = false;
+                        fsphil = true;
+                        mattstvbarn = false;
+                        continue;
+                    }
+                    else if (c.contains("pm8546g.bin")) {
+                        b = true;
+                        lblFork.setText("Matt's TV Barn");
+                        captainJack = false;
+                        mattstvbarn = true;
+                        break;
                     }
                     // If we found a match, stop processing
                     if (b) break;
                 }
+                if (!b) b = fsphil;
             }
         }
         catch (IOException ex) {
@@ -3399,6 +3444,8 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void fsphil() {
+        // Enable test signal settings button
+        btnTestSettings.setEnabled(mattstvbarn);
         // Disable features unsupported in fsphil's build
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkLogo.isSelected()) chkLogo.doClick();
@@ -3424,6 +3471,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void captainJack() {
+        // Disable test signal settings button
+        btnTestSettings.setEnabled(false);
         // Enable features supported in Captain Jack's build
         chkLogo.setEnabled(true);
         addLogoOptions();
@@ -3808,7 +3857,7 @@ public class GUI extends javax.swing.JFrame {
                 boolean TCFound = false;
                 if (!ImportedTC.isEmpty()) {
                     for (int i = 0; i <= tcArray.length - 1; i++) {
-                        if ( (tcArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedTC) ) {
+                        if ((tcArray[i].split("\\s*,\\s*")[0].toLowerCase(Locale.ENGLISH)).equals(ImportedTC)) {
                             cmbTest.setSelectedIndex(i);
                             TCFound = true;
                             break;
@@ -3817,7 +3866,7 @@ public class GUI extends javax.swing.JFrame {
                     if (!TCFound) {
                         invalidConfigFileValue("test card", ImportedTC);
                     }
-                }                
+                }
             }
         }
         else if (!M3USource.isEmpty()) {
@@ -3992,12 +4041,6 @@ public class GUI extends javax.swing.JFrame {
         if (!ImportedGamma.isEmpty()) {
             chkGamma.doClick();
             txtGamma.setText(ImportedGamma);
-        }
-        // Repeat
-        if (chkRepeat.isEnabled()) {
-            if (INI.getBooleanFromINI(fileContents, "hacktv", "repeat")) {
-                chkRepeat.doClick();
-            }
         }
         // Position
         if (chkPosition.isEnabled()) {
@@ -4429,6 +4472,38 @@ public class GUI extends javax.swing.JFrame {
             messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
         }
         txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
+        // Philips test signal
+        String importedTS = INI.getStringFromINI(fileContents, "hacktv", "testsignal", "", false);
+        if (mattstvbarn) {
+            boolean TSFound = false;
+            if (!importedTS.isEmpty()) {
+                for (int i = 0; i < tcArray.length; i++) {
+                    int j = tcArray[i].indexOf(",");
+                    if (j == -1) continue;
+                    if ((tcArray[i].substring(0, j).toLowerCase(Locale.ENGLISH)).equals(importedTS)) {
+                        radTest.doClick();
+                        cmbTest.setSelectedIndex(i);
+                        if (!ImportedSource.isBlank()) txtSource.setText(ImportedSource);
+                        TSFound = true;
+                        break;
+                    }
+                }
+                if (!TSFound) {
+                    invalidConfigFileValue("test signal", importedTS);
+                }
+            }
+        }
+        else if (!importedTS.isBlank()) {
+            messageBox("The selected build of hacktv does not support the " +
+                    importedTS + " test signal.\n" +
+                    "The setting will be skipped.", JOptionPane.WARNING_MESSAGE);
+        }
+        // Repeat
+        if (chkRepeat.isEnabled()) {
+            if (INI.getBooleanFromINI(fileContents, "hacktv", "repeat")) {
+                chkRepeat.doClick();
+            }
+        }
         btnRun.requestFocusInWindow();
         // This must be the last line in this method, it confirms that 
         // everything ran as planned.
@@ -4526,9 +4601,11 @@ public class GUI extends javax.swing.JFrame {
             if (chkRandom.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "random", 1);
         }
         else {
-            if (radTest.isSelected()) {
-                if ((captainJack) && (cmbTest.getComponentCount() > 1)) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:" + tcArray[cmbTest.getSelectedIndex()]);
+            // We'll add Philips patterns later, if any
+            if ( (radTest.isSelected()) && (!isPhilipsTestSignal()) ) {
+                if ((cmbTest.isEnabled()) && (tcArray != null)) {
+                    String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+                    if (sa.length > 0) FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:" + sa[0]);
                 }
                 else {
                     FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
@@ -4797,6 +4874,11 @@ public class GUI extends javax.swing.JFrame {
             FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "tx-subtitles", 1);
             FileContents = INI.setINIValue(FileContents, "hacktv", "tx-subindex", txtTextSubtitleIndex.getText());
         }
+        // Philips test signals
+        if (isPhilipsTestSignal()) {
+            String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+            if (sa.length > 0) FileContents = INI.setINIValue(FileContents, "hacktv", "testsignal", sa[0]);
+        }
         // The playlist doesn't follow a standard INI format. We just dump the
         // playlist array into the file as-is.
         if (!playlistAL.isEmpty()) {
@@ -4995,7 +5077,6 @@ public class GUI extends javax.swing.JFrame {
             protected Boolean doInBackground() throws Exception {
                 String M3UNames = "";
                 var playlistNamesAL = new ArrayList<String>();
-                playlistURLsAL = new ArrayList <> ();
                 try {
                     // Read source file to a list.
                     List<String> fl = Files.readAllLines(f.toPath());
@@ -6020,56 +6101,237 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addTestCardOptions() {
-        String testcards;
-        // Backwards compatibility. [testcards] refers to 625 line cards.
-        // So we set l to a blank string on 625, otherwise we populate it with
-        // the line count.
-        // e.g, if l is set to 525 we'll query the modes file for [testcards525].
-        String l = "";
-        if (lines != 625) l = Integer.toString(lines);
-        // Extract (from modesFile) the test card list
-        testcards = INI.splitINIfile(modesFile, "testcards" + l);
-        if (testcards == null) {
+        // Reads the available test cards/signals/patterns from the modes file
+        String t;
+        if ((tcArray == null) || (tcArray.length == 0)) tcArray = new String[0];
+        if (captainJack) {
+            // Extract (from modesFile) the test card list
+            t = INI.splitINIfile(modesFile, "testcards");
+        }
+        else if (mattstvbarn) {
+            // PM5644/PT8631 emulation
+            String c = getSelectedColourSystem();
+            if (c.isEmpty()) {
+                // Unsupported mode, set to null (we'll catch it later)
+                t = null;
+            }
+            else {
+                // Extract (from modesFile) the test signal list (e.g. [testsignals_625_pal])
+                // This will return null if the section does not exist
+                t = INI.splitINIfile(modesFile, "testsignals" + "_" + Integer.toString(lines) + "_" + c);
+            }
+        }
+        else {
+            t = null;
+        }
+        if (t == null) {
             // If nothing was found, disable the test card combobox
             // Use a dummy string to preserve the length of the combobox
             // This won't be seen as the combobox is disabled
-            String[] TCNames = {"No items found"};
+            String[] n = {"No items found"};
             cmbTest.setEnabled(false);
             cmbTest.removeAllItems();
-            cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
+            cmbTest.setModel(new DefaultComboBoxModel<>(n));
             cmbTest.setSelectedIndex(-1);
         }
         else {
-            // We just want the commands so remove everything after =
-            testcards = testcards.replaceAll("\\=.*", "");
-            // Add a headerless string to tcArray by splitting off the first line
-            tcArray = testcards.substring(testcards.indexOf("\n") +1).split("\\r?\\n");
-            // Populate TCNames by reading modesFile using what we added
-            // to tcArray.
-            var TCNames = new String[tcArray.length];
-            for (int i = 0; i < tcArray.length; i++) {
-                TCNames[i] = INI.getStringFromINI(modesFile, "testcards" + l, tcArray[i], "", true);
+            // Variable for storing pattern directory location
+            String p = PREFS.get("testdir", hackTVDirectory);
+            // Remove the first line from t (the INI header) and split each line to tcArray
+            tcArray = t.replace("=", ",").substring(t.indexOf("\n") +1).split("\n");
+            /* tcArray contains five pieces of data, separated by commas:
+               [0]      [1]           [2]               [3]                 [4]
+               Command, Display name, Pattern filename, Text/clock support, Sample rate
+             */
+            String[] tcNames;
+            if (captainJack) {
+                // Populate tcNames by adding element 1 of tcArray
+                tcNames = new String[tcArray.length];
+                for (int i = 0; i < tcArray.length; i++) {
+                    String[] sa = tcArray[i].split(",");
+                    if (sa.length > 1) tcNames[i] = sa[1];
+                }
             }
-            cmbTest.removeAllItems();
-            cmbTest.setModel(new DefaultComboBoxModel<>(TCNames));
-            if (!radTest.isSelected()) {
-                cmbTest.setSelectedIndex(-1);
+            else if ((mattstvbarn) && (Files.exists(Path.of(p + File.separator + "pm8546g.bin")))) {
+                // PM5644/PT8631 emulation continued
+                var tal = new ArrayList<String>();
+                for (String s : tcArray) {
+                    // Split tcArray to another array and check the existence of
+                    // the third element of each item (the filename).
+                    String[] sa = s.split("\\s*,\\s*");
+                    if (sa.length > 2) {
+                        if (Files.exists(Path.of(p + File.separator + sa[2]))) {
+                            // Add command line argument to temp tal ArrayList
+                            tal.add(sa[0]);
+                        }
+                        else {
+                            System.err.println("Unable to add test pattern " + sa[0] + ".\n"
+                                    + "The file " + sa[2] + " could not be found.");
+                        }
+                    }
+                    else {
+                        // Treat this as an internal hacktv pattern (not emulated Philips)
+                        // Add command line argument to temp tal ArrayList
+                        tal.add(sa[0]);
+                    } 
+                }
+                // If the number of elements in tcArray and tal do not match,
+                // then something was removed.
+                // We need to repopulate tcArray with the correct data.
+                if (tcArray.length != tal.size()) {
+                    tcArray = new String[tal.size()];
+                    for (int i = 0; i < tal.size(); i++) {
+                        // Query the modes file to get the missing parameters back
+                        String s = INI.getStringFromINI(
+                                modesFile,
+                                "testsignals" + "_" + Integer.toString(lines) + "_" + getSelectedColourSystem(),
+                                tal.get(i),
+                                "",
+                                true
+                        );
+                        if (!s.isBlank()) tcArray[i] = tal.get(i) + "," + s;
+                    }
+                }
+                // Populate tcNames by adding element 1 of tcArray
+                tcNames = new String[tcArray.length];
+                for (int i = 0; i < tcArray.length; i++) {
+                    String[] sa = tcArray[i].split("\\s*,\\s*");
+                    if (sa.length > 1) tcNames[i] = sa[1];
+                }
             }
             else {
-                cmbTest.setSelectedIndex(0);
-            }        
+                // Initialise empty array
+                tcNames = new String[0];
+            }
+            // Populate cmbTest combobox
+            if ((tcNames.length) > 0) {
+                cmbTest.removeAllItems();
+                cmbTest.setModel(new DefaultComboBoxModel<>(tcNames));
+                if (!radTest.isSelected()) {
+                    cmbTest.setSelectedIndex(-1);
+                }
+                else {
+                    cmbTest.setSelectedIndex(0);
+                }
+            }
+            else {
+                // If nothing was found, disable the test card combobox
+                // Use a dummy string to preserve the length of the combobox
+                // This won't be seen as the combobox is disabled
+                tcArray = new String[]{};
+                String[] n = {"No items found"};
+                cmbTest.setEnabled(false);
+                cmbTest.removeAllItems();
+                cmbTest.setModel(new DefaultComboBoxModel<>(n));
+                cmbTest.setSelectedIndex(-1);
+            }
+        }
+    }
+    
+    private String getSelectedColourSystem() {
+        if (radPAL.isSelected()) {
+            return "pal";
+        }
+        else if (radNTSC.isSelected()) {
+            return "ntsc";
+        }
+        else if (radSECAM.isSelected()) {
+            return "secam";
+        }
+        else {
+            return "";
         }
     }
     
     private ArrayList<String> checkTestCard() {
         var al = new ArrayList<String>();
         if (cmbTest.isEnabled()) {
-            al.add("test:" + tcArray[cmbTest.getSelectedIndex()]);
+            if (captainJack) {
+                String[] sa = tcArray[cmbTest.getSelectedIndex()].split(",");
+                if (!sa[0].isBlank()) al.add("test:" + sa[0]);
+            }
+            else if (mattstvbarn) {
+                String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+                if (sa[0].equals("colourbars")) {
+                    // Use internal hacktv bars rather than the Philips one
+                    if (!playlistAL.contains("test:" + sa[0])) al.add("test:" + sa[0]);
+                    return al;
+                }
+                else if (isPhilipsTestSignal()) {
+                    // Check sample and pixel rate
+                    String tcsr = getTCSampleRate();
+                    String err = "The selected test pattern requires a pixel rate (or sample rate) of " + tcsr + " MHz.";
+                    if (chkPixelRate.isSelected()) {
+                        if (!txtPixelRate.getText().equals(tcsr)) {
+                           messageBox(err, JOptionPane.WARNING_MESSAGE);
+                           return null;
+                        }
+                    }
+                    else if (!txtSampleRate.getText().equals(tcsr)) {
+                        messageBox(err, JOptionPane.WARNING_MESSAGE);
+                        return null;
+                    }
+                }
+                al.add("--testsignal");
+                al.add(sa[0]);
+                // Check if the selected pattern supports text insertion
+                if ((sa.length >= 3) && (sa[3].equals("1"))) {
+                    String t1 = PREFS.get("philipstext1", "");
+                    String t2 = PREFS.get("philipstext2", "");
+                    // Populate text fields and clock/date
+                    if (!t1.isBlank()) {
+                        al.add("--text1");
+                        al.add('\u0022' + t1 + '\u0022');
+                    }  
+                    if (!t2.isBlank()) {
+                        al.add("--text2");
+                        al.add('\u0022' + t2 + '\u0022');
+                    }
+                    switch (PREFS.getInt("philipsclock", 0)) {
+                        case 0:
+                        default:
+                            // Clock off
+                            break;
+                        case 1:
+                            // Clock on
+                            al.add("--clockmode");
+                            al.add("time");
+                            break;
+                        case 2:
+                            // Clock and date on
+                            al.add("--clockmode");
+                            al.add("datetime");
+                            break;
+                    }
+                }
+                return al;
+            }
         }
         else if (radTest.isSelected()) {
-            al.add("test:colourbars");
+            if (!playlistAL.contains("test:colourbars")) al.add("test:colourbars");
         }
         return al;
+    }
+    
+    private boolean isPhilipsTestSignal() {
+        if (cmbTest.getSelectedIndex() == -1) return false;
+        String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+        String d = PREFS.get("testdir", hackTVDirectory);
+        return ((sa.length > 3) && (Files.exists(Path.of(d + File.separator + sa[2]))));
+    }
+    
+    private String getTCSampleRate() {
+        // Philips patterns use a fixed sample rate, usually 13.5 or 20 MHz.
+        // Default sample rate (if not defined) is 13.5 MHz
+        String sr = "13.5";
+        // Check if the sample rate has been overriden for the selected pattern
+        String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+        if ((sa.length == 5) && (SharedInst.isNumeric(sa[4]))) {
+            return sa[4];
+        }
+        else {
+            return sr;
+        }
     }
     
     private void addOutputDevices() {
@@ -6123,6 +6385,37 @@ public class GUI extends javax.swing.JFrame {
         txtAntennaName.setText("");
         txtAntennaName.setEnabled(false);
         txtAntennaName.setEditable(false);
+    }
+    
+    private void disableSourceOptions() {
+        // Disable all options in the source frame
+        if (chkRepeat.isSelected()) chkRepeat.doClick();
+        if (chkPosition.isSelected()) chkPosition.doClick();
+        if (chkTimestamp.isSelected()) chkTimestamp.doClick();
+        if (chkInterlace.isSelected()) chkInterlace.doClick();
+        if (chkSubtitles.isSelected()) chkSubtitles.doClick();
+        if (chkDownmix.isSelected()) chkDownmix.doClick();
+        if (chkVolume.isSelected()) chkVolume.doClick();
+        chkRepeat.setEnabled(false);
+        chkPosition.setEnabled(false);
+        chkTimestamp.setEnabled(false);
+        chkInterlace.setEnabled(false);
+        chkSubtitles.setEnabled(false);
+        chkDownmix.setEnabled(false);
+        chkVolume.setEnabled(false);
+        btnSourceBrowse.setEnabled(false);
+        txtSource.setEnabled(false);
+        txtSource.setText("");
+        txtSource.setEditable(false);
+        if (chkARCorrection.isSelected()) chkARCorrection.doClick();
+        chkARCorrection.setEnabled(false);
+        if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
+        chkTextSubtitles.setEnabled(false);
+        if ( cmbM3USource.isVisible() ) {
+            cmbM3USource.setVisible(false);
+            cmbM3USource.setEnabled(false);
+            txtSource.setVisible(true);
+        }
     }
     
     private void checkMode() {
@@ -6315,9 +6608,13 @@ public class GUI extends javax.swing.JFrame {
             if (chkSVideo.isSelected()) chkSVideo.doClick();
             chkSVideo.setEnabled(false);
         }
-        // Check if the line count varies from the previous mode
-        // If so, refresh the available test cards
-        if (oldLines != lines) addTestCardOptions();
+        // If the colour system (PAL/NTSC/SECAM) or line count varies from the previous mode...
+        if ( (!getSelectedColourSystem().equals(prevColour)) || (oldLines != lines)) {
+            // ...refresh the available test cards
+            addTestCardOptions();
+        }
+        // Save the current colour system to prevColour so we can recall this later
+        prevColour = getSelectedColourSystem();
         // Check for UHF and VHF band plans
         // We now support up to five band plans per band. uhf and vhf are the
         // default and these names are retained for backwards compatibility.
@@ -6420,10 +6717,6 @@ public class GUI extends javax.swing.JFrame {
     
     private boolean checkBasebandSupport() {
         // Check if the selected output device supports baseband modes or not.
-        // We also check for a currently invisible setting - "hackdac" - this is
-        // for an addon board which allows the HackRF to output baseband modes.
-        // It is not currently available to the public, hence why the setting 
-        // isn't visible to the user.
         if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (PREFS.getInt("hackdac", 0) == 1)) ||
                 (cmbOutputDevice.getSelectedIndex() == 2) ||
                 (cmbOutputDevice.getSelectedIndex() == 3) ) {
@@ -6436,9 +6729,45 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             messageBox("This mode is not supported by the selected output device.", JOptionPane.WARNING_MESSAGE);
-            cmbMode.setSelectedIndex(previousIndex);
-            checkMode();
-            return false;
+            if (cmbMode.getSelectedIndex() != previousIndex) {
+                cmbMode.setSelectedIndex(previousIndex);
+                checkMode();
+                return false;
+            }
+            else {
+                // Fallback for when the previousIndex value matches the current mode
+                // This would cause an error message loop otherwise
+                List<String> l;
+                if (Arrays.asList(palModeArray).contains(mode)) {
+                    l = Arrays.asList(palModeArray);
+                }
+                else if (Arrays.asList(ntscModeArray).contains(mode)) {
+                    l = Arrays.asList(ntscModeArray);
+                }
+                else if (Arrays.asList(secamModeArray).contains(mode)) {
+                    l = Arrays.asList(secamModeArray);
+                }
+                else if (Arrays.asList(otherModeArray).contains(mode)) {
+                    l = Arrays.asList(otherModeArray);
+                }
+                else if (Arrays.asList(macModeArray).contains(mode)) {
+                    l = Arrays.asList(macModeArray);
+                }
+                else {
+                    // Should never trigger
+                    System.err.println("Unexpected error");
+                    return false;
+                }
+                for (String s : l) {
+                    String m = INI.getStringFromINI(modesFile, s, "modulation", "", false);
+                    if ((m.equals("vsb")) || (m.equals("fm"))) {
+                        cmbMode.setSelectedIndex(l.indexOf(s));
+                        break;
+                    }
+                }
+                // No VSB or FM mode found. This is fatal, we can't continue.
+                throw new Error("Fatal error: unable to find a suitable mode to revert to.");
+            }
         }
     }
     
@@ -6621,7 +6950,7 @@ public class GUI extends javax.swing.JFrame {
         if (chkAudio.isSelected()) {
             chkA2Stereo.setEnabled(true);
         }
-        if (!chkNICAM.isEnabled()) {
+        if ((!chkNICAM.isEnabled()) && (lines == 625)) {
             chkA2Stereo.doClick();
         }
     }
@@ -6791,7 +7120,7 @@ public class GUI extends javax.swing.JFrame {
     private String checkInput() {
         // Skip this method if the playlist is populated
         if (!playlistAL.isEmpty()) return "";
-        if (radLocalSource.isSelected()) {
+        if ( (radLocalSource.isSelected()) || (isPhilipsTestSignal())) {
             if (cmbM3USource.isVisible()) {
                 return playlistURLsAL.get(cmbM3USource.getSelectedIndex());
             }
@@ -6800,7 +7129,10 @@ public class GUI extends javax.swing.JFrame {
                       (txtSource.getText().contains("://youtu.be/")) ||
                       (txtSource.getText().startsWith("ytdl:")) ) {
                 // Invoke the yt-dlp handler
-                if (!chkSyntaxOnly.isSelected()) {
+                if (isPhilipsTestSignal()) {
+                    messageBox("yt-dlp is not supported with test cards.", JOptionPane.WARNING_MESSAGE);
+                }
+                else if (!chkSyntaxOnly.isSelected()) {
                     youtubedl(txtSource.getText());
                 }
                 else {
@@ -6813,9 +7145,15 @@ public class GUI extends javax.swing.JFrame {
                 return txtSource.getText().replace("\"", "");
             }
             else {
-                tabPane.setSelectedIndex(0);
-                messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
-                return null;
+                if (!isPhilipsTestSignal()) {
+                    tabPane.setSelectedIndex(0);
+                    messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
+                    return null;
+                }
+                else {
+                    // No file defined, return "test" to play standard GLITS tone
+                    return "test";
+                }
             }
         }
         else {
@@ -7239,6 +7577,8 @@ public class GUI extends javax.swing.JFrame {
                     keyEnd = 11;
                 }
                 break;
+            default:
+                break;
         }
         if (!SharedInst.isNumeric(cardNumber) || keyStart == -1) {
             tabPane.setSelectedIndex(4);
@@ -7394,7 +7734,6 @@ public class GUI extends javax.swing.JFrame {
     
     private void checkTestCardStatus() {
         if ( (!cmbTest.isEnabled())
-                && (captainJack)
                 && (!htvLoadInProgress)
                 && cmbTest.getItemCount() > 1 ) {
             // Enable cmbTest (test card dropdown)
@@ -7404,7 +7743,7 @@ public class GUI extends javax.swing.JFrame {
         else if (htvLoadInProgress == true) {
             // Do nothing so we don't interrupt the file loading process
         }
-        else if ((cmbTest.isEnabled()) && (captainJack) ) {
+        else if (cmbTest.isEnabled()) {
             // Do nothing if cmbTest is already enabled on a supported mode.
             // This prevents the test card from resetting back to bars when
             // changing video modes.
@@ -7737,6 +8076,15 @@ public class GUI extends javax.swing.JFrame {
         if (ytdl.isBlank()) {
             String InputSource = checkInput();
             if (InputSource == null) return;
+            // Add test card options if defined
+            if (radTest.isSelected()) {
+                if (checkTestCard() != null) {
+                    allArgs.addAll(checkTestCard());
+                }
+                else {
+                    return;
+                }
+            }
             if (!playlistAL.isEmpty()) {
                 if (chkRandom.isSelected()) {
                     // Set the start point as the first item
@@ -7797,11 +8145,8 @@ public class GUI extends javax.swing.JFrame {
                 // Add quotation marks if path contains whitespaces on Windows
                 allArgs.add('\u0022' + InputSource + '\u0022');
             }
-            else if (radTest.isSelected()) {
-                allArgs.addAll(checkTestCard());
-            }
             else {
-                allArgs.add(InputSource);
+                if (!InputSource.isEmpty()) allArgs.add(InputSource);
             }
             // Arguments textbox handling - clear it first
             if (!txtStatus.getText().isEmpty()) txtStatus.setText("");
@@ -7849,7 +8194,14 @@ public class GUI extends javax.swing.JFrame {
                 // Create process with the ArrayList we populated above
                 var pb = new ProcessBuilder(allArgs);
                 pb.redirectErrorStream(true);
-                pb.directory(new File(hackTVDirectory));
+                if (isPhilipsTestSignal()) {
+                    // Set working directory to test signal location
+                    pb.directory(new File(PREFS.get("testdir", hackTVDirectory)));
+                }
+                else {
+                    // Set working directory to hacktv location
+                    pb.directory(new File(hackTVDirectory));
+                }
                 // Try to start the process
                 try {
                     Process p = pb.start();
@@ -8093,11 +8445,11 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Does windows-kill.exe exist in our directory?
-            if (Files.exists(Path.of(jarDir + "\\windows-kill.exe"))) {
+            if (Files.exists(Path.of(jarDir + File.separator + "windows-kill.exe"))) {
                 try {
                     // Run windows-kill.exe from this path and feed the PID to it
                     var windowsKill = new ProcessBuilder
-                        (jarDir + "\\windows-kill.exe", "-2", Long.toString(pid));
+                        (jarDir + File.separator + "windows-kill.exe", "-2", Long.toString(pid));
                     windowsKill.start();
                 }
                 catch (IOException ex)  {
@@ -8121,7 +8473,6 @@ public class GUI extends javax.swing.JFrame {
         // I decided to use a single clear string (with escape characters where
         // necessary) rather than risking triggering AV software by using
         // EncodedCommand. I've divided the string into lines here for clarity.
-        btnRun.setEnabled(false);
         String ps1 =
                 "& {Add-Type -Namespace 'steeviebops' -Name 'hacktvgui' -MemberDefinition '"
                 +     "[DllImport(\\\"kernel32.dll\\\")]public static extern bool FreeConsole();"
@@ -8150,19 +8501,14 @@ public class GUI extends javax.swing.JFrame {
     private void taskKill(long pid) {
         // Last resort option on Windows if the other stop options have failed.
         // This will forcibly terminate hacktv using taskkill.exe.
-        if (JOptionPane.showConfirmDialog(
-            null, "An error occurred while attempting to stop hacktv gracefully.\n"
-            + "As a last resort, we can kill the hacktv process. This may "
-            + "require your output device to be reset.\n"
-            + "Would you like to forcibly kill the hacktv process?",
-            APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-            var k = new ProcessBuilder("taskkill.exe", "/pid", Long.toString(pid), "/f");
-            try {
-                k.start();
-            }
-            catch (IOException e) {
-                System.err.println(e);
-            }
+        System.err.println("Unable to stop hacktv using PowerShell or windows-kill. "
+                + "Stopping using taskkill, which is not a clean shutdown.");
+        var k = new ProcessBuilder("taskkill.exe", "/pid", Long.toString(pid), "/f");
+        try {
+            k.start();
+        }
+        catch (IOException e) {
+            System.err.println(e);
         }
     }
     
@@ -8216,6 +8562,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
+            btnRun.setEnabled(false);
             stopTV(hpid);
         }
     }//GEN-LAST:event_btnRunActionPerformed
@@ -8549,7 +8896,7 @@ public class GUI extends javax.swing.JFrame {
                 chkNICAM.setEnabled(true);
                 chkNICAM.doClick();
             }
-            if (a2Supported) chkA2Stereo.setEnabled(true);
+            if ((a2Supported)&& (lines == 625)) chkA2Stereo.setEnabled(true);
         }
         else {
             if (chkNICAM.isSelected()) chkNICAM.doClick();
@@ -8587,7 +8934,6 @@ public class GUI extends javax.swing.JFrame {
         cmbMode.removeAllItems();
         cmbMode.setModel( new DefaultComboBoxModel<>( addVideoModes("pal", 0) ) );
         cmbMode.setSelectedIndex(0);
-        // End populate
     }//GEN-LAST:event_radPALActionPerformed
 
     private void cmbModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbModeActionPerformed
@@ -8697,38 +9043,13 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSourceBrowseActionPerformed
 
     private void radTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radTestActionPerformed
-        // Disable all options in the frame
-        if (chkRepeat.isSelected()) chkRepeat.doClick();
-        if (chkPosition.isSelected()) chkPosition.doClick();
-        if (chkTimestamp.isSelected()) chkTimestamp.doClick();
-        if (chkInterlace.isSelected()) chkInterlace.doClick();
-        if (chkSubtitles.isSelected()) chkSubtitles.doClick();
-        if (chkDownmix.isSelected()) chkDownmix.doClick();
-        if (chkVolume.isSelected()) chkVolume.doClick();
-        chkRepeat.setEnabled(false);
-        chkPosition.setEnabled(false);
-        chkTimestamp.setEnabled(false);
-        chkInterlace.setEnabled(false);
-        chkSubtitles.setEnabled(false);
-        chkDownmix.setEnabled(false);
-        chkVolume.setEnabled(false);
-        btnSourceBrowse.setEnabled(false);
-        txtSource.setEnabled(false);
-        txtSource.setText("");
-        txtSource.setEditable(false);
-        if (chkARCorrection.isSelected()) chkARCorrection.doClick();
-        chkARCorrection.setEnabled(false);
-        if (chkTextSubtitles.isSelected()) chkTextSubtitles.doClick();
-        chkTextSubtitles.setEnabled(false);    
-        if ( cmbM3USource.isVisible() ) {
-            cmbM3USource.setVisible(false);
-            cmbM3USource.setEnabled(false);
-            txtSource.setVisible(true);
-        }
         // Enable test card dropdown
-        if ((captainJack) && (cmbTest.getItemCount() > 1)) {
+        if (cmbTest.getItemCount() > 1) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
+        }
+        else {
+            disableSourceOptions();
         }
     }//GEN-LAST:event_radTestActionPerformed
 
@@ -8741,14 +9062,14 @@ public class GUI extends javax.swing.JFrame {
         btnSourceBrowse.setEnabled(true);
         chkARCorrection.setEnabled(true);
         chkVolume.setEnabled(true);
+        // Disable test card dropdown
+        cmbTest.setSelectedIndex(-1);
+        cmbTest.setEnabled(false);
         if (captainJack) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
             chkDownmix.setEnabled(true);
             chkSubtitles.setEnabled(true);
-            // Disable test card dropdown
-            cmbTest.setSelectedIndex(-1);
-            cmbTest.setEnabled(false);
             if (chkTeletext.isEnabled()) {
                 chkTextSubtitles.setEnabled(true);
             }
@@ -8914,14 +9235,15 @@ public class GUI extends javax.swing.JFrame {
             // Detect what were provided with
             detectFork();
             selectModesFile();
+            addTestCardOptions();
+            addARCorrectionOptions();
             if (captainJack) {
                 captainJack();
             }
             else {
                 fsphil();
             }
-            addARCorrectionOptions();
-            addTestCardOptions();
+            if (radTest.isSelected()) radTest.doClick();
         }
     }//GEN-LAST:event_btnHackTVPathActionPerformed
 
@@ -9005,6 +9327,7 @@ public class GUI extends javax.swing.JFrame {
         switch(cmbOutputDevice.getSelectedIndex()) {
             // hackrf
             case 0:
+                chkHackDAC.setVisible(true);
                 lblOutputDevice2.setText("Serial number (optional)");
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected and HackDAC is not enabled,
@@ -9035,6 +9358,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
             // soapysdr
             case 1:
+                chkHackDAC.setVisible(false);
                 lblOutputDevice2.setText("Device options");
                 if (!radCustom.isEnabled()) {
                     if (bb) {
@@ -9058,21 +9382,23 @@ public class GUI extends javax.swing.JFrame {
                 break;
             // fl2k
             case 2:
+                chkHackDAC.setVisible(false);
                 lblOutputDevice2.setText("Device number (optional)");
                 // fl2k is baseband only for now so disable all RF options
                 disableRFOptions();
                 rfPanel.setEnabled(false);
                 // Enable S-Video option if a baseband mode is selected
-                if ( (bb) & ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                if ( (bb) && ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
                     (radSECAM.isSelected()) ) ) chkSVideo.setEnabled(true);
                 break;
             // Output to file
             case 3:
+                chkHackDAC.setVisible(false);
                 lblOutputDevice2.setText("Destination file");
                 disableRFOptions();
                 rfPanel.setEnabled(true);
                 // Enable S-Video option if a baseband mode is selected
-                if ( (bb) & ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
+                if ( (bb) && ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
                     (radSECAM.isSelected()) ) ) chkSVideo.setEnabled(true);
                 lblFileType.setEnabled(true);
                 cmbFileType.setEnabled(true);
@@ -9245,6 +9571,11 @@ public class GUI extends javax.swing.JFrame {
                         + "The yt-dlp handler is only supported for single URLs at present.", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        else if (isPhilipsTestSignal()) {
+            // Don't add Philips test cards
+            messageBox("Unable to add this test card to the playlist.\n", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
             // Add whatever is in txtSource to playlistAL
             playlistAL.add(txtSource.getText());
@@ -9259,7 +9590,8 @@ public class GUI extends javax.swing.JFrame {
             }
             if (cmbTest.isEnabled()) {
                 // Add the selected test card
-                playlistAL.add("test:" + tcArray[cmbTest.getSelectedIndex()]);
+                String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+                if (sa.length > 0) playlistAL.add("test:" + sa[0]);
             }
             else {
                 // Add the test card
@@ -10111,6 +10443,46 @@ public class GUI extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_chkSVideoActionPerformed
+
+    private void cmbTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTestActionPerformed
+        if ((!captainJack) && (radTest.isSelected())) { 
+            if (isPhilipsTestSignal()) {
+                // Philips patterns use a fixed sample rate, usually 13.5 or 20 MHz.
+                String tsr = getTCSampleRate();
+                if (!txtSampleRate.getText().equals(tsr)) {
+                    if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
+                    txtPixelRate.setText(tsr);
+                }
+                txtSource.setEnabled(true);
+                txtSource.setEditable(true);
+                btnSourceBrowse.setEnabled(true);
+                chkRepeat.setEnabled(true);
+            }
+            else {
+                disableSourceOptions();
+            }
+        }
+    }//GEN-LAST:event_cmbTestActionPerformed
+
+    private void chkHackDACActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkHackDACActionPerformed
+        if (chkHackDAC.isSelected()) {
+            PREFS.putInt("hackdac", 1);
+        }
+        else {
+            PREFS.remove("hackdac");
+            if (INI.getStringFromINI(modesFile, mode, "modulation", "", false).equals("baseband")) checkBasebandSupport();
+        }
+    }//GEN-LAST:event_chkHackDACActionPerformed
+
+    private void btnTestSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestSettingsActionPerformed
+        // Show the setting dialogue box
+        var td = new TestSettingsDialogue(this, true, hackTVDirectory);
+        td.setVisible(true);
+        if (td.settingsChanged()) {
+            addTestCardOptions();
+            if (radTest.isSelected()) radTest.doClick();
+        }
+    }//GEN-LAST:event_btnTestSettingsActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -10131,6 +10503,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnSpark;
     private javax.swing.JButton btnTeefax;
     private javax.swing.JButton btnTeletextBrowse;
+    private javax.swing.JButton btnTestSettings;
     private javax.swing.JCheckBox chkA2Stereo;
     private javax.swing.JCheckBox chkACP;
     private javax.swing.JCheckBox chkARCorrection;
@@ -10144,6 +10517,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkFMDev;
     private javax.swing.JCheckBox chkFindKeys;
     private javax.swing.JCheckBox chkGamma;
+    private javax.swing.JCheckBox chkHackDAC;
     private javax.swing.JCheckBox chkInterlace;
     private javax.swing.JCheckBox chkInvertVideo;
     private javax.swing.JCheckBox chkLocalModes;
