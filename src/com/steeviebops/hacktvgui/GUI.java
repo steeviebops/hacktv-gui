@@ -76,6 +76,8 @@ import java.util.Random;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.KeyStroke;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Utilities;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
@@ -8209,29 +8211,14 @@ public class GUI extends javax.swing.JFrame {
                     hpid = p.pid();
                     // Capture the output of hacktv
                     try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
-                        if (!captainJack) {
-                            int a;
-                            while ( (a = br.read()) != -1 ) {
-                                // br.read() returns an integer value 'a' which is the ASCII
-                                // number of a character it has received from the process.
-                                // We convert 'a' to the actual character and publish it.
-                                // When the process has closed, br.read() will return -1
-                                // which will exit this loop.
-                                publish(String.valueOf((char)a));
-                            }
-                        }
-                        else {
-                            // A (hopefully) temporary workaround for the display bug as a result
-                            // of the introduction of a timestamp to Captain Jack's fork.
-                            // Use br.readLine() instead. If the received line matches a single 
-                            // timestamp (as detected by regex) then do not publish it.
-                            // As we're reading by line, this unfortunately breaks the buffer
-                            // underrun indicator.
-                            String b;
-                            String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
-                            while ( (b = br.readLine()) != null ) {
-                                if (!b.matches(r)) publish(b + "\n");
-                            }
+                        int a;
+                        while ( (a = br.read()) != -1 ) {
+                            // br.read() returns an integer value 'a' which is the ASCII
+                            // number of a character it has received from the process.
+                            // We convert 'a' to the actual character and publish it.
+                            // When the process has closed, br.read() will return -1
+                            // which will exit this loop.
+                            publish(String.valueOf((char)a));
                         }
                     }
                     publish("\n" + "hacktv stopped");
@@ -8275,9 +8262,29 @@ public class GUI extends javax.swing.JFrame {
                 // Here we receive the values from publish() and display
                 // them in the console
                 for (String o : chunks) {
-                    if (o.contains("Caught signal")) {
-                        // Strip out the timestamp from the "Caught signal" message
-                        txtConsoleOutput.append(o.substring(o.indexOf("C")));
+                    if (captainJack) {
+                        // Timestamp handling on Captain Jack's fork
+                        String s = txtConsoleOutput.getText();
+                        int l = s.lastIndexOf("\r");
+                        String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
+                        // If o is a carriage return (CR) character, and the
+                        // text after the last CR is a timestamp...
+                        if ((o.equals("\r") && (l != -1) && (s.substring(l + 1, s.length())).matches(r))) {
+                            try {
+                                // ...blank the previous timestamp
+                                int rs = Utilities.getRowStart(txtConsoleOutput, l) + 1;
+                                int re = Utilities.getRowEnd(txtConsoleOutput, txtConsoleOutput.getText().length());
+                                txtConsoleOutput.replaceRange("", rs, re);
+                            }
+                            catch (BadLocationException e) {
+                                System.err.println(e);
+                                txtConsoleOutput.append(o);
+                            }
+                        }
+                        else {
+                            // Append the character as normal
+                            txtConsoleOutput.append(o);
+                        }
                     }
                     else {
                         txtConsoleOutput.append(o);
@@ -9813,9 +9820,7 @@ public class GUI extends javax.swing.JFrame {
             downloadCancelled = true;
             return;
         }
-        // Downloads the latest pre-compiled Windows build from my OneDrive
-        // Captain Jack's download URL is https://filmnet.plus/hacktv/hacktv.zip
-        // but this hasn't been updated for a while so we'll put it aside.
+        // Downloads the latest pre-compiled Windows build from my build server
         String prompt = "This will download the latest build of hacktv from the author's Github repository.\n"
                     + "This requires an internet connection and will only work if you have write access "
                     + "to the directory where this application is located.\n"
