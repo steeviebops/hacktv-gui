@@ -8264,12 +8264,12 @@ public class GUI extends javax.swing.JFrame {
                 // method works on other systems too.
                 boolean cr = false;
                 for (String o : chunks) {
-                    // Start of carriage return (CR) handling.
+                    // Start of CR handling.
                     if (o.equals("\r")) {
                         // Let the next loop know that we found a CR
                         cr = true;
                     }
-                    else if (((cr) && (!o.equals("\n")))) {
+                    else if ((cr) && (!o.equals("\n"))) {
                         String s = txtConsoleOutput.getText();
                         txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
                         cr = false;
@@ -8380,7 +8380,7 @@ public class GUI extends javax.swing.JFrame {
                         // Let the next loop know that we found a CR
                         cr = true;
                     }
-                    else if (((cr) && (!o.equals("\n")))) {
+                    else if ((cr) && (!o.equals("\n"))) {
                         String s = txtConsoleOutput.getText();
                         txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
                         cr = false;
@@ -9045,9 +9045,14 @@ public class GUI extends javax.swing.JFrame {
 
     private void radTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radTestActionPerformed
         // Enable test card dropdown
-        if (cmbTest.getItemCount() > 1) {
+        if ((!captainJack) && (cmbTest.getItemCount() > 1)) {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
+        }
+        else if ((captainJack) && (cmbTest.getItemCount() > 1)) {
+            cmbTest.setEnabled(true);
+            cmbTest.setSelectedIndex(0);
+            disableSourceOptions();
         }
         else {
             disableSourceOptions();
@@ -10444,7 +10449,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_chkSVideoActionPerformed
 
     private void cmbTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTestActionPerformed
-        if ((!captainJack) && (radTest.isSelected())) { 
+        if ((!captainJack) && (radTest.isSelected())) {
             if (isPhilipsTestSignal()) {
                 // Philips patterns use a fixed sample rate, usually 13.5 or 20 MHz.
                 String tsr = getTCSampleRate();
