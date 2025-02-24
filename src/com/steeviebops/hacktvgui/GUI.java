@@ -76,8 +76,6 @@ import java.util.Random;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.KeyStroke;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Utilities;
 
 public class GUI extends javax.swing.JFrame {    
     // Application name
@@ -8260,33 +8258,25 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected void process(List<String> chunks) {
                 // Here we receive the values from publish() and display
-                // them in the console
+                // them in the console.
+                // We need to handle carriage returns (CRs) differently on
+                // Windows, due to it using CR+LF for new lines. But this
+                // method works on other systems too.
+                boolean cr = false;
                 for (String o : chunks) {
-                    if (captainJack) {
-                        // Timestamp handling on Captain Jack's fork
-                        String s = txtConsoleOutput.getText();
-                        int l = s.lastIndexOf("\r");
-                        String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
-                        // If o is a carriage return (CR) character, and the
-                        // text after the last CR is a timestamp...
-                        if ((o.equals("\r") && (l != -1) && (s.substring(l + 1, s.length())).matches(r))) {
-                            try {
-                                // ...blank the previous timestamp
-                                int rs = Utilities.getRowStart(txtConsoleOutput, l) + 1;
-                                int re = Utilities.getRowEnd(txtConsoleOutput, txtConsoleOutput.getText().length());
-                                txtConsoleOutput.replaceRange("", rs, re);
-                            }
-                            catch (BadLocationException e) {
-                                System.err.println(e);
-                                txtConsoleOutput.append(o);
-                            }
-                        }
-                        else {
-                            // Append the character as normal
-                            txtConsoleOutput.append(o);
-                        }
+                    // Start of carriage return (CR) handling.
+                    if (o.equals("\r")) {
+                        // Let the next loop know that we found a CR
+                        cr = true;
                     }
+                    else if (((cr) && (!o.equals("\n")))) {
+                        String s = txtConsoleOutput.getText();
+                        txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
+                        cr = false;
+                    }
+                    // End of CR handling
                     else {
+                        // Append the character as normal
                         txtConsoleOutput.append(o);
                     }
                 }
@@ -8357,18 +8347,9 @@ public class GUI extends javax.swing.JFrame {
                     hpid = h.pid();
                     // Capture the output of hacktv
                     try (var br = new BufferedReader(new InputStreamReader(h.getInputStream(), StandardCharsets.UTF_8))) {
-                        if (!captainJack) {
-                            int a;
-                            while ( (a = br.read()) != -1 ) {
-                                publish(String.valueOf((char)a));
-                            }
-                        }
-                        else {
-                            String b;
-                            String r = "^(?:\\d+(?::[0-5][0-9]:[0-5][0-9])?|[0-5]?[0-9]:[0-5][0-9])$";
-                            while ( (b = br.readLine()) != null ) {
-                                if (!b.matches(r)) publish(b + "\n");
-                            }
+                        int a;
+                        while ( (a = br.read()) != -1 ) {
+                            publish(String.valueOf((char)a));
                         }
                     }
                     publish("\n" + "hacktv stopped");
@@ -8392,10 +8373,23 @@ public class GUI extends javax.swing.JFrame {
             } // End doInBackground
             @Override
             protected void process(List<String> chunks) {
-                // Here we receive the values from publish() and display
-                // them in the console
+                boolean cr = false;
                 for (String o : chunks) {
-                    txtConsoleOutput.append(o);
+                    // Start of carriage return (CR) handling.
+                    if (o.equals("\r")) {
+                        // Let the next loop know that we found a CR
+                        cr = true;
+                    }
+                    else if (((cr) && (!o.equals("\n")))) {
+                        String s = txtConsoleOutput.getText();
+                        txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
+                        cr = false;
+                    }
+                    // End of CR handling
+                    else {
+                        // Append the character as normal
+                        txtConsoleOutput.append(o);
+                    }
                 }
             }// End of process
             @Override
