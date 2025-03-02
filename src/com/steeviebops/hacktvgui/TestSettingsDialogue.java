@@ -71,6 +71,11 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         lblLocationDescriptor.setText("Specify the directory containing the test signal files.");
 
         txtTSDir.addMouseListener(new ContextMenuListener());
+        txtTSDir.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTSDirKeyPressed(evt);
+            }
+        });
 
         btnTSDir.setText("Browse...");
         btnTSDir.addActionListener(new java.awt.event.ActionListener() {
@@ -151,6 +156,9 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
 
         txtTop.addMouseListener(new ContextMenuListener());
         txtTop.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTopKeyPressed(evt);
+            }
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtTopKeyTyped(evt);
             }
@@ -160,6 +168,9 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
 
         txtBottom.addMouseListener(new ContextMenuListener());
         txtBottom.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtBottomKeyPressed(evt);
+            }
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtBottomKeyTyped(evt);
             }
@@ -296,6 +307,22 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         return changed;
     }
     
+    private void processTypedKey(int kc) {
+        switch(kc) {
+            case 10:
+                // Enter key
+                btnOK.doClick();
+                break;
+            case 27:
+                // Esc key
+                btnCancel.doClick();
+                break;
+            default:
+                // Do nothing for other keys
+                break;
+        }
+    }
+    
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         // If the directory has changed, process the new one
         if (!txtTSDir.getText().equals(oldDir)) {
@@ -305,6 +332,11 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
             if (Files.exists(Path.of(l + File.separator + "pm8546g.bin"))) {
                 // Save the chosen directory to prefs
                 GUI.PREFS.put("testdir", l);
+                changed = true;
+            }
+            else if (txtTSDir.getText().isBlank()) {
+                // No directory specified, default to the hacktv location
+                GUI.PREFS.remove("testdir");
                 changed = true;
             }
             else {
@@ -386,6 +418,18 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
             evt.consume();
         }
     }//GEN-LAST:event_txtBottomKeyTyped
+
+    private void txtTSDirKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTSDirKeyPressed
+        processTypedKey(evt.getKeyCode());
+    }//GEN-LAST:event_txtTSDirKeyPressed
+
+    private void txtTopKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTopKeyPressed
+        processTypedKey(evt.getKeyCode());
+    }//GEN-LAST:event_txtTopKeyPressed
+
+    private void txtBottomKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBottomKeyPressed
+        processTypedKey(evt.getKeyCode());
+    }//GEN-LAST:event_txtBottomKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;

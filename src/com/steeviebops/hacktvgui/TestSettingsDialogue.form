@@ -114,6 +114,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtTSDir">
+          <Events>
+            <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTSDirKeyPressed"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtTSDir.addMouseListener(new ContextMenuListener());"/>
           </AuxValues>
@@ -295,6 +298,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtTop">
               <Events>
+                <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTopKeyPressed"/>
                 <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTopKeyTyped"/>
               </Events>
               <AuxValues>
@@ -308,6 +312,7 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtBottom">
               <Events>
+                <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtBottomKeyPressed"/>
                 <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtBottomKeyTyped"/>
               </Events>
               <AuxValues>

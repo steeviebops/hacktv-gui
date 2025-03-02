@@ -246,8 +246,11 @@ public class GUI extends javax.swing.JFrame {
         tabPane = new javax.swing.JTabbedPane();
         sourceTab = new javax.swing.JPanel();
         sourcePanel = new javax.swing.JPanel();
+        sourceSelectPanel = new javax.swing.JPanel();
         radLocalSource = new javax.swing.JRadioButton();
         radTest = new javax.swing.JRadioButton();
+        cmbTest = new javax.swing.JComboBox<>();
+        btnTestSettings = new javax.swing.JButton();
         chkRepeat = new javax.swing.JCheckBox();
         chkTimestamp = new javax.swing.JCheckBox();
         chkInterlace = new javax.swing.JCheckBox();
@@ -260,7 +263,6 @@ public class GUI extends javax.swing.JFrame {
         lblSubtitleIndex = new javax.swing.JLabel();
         chkARCorrection = new javax.swing.JCheckBox();
         cmbARCorrection = new javax.swing.JComboBox<>();
-        cmbTest = new javax.swing.JComboBox<>();
         playlistScrollPane = new javax.swing.JScrollPane();
         lstPlaylist = new javax.swing.JList<>();
         btnAdd = new javax.swing.JButton();
@@ -412,7 +414,6 @@ public class GUI extends javax.swing.JFrame {
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
         btnSatSettings = new javax.swing.JButton();
-        btnTestSettings = new javax.swing.JButton();
         txtStatus = new javax.swing.JTextField();
         runButtonGrid = new javax.swing.JPanel();
         btnRun = new javax.swing.JButton();
@@ -477,6 +478,8 @@ public class GUI extends javax.swing.JFrame {
 
         sourcePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Source options"));
 
+        sourceSelectPanel.setLayout(new java.awt.GridBagLayout());
+
         sourceButtonGroup.add(radLocalSource);
         radLocalSource.setText("Local or internet source");
         radLocalSource.addActionListener(new java.awt.event.ActionListener() {
@@ -484,6 +487,12 @@ public class GUI extends javax.swing.JFrame {
                 radLocalSourceActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        sourceSelectPanel.add(radLocalSource, gridBagConstraints);
 
         sourceButtonGroup.add(radTest);
         radTest.setText("Test card");
@@ -492,6 +501,45 @@ public class GUI extends javax.swing.JFrame {
                 radTestActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 18, 0, 0);
+        sourceSelectPanel.add(radTest, gridBagConstraints);
+
+        cmbTest.setEnabled(false);
+        cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbTestMouseWheelMoved(evt);
+            }
+        });
+        cmbTest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbTestActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 18, 0, 0);
+        sourceSelectPanel.add(cmbTest, gridBagConstraints);
+
+        btnTestSettings.setText("Settings...");
+        btnTestSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTestSettingsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 18, 0, 10);
+        sourceSelectPanel.add(btnTestSettings, gridBagConstraints);
 
         chkRepeat.setText("Repeat indefinitely");
 
@@ -561,18 +609,6 @@ public class GUI extends javax.swing.JFrame {
         cmbARCorrection.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbARCorrectionMouseWheelMoved(evt);
-            }
-        });
-
-        cmbTest.setEnabled(false);
-        cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-                cmbTestMouseWheelMoved(evt);
-            }
-        });
-        cmbTest.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbTestActionPerformed(evt);
             }
         });
 
@@ -684,13 +720,6 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(playlistScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
                             .addGroup(sourcePanelLayout.createSequentialGroup()
-                                .addComponent(radLocalSource)
-                                .addGap(39, 39, 39)
-                                .addComponent(radTest)
-                                .addGap(18, 18, 18)
-                                .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(sourcePanelLayout.createSequentialGroup()
                                 .addComponent(txtSource, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmbM3USource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -701,17 +730,17 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(btnPlaylistDown, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnPlaylistStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnSourceBrowse, javax.swing.GroupLayout.Alignment.TRAILING))))
+                            .addComponent(btnSourceBrowse, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(sourcePanelLayout.createSequentialGroup()
+                        .addComponent(sourceSelectPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         sourcePanelLayout.setVerticalGroup(
             sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sourcePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(radLocalSource)
-                    .addComponent(radTest)
-                    .addComponent(cmbTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
+                .addComponent(sourceSelectPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cmbM3USource)
@@ -2222,14 +2251,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        btnTestSettings.setText("Test signal settings...");
-        btnTestSettings.setActionCommand("");
-        btnTestSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTestSettingsActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout generalSettingsPanelLayout = new javax.swing.GroupLayout(generalSettingsPanel);
         generalSettingsPanel.setLayout(generalSettingsPanelLayout);
         generalSettingsPanelLayout.setHorizontalGroup(
@@ -2248,11 +2269,8 @@ public class GUI extends javax.swing.JFrame {
                         .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cmbNMSCeefaxRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(generalSettingsPanelLayout.createSequentialGroup()
-                        .addComponent(btnSatSettings)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnTestSettings)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnSatSettings))
+                .addContainerGap(237, Short.MAX_VALUE))
         );
         generalSettingsPanelLayout.setVerticalGroup(
             generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2271,9 +2289,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(lblLookAndFeel)
                     .addComponent(cmbLookAndFeel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(generalSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSatSettings)
-                    .addComponent(btnTestSettings))
+                .addComponent(btnSatSettings)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -3445,7 +3461,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void fsphil() {
         // Enable test signal settings button
-        btnTestSettings.setEnabled(mattstvbarn);
+        btnTestSettings.setVisible(mattstvbarn);
         // Disable features unsupported in fsphil's build
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkLogo.isSelected()) chkLogo.doClick();
@@ -3471,8 +3487,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void captainJack() {
-        // Disable test signal settings button
-        btnTestSettings.setEnabled(false);
+        // Hide test signal settings button
+        btnTestSettings.setVisible(false);
         // Enable features supported in Captain Jack's build
         chkLogo.setEnabled(true);
         addLogoOptions();
@@ -6270,41 +6286,51 @@ public class GUI extends javax.swing.JFrame {
                     else if (!txtSampleRate.getText().equals(tcsr)) {
                         messageBox(err, JOptionPane.WARNING_MESSAGE);
                         return null;
+                    }                
+                    // Test signals location
+                    String p = PREFS.get("testdir", hackTVDirectory);
+                    al.add("--testsignals-path");
+                    if ((runningOnWindows) && (p.matches(".*\\s.*"))) {
+                        al.add('\u0022' + p + '\u0022');
                     }
+                    else {
+                        al.add(p);
+                    }
+                    // Add test signal parameters
+                    al.add("--testsignal");
+                    al.add(sa[0]);
+                    // Check if the selected pattern supports text insertion
+                    if ((sa.length >= 3) && (sa[3].equals("1"))) {
+                        String t1 = PREFS.get("philipstext1", "");
+                        String t2 = PREFS.get("philipstext2", "");
+                        // Populate text fields and clock/date
+                        if (!t1.isBlank()) {
+                            al.add("--text1");
+                            al.add('\u0022' + t1 + '\u0022');
+                        }  
+                        if (!t2.isBlank()) {
+                            al.add("--text2");
+                            al.add('\u0022' + t2 + '\u0022');
+                        }
+                        switch (PREFS.getInt("philipsclock", 0)) {
+                            case 0:
+                            default:
+                                // Clock off
+                                break;
+                            case 1:
+                                // Clock on
+                                al.add("--clockmode");
+                                al.add("time");
+                                break;
+                            case 2:
+                                // Clock and date on
+                                al.add("--clockmode");
+                                al.add("datetime");
+                                break;
+                        }
+                    }
+                    return al;
                 }
-                al.add("--testsignal");
-                al.add(sa[0]);
-                // Check if the selected pattern supports text insertion
-                if ((sa.length >= 3) && (sa[3].equals("1"))) {
-                    String t1 = PREFS.get("philipstext1", "");
-                    String t2 = PREFS.get("philipstext2", "");
-                    // Populate text fields and clock/date
-                    if (!t1.isBlank()) {
-                        al.add("--text1");
-                        al.add('\u0022' + t1 + '\u0022');
-                    }  
-                    if (!t2.isBlank()) {
-                        al.add("--text2");
-                        al.add('\u0022' + t2 + '\u0022');
-                    }
-                    switch (PREFS.getInt("philipsclock", 0)) {
-                        case 0:
-                        default:
-                            // Clock off
-                            break;
-                        case 1:
-                            // Clock on
-                            al.add("--clockmode");
-                            al.add("time");
-                            break;
-                        case 2:
-                            // Clock and date on
-                            al.add("--clockmode");
-                            al.add("datetime");
-                            break;
-                    }
-                }
-                return al;
             }
         }
         else if (radTest.isSelected()) {
@@ -6314,6 +6340,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean isPhilipsTestSignal() {
+        if (!mattstvbarn) return false;
         if (cmbTest.getSelectedIndex() == -1) return false;
         String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
         String d = PREFS.get("testdir", hackTVDirectory);
@@ -8194,14 +8221,8 @@ public class GUI extends javax.swing.JFrame {
                 // Create process with the ArrayList we populated above
                 var pb = new ProcessBuilder(allArgs);
                 pb.redirectErrorStream(true);
-                if (isPhilipsTestSignal()) {
-                    // Set working directory to test signal location
-                    pb.directory(new File(PREFS.get("testdir", hackTVDirectory)));
-                }
-                else {
-                    // Set working directory to hacktv location
-                    pb.directory(new File(hackTVDirectory));
-                }
+                // Set working directory to hacktv location
+                pb.directory(new File(hackTVDirectory));
                 // Try to start the process
                 try {
                     Process p = pb.start();
@@ -10671,6 +10692,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup sourceButtonGroup;
     private javax.swing.JFileChooser sourceFileChooser;
     private javax.swing.JPanel sourcePanel;
+    private javax.swing.JPanel sourceSelectPanel;
     private javax.swing.JPanel sourceTab;
     private javax.swing.JTabbedPane tabPane;
     private javax.swing.JFileChooser teletextFileChooser;
