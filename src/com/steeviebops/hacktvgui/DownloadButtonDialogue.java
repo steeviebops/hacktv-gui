@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Stephen
+ * Copyright (C) 2025 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,25 +21,15 @@ import java.awt.Cursor;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Stephen
- */
 public class DownloadButtonDialogue extends javax.swing.JDialog {
     
     private String selection;
 
-    /**
-     * Creates new form DownloadButtonDialogue
-     * @param parent
-     * @param modal
-     */
     public DownloadButtonDialogue(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         super.setLocationRelativeTo(parent);
     }
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -230,7 +220,7 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
                 selection = "https://download.bops.ie/hacktv/captainjack.zip";
                 break;
             case 2:
-                // Matts TV Barn (inaxeon)
+                // Matt's TV Barn (inaxeon)
                 selection = "https://download.bops.ie/hacktv/mattstvbarn.zip";
                 break;
             default:
@@ -248,7 +238,7 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
             new Shared().launchBrowser(lblinaxeon2.getText().split("\"(.*?)")[1]);
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null ,"Unable to launch default browser.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_lblinaxeon2MouseClicked
 
