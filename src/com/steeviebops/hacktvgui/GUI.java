@@ -5599,6 +5599,198 @@ public class GUI extends javax.swing.JFrame {
         downloadInProgress = false;
     }
     
+    private void downloadHackTV_Win32(String dUrl) {
+        // Downloads the latest pre-compiled Windows build from my build server
+        // The download URL is sent here from the download dialogue
+        btnDownloadHackTV.setText("Cancel");
+        // Disable Teletext download options so they don't interfere
+        if (chkTeletext.isSelected()) {
+            btnTeefax.setEnabled(false);
+            btnSpark.setEnabled(false);
+            btnNMSCeefax.setEnabled(false);
+            lblTeefax.setEnabled(false);
+            lblSpark.setEnabled(false);
+            lblNMSCeefax.setEnabled(false);
+            lblDownload.setEnabled(false);
+            downloadPanel.setEnabled(false);            
+        }
+        downloadInProgress = true;
+        txtStatus.setText("Connecting to " + dUrl);
+        var downloadHackTV = new SwingWorker<String, Integer>() {
+            long p;
+            long size;
+            @Override
+            protected String doInBackground() throws Exception {
+                createTempDirectory();
+                String t = tempDir.toString();
+                String downloadPath = t + File.separator + "hacktv.zip";
+                String tmpExePath = t + File.separator + "hacktv.exe";
+                String exePath = jarDir + File.separator + "hacktv.exe";
+                String readmePath = t + File.separator + "readme.txt";
+                var testSignalPath = Path.of(t + File.separator + "testsignals");
+                var con = new URI(dUrl).toURL().openConnection();
+                size = con.getContentLengthLong();
+                try (var in = new BufferedInputStream(con.getInputStream());
+                    var out = new FileOutputStream(downloadPath)) {
+                    byte buffer[] = new byte[1024];
+                    int b;
+                    while (((b = in.read(buffer, 0, 1024)) != -1) && (!downloadCancelled)) {
+                        publish(b);
+                        out.write(buffer, 0, b);
+                    }
+                    out.close();
+                }
+                catch (IOException ex) {
+                    System.err.println(ex);
+                    var err = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(err));
+                    if (err.toString().contains("CertificateExpiredException")) {
+                        return "CertificateExpiredException";
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                if (downloadCancelled) {
+                    // Delete the partially downloaded file and return
+                    Files.deleteIfExists(Path.of(downloadPath));
+                    return "";
+                }
+                else {
+                    // Unzip what we got to the temp directory
+                    SharedInst.unzipFile(downloadPath, t);
+                    // If hacktv.exe exists in the temp directory, attempt to
+                    // move it to the working directory
+                    if (Files.exists(Path.of(tmpExePath))) {
+                        // Delete the readme file that was extracted from the zip
+                        if (Files.exists(Path.of(readmePath))) {
+                            Shared.deleteFSObject(Path.of(readmePath));
+                        }
+                        Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
+                        // If downloading a build with included test signals
+                        if (Files.exists(testSignalPath) && Files.isDirectory(testSignalPath)) {
+                            var tsd = Path.of(jarDir + File.separator + "testsignals");
+                            if (!Files.exists(tsd)) Files.createDirectory(tsd);
+                            if (Files.isDirectory(tsd)) {
+                                var d = testSignalPath.toFile().listFiles();
+                                if (d != null) {
+                                    for (File f : d) {
+                                        Files.move(
+                                                f.toPath(),
+                                                Path.of(tsd + File.separator + f.getName()),
+                                                StandardCopyOption.REPLACE_EXISTING
+                                        );
+                                    }
+                                }
+                                PREFS.put("testdir", tsd.toString());
+                                Shared.deleteFSObject(testSignalPath);
+                            }
+                        }
+                        // Clean up temp directory
+                        Shared.deleteFSObject(Path.of(downloadPath));
+                        return exePath;
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            } // End doInBackground()
+            @Override
+            protected void process(List<Integer> c) {
+                for (int i : c) {
+                    p = p + i;
+                    double d = (double) p / size * 100;
+                    txtStatus.setText("Downloading: " + (int) d + "%");
+                    if (Taskbar.isTaskbarSupported()) {
+                        var t = Taskbar.getTaskbar();
+                        if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                            t.setWindowProgressValue(GUI.this, (short) d);
+                        }
+                        else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                            t.setProgressValue((short) d);
+                        }
+                    } 
+                }
+            }
+            @Override
+            protected void done() {
+                downloadInProgress = false;
+                if (!btnDownloadHackTV.isEnabled()) btnDownloadHackTV.setEnabled(true);
+                btnDownloadHackTV.setText("Download...");
+                // Re-enable Teletext download options
+                if (chkTeletext.isSelected()) {
+                    btnTeefax.setEnabled(true);
+                    btnSpark.setEnabled(true);
+                    btnNMSCeefax.setEnabled(true);
+                    lblTeefax.setEnabled(true);
+                    lblSpark.setEnabled(true);
+                    lblNMSCeefax.setEnabled(true);
+                    lblDownload.setEnabled(true);
+                    downloadPanel.setEnabled(true);                    
+                }
+                // Reset taskbar/dock progress bars
+                if (Taskbar.isTaskbarSupported()) {
+                    var t = Taskbar.getTaskbar();
+                    if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                        t.setWindowProgressState(GUI.this, Taskbar.State.OFF);
+                    }
+                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                        t.setProgressValue(-1);
+                    }
+                }
+                // Retrieve the return value of doInBackground.
+                String exePath;
+                try {
+                    exePath = get();
+                }
+                catch (InterruptedException | ExecutionException ex) {
+                    System.err.println(ex);
+                    exePath = null;
+                }
+                if (exePath == null) {
+                    messageBox("An error occurred while downloading hacktv.\n"
+                            + "Please ensure that you have write permissions to the "
+                            + "application directory and that you have internet access.", JOptionPane.WARNING_MESSAGE);
+                    txtStatus.setText("Failed");
+                    downloadCancelled = false;
+                }
+                else if (exePath.isEmpty()) {
+                    txtStatus.setText("Cancelled");
+                    downloadCancelled = false;
+                }
+                else if (exePath.equals("CertificateExpiredException")) {
+                    messageBox("Download failed due to an expired SSL/TLS certificate.\n"
+                            + "Please ensure that your system date is correct. "
+                            + "Otherwise, please try again later.", JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    // Set location of hacktv so we can find it later
+                    if (Files.exists(Path.of(exePath))) {
+                        hackTVPath = exePath;
+                        txtHackTVPath.setText(exePath);
+                        // Store the specified path in the preferences store.
+                        PREFS.put("HackTVPath", hackTVPath);
+                        // Load the full path to a variable so we can use getParent on it
+                        // and get its parent directory path
+                        hackTVDirectory = new File(hackTVPath).getParent();    
+                        // Detect what were provided with
+                        detectFork();
+                        selectModesFile();
+                        if (captainJack) {
+                            captainJack();
+                        }
+                        else {
+                            fsphil();
+                        }
+                        addTestCardOptions();
+                        txtStatus.setText("Done");
+                    }
+                }
+            } // End done()
+        }; // End SwingWorker
+        downloadHackTV.execute();
+    }
+    
     private void enableScrambling() {
         cmbScramblingType.setEnabled(true);
         lblScramblingSystem.setEnabled(true);
@@ -9840,205 +10032,10 @@ public class GUI extends javax.swing.JFrame {
             downloadCancelled = true;
             return;
         }
-        // Downloads the latest pre-compiled Windows build from my build server
-        String prompt = "This will download the latest build of hacktv from the author's Github repository.\n"
-                    + "This requires an internet connection and will only work if you have write access "
-                    + "to the directory where this application is located.\n"
-                    + "Please select the build to download.";
-        String opts[] = {
-            "fsphil",
-            "Captain Jack",
-            "Cancel"
-        };
-        int q = JOptionPane.showOptionDialog(
-                null,
-                prompt,
-                APP_NAME,
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                opts,
-                opts[2]
-        );
-        String dUrl;
-        switch (q) {
-            case 0:
-                // fsphil download
-                dUrl = "https://download.bops.ie/hacktv/fsphil.zip";
-                break;
-            case 1:
-                // Captain Jack download
-                dUrl = "https://download.bops.ie/hacktv/captainjack.zip";
-                break;
-            default:
-                return;
-        }
-        btnDownloadHackTV.setText("Cancel");
-        // Disable Teletext download options so they don't interfere
-        if (chkTeletext.isSelected()) {
-            btnTeefax.setEnabled(false);
-            btnSpark.setEnabled(false);
-            btnNMSCeefax.setEnabled(false);
-            lblTeefax.setEnabled(false);
-            lblSpark.setEnabled(false);
-            lblNMSCeefax.setEnabled(false);
-            lblDownload.setEnabled(false);
-            downloadPanel.setEnabled(false);            
-        }
-        downloadInProgress = true;
-        txtStatus.setText("Connecting to " + dUrl);
-        var downloadHackTV = new SwingWorker<String, Integer>() {
-            long p;
-            long size;
-            @Override
-            protected String doInBackground() throws Exception {
-                createTempDirectory();
-                String t = tempDir.toString();
-                String downloadPath = t + File.separator + "hacktv.zip";
-                String tmpExePath = t + File.separator + "hacktv.exe";
-                String exePath = jarDir + File.separator + "hacktv.exe";
-                String readmePath = t + File.separator + "readme.txt";
-                var con = new URI(dUrl).toURL().openConnection();
-                size = con.getContentLengthLong();
-                try (var in = new BufferedInputStream(con.getInputStream());
-                    var out = new FileOutputStream(downloadPath)) {
-                    byte buffer[] = new byte[1024];
-                    int b;
-                    while (((b = in.read(buffer, 0, 1024)) != -1) && (!downloadCancelled)) {
-                        publish(b);
-                        out.write(buffer, 0, b);
-                    }
-                    out.close();
-                }
-                catch (IOException ex) {
-                    System.err.println(ex);
-                    var err = new StringWriter();
-                    ex.printStackTrace(new PrintWriter(err));
-                    if (err.toString().contains("CertificateExpiredException")) {
-                        return "CertificateExpiredException";
-                    }
-                    else {
-                        return null;
-                    }
-                }
-                if (downloadCancelled) {
-                    // Delete the partially downloaded file and return
-                    Files.deleteIfExists(Path.of(downloadPath));
-                    return "";
-                }
-                else {
-                    // Unzip what we got to the temp directory
-                    SharedInst.unzipFile(downloadPath, t);
-                    // If hacktv.exe exists in the temp directory, delete the zip
-                    // and attempt to move it to the working directory
-                    if (Files.exists(Path.of(tmpExePath))) {
-                        // Delete the readme file that was extracted from the zip
-                        if (Files.exists((Path.of(readmePath)))) {
-                            Shared.deleteFSObject(Path.of(readmePath));
-                        }
-                        Shared.deleteFSObject(Path.of(downloadPath));
-                        Files.move(Path.of(tmpExePath), Path.of(exePath), StandardCopyOption.REPLACE_EXISTING);
-                        return exePath;
-                    }
-                    else {
-                        return null;
-                    }
-                }
-            } // End doInBackground()
-            @Override
-            protected void process(List<Integer> c) {
-                for (int i : c) {
-                    p = p + i;
-                    double d = (double) p / size * 100;
-                    txtStatus.setText("Downloading: " + (int) d + "%");
-                    if (Taskbar.isTaskbarSupported()) {
-                        var t = Taskbar.getTaskbar();
-                        if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                            t.setWindowProgressValue(GUI.this, (short) d);
-                        }
-                        else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-                            t.setProgressValue((short) d);
-                        }
-                    } 
-                }
-            }
-            @Override
-            protected void done() {
-                downloadInProgress = false;
-                if (!btnDownloadHackTV.isEnabled()) btnDownloadHackTV.setEnabled(true);
-                btnDownloadHackTV.setText("Download...");
-                // Re-enable Teletext download options
-                if (chkTeletext.isSelected()) {
-                    btnTeefax.setEnabled(true);
-                    btnSpark.setEnabled(true);
-                    btnNMSCeefax.setEnabled(true);
-                    lblTeefax.setEnabled(true);
-                    lblSpark.setEnabled(true);
-                    lblNMSCeefax.setEnabled(true);
-                    lblDownload.setEnabled(true);
-                    downloadPanel.setEnabled(true);                    
-                }
-                // Reset taskbar/dock progress bars
-                if (Taskbar.isTaskbarSupported()) {
-                    var t = Taskbar.getTaskbar();
-                    if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                        t.setWindowProgressState(GUI.this, Taskbar.State.OFF);
-                    }
-                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-                        t.setProgressValue(-1);
-                    }
-                }
-                // Retrieve the return value of doInBackground.
-                String exePath;
-                try {
-                    exePath = get();
-                }
-                catch (InterruptedException | ExecutionException ex) {
-                    System.err.println(ex);
-                    exePath = null;
-                }
-                if (exePath == null) {
-                    messageBox("An error occurred while downloading hacktv.\n"
-                            + "Please ensure that you have write permissions to the "
-                            + "application directory and that you have internet access.", JOptionPane.WARNING_MESSAGE);
-                    txtStatus.setText("Failed");
-                    downloadCancelled = false;
-                }
-                else if (exePath.isEmpty()) {
-                    txtStatus.setText("Cancelled");
-                    downloadCancelled = false;
-                }
-                else if (exePath.equals("CertificateExpiredException")) {
-                    messageBox("Download failed due to an expired SSL/TLS certificate.\n"
-                            + "Please ensure that your system date is correct. "
-                            + "Otherwise, please try again later.", JOptionPane.WARNING_MESSAGE);
-                }
-                else {
-                    // Set location of hacktv so we can find it later
-                    if (Files.exists(Path.of(exePath))) {
-                        hackTVPath = exePath;
-                        txtHackTVPath.setText(exePath);
-                        // Store the specified path in the preferences store.
-                        PREFS.put("HackTVPath", hackTVPath);
-                        // Load the full path to a variable so we can use getParent on it
-                        // and get its parent directory path
-                        hackTVDirectory = new File(hackTVPath).getParent();    
-                        // Detect what were provided with
-                        detectFork();
-                        selectModesFile();
-                        if (captainJack) {
-                            captainJack();
-                        }
-                        else {
-                            fsphil();
-                        }
-                        addTestCardOptions();
-                        txtStatus.setText("Done");
-                    }
-                }
-            } // End done()
-        }; // End SwingWorker
-        downloadHackTV.execute();
+        var ds = new DownloadButtonDialogue(this, true);
+        ds.setVisible(true);
+        String s = ds.getSelection();
+        if (s != null) downloadHackTV_Win32(s);
     }//GEN-LAST:event_btnDownloadHackTVActionPerformed
 
     private void menuGithubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGithubRepoActionPerformed
