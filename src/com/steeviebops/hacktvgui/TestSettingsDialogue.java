@@ -119,10 +119,12 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         radClockOff.setText("Off");
 
         clockBG.add(radClockOn);
-        radClockOn.setText("Clock only");
+        radClockOn.setText("Time");
+        radClockOn.setActionCommand("Time");
 
         clockBG.add(radDateOn);
-        radDateOn.setText("Clock and date");
+        radDateOn.setText("Time and date");
+        radDateOn.setActionCommand("Time and date");
 
         javax.swing.GroupLayout clockPanelLayout = new javax.swing.GroupLayout(clockPanel);
         clockPanel.setLayout(clockPanelLayout);

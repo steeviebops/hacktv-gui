@@ -7059,34 +7059,22 @@ public class GUI extends javax.swing.JFrame {
         if (chkTeletext.isSelected()) {
             al.add("--teletext");
             // If the txtTeletextSource field contains quotes, remove them
-            if ((txtTeletextSource.getText()).contains(String.valueOf((char)34))) {
+            if ((txtTeletextSource.getText()).matches(".*\\s.*")) {
                 txtTeletextSource.setText(txtTeletextSource.getText().replaceAll(String.valueOf((char)34), ""));
             }
-            if ((txtTeletextSource.getText()).isEmpty()) {
-                // Create a temp directory if it does not exist
-                createTempDirectory();
-                // Copy the demo page resource to the temp directory
-                try {
-                    SharedInst.copyResource("/com/steeviebops/resources/demo.tti", tempDir.toString() + File.separator + "demo.tti", this.getClass());   
-                    if ( (runningOnWindows) && tempDir.toString().contains(" ") ) {
-                        al.add('\u0022' + tempDir.toString() + File.separator + "demo.tti" + '\u0022');
-                    }
-                    else {
-                        al.add(tempDir.toString() + File.separator + "demo.tti");
-                    }
-                } catch (IOException ex) {
-                    System.err.println("An error occurred while attempting to copy to the temp directory: " + ex);
-                    return null;
-                }
+            if ((txtTeletextSource.getText()).isBlank()) {
+                tabPane.setSelectedIndex(3);
+                messageBox("Please specify a directory that contains teletext files, or a teletext archive file.", JOptionPane.WARNING_MESSAGE);
+                return null;
             }
             else if ( (txtTeletextSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".t42")) 
-                    && (runningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
+                    && (runningOnWindows) && (txtTeletextSource.getText().matches(".*\\s.*")) ) {
                 al.add("raw:" + '\u0022' + txtTeletextSource.getText() + '\u0022');
             }
             else if (txtTeletextSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".t42")) {
                 al.add("raw:" + txtTeletextSource.getText());
             }
-            else if ( (runningOnWindows) && (txtTeletextSource.getText().contains(" ")) ) {
+            else if ( (runningOnWindows) && (txtTeletextSource.getText().matches(".*\\s.*")) ) {
                 al.add('\u0022' + txtTeletextSource.getText() + '\u0022');
             }
             else {
@@ -8233,8 +8221,9 @@ public class GUI extends javax.swing.JFrame {
         }
         // The true parameter here suppresses any error messages, used here to 
         // present a non-fatal error so it is not presented twice.
-        if (checkTeletextSource(false) != null)  {
-            allArgs.addAll(checkTeletextSource(true));
+        var txt = checkTeletextSource(true);
+        if (txt != null)  {
+            allArgs.addAll(txt);
         }
         else {
             return;

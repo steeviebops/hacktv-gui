@@ -27,8 +27,11 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
 
     public DownloadButtonDialogue(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        initComponents();
-        super.setLocationRelativeTo(parent);
+        // Don't init on anything other than Windows
+        if (System.getProperty("os.name").contains("Windows")) {
+            initComponents();
+            super.setLocationRelativeTo(parent);
+        }
     }
 
     /**
