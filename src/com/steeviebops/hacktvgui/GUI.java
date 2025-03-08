@@ -2722,11 +2722,6 @@ public class GUI extends javax.swing.JFrame {
         var icons = new ArrayList<Image>();
         try {
             icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/test.gif")));
-            /* WIP
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/icon16.png")));
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/icon32.png")));
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/icon48.png")));
-            */
         }
         catch (IOException e) {
             System.err.println("Icon load failed, using default.\n" + e);
@@ -9779,9 +9774,12 @@ public class GUI extends javax.swing.JFrame {
                         + "The yt-dlp handler is only supported for single URLs at present.", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        else if (isPhilipsTestSignal()) {
+        else if ((isPhilipsTestSignal()) && (txtSource.getText().isBlank())) {
             // Don't add Philips test cards
-            messageBox("Unable to add this test card to the playlist.\n", JOptionPane.WARNING_MESSAGE);
+            messageBox("Adding a Philips test pattern to the playlist is not supported. "
+                    + "Click \"Run hacktv\" to use it without the playlist.\n"
+                    + "However, you can add audio files to the playlist, which "
+                    + "will be played over the test pattern.", JOptionPane.WARNING_MESSAGE);
             return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
