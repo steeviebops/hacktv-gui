@@ -2218,6 +2218,11 @@ public class GUI extends javax.swing.JFrame {
                 cmbLookAndFeelMouseWheelMoved(evt);
             }
         });
+        cmbLookAndFeel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cmbLookAndFeelMouseEntered(evt);
+            }
+        });
         cmbLookAndFeel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbLookAndFeelActionPerformed(evt);
@@ -2569,16 +2574,18 @@ public class GUI extends javax.swing.JFrame {
             // System.setProperty("apple.awt.application.appearance", "system");
         }
         try {
-            // Create GUI class instance
-            final var g = new GUI();
-            if (g.populateUI(args)) {
-                // Prevent window from being resized below the current size
-                g.setMinimumSize(g.getSize());
-                g.setVisible(true);
-            }
-            else {
-                System.exit(1);
-            }
+            SwingUtilities.invokeLater(() -> {
+                // Create GUI class instance
+                final var g = new GUI();
+                if (g.populateUI(args)) {
+                    // Prevent window from being resized below the current size
+                    g.setMinimumSize(g.getSize());
+                    g.setVisible(true);
+                }
+                else {
+                    System.exit(1);
+                }                
+            });
         }
 	catch (HeadlessException e) {
             // Catch this error if we find we're running on a headless JRE or an
@@ -2604,6 +2611,11 @@ public class GUI extends javax.swing.JFrame {
         setLaf();
         // Initialise Swing components
         initComponents();
+        // If the IntelliJ themes are installed, limit the size of the Theme combobox
+        // This prevents the combobox from reducing the size of the console pane
+        if (lafAL.get(lafAL.size() - 1).startsWith("com.formdev.flatlaf.intellijthemes")) {
+            cmbLookAndFeel.setPreferredSize(new Dimension(166, cmbLookAndFeel.getSize().height));
+        }
         // Set the jarDir variable so we know where we're located
         jarDir = Path.of(SharedInst.getCurrentDirectory());
         // Check operating system and set OS-specific options
@@ -2796,7 +2808,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void setLaf() {
-        lafAL = new ArrayList <> ();
+        lafAL = new ArrayList<>();
         UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             // Get the implementation class for the look and feel
@@ -2806,12 +2818,26 @@ public class GUI extends javax.swing.JFrame {
                 defaultLaf = lafAL.size() - 1;
             }
         }
+        // Use normal fonts on Metal look and feel, rather than bold
+        UIManager.put("swing.boldMetal", false);
         // Add FlatLaf
         // Not enabled by default, needs FlatLaf JAR dependency in classpath
         // https://repo1.maven.org/maven2/com/formdev/flatlaf/
+        boolean flatLaf;
         try {
             // Check to see if the FlatLaf class is available to us
             Class.forName("com.formdev.flatlaf.FlatLightLaf");
+            flatLaf = true;
+        }
+        catch (ClassNotFoundException e) {
+           flatLaf = false;
+        }
+        if (flatLaf) {
+            // Load embedded flatlaf.ini
+            // Also sets FlatLaf system properties
+            String flConf = loadFlatLafINI(true);
+            // Add the look and feels
+            if (flConf != null) lafAL.addAll(parseThemesINI(flConf, "core-themes", false));
             // Version 3?
             boolean v3;
             try {
@@ -2821,20 +2847,25 @@ public class GUI extends javax.swing.JFrame {
             catch (ClassNotFoundException e) {
                 v3 = false;
             }
-            // Add the look and feels
-            lafAL.add("com.formdev.flatlaf.FlatLightLaf");
-            lafAL.add("com.formdev.flatlaf.FlatDarkLaf");
-            lafAL.add("com.formdev.flatlaf.FlatIntelliJLaf");
-            lafAL.add("com.formdev.flatlaf.FlatDarculaLaf");
-            if (v3) lafAL.add("com.formdev.flatlaf.themes.FlatMacLightLaf");
-            if (v3) lafAL.add("com.formdev.flatlaf.themes.FlatMacDarkLaf");
-            System.setProperty("flatlaf.menuBarEmbedded", "false");
-            //System.setProperty("flatlaf.useWindowDecorations", "false");
+            if ((v3) && (flConf != null)) {
+                // Add FlatLaf v3 themes
+                lafAL.addAll(parseThemesINI(flConf, "core-themes-v3", false));
+            }
+            // IntelliJ themes?
+            boolean ij;
+            try {
+                Class.forName("com.formdev.flatlaf.intellijthemes.Utils");
+                ij = true;
+            }
+            catch (ClassNotFoundException e) {
+                ij = false;
+            }
+            if ((ij) && (flConf != null)) {
+                // Read the IntellJ themes from flConf
+                lafAL.addAll(parseThemesINI(flConf, "intellij-themes", false));
+                lafAL.addAll(parseThemesINI(flConf, "materialthemeuilite", false));
+            }
         }
-        catch (ClassNotFoundException e) {
-            // No need to do anything, we just won't load FlatLaf stuff
-        }
-        UIManager.put("swing.boldMetal", false);
         // Safeguard if the LookAndFeel preference is out of bounds
         int v = PREFS.getInt("LookAndFeel", defaultLaf);
         if ((v >= (lafAL.size())) || (v < 0)) {
@@ -2858,13 +2889,16 @@ public class GUI extends javax.swing.JFrame {
         }
         // Add FlatLaf if available
         if (lafAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
-            LAF.add("FlatLaf (light)");
-            LAF.add("FlatLaf (dark)");
-            LAF.add("FlatLaf (IntelliJ-style)");
-            LAF.add("FlatLaf (Darcula-style)");
+            LAF.addAll(parseThemesINI(loadFlatLafINI(false), "core-themes", true));
             if (lafAL.contains("com.formdev.flatlaf.themes.FlatMacLightLaf")) {
-                LAF.add("FlatLaf (Cupertino Light)");
-                LAF.add("FlatLaf (Cupertino Dark)");
+                LAF.addAll(parseThemesINI(loadFlatLafINI(false), "core-themes-v3", true));
+                for (String s : lafAL) {
+                    if (s.startsWith("com.formdev.flatlaf.intellijthemes")) {
+                        LAF.addAll(parseThemesINI(loadFlatLafINI(false), "intellij-themes", true));
+                        LAF.addAll(parseThemesINI(loadFlatLafINI(false), "materialthemeuilite", true));
+                        break;
+                    }
+                }
             }
         }
         var lf = new String[LAF.size()];
@@ -2873,6 +2907,70 @@ public class GUI extends javax.swing.JFrame {
         }
         cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
         cmbLookAndFeel.setSelectedIndex(PREFS.getInt("LookAndFeel", defaultLaf));
+    }
+    
+    private String loadFlatLafINI(boolean loadProperties) {
+        // Read the embedded flatlaf.ini file
+        String r = "com/steeviebops/resources/flatlaf.ini";
+        String f;
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(r)) {
+            if (is == null) {
+                throw new FileSystemNotFoundException("Unable to open embedded resource " + r);
+            }
+            else {
+                f = new String(is.readAllBytes(), StandardCharsets.UTF_8);                           
+            }
+        }
+        catch (IOException | FileSystemNotFoundException ex) {
+            System.err.println(ex);
+            return null;
+        }
+        if (loadProperties) {
+            // Set FlatLaf system properties
+            System.setProperty("flatlaf.useWindowDecorations",
+                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "UseWindowDecorations"))
+            );
+            System.setProperty("flatlaf.menuBarEmbedded",
+                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "MenuBarEmbedded"))
+            );
+            System.setProperty("flatlaf.useRoundedPopupBorder",
+                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "UseRoundedPopupBorder"))
+            );
+        }
+        return f;
+    }
+    
+    private ArrayList<String> parseThemesINI(String iniFile, String iniSection, boolean names) {
+        var name = new ArrayList<String>();
+        var lafClassName = new ArrayList<String>();
+        String s = INI.splitINIfile(iniFile, iniSection);
+        if (s != null) {
+            String[] sa = s.substring(s.indexOf("\n") +1).split("\n");
+            String cn = "";
+            for (String a : sa) {
+                if (a.startsWith("class")) {
+                    cn = a.split("=")[1];
+                }
+                else {
+                    String[] sa2 = a.split("=");
+                    if (!names) {
+                        lafClassName.add(cn + '\u002e' + sa2[0]);
+                    }
+                    else {
+                        name.add("FlatLaf (" + sa2[1] + ")");
+                    }
+                }
+            }
+            if (!names) {
+                return lafClassName;
+            }
+            else {
+                return name;
+            }
+        }
+        else {
+            return null;
+        }
     }
     
     private void changeLaf(int i) {
@@ -2894,8 +2992,20 @@ public class GUI extends javax.swing.JFrame {
                 }
                 PREFS.putInt("LookAndFeel", i);
             }
-            catch (ClassNotFoundException | IllegalAccessException | 
-                    InstantiationException | UnsupportedLookAndFeelException ex) {
+            catch (ClassNotFoundException c) {
+                String err = "The requested look and feel cannot be found.\n"
+                        + "The current version of FlatLaf may not support it.";
+                if (this.isVisible()) {
+                    messageBox(err, JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                    System.err.println();
+                }
+                changeLaf(defaultLaf);
+                PREFS.putInt("LookAndFeel", defaultLaf);
+            }    
+            catch (IllegalAccessException | InstantiationException | 
+                    UnsupportedLookAndFeelException ex) {
                 System.err.println(ex);
             }            
         }
@@ -10036,7 +10146,11 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuGithubRepoActionPerformed
 
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
-        if (this.isVisible()) changeLaf(cmbLookAndFeel.getSelectedIndex());
+        if (this.isVisible()) {
+            SwingUtilities.invokeLater(() -> {
+                changeLaf(cmbLookAndFeel.getSelectedIndex());    
+            });
+        }
     }//GEN-LAST:event_cmbLookAndFeelActionPerformed
 
     private void chkECppvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkECppvActionPerformed
@@ -10492,6 +10606,11 @@ public class GUI extends javax.swing.JFrame {
             if (radTest.isSelected()) radTest.doClick();
         }
     }//GEN-LAST:event_btnTestSettingsActionPerformed
+
+    private void cmbLookAndFeelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cmbLookAndFeelMouseEntered
+        // Show tooltip as the friendly name may be longer than the combobox
+        cmbLookAndFeel.setToolTipText(cmbLookAndFeel.getItemAt(cmbLookAndFeel.getSelectedIndex()));
+    }//GEN-LAST:event_cmbLookAndFeelMouseEntered
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;

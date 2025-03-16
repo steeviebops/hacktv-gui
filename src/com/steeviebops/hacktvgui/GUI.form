@@ -3008,13 +3008,9 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbLookAndFeel">
-                      <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
-                      </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbLookAndFeelMouseWheelMoved"/>
+                        <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="cmbLookAndFeelMouseEntered"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbLookAndFeelActionPerformed"/>
                       </Events>
                       <AuxValues>
