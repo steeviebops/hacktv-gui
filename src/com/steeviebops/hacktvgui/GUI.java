@@ -8501,9 +8501,9 @@ public class GUI extends javax.swing.JFrame {
     
     private void runHackTV(ArrayList<String> allArgs) {
         // Spawn a new SwingWorker to run hacktv
-        var runTV = new SwingWorker <Boolean, String> () {
+        var runTV = new SwingWorker <String, String> () {
             @Override
-            protected Boolean doInBackground() {
+            protected String doInBackground() {
                 // Create process with the ArrayList we populated above
                 var pb = new ProcessBuilder(allArgs);
                 pb.redirectErrorStream(true);
@@ -8529,9 +8529,9 @@ public class GUI extends javax.swing.JFrame {
                     publish("\n" + "hacktv stopped");
                 }
                 catch (IOException ex) {
-                    return false;
+                    return ex.getMessage();
                 }
-                return true;
+                return null;
             } // End doInBackground
 
             // Update the GUI from this method.
@@ -8540,8 +8540,10 @@ public class GUI extends javax.swing.JFrame {
                 // Get the status code from doInBackground() and return an
                 // error if it failed.
                 try {
-                    if (!get()) {
-                        messageBox("An error occurred while attempting to run hacktv.", JOptionPane.ERROR_MESSAGE);
+                    String r = get();
+                    if (r != null) {
+                        messageBox("An error occurred while attempting to run hacktv.\n" +
+                                r, JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 catch (InterruptedException | ExecutionException e) {
@@ -8630,9 +8632,9 @@ public class GUI extends javax.swing.JFrame {
             txtStatus.setText(txtStatus.getText() + '\u0020' + allArgs.get(i));
         }
         // Spawn a new SwingWorker to run yt-dlp and hacktv
-        var runTV = new SwingWorker <Boolean, String> () {
+        var runTV = new SwingWorker <String, String> () {
             @Override
-            protected Boolean doInBackground() {
+            protected String doInBackground() {
                 // Create two processes, one for yt-dlp and the other for hacktv
                 List<ProcessBuilder> pb = Arrays.asList(
                     new ProcessBuilder(ytargs)
@@ -8674,9 +8676,9 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 catch (IOException ex) {
-                    return false;
+                    return ex.getMessage();
                 }
-                return true;
+                return null;
             } // End doInBackground
             @Override
             protected void process(List<String> chunks) {
@@ -8704,8 +8706,10 @@ public class GUI extends javax.swing.JFrame {
                 // Get the status code from doInBackground() and return an
                 // error if it failed.
                 try {
-                    if (!get()) {
-                        messageBox("An error occurred while attempting to run yt-dlp or hacktv.", JOptionPane.ERROR_MESSAGE);
+                    String r = get();
+                    if (r != null) {
+                        messageBox("An error occurred while attempting to run yt-dlp or hacktv.\n" +
+                                r , JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 catch (InterruptedException | ExecutionException e) {
