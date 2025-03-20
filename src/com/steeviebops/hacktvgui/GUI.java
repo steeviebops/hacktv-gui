@@ -54,6 +54,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.MalformedInputException;
@@ -7369,7 +7370,7 @@ public class GUI extends javax.swing.JFrame {
                 ytp = "yt-dlp.exe";
             }
             else {
-                ytp = "yt-dlp";
+                ytp = getYtDlpPath() + "yt-dlp";
             }
             // Remove the ytdl: prefix if specified
             if (input.toLowerCase(Locale.ENGLISH).startsWith("ytdl:")) {
@@ -8166,6 +8167,95 @@ public class GUI extends javax.swing.JFrame {
         if (chkMacLinear.isSelected()) al.add("--mac-audio-linear");
         if (chkMacL2.isSelected()) al.add("--mac-audio-l2-protection");
         return al;
+    }
+    
+    private String getYtDlpPath() {
+        // This method attempts to find yt-dlp on *nix by checking some common
+        // locations, as well as by retrieving paths that were defined in
+        // terminal configuration files in the user's home directory.
+        if (runningOnWindows) return ""; // Not required on Windows
+        var c = System.console();
+        // c will be null if not running from a terminal
+        if (c != null) {
+            // Not required if running from a terminal, we have the full
+            // user path variable anyway. But, in Java 22 or later, we need to 
+            // check if the console object is really a terminal or not.
+            try {
+                var m = c.getClass().getMethod("isTerminal");
+                if (!(boolean) m.invoke(c)) {
+                    return "";
+                }
+            }
+            catch (NoSuchMethodException e) {
+                // We're running on Java 21 or earlier which does not support 
+                // the isTerminal method. But this is OK, because we know it
+                // would have returned null already if no terminal was detected.
+                // No action needed here, we know it's a terminal.
+            }
+            catch (IllegalAccessException
+                    | IllegalArgumentException
+                    | SecurityException
+                    | InvocationTargetException
+                    ex) {
+                return "";
+            }
+        }
+        // Prioritise a binary in the current directory
+        if (Files.exists(Path.of(jarDir + File.separator + "yt-dlp"))) {
+            return jarDir + File.separator;
+        }
+        // Check default Homebrew paths
+        else if (Files.exists(Path.of("/opt/homebrew/bin/yt-dlp"))) {
+            return "/opt/homebrew/bin/"; // MacOS on Apple Silicon
+        }
+        else if (Files.exists(Path.of("/usr/local/bin/yt-dlp"))) {
+            return "/usr/local/bin/"; // MacOS on x64
+        }
+        else if (Files.exists(Path.of("/home/linuxbrew/.linuxbrew/bin/yt-dlp"))) {
+            return "/home/linuxbrew/.linuxbrew/bin/"; // Linux
+        }
+        String home = System.getProperty("user.home") + File.separator;
+        String s1 = findTerminalPaths(Path.of(home + ".bashrc"));
+        if (!s1.isEmpty()) return s1;
+        String s2 = findTerminalPaths(Path.of(home + ".bash_profile"));
+        if (!s2.isEmpty()) return s2;
+        String s3 = findTerminalPaths(Path.of(home + ".zshrc"));
+        if (!s3.isEmpty()) return s3;
+        String s4 = findTerminalPaths(Path.of(home + ".zshenv"));
+        if (!s4.isEmpty()) return s4;
+        // Nothing found, let's hope it's in the system path!
+        return "";
+    }
+    
+    private String findTerminalPaths(Path p) {
+        if (!Files.exists(p)) return "";
+        String c;
+        String pathString = null;
+        String[] pathArray;
+        var f = new File(p.toUri());
+            try (var br1 = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
+                while ((c = br1.readLine()) != null) {
+                    if (c.trim().startsWith("export PATH")) {
+                        pathString = c;
+                    }
+                }
+            }
+            catch (IOException e) {
+                return "";
+            }
+        if (pathString != null) {
+            pathArray = pathString.substring(pathString.indexOf("=") + 1).split(File.pathSeparator);
+            for (String s : pathArray) {
+                String testPath = s.replace("$HOME", System.getProperty("user.home"));
+                if (testPath.endsWith(File.separator)) testPath = testPath.substring(0, testPath.lastIndexOf(File.separator));
+                if ((!s.endsWith("$PATH")) && (Files.exists(Path.of(testPath +  File.separator + "yt-dlp")))) {
+                    // yt-dlp found at this location
+                    return testPath + File.separator;
+                }
+            }
+        }
+        // Nothing found
+        return "";
     }
     
     private void populateArguments(String ytdl) {
