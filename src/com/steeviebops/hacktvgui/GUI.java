@@ -8173,24 +8173,32 @@ public class GUI extends javax.swing.JFrame {
         // This method attempts to find yt-dlp on *nix by checking some common
         // locations, as well as by retrieving paths that were defined in
         // terminal configuration files in the user's home directory.
+        // This method is needed if no underlying terminal is running.
         if (runningOnWindows) return ""; // Not required on Windows
         var c = System.console();
-        // c will be null if not running from a terminal
+        // c will be null if not running from a terminal on Java 21 or earlier.
+        if ((c != null) && (Runtime.version().feature() < 22)) {
+            // This is a terminal, not required.
+            return "";
+        }
         if (c != null) {
-            // Not required if running from a terminal, we have the full
-            // user path variable anyway. But, in Java 22 or later, we need to 
-            // check if the console object is really a terminal or not.
+            // In Java 22 or later, we need to check if the console object is 
+            // really a terminal or not.
+            // If we were targeting JRE 22, we could simply query c.isTerminal()
+            // but this is not possible under older JDKs, so we need to
+            // use reflection to invoke the method.
             try {
                 var m = c.getClass().getMethod("isTerminal");
-                if (!(boolean) m.invoke(c)) {
+                // m.invoke(c) returns true if it is a terminal
+                if ((boolean) m.invoke(c)) {
+                    // This is a terminal, not required.
                     return "";
                 }
             }
             catch (NoSuchMethodException e) {
-                // We're running on Java 21 or earlier which does not support 
-                // the isTerminal method. But this is OK, because we know it
-                // would have returned null already if no terminal was detected.
-                // No action needed here, we know it's a terminal.
+                // This should never trigger, as we have already eliminated
+                // older JRE versions that don't support the isTerminal method.
+                // But if it did, we'd proceed anyway.
             }
             catch (IllegalAccessException
                     | IllegalArgumentException
