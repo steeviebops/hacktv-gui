@@ -7372,17 +7372,22 @@ public class GUI extends javax.swing.JFrame {
             else {
                 // Auto-detect yt-dlp location
                 String p = PREFS.get("ytdlppath", "");
+                if (p.isBlank()) p = getYtDlpPath();
                 if (p.isBlank()) {
-                    p = getYtDlpPath();
-                    if (!p.isBlank()) PREFS.put("ytdlppath", p.substring(0, p.lastIndexOf(File.separator)));
+                    ytp = "yt-dlp";
                 }
-                if (!p.endsWith(File.separator)) p = p + File.separator;
-                // If the detected path was not found, discard it
-                if (!Files.exists(Path.of(p + "yt-dlp"))) {
-                    p = "";
-                    PREFS.remove("ytdlppath");
+                else {
+                    if (!p.endsWith(File.separator)) p = p + File.separator;
+                    // If the detected path was not found, discard it
+                    if (!Files.exists(Path.of(p + "yt-dlp"))) {
+                        p = "";
+                        PREFS.remove("ytdlppath");
+                    }
+                    else {
+                        PREFS.put("ytdlppath", p.substring(0, p.lastIndexOf(File.separator)));
+                    }
+                    ytp = p + "yt-dlp";                    
                 }
-                ytp = p + "yt-dlp";
             }
             // Remove the ytdl: prefix if specified
             if (input.toLowerCase(Locale.ENGLISH).startsWith("ytdl:")) {
