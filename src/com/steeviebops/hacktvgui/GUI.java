@@ -8173,41 +8173,9 @@ public class GUI extends javax.swing.JFrame {
         // This method attempts to find yt-dlp on *nix by checking some common
         // locations, as well as by retrieving paths that were defined in
         // terminal configuration files in the user's home directory.
-        // This method is needed if no underlying terminal is running.
         if (runningOnWindows) return ""; // Not required on Windows
-        var c = System.console();
-        // c will be null if not running from a terminal on Java 21 or earlier.
-        if ((c != null) && (Runtime.version().feature() < 22)) {
-            // This is a terminal, not required.
-            return "";
-        }
-        if (c != null) {
-            // In Java 22 or later, we need to check if the console object is 
-            // really a terminal or not.
-            // If we were targeting JRE 22, we could simply query c.isTerminal()
-            // but this is not possible under older JDKs, so we need to
-            // use reflection to invoke the method.
-            try {
-                var m = c.getClass().getMethod("isTerminal");
-                // m.invoke(c) returns true if it is a terminal
-                if ((boolean) m.invoke(c)) {
-                    // This is a terminal, not required.
-                    return "";
-                }
-            }
-            catch (NoSuchMethodException e) {
-                // This should never trigger, as we have already eliminated
-                // older JRE versions that don't support the isTerminal method.
-                // But if it did, we'd proceed anyway.
-            }
-            catch (IllegalAccessException
-                    | IllegalArgumentException
-                    | SecurityException
-                    | InvocationTargetException
-                    ex) {
-                return "";
-            }
-        }
+        // This method is only needed if no underlying terminal is running.
+        if (isTerminal()) return "";
         // Prioritise a binary in the current directory
         if (Files.exists(Path.of(jarDir + File.separator + "yt-dlp"))) {
             return jarDir + File.separator;
@@ -8233,6 +8201,37 @@ public class GUI extends javax.swing.JFrame {
         if (!s4.isEmpty()) return s4;
         // Nothing found, let's hope it's in the system path!
         return "";
+    }
+    
+    private boolean isTerminal() {
+        var c = System.console();
+        // Java 21 or earlier is simple; c is null if an underlying terminal is
+        // not present, or non-null if it is.
+        if (c == null) return false;
+        if (Runtime.version().feature() < 22) return true;
+        // But in Java 22 or later, we need to check if the console object
+        // is really a terminal or not.
+        // If we were targeting JRE 22, we could simply query c.isTerminal()
+        // but this is not possible under older JDKs, so we need to
+        // use the reflection API to invoke the method.
+        try {
+            var m = c.getClass().getMethod("isTerminal");
+            // m.invoke(c) returns true if it is a terminal
+            return (boolean) m.invoke(c);
+        }
+        catch (NoSuchMethodException e) {
+            // This should never trigger, as we have already eliminated
+            // older JRE versions that don't support the isTerminal method.
+            // But if it did, we'd return false.
+            return false;
+        }
+        catch (IllegalAccessException
+                | IllegalArgumentException
+                | SecurityException
+                | InvocationTargetException
+                ex) {
+            return true;
+        }
     }
     
     private String findTerminalPaths(Path p) {
