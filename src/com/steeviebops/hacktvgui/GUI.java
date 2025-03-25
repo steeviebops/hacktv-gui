@@ -7370,7 +7370,19 @@ public class GUI extends javax.swing.JFrame {
                 ytp = "yt-dlp.exe";
             }
             else {
-                ytp = getYtDlpPath() + "yt-dlp";
+                // Auto-detect yt-dlp location
+                String p = PREFS.get("ytdlppath", "");
+                if (p.isBlank()) {
+                    p = getYtDlpPath();
+                    if (!p.isBlank()) PREFS.put("ytdlppath", p.substring(0, p.lastIndexOf(File.separator)));
+                }
+                if (!p.endsWith(File.separator)) p = p + File.separator;
+                // If the detected path was not found, discard it
+                if (!Files.exists(Path.of(p + "yt-dlp"))) {
+                    p = "";
+                    PREFS.remove("ytdlppath");
+                }
+                ytp = p + "yt-dlp";
             }
             // Remove the ytdl: prefix if specified
             if (input.toLowerCase(Locale.ENGLISH).startsWith("ytdl:")) {
@@ -8181,13 +8193,13 @@ public class GUI extends javax.swing.JFrame {
             return jarDir + File.separator;
         }
         // Check default Homebrew paths
-        else if (Files.exists(Path.of("/opt/homebrew/bin/yt-dlp"))) {
+        if (Files.exists(Path.of("/opt/homebrew/bin/yt-dlp"))) {
             return "/opt/homebrew/bin/"; // MacOS on Apple Silicon
         }
-        else if (Files.exists(Path.of("/usr/local/bin/yt-dlp"))) {
+        if (Files.exists(Path.of("/usr/local/bin/yt-dlp"))) {
             return "/usr/local/bin/"; // MacOS on x64
         }
-        else if (Files.exists(Path.of("/home/linuxbrew/.linuxbrew/bin/yt-dlp"))) {
+        if (Files.exists(Path.of("/home/linuxbrew/.linuxbrew/bin/yt-dlp"))) {
             return "/home/linuxbrew/.linuxbrew/bin/"; // Linux
         }
         String home = System.getProperty("user.home") + File.separator;
@@ -8204,16 +8216,16 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean isTerminal() {
-        var c = System.console();
-        // Java 21 or earlier is simple; c is null if an underlying terminal is
-        // not present, or non-null if it is.
-        if (c == null) return false;
-        if (Runtime.version().feature() < 22) return true;
-        // But in Java 22 or later, we need to check if the console object
-        // is really a terminal or not.
+        // Java 21 or earlier is simple; the console object (named 'c' below) is
+        // null if an underlying terminal is not present, or non-null if it is.
+        // But in Java 22 or later, this should never be null, so we need to
+        // check if the object is really a terminal or not.
         // If we were targeting JRE 22, we could simply query c.isTerminal()
         // but this is not possible under older JDKs, so we need to
         // use the reflection API to invoke the method.
+        var c = System.console();
+        if (c == null) return false;
+        if (Runtime.version().feature() < 22) return true;
         try {
             var m = c.getClass().getMethod("isTerminal");
             // m.invoke(c) returns true if it is a terminal
@@ -8240,25 +8252,24 @@ public class GUI extends javax.swing.JFrame {
         String pathString = null;
         String[] pathArray;
         var f = new File(p.toUri());
-            try (var br1 = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
-                while ((c = br1.readLine()) != null) {
-                    if (c.trim().startsWith("export PATH")) {
-                        pathString = c;
-                    }
+        try (var br1 = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
+            while ((c = br1.readLine()) != null) {
+                if (c.trim().startsWith("export PATH")) {
+                    pathString = c;
                 }
             }
-            catch (IOException e) {
-                return "";
-            }
-        if (pathString != null) {
-            pathArray = pathString.substring(pathString.indexOf("=") + 1).split(File.pathSeparator);
-            for (String s : pathArray) {
-                String testPath = s.replace("$HOME", System.getProperty("user.home"));
-                if (testPath.endsWith(File.separator)) testPath = testPath.substring(0, testPath.lastIndexOf(File.separator));
-                if ((!s.endsWith("$PATH")) && (Files.exists(Path.of(testPath +  File.separator + "yt-dlp")))) {
-                    // yt-dlp found at this location
-                    return testPath + File.separator;
-                }
+        }
+        catch (IOException e) {
+            return "";
+        }
+        if (pathString == null) return "";
+        pathArray = pathString.substring(pathString.indexOf("=") + 1).split(File.pathSeparator);
+        for (String s : pathArray) {
+            String testPath = s.replace("$HOME", System.getProperty("user.home"));
+            if (testPath.endsWith(File.separator)) testPath = testPath.substring(0, testPath.lastIndexOf(File.separator));
+            if ((!s.endsWith("$PATH")) && (Files.exists(Path.of(testPath +  File.separator + "yt-dlp")))) {
+                // yt-dlp found at this location
+                return testPath + File.separator;
             }
         }
         // Nothing found
