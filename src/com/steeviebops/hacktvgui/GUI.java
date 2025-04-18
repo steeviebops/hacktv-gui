@@ -308,6 +308,7 @@ public class GUI extends javax.swing.JFrame {
         chkVITC = new javax.swing.JCheckBox();
         chkSecamId = new javax.swing.JCheckBox();
         cmbSecamIdLines = new javax.swing.JComboBox<>();
+        chkCC608 = new javax.swing.JCheckBox();
         macPanel = new javax.swing.JPanel();
         chkMacChId = new javax.swing.JCheckBox();
         txtMacChId = new javax.swing.JTextField();
@@ -348,6 +349,8 @@ public class GUI extends javax.swing.JFrame {
         lblOutputDevice2 = new javax.swing.JLabel();
         txtOutputDevice = new javax.swing.JTextField();
         chkHackDAC = new javax.swing.JCheckBox();
+        lblFl2kAudio = new javax.swing.JLabel();
+        cmbFl2kAudio = new javax.swing.JComboBox<>();
         teletextTab = new javax.swing.JPanel();
         teletextPanel = new javax.swing.JPanel();
         chkTeletext = new javax.swing.JCheckBox();
@@ -1092,6 +1095,8 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        chkCC608.setText("Closed captions (CEA/EIA-608)");
+
         javax.swing.GroupLayout vbiPanelLayout = new javax.swing.GroupLayout(vbiPanel);
         vbiPanel.setLayout(vbiPanelLayout);
         vbiPanelLayout.setHorizontalGroup(
@@ -1100,21 +1105,26 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(vbiPanelLayout.createSequentialGroup()
-                        .addComponent(chkSecamId)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(vbiPanelLayout.createSequentialGroup()
                         .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkACP)
-                            .addComponent(chkVITS)
                             .addGroup(vbiPanelLayout.createSequentialGroup()
-                                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(chkSecamId)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(vbiPanelLayout.createSequentialGroup()
+                                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkACP)
+                                    .addComponent(chkVITS)
+                                    .addGroup(vbiPanelLayout.createSequentialGroup()
+                                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(vbiPanelLayout.createSequentialGroup()
+                        .addComponent(chkCC608)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         vbiPanelLayout.setVerticalGroup(
             vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1132,7 +1142,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSecamId)
                     .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkCC608, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC options"));
@@ -1222,11 +1234,14 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(modeTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(modePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(68, Short.MAX_VALUE))
+                .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(modeTabLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(modeTabLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Mode", modeTab);
@@ -1521,6 +1536,10 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        lblFl2kAudio.setText("Audio mode");
+
+        cmbFl2kAudio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Stereo", "S/PDIF" }));
+
         javax.swing.GroupLayout frequencyPanelLayout = new javax.swing.GroupLayout(frequencyPanel);
         frequencyPanel.setLayout(frequencyPanelLayout);
         frequencyPanelLayout.setHorizontalGroup(
@@ -1534,7 +1553,11 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(lblOutputDevice2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtOutputDevice)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblFl2kAudio)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbFl2kAudio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkHackDAC)
                 .addGap(10, 10, 10))
             .addComponent(rfPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1548,7 +1571,9 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(cmbOutputDevice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblOutputDevice2)
                     .addComponent(txtOutputDevice)
-                    .addComponent(chkHackDAC))
+                    .addComponent(chkHackDAC)
+                    .addComponent(lblFl2kAudio)
+                    .addComponent(cmbFl2kAudio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rfPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -2804,7 +2829,8 @@ public class GUI extends javax.swing.JFrame {
             chkOffset,
             chkSwapIQ,
             chkSiS,
-            chkSVideo
+            chkSVideo,
+            chkCC608
         };
     }
     
@@ -3874,6 +3900,17 @@ public class GUI extends javax.swing.JFrame {
             if (ImportedOutputDevice.contains(":")) {
                 txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
             }
+            switch (INI.getStringFromINI(fileContents, "hacktv", "fl2k-audio", "", false)) {
+                case "stereo":
+                    cmbFl2kAudio.setSelectedIndex(1);
+                    break;
+                case "spdif":
+                    cmbFl2kAudio.setSelectedIndex(2);
+                    break;
+                default:
+                    cmbFl2kAudio.setSelectedIndex(0);
+                    break;
+            }
         }
         else {
             cmbOutputDevice.setSelectedIndex(3);
@@ -4513,6 +4550,10 @@ public class GUI extends javax.swing.JFrame {
         if (INI.getBooleanFromINI(fileContents, "hacktv", "s-video") ){
             if (chkSVideo.isEnabled()) chkSVideo.doClick();
         }
+        // Closed captioning
+        if (INI.getBooleanFromINI(fileContents, "hacktv", "cc608") ){
+            if (chkCC608.isEnabled()) chkCC608.doClick();
+        }
         // Invert video polarity
         if (INI.getBooleanFromINI(fileContents, "hacktv", "invert-video") ){
             chkInvertVideo.doClick();
@@ -4698,7 +4739,17 @@ public class GUI extends javax.swing.JFrame {
                 }
                 else {
                     FileContents = INI.setINIValue(FileContents, "hacktv", "output", "fl2k:" + txtOutputDevice.getText());
-                }                
+                }
+                switch (cmbFl2kAudio.getSelectedIndex()) {
+                    case 1:
+                        FileContents = INI.setINIValue(FileContents, "hacktv", "fl2k-audio", "stereo");
+                        break;
+                    case 2:
+                        FileContents = INI.setINIValue(FileContents, "hacktv", "fl2k-audio", "spdif");
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case 3:
                 if (txtOutputDevice.getText().isBlank()) {
@@ -4969,6 +5020,8 @@ public class GUI extends javax.swing.JFrame {
         if (chkColour.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1);
         // S-Video
         if (chkSVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "s-video", 1);
+        // Closed captioning
+        if (chkCC608.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "cc608", 1);
         // Invert video
         if (chkInvertVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1);
         // MAC channel ID
@@ -6933,6 +6986,13 @@ public class GUI extends javax.swing.JFrame {
             if (chkSVideo.isSelected()) chkSVideo.doClick();
             chkSVideo.setEnabled(false);
         }
+        if (!radMAC.isSelected() && (lines == 625 || lines == 525)) {
+            chkCC608.setEnabled(true);
+        }
+        else {
+            if (chkCC608.isSelected()) chkCC608.doClick();
+            chkCC608.setEnabled(false);
+        }
         // If the colour system (PAL/NTSC/SECAM) or line count varies from the previous mode...
         if ( (!getSelectedColourSystem().equals(prevColour)) || (oldLines != lines)) {
             // ...refresh the available test cards
@@ -8129,6 +8189,22 @@ public class GUI extends javax.swing.JFrame {
                 else {
                     al.add("fl2k");
                 }
+                switch (cmbFl2kAudio.getSelectedIndex()) {
+                    case 0:
+                    default:
+                        // No audio
+                        break;
+                    case 1:
+                        // Stereo
+                        al.add("--fl2k-audio");
+                        al.add("stereo");
+                        break;
+                    case 2:
+                        // S/PDIF
+                        al.add("--fl2k-audio");
+                        al.add("spdif");
+                        break;
+                }
                 break;
             case 1:
                 // SoapySDR
@@ -8498,6 +8574,7 @@ public class GUI extends javax.swing.JFrame {
             allArgs.add("dcsis");
         }
         if (chkSVideo.isSelected()) allArgs.add("--s-video");
+        if (chkCC608.isSelected()) allArgs.add("--cc608");
         // Finally, add the source video or test option
         if (ytdl.isBlank()) {
             String InputSource = checkInput();
@@ -9761,6 +9838,9 @@ public class GUI extends javax.swing.JFrame {
             // hackrf
             case 0:
                 chkHackDAC.setVisible(true);
+                lblFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setSelectedIndex(0);
                 lblOutputDevice2.setText("Serial number (optional)");
                 if (!radCustom.isEnabled()) {
                     // If a baseband mode is selected and HackDAC is not enabled,
@@ -9792,6 +9872,9 @@ public class GUI extends javax.swing.JFrame {
             // soapysdr
             case 1:
                 chkHackDAC.setVisible(false);
+                lblFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setSelectedIndex(0);
                 lblOutputDevice2.setText("Device options");
                 if (!radCustom.isEnabled()) {
                     if (bb) {
@@ -9816,6 +9899,9 @@ public class GUI extends javax.swing.JFrame {
             // fl2k
             case 2:
                 chkHackDAC.setVisible(false);
+                lblFl2kAudio.setVisible(true);
+                cmbFl2kAudio.setVisible(true);
+                cmbFl2kAudio.setSelectedIndex(0);
                 lblOutputDevice2.setText("Device number (optional)");
                 // fl2k is baseband only for now so disable all RF options
                 disableRFOptions();
@@ -9827,6 +9913,9 @@ public class GUI extends javax.swing.JFrame {
             // Output to file
             case 3:
                 chkHackDAC.setVisible(false);
+                lblFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setVisible(false);
+                cmbFl2kAudio.setSelectedIndex(0);
                 lblOutputDevice2.setText("Destination file");
                 disableRFOptions();
                 rfPanel.setEnabled(true);
@@ -10758,6 +10847,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkActivateCard;
     private javax.swing.JCheckBox chkAmp;
     private javax.swing.JCheckBox chkAudio;
+    private javax.swing.JCheckBox chkCC608;
     private javax.swing.JCheckBox chkColour;
     private javax.swing.JCheckBox chkDeactivateCard;
     private javax.swing.JCheckBox chkDownmix;
@@ -10806,6 +10896,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbChannel;
     private javax.swing.JComboBox<String> cmbECMaturity;
     private javax.swing.JComboBox<String> cmbFileType;
+    private javax.swing.JComboBox<String> cmbFl2kAudio;
     private javax.swing.JComboBox<String> cmbLogo;
     private javax.swing.JComboBox<String> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
@@ -10842,6 +10933,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblECprognum;
     private javax.swing.JLabel lblEMMCardNumber;
     private javax.swing.JLabel lblFileType;
+    private javax.swing.JLabel lblFl2kAudio;
     private javax.swing.JLabel lblFork;
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblGain;
