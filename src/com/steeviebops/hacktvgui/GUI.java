@@ -9001,11 +9001,14 @@ public class GUI extends javax.swing.JFrame {
         } else {
             y = " 2020-" + v.substring(0, 4);
         }
+        // Get JRE version
+        String jv = String.valueOf(Runtime.version().feature());
         JOptionPane.showMessageDialog(null,
                 APP_NAME +
                 "\nBuild date: " + v +
                 "\nUsing " + modesFileLocation + " modes file, version " + modesFileVersion +
                 "\nUsing " + bpFileLocation + " band plan file version " + bpFileVersion +
+                "\nUsing Java Runtime Environment version " + jv +
                 "\n\nCreated" + y + " by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n",
