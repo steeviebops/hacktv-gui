@@ -6204,7 +6204,7 @@ public class GUI extends javax.swing.JFrame {
             chkScrambleAudio.setEnabled(false);
         }
         // Enable EuroCrypt maturity rating
-        if ((captainJack) && (scramblingType2.equals("--eurocrypt"))) {
+        if (scramblingType2.equals("--eurocrypt")) {
             lblECMaturity.setEnabled(true);
             cmbECMaturity.setEnabled(true);
             cmbECMaturity.setSelectedIndex(0);
@@ -6215,7 +6215,7 @@ public class GUI extends javax.swing.JFrame {
             cmbECMaturity.setSelectedIndex(-1);
         }
         // Enable EuroCrypt PPV and "no date" options
-        if ((captainJack) && (scramblingType2.equals("--eurocrypt"))) {
+        if (scramblingType2.equals("--eurocrypt")) {
             chkECppv.setEnabled(true);
             chkNoDate.setEnabled(true);
         }
@@ -6284,7 +6284,7 @@ public class GUI extends javax.swing.JFrame {
             cmbSysterPermTable.setEnabled(false);
             cmbSysterPermTable.setSelectedIndex(-1);
         }
-        // Enable ECM option and disable ACP (if not a MAC mode)
+        // Enable ECM option and disable ACP if not supported
         if (cmbScramblingType.getSelectedIndex() == 0) {
             if ( chkShowECM.isSelected() ) chkShowECM.doClick();
             chkShowECM.setEnabled(false);
@@ -6295,8 +6295,11 @@ public class GUI extends javax.swing.JFrame {
                 disableACP();
             }
         }
-        else {
-            if (captainJack) chkShowECM.setEnabled(true);
+        else if (radMAC.isSelected()) {
+            chkShowECM.setEnabled(true);
+        }
+        else if (captainJack) {
+            chkShowECM.setEnabled(true);
             disableACP();
         }
     }
