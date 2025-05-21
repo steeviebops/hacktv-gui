@@ -3917,7 +3917,7 @@ public class GUI extends javax.swing.JFrame {
             txtOutputDevice.setText(ImportedOutputDevice);
         }
         // Video mode
-        String ImportedVideoMode = INI.getStringFromINI(fileContents, "hacktv", "mode", "", false);
+        String ImportedVideoMode = INI.getINIValue(fileContents, "hacktv", "mode", "");
         boolean ModeFound = false;
         for (int i = 0; i < palModeArray.length; i++) {
             // Check if the mode we imported is in the PAL mode array
@@ -4005,6 +4005,8 @@ public class GUI extends javax.swing.JFrame {
            resetAllControls();
            return false;
         }
+        // Is this a baseband mode?
+        boolean bb = INI.getINIValue(modesFile, ImportedVideoMode, "modulation", "").equals("baseband");
         // Input source or test card
         String ImportedSource = INI.getStringFromINI(fileContents, "hacktv", "input", "", true);
         String M3USource = (INI.getStringFromINI(fileContents, "hacktv-gui3", "m3usource", "", true));
@@ -4058,7 +4060,7 @@ public class GUI extends javax.swing.JFrame {
             if ( (!ImportedSource.endsWith(".m3u")) || (!ImportedSource.endsWith(".m3u8")) ) txtSource.setText(ImportedSource);
         }
         // Frequency or channel number
-        if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+        if ( ((cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) && (!bb) ) {
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
             String ImportedChannel = INI.getStringFromINI(fileContents, "hacktv-gui3", "channel", "", true);
             String ImportedBandPlan = INI.getStringFromINI(fileContents, "hacktv-gui3", "bandplan", "", false);
@@ -4175,7 +4177,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // If value is null and output device is hackrf or soapysdr, set gain to zero
         else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            txtGain.setText("0");
+            if (!bb) txtGain.setText("0");
         }
         // Amp
         if (cmbOutputDevice.getSelectedIndex() == 0) {
@@ -4805,9 +4807,11 @@ public class GUI extends javax.swing.JFrame {
         }
         // Video format/mode
         FileContents = INI.setINIValue(FileContents, "hacktv", "mode", mode);
+        // Is this a baseband mode?
+        boolean bb = (INI.getINIValue(modesFile, mode, "modulation", "").equals("baseband"));
         // Frequency and channel
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            if (!radCustom.isSelected()) {
+            if ( (!radCustom.isSelected()) && (!bb) ) {
                 FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
                 // Save band plan identifier, this uses the section name from modes file
                 if (radUHF.isSelected()) {
@@ -4831,7 +4835,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             else {
-                FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", frequency);
+                if (!bb) FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", frequency);
             }
         }
         // Sample rate
@@ -4860,7 +4864,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.valueOf(txtGain.getText()));
+            if (!bb) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.valueOf(txtGain.getText()));
         }
         // RF Amp
         if (chkAmp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "amp", 1);
