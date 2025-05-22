@@ -4005,6 +4005,11 @@ public class GUI extends javax.swing.JFrame {
            resetAllControls();
            return false;
         }
+        // Did the mode load successfully?
+        if (!ImportedVideoMode.equals(mode)) {
+           resetAllControls();
+           return false;
+        }
         // Is this a baseband mode?
         boolean bb = INI.getINIValue(modesFile, ImportedVideoMode, "modulation", "").equals("baseband");
         // Input source or test card
@@ -7120,7 +7125,11 @@ public class GUI extends javax.swing.JFrame {
             return true;
         }
         else {
-            messageBox("This mode is not supported by the selected output device.", JOptionPane.WARNING_MESSAGE);
+            String err = "This mode is not supported by the selected output device.";
+            if (cmbOutputDevice.getSelectedIndex() == 0) {
+                err += "\nIf you have a HackDAC board, enable HackDAC support on the Output tab.";
+            }
+            messageBox(err, JOptionPane.WARNING_MESSAGE);
             if (cmbMode.getSelectedIndex() != previousIndex) {
                 cmbMode.setSelectedIndex(previousIndex);
                 checkMode();
@@ -7154,7 +7163,7 @@ public class GUI extends javax.swing.JFrame {
                     String m = INI.getStringFromINI(modesFile, s, "modulation", "", false);
                     if ((m.equals("vsb")) || (m.equals("fm"))) {
                         cmbMode.setSelectedIndex(l.indexOf(s));
-                        break;
+                        return true;
                     }
                 }
                 // No VSB or FM mode found. This is fatal, we can't continue.
