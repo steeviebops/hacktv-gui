@@ -300,6 +300,13 @@ public class GUI extends javax.swing.JFrame {
         txtOffset = new javax.swing.JTextField();
         chkSwapIQ = new javax.swing.JCheckBox();
         chkSVideo = new javax.swing.JCheckBox();
+        macPanel = new javax.swing.JPanel();
+        chkMacChId = new javax.swing.JCheckBox();
+        txtMacChId = new javax.swing.JTextField();
+        chkMacMono = new javax.swing.JCheckBox();
+        chkMac16k = new javax.swing.JCheckBox();
+        chkMacLinear = new javax.swing.JCheckBox();
+        chkMacL2 = new javax.swing.JCheckBox();
         vbiPanel = new javax.swing.JPanel();
         chkVITS = new javax.swing.JCheckBox();
         chkACP = new javax.swing.JCheckBox();
@@ -309,13 +316,6 @@ public class GUI extends javax.swing.JFrame {
         chkSecamId = new javax.swing.JCheckBox();
         cmbSecamIdLines = new javax.swing.JComboBox<>();
         chkCC608 = new javax.swing.JCheckBox();
-        macPanel = new javax.swing.JPanel();
-        chkMacChId = new javax.swing.JCheckBox();
-        txtMacChId = new javax.swing.JTextField();
-        chkMacMono = new javax.swing.JCheckBox();
-        chkMac16k = new javax.swing.JCheckBox();
-        chkMacLinear = new javax.swing.JCheckBox();
-        chkMacL2 = new javax.swing.JCheckBox();
         outputTab = new javax.swing.JPanel();
         additionalOptionsPanel = new javax.swing.JPanel();
         chkGamma = new javax.swing.JCheckBox();
@@ -1028,32 +1028,98 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSampleRate)
                     .addComponent(chkAudio)
-                    .addComponent(txtSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(modePanelLayout.createSequentialGroup()
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtPixelRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkPixelRate))
-                        .addGap(2, 2, 2)
-                        .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkA2Stereo)
-                            .addComponent(chkFMDev)
-                            .addComponent(txtFMDev, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtSampleRate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtPixelRate)
+                    .addComponent(chkPixelRate)
                     .addComponent(chkNICAM))
-                .addGap(2, 2, 2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkA2Stereo)
+                    .addComponent(chkFMDev)
+                    .addComponent(txtFMDev))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkColour)
                     .addComponent(chkOffset)
-                    .addComponent(txtOffset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
+                    .addComponent(txtOffset))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkInvertVideo)
                     .addComponent(chkVideoFilter))
-                .addGap(2, 2, 2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSwapIQ)
                     .addComponent(chkSVideo))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC options"));
+
+        chkMacChId.setText("Override channel ID");
+        chkMacChId.setEnabled(false);
+        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMacChIdActionPerformed(evt);
+            }
+        });
+
+        txtMacChId.setEditable(false);
+        txtMacChId.setEnabled(false);
+        txtMacChId.addMouseListener(new ContextMenuListener());
+        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtMacChIdKeyTyped(evt);
+            }
+        });
+
+        chkMacMono.setText("Mono audio");
+        chkMacMono.setEnabled(false);
+
+        chkMac16k.setText("16 kHz audio sample rate");
+        chkMac16k.setEnabled(false);
+
+        chkMacLinear.setText("Linear audio");
+        chkMacLinear.setEnabled(false);
+
+        chkMacL2.setText("Level 2 audio protection");
+        chkMacL2.setEnabled(false);
+
+        javax.swing.GroupLayout macPanelLayout = new javax.swing.GroupLayout(macPanel);
+        macPanel.setLayout(macPanelLayout);
+        macPanelLayout.setHorizontalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(macPanelLayout.createSequentialGroup()
+                        .addComponent(chkMacChId)
+                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(macPanelLayout.createSequentialGroup()
+                        .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkMacMono)
+                            .addComponent(chkMac16k)
+                            .addComponent(chkMacLinear)
+                            .addComponent(chkMacL2))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        macPanelLayout.setVerticalGroup(
+            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(macPanelLayout.createSequentialGroup()
+                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkMacChId)
+                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacMono)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMac16k)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacLinear)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkMacL2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1107,24 +1173,24 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(vbiPanelLayout.createSequentialGroup()
                         .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(vbiPanelLayout.createSequentialGroup()
+                                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkACP)
+                                    .addComponent(chkVITS))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(vbiPanelLayout.createSequentialGroup()
                                 .addComponent(chkSecamId)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(vbiPanelLayout.createSequentialGroup()
-                                .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkACP)
-                                    .addComponent(chkVITS)
-                                    .addGroup(vbiPanelLayout.createSequentialGroup()
-                                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addComponent(chkWSS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(chkVITC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(chkWSS)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())
                     .addGroup(vbiPanelLayout.createSequentialGroup()
-                        .addComponent(chkCC608)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkVITC)
+                            .addComponent(chkCC608))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         vbiPanelLayout.setVerticalGroup(
             vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1132,9 +1198,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(vbiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkWSS)
                     .addComponent(cmbWSS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkACP)
-                .addGap(0, 0, 0)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVITS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkVITC)
@@ -1143,75 +1209,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(chkSecamId)
                     .addComponent(cmbSecamIdLines, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkCC608, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        macPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("MAC options"));
-
-        chkMacChId.setText("Override channel ID");
-        chkMacChId.setEnabled(false);
-        chkMacChId.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkMacChIdActionPerformed(evt);
-            }
-        });
-
-        txtMacChId.setEditable(false);
-        txtMacChId.setEnabled(false);
-        txtMacChId.addMouseListener(new ContextMenuListener());
-        txtMacChId.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtMacChIdKeyTyped(evt);
-            }
-        });
-
-        chkMacMono.setText("Mono audio");
-        chkMacMono.setEnabled(false);
-
-        chkMac16k.setText("16 kHz audio sample rate");
-        chkMac16k.setEnabled(false);
-
-        chkMacLinear.setText("Linear audio");
-        chkMacLinear.setEnabled(false);
-
-        chkMacL2.setText("Level 2 audio protection");
-        chkMacL2.setEnabled(false);
-
-        javax.swing.GroupLayout macPanelLayout = new javax.swing.GroupLayout(macPanel);
-        macPanel.setLayout(macPanelLayout);
-        macPanelLayout.setHorizontalGroup(
-            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(macPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(macPanelLayout.createSequentialGroup()
-                        .addComponent(chkMacChId)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(macPanelLayout.createSequentialGroup()
-                        .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkMacMono)
-                            .addComponent(chkMac16k)
-                            .addComponent(chkMacLinear)
-                            .addComponent(chkMacL2))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        macPanelLayout.setVerticalGroup(
-            macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(macPanelLayout.createSequentialGroup()
-                .addGroup(macPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkMacChId)
-                    .addComponent(txtMacChId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkMacMono)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkMac16k)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkMacLinear)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkMacL2)
+                .addComponent(chkCC608)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1224,9 +1222,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(modePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(modeTabLayout.createSequentialGroup()
-                        .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(macPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(vbiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         modeTabLayout.setVerticalGroup(
@@ -1234,14 +1232,11 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(modeTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(modePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(modeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(modeTabLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(modeTabLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(47, Short.MAX_VALUE))
+                    .addComponent(macPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(vbiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Mode", modeTab);
@@ -1596,7 +1591,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(frequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(141, Short.MAX_VALUE))
+                .addContainerGap(148, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -2100,7 +2095,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addContainerGap(99, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2345,7 +2340,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2390,7 +2385,7 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(containerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(containerPanelLayout.createSequentialGroup()
-                        .addComponent(tabPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tabPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(runButtonGrid, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(consoleOutputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
