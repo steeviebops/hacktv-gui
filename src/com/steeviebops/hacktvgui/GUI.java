@@ -5450,12 +5450,6 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addCeefaxRegions() {
-        // Regional Ceefax data is currently unavailable, disable for now
-        lblNMSCeefaxRegion.setEnabled(false);
-        cmbNMSCeefaxRegion.setEnabled(false);
-        lblNMSCeefaxRegion.setVisible(false);
-        cmbNMSCeefaxRegion.setVisible(false);
-        /*
         // Populate the Ceefax regions to the combobox in GUI settings
         String[] CeefaxRegions = {
             "East",
@@ -5481,7 +5475,6 @@ public class GUI extends javax.swing.JFrame {
         else {
             cmbNMSCeefaxRegion.setSelectedIndex(9);
         }
-        */
     }
 
     private void downloadTeletext(String url, String destinationFile, String regex) {
@@ -5552,8 +5545,7 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     default:
                         if (dUrl.startsWith("https://internal.nathanmediaservices.co.uk/svn/ceefax/")) {
-                            // This is most likely a Ceefax region
-                            f = new File(tempDir + File.separator + "ceefax_region");
+                            f = new File(tempDir + File.separator + "ceefax");
                         }
                         else {
                             System.err.println("Unknown teletext URL");
@@ -5618,53 +5610,6 @@ public class GUI extends javax.swing.JFrame {
                         // All good
                         txtStatus.setText("Done");
                         txtTeletextSource.setText(teletextPath);
-                        // Regional Ceefax data is currently unavailable, disable for now
-                        /*
-                        // Check if we just downloaded Ceefax
-                        if (url.equals("https://internal.nathanmediaservices.co.uk/svn/ceefax/national/")) {
-                            // It's not enough to just download the national files, we also need a region
-                            var CeefaxRegionArray = new String[] {
-                                "East",
-                                "EastMidlands",
-                                "London",
-                                "NorthernIreland",
-                                "Scotland",
-                                "South",
-                                "SouthWest",
-                                "Wales",
-                                "West",
-                                "Worldwide",
-                                "Yorks&Lincs"
-                            };
-                            htmlTempFile = "ceefax_region.xml";
-                            String nUrl = "https://internal.nathanmediaservices.co.uk/svn/ceefax/"
-                                    + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/";
-                            // Download regional index page
-                            downloadTeletext(nUrl, htmlTempFile, regex);
-                        }
-                        else if (htmlTempFile.equals("ceefax_region.xml")) {
-                            // Move the regional files to the national directory
-                            var rd = new File(tempDir + File.separator + "ceefax_region");
-                            var nd = new File(tempDir + File.separator + "ceefax");
-                            if ( (rd.isDirectory()) && (nd.isDirectory()) ) {
-                                var files = rd.listFiles();
-                                if (files != null) {
-                                    for (File f : files) {
-                                        try {
-                                            Files.move(f.toPath(), Path.of(nd + File.separator + f.getName()), StandardCopyOption.REPLACE_EXISTING);
-                                        }
-                                        catch (IOException e) {
-                                            messageBox("An error occurred when merging the regional Ceefax data with the national data.\n"
-                                                    + e, JOptionPane.WARNING_MESSAGE);
-                                            break;
-                                        }
-                                    }                                    
-                                }
-                            }
-                            // Reset the source directory to the national directory,
-                            // which hopefully now has the regional files merged into it
-                            txtTeletextSource.setText(teletextPath.substring(0, teletextPath.length() - 7));
-                        }*/
                         break;
                     case 1:
                         // Download cancelled by the user
@@ -10529,11 +10474,24 @@ public class GUI extends javax.swing.JFrame {
             // Disable hacktv download button so it doesn't interfere
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
-            String dUrl = "https://feeds.nmsni.co.uk/svn/ceefax/national/";
+            var CeefaxRegionArray = new String[] {
+                "East",
+                "EastMidlands",
+                "London",
+                "NorthernIreland",
+                "Scotland",
+                "South",
+                "SouthWest",
+                "Wales",
+                "West",
+                "Worldwide",
+                "Yorks&Lincs"
+            };
+            htmlTempFile = "ceefax.xml";
             String regex = "name=\"(.*?)\"";
-            htmlTempFile = "ceefax_national.xml";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, regex);
+            downloadTeletext("https://internal.nathanmediaservices.co.uk/svn/ceefax/"
+                                    + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/", htmlTempFile, regex);
         }
     }//GEN-LAST:event_btnNMSCeefaxActionPerformed
 
