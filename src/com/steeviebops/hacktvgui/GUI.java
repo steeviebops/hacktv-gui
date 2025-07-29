@@ -49,6 +49,7 @@ import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -72,8 +73,10 @@ import java.util.stream.Stream;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.KeyStroke;
@@ -3532,51 +3535,72 @@ public class GUI extends javax.swing.JFrame {
             mattstvbarn = false;
             return;
         }
-        // Test the specified file by loading it into memory using a BufferedReader.
-        // This is more memory-efficient than loading the entire file to a byte array.
-        boolean b = false;
+        // Create a set of strings to look for in the binary
+        Set<String> foundStrings;
         try {
-            String c;
-            boolean fsphil = false;
-            try (var br1 = new BufferedReader(new FileReader(hackTVPath, StandardCharsets.ISO_8859_1))) {
-                while ((c = br1.readLine()) != null) {
-                    if (c.contains("--enableemm")) {
-                        b = true;
-                        lblFork.setText("Captain Jack");
-                        captainJack = true;
-                        mattstvbarn = false;
-                    }
-                    else if (c.contains("Both VC1 and VC2 cannot be used together")) {
-                        lblFork.setText("fsphil");
-                        captainJack = false;
-                        fsphil = true;
-                        mattstvbarn = false;
-                        continue;
-                    }
-                    else if (c.contains("pm8546g.bin")) {
-                        b = true;
-                        lblFork.setText("Matt's TV Barn");
-                        captainJack = false;
-                        mattstvbarn = true;
-                        break;
-                    }
-                    // If we found a match, stop processing
-                    if (b) break;
+            foundStrings = extractMatchingStrings(Paths.get(hackTVPath), 10, Set.of(
+                "--enableemm",
+                "Both VC1 and VC2 cannot be used together",
+                "pm8546g.bin"
+            ));
+            if (foundStrings.isEmpty()) {
+                lblFork.setText("Invalid file (not hacktv?)");
+                captainJack = false;
+                mattstvbarn = false;
+                return;
+            }
+            if (foundStrings.contains("--enableemm")) {
+                lblFork.setText("Captain Jack");
+                captainJack = true;
+                mattstvbarn = false;
+            }
+            else if (foundStrings.contains("Both VC1 and VC2 cannot be used together")) {
+                captainJack = false;
+                mattstvbarn = foundStrings.contains("pm8546g.bin");
+                if (mattstvbarn) {
+                    lblFork.setText("Matt's TV Barn");
                 }
-                if (!b) b = fsphil;
+                else {
+                    lblFork.setText("fsphil");
+                    mattstvbarn = false;
+                }
             }
         }
         catch (IOException ex) {
             lblFork.setText("File access error");
             captainJack = false;
-            return;
-        }
-        if (!b) {
-            lblFork.setText("Invalid file (not hacktv?)");
-            captainJack = false;
+            mattstvbarn = false;
         }
     }
     
+    private Set<String> extractMatchingStrings(Path binaryPath, int minLength, Set<String> targets) throws IOException {
+        var found = new HashSet<String>();
+        try (var is = new BufferedInputStream(Files.newInputStream(binaryPath))) {
+            var baos = new ByteArrayOutputStream();
+            int b;
+            while ((b = is.read()) != -1) {
+                // Only write printable ASCII characters to the ByteArrayOutputStream
+                if (b >= 32 && b <= 126) {
+                    baos.write(b);
+                }
+                else {
+                    if (baos.size() >= minLength) {
+                        String s = baos.toString("US-ASCII");
+                        for (String target : targets) {
+                            if (s.contains(target)) {
+                                found.add(target);
+                                // Early return if all found
+                                if (found.containsAll(targets)) return found;
+                            }
+                        }
+                    }
+                    baos.reset();
+                }
+            }
+        }
+        return found;
+    }
+
     private String getFork() {
         if (captainJack) {
             return "captainjack";
