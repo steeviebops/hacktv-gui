@@ -4334,28 +4334,13 @@ public class GUI extends javax.swing.JFrame {
                     i = scramblingTypeArray.indexOf("--syster");
                     break;
                 case "d11":
-                    if (captainJack) {
-                        i = scramblingTypeArray.indexOf("--d11");
-                    }
-                    else {
-                        i = -1;
-                    }
+                    i = scramblingTypeArray.indexOf("--d11");
                     break;
                 case "systercnr":
-                    if (captainJack) {
-                        i = scramblingTypeArray.indexOf("--systercnr");
-                    }
-                    else {
-                        i = -1;
-                    }
+                    i = scramblingTypeArray.indexOf("--systercnr");
                     break;
                 case "systerls+cnr":
-                    if (captainJack) {
-                        i = scramblingTypeArray.indexOf("--systercnr") + 1;
-                    }
-                    else {
-                        i = -1;
-                    }
+                    i = scramblingTypeArray.indexOf("--systercnr") + 1;
                     break;
                 default:
                     i = -1;
@@ -4462,7 +4447,7 @@ public class GUI extends javax.swing.JFrame {
         int ImportedPermutationTable;
         if (INI.getIntegerFromINI(fileContents, "hacktv", "permutationtable") != null) {
             ImportedPermutationTable = INI.getIntegerFromINI(fileContents, "hacktv", "permutationtable");
-            if ( (captainJack) && (scramblingType1.equals("--syster")) || (scramblingType1.equals("--systercnr")) ) {
+            if ( (scramblingType1.equals("--syster")) || (scramblingType1.equals("--systercnr")) ) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
                 cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
@@ -5979,14 +5964,12 @@ public class GUI extends javax.swing.JFrame {
         if (syster != null) {
             ScramblingTypeAL.add("Nagravision Syster");
             scramblingTypeArray.add("--syster");
-            if (captainJack) { 
-                ScramblingTypeAL.add("Discret 11");
-                ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
-                ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
-                scramblingTypeArray.add("--d11");
-                scramblingTypeArray.add("--systercnr");
-                scramblingTypeArray.add("--syster");
-            }   
+            ScramblingTypeAL.add("Discret 11");
+            ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
+            ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
+            scramblingTypeArray.add("--d11");
+            scramblingTypeArray.add("--systercnr");
+            scramblingTypeArray.add("--syster");
         }
         if (ScramblingTypeAL.size() == 1) {
             // No systems found, disable the scrambling tab
@@ -6246,11 +6229,9 @@ public class GUI extends javax.swing.JFrame {
         }
         // Enable permutation table options (Syster-based modes)
         if ( ((scramblingType1).equals("--syster")) || (scramblingType1).equals("--systercnr")) {
-            if (captainJack) {
-                lblSysterPermTable.setEnabled(true);
-                cmbSysterPermTable.setEnabled(true);
-                cmbSysterPermTable.setSelectedIndex(0);
-            }
+            lblSysterPermTable.setEnabled(true);
+            cmbSysterPermTable.setEnabled(true);
+            cmbSysterPermTable.setSelectedIndex(0);
         }
         else {
             lblSysterPermTable.setEnabled(false);
