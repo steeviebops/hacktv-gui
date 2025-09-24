@@ -3562,7 +3562,6 @@ public class GUI extends javax.swing.JFrame {
                 }
                 else {
                     lblFork.setText("fsphil");
-                    mattstvbarn = false;
                 }
             }
         }
@@ -5241,6 +5240,8 @@ public class GUI extends javax.swing.JFrame {
         // Handler for Extended M3U files (with #EXTM3U header)
         // Set mouse cursor to busy
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        // Clear playlistURLsAL if it's not empty
+        if (!playlistURLsAL.isEmpty()) playlistURLsAL.clear();
         // Temporarily disable the radio buttons, Browse and Run buttons, and menus
         btnSourceBrowse.setEnabled(false);
         radLocalSource.setEnabled(false);
