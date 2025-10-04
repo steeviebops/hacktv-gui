@@ -68,7 +68,6 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
 
         harmonicBG.add(radFirst);
         radFirst.setText("Standard IF (first harmonic)");
-        radFirst.setToolTipText("");
         radFirst.setActionCommand("1"); // NOI18N
 
         harmonicBG.add(radSecond);

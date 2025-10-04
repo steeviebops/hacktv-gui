@@ -182,7 +182,6 @@
                   <ComponentRef name="harmonicBG"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Standard IF (first harmonic)"/>
-                <Property name="toolTipText" type="java.lang.String" value=""/>
                 <Property name="actionCommand" type="java.lang.String" value="1" noResource="true"/>
               </Properties>
             </Component>

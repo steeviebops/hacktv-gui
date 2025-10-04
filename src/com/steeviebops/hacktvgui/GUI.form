@@ -160,7 +160,6 @@
             <MenuItem class="javax.swing.JMenuItem" name="menuGithubRepo">
               <Properties>
                 <Property name="text" type="java.lang.String" value="GitHub repository"/>
-                <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuGithubRepoActionPerformed"/>
@@ -1187,7 +1186,6 @@
                     <Component class="javax.swing.JCheckBox" name="chkSwapIQ">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Swap I and Q samples"/>
-                        <Property name="toolTipText" type="java.lang.String" value=""/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkSVideo">
@@ -2542,7 +2540,6 @@
                             <TitledBorder title="Format-specific options"/>
                           </Border>
                         </Property>
-                        <Property name="toolTipText" type="java.lang.String" value=""/>
                       </Properties>
 
                       <Layout>
@@ -2956,7 +2953,6 @@
                     <Component class="javax.swing.JLabel" name="lblClearAll">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Clears all settings."/>
-                        <Property name="toolTipText" type="java.lang.String" value=""/>
                       </Properties>
                     </Component>
                   </SubComponents>

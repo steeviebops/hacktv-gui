@@ -968,7 +968,6 @@ public class GUI extends javax.swing.JFrame {
         });
 
         chkSwapIQ.setText("Swap I and Q samples");
-        chkSwapIQ.setToolTipText("");
 
         chkSVideo.setText("S-Video");
         chkSVideo.addActionListener(new java.awt.event.ActionListener() {
@@ -1909,7 +1908,6 @@ public class GUI extends javax.swing.JFrame {
         );
 
         scramblingOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Format-specific options"));
-        scramblingOptionsPanel.setToolTipText("");
 
         chkScrambleAudio.setText("Scramble audio");
         chkScrambleAudio.setEnabled(false);
@@ -2188,7 +2186,6 @@ public class GUI extends javax.swing.JFrame {
         lblClearMRU.setText("Clears the list of recently opened files.");
 
         lblClearAll.setText("Clears all settings.");
-        lblClearAll.setToolTipText("");
 
         javax.swing.GroupLayout resetSettingsPanelLayout = new javax.swing.GroupLayout(resetSettingsPanel);
         resetSettingsPanel.setLayout(resetSettingsPanelLayout);
@@ -2512,7 +2509,6 @@ public class GUI extends javax.swing.JFrame {
         helpMenu.add(menuWiki);
 
         menuGithubRepo.setText("GitHub repository");
-        menuGithubRepo.setToolTipText("");
         menuGithubRepo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuGithubRepoActionPerformed(evt);
@@ -9046,7 +9042,7 @@ public class GUI extends javax.swing.JFrame {
                 APP_NAME +
                 "\nBuild date: " + v +
                 "\nUsing " + modesFileLocation + " modes file, version " + modesFileVersion +
-                "\nUsing " + bpFileLocation + " band plan file version " + bpFileVersion +
+                "\nUsing " + bpFileLocation + " band plan file, version " + bpFileVersion +
                 "\nUsing Java Runtime Environment version " + jv +
                 "\n\nCreated" + y + " by Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
