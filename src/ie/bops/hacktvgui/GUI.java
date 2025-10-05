@@ -3466,7 +3466,7 @@ public class GUI extends javax.swing.JFrame {
             if (runningOnWindows ? PREFS.keys().length > 1 : PREFS.keys().length > 0) return;
             if (Preferences.userRoot().nodeExists("com/steeviebops/hacktvgui")) {
                 var oldPrefs = Preferences.userRoot().node("com/steeviebops/hacktvgui");
-                if (oldPrefs.keys().length > 0) {
+                if (runningOnWindows ? oldPrefs.keys().length > 1 : oldPrefs.keys().length > 0) {
                     // Convert preferences to new format
                     for (String key : oldPrefs.keys()) {
                         PREFS.put(key.toLowerCase(), oldPrefs.get(key, null));
