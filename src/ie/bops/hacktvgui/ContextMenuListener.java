@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Stephen McGarry
+ * Copyright (C) 2025 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package com.steeviebops.hacktvgui;
+package ie.bops.hacktvgui;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;

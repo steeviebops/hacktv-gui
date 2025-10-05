@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package com.steeviebops.hacktvgui;
+package ie.bops.hacktvgui;
 
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
@@ -2670,6 +2670,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         populateCheckboxArray();
+        migratePreferences();
         loadPreferences();
         detectFork();
         selectModesFile();
@@ -2753,7 +2754,7 @@ public class GUI extends javax.swing.JFrame {
     private void setIcons() {
         var icons = new ArrayList<Image>();
         try {
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/test.gif")));
+            icons.add(ImageIO.read(getClass().getClassLoader().getResource("ie/bops/resources/test.gif")));
         }
         catch (IOException e) {
             System.err.println("Icon load failed, using default.\n" + e);
@@ -2888,12 +2889,12 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Safeguard if the LookAndFeel preference is out of bounds
-        int v = PREFS.getInt("LookAndFeel", defaultLaf);
+        int v = PREFS.getInt("lookandfeel", defaultLaf);
         if ((v >= (lafAL.size())) || (v < 0)) {
             // Use default L&F and reset preference
             System.out.println("Specified look and feel not found, reverting to default.");
             changeLaf(defaultLaf);
-            PREFS.putInt("LookAndFeel", defaultLaf);
+            PREFS.putInt("lookandfeel", defaultLaf);
         }
         else {
             // Use the value we got from preferences
@@ -2927,12 +2928,12 @@ public class GUI extends javax.swing.JFrame {
             lf[i] = LAF.get(i);
         }
         cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
-        cmbLookAndFeel.setSelectedIndex(PREFS.getInt("LookAndFeel", defaultLaf));
+        cmbLookAndFeel.setSelectedIndex(PREFS.getInt("lookandfeel", defaultLaf));
     }
     
     private String loadFlatLafINI(boolean loadProperties) {
         // Read the embedded flatlaf.ini file
-        String r = "com/steeviebops/resources/flatlaf.ini";
+        String r = "ie/bops/resources/flatlaf.ini";
         String f;
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(r)) {
             if (is == null) {
@@ -3011,7 +3012,7 @@ public class GUI extends javax.swing.JFrame {
                     // Set tie background colour of the JList to background (enabled)
                     lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.background"));
                 }
-                PREFS.putInt("LookAndFeel", i);
+                PREFS.putInt("lookandfeel", i);
             }
             catch (ClassNotFoundException c) {
                 String err = "The requested look and feel cannot be found.\n"
@@ -3023,7 +3024,7 @@ public class GUI extends javax.swing.JFrame {
                     System.err.println();
                 }
                 changeLaf(defaultLaf);
-                PREFS.putInt("LookAndFeel", defaultLaf);
+                PREFS.putInt("lookandfeel", defaultLaf);
             }    
             catch (IllegalAccessException | InstantiationException | 
                     UnsupportedLookAndFeelException ex) {
@@ -3129,7 +3130,7 @@ public class GUI extends javax.swing.JFrame {
         }
         try {
             var sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String classFilePath = "/com/steeviebops/hacktvgui/GUI.class";
+            String classFilePath = "/ie/bops/hacktvgui/GUI.class";
             Date date;
             if (Files.exists(Path.of(cp))) {
                 date = SharedInst.getLastUpdatedTime(cp, classFilePath);
@@ -3178,7 +3179,7 @@ public class GUI extends javax.swing.JFrame {
                 (Files.exists(Path.of(jarDir + "/bandplans.ini"))) ||
                 (Files.exists(Path.of(jarDir + "/Modes.ini")))) ) {
             // If yes, and UseLocalModesFile is 1, use local file.
-            if ((PREFS.getInt("UseLocalModesFile", 0)) == 1) {
+            if ((PREFS.getInt("uselocalmodesfile", 0)) == 1) {
                 q = JOptionPane.YES_OPTION;
             }
             // If yes, and UseLocalModesFile is 0, prompt.
@@ -3189,7 +3190,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // If no, and "UseLocalModesFile" is 0, download
-        else if ((PREFS.getInt("UseLocalModesFile", 0)) == 0) {
+        else if ((PREFS.getInt("uselocalmodesfile", 0)) == 0) {
             q = JOptionPane.NO_OPTION;
         }
         // If no, and UseLocalModesFile is 1, use embedded file
@@ -3208,7 +3209,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + ".ini";
             }
             if (Files.exists(Path.of(jarDir + "/bandplans.ini"))) {
                 // Use the local file
@@ -3216,13 +3217,13 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
             }
         }
         else {
             // Download from Github
-            String v = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + ".ini";
-            String b = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/bandplans.ini";
+            String v = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/ie/bops/resources/" + getFork() + ".ini";
+            String b = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/ie/bops/resources/bandplans.ini";
             modesFile = downloadModesFile(v);
             bpFile = downloadModesFile(b);
         }
@@ -3255,12 +3256,12 @@ public class GUI extends javax.swing.JFrame {
             String f = "";
             if (url.endsWith(v)) {
                 System.err.println("Error downloading " + v + "...\n" + ex);
-                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + ".ini";
                 f = v;
             }
             else if (url.endsWith(b)) {
                 System.err.println("Error downloading " + b + "...\n" + ex);
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
                 f = b;
             }
             messageBox("Unable to download the " + f + " file from Github.\n"
@@ -3274,7 +3275,7 @@ public class GUI extends javax.swing.JFrame {
         if ( (modesFilePath.isEmpty()) && (modesFile != null) ) {
             modesFileLocation = "online";
         }
-        else if (modesFilePath.startsWith("com/steeviebops/resources/")) {
+        else if (modesFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded videomodes.ini to the modesFile string
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
                 if (is == null) {
@@ -3304,7 +3305,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the modes file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                modesFilePath = "com/steeviebops/resources/" + getFork() + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + getFork() + ".ini";
                 modesFileLocation = "embedded";
                 openModesFile();
             }
@@ -3330,7 +3331,7 @@ public class GUI extends javax.swing.JFrame {
         else if ( (bpFilePath.isEmpty()) && (bpFile != null) ) {
             bpFileLocation = "online";
         }
-        else if (bpFilePath.startsWith("com/steeviebops/resources/")) {
+        else if (bpFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded bandplans.ini to the bpFile string
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
                 if (is == null) {
@@ -3360,7 +3361,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the band plans file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
                 bpFileLocation = "embedded";
                 openBandPlanFile();
             }
@@ -3460,15 +3461,38 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    private void migratePreferences() {
+        try {
+            if (runningOnWindows ? PREFS.keys().length > 1 : PREFS.keys().length > 0) return;
+            if (Preferences.userRoot().nodeExists("com/steeviebops/hacktvgui")) {
+                var oldPrefs = Preferences.userRoot().node("com/steeviebops/hacktvgui");
+                if (runningOnWindows ? oldPrefs.keys().length > 1 : oldPrefs.keys().length > 0) {
+                    // Convert preferences to new format
+                    for (String key : oldPrefs.keys()) {
+                        PREFS.put(key.toLowerCase(), oldPrefs.get(key, null));
+                    }
+                }
+                PREFS.flush();
+                // Remove old preferences node
+                //oldPrefs.parent().removeNode();
+                //oldPrefs.flush();
+                System.out.println("Successfully migrated preferences node.");                
+            }
+        }
+        catch (BackingStoreException ex) {
+            System.err.println("Error importing old preference store: " + ex.getMessage());
+        }
+    }
+    
     private void loadPreferences(){
         if (PREFS.getInt("hackdac", 0) == 1) chkHackDAC.setSelected(true);
         // Check preferences node for the path to hacktv
         // If not found, use the default
         if (runningOnWindows) {
-            hackTVPath = PREFS.get("HackTVPath", defaultHackTVPath);
+            hackTVPath = PREFS.get("hacktvpath", defaultHackTVPath);
         }
         else {
-            hackTVPath = PREFS.get("HackTVPath", null);
+            hackTVPath = PREFS.get("hacktvpath", null);
             if (hackTVPath == null) {
                 // Check if hacktv exists at /usr/bin/hacktv, which is the
                 // package manager's path. Otherwise use the default.
@@ -3486,7 +3510,7 @@ public class GUI extends javax.swing.JFrame {
         hackTVDirectory = new File(hackTVPath).getParent();
         txtHackTVPath.setText(hackTVPath);
         // Check status of UseLocalModesFile
-        if (PREFS.getInt("UseLocalModesFile", 0) == 1) {
+        if (PREFS.getInt("uselocalmodesfile", 0) == 1) {
             chkLocalModes.setSelected(true);
         }
     }
@@ -3692,10 +3716,10 @@ public class GUI extends javax.swing.JFrame {
     
     private void checkMRUList() {
         // Get MRU values and display in the File menu
-        String ConfigFile1 = PREFS.get("File1", "");
-        String ConfigFile2 = PREFS.get("File2", "");
-        String ConfigFile3 = PREFS.get("File3", "");
-        String ConfigFile4 = PREFS.get("File4", "");
+        String ConfigFile1 = PREFS.get("file1", "");
+        String ConfigFile2 = PREFS.get("file2", "");
+        String ConfigFile3 = PREFS.get("file3", "");
+        String ConfigFile4 = PREFS.get("file4", "");
         if ( !ConfigFile1.isEmpty() ) {
             sepMruSeparator.setVisible(true);
             menuMRUFile1.setText(ConfigFile1);
@@ -3740,36 +3764,36 @@ public class GUI extends javax.swing.JFrame {
     }    
         
     private void updateMRUList (String FilePath) {
-        String ConfigFile1 = PREFS.get("File1", "");
-        String ConfigFile2 = PREFS.get("File2", "");
-        String ConfigFile3 = PREFS.get("File3", "");
-        String ConfigFile4 = PREFS.get("File4", "");
+        String ConfigFile1 = PREFS.get("file1", "");
+        String ConfigFile2 = PREFS.get("file2", "");
+        String ConfigFile3 = PREFS.get("file3", "");
+        String ConfigFile4 = PREFS.get("file4", "");
         if (FilePath.equals(ConfigFile2)) {
-            PREFS.put("File2", ConfigFile1);
-            PREFS.put("File1", FilePath);
+            PREFS.put("file2", ConfigFile1);
+            PREFS.put("file1", FilePath);
             checkMRUList();
         }
         else if (FilePath.equals(ConfigFile3)) {
-            PREFS.put("File3", ConfigFile2);
-            PREFS.put("File2", ConfigFile1);
-            PREFS.put("File1", FilePath);   
+            PREFS.put("file3", ConfigFile2);
+            PREFS.put("file2", ConfigFile1);
+            PREFS.put("file1", FilePath);   
             checkMRUList(); 
         }
         else if (FilePath.equals(ConfigFile4)) {
-            PREFS.put("File4", ConfigFile3);
-            PREFS.put("File3", ConfigFile2);
-            PREFS.put("File2", ConfigFile1);
-            PREFS.put("File1", FilePath);
+            PREFS.put("file4", ConfigFile3);
+            PREFS.put("file3", ConfigFile2);
+            PREFS.put("file2", ConfigFile1);
+            PREFS.put("file1", FilePath);
             checkMRUList();
         }
         else if (FilePath.equals(ConfigFile1)) {
             // Do nothing
         }
         else {
-            if (!ConfigFile3.isEmpty()) PREFS.put("File4", ConfigFile3);
-            if (!ConfigFile2.isEmpty()) PREFS.put("File3", ConfigFile2);
-            if (!ConfigFile1.isEmpty()) PREFS.put("File2", ConfigFile1);
-            PREFS.put("File1", FilePath);
+            if (!ConfigFile3.isEmpty()) PREFS.put("file4", ConfigFile3);
+            if (!ConfigFile2.isEmpty()) PREFS.put("file3", ConfigFile2);
+            if (!ConfigFile1.isEmpty()) PREFS.put("file2", ConfigFile1);
+            PREFS.put("file1", FilePath);
             checkMRUList();
         }
     }
@@ -5474,7 +5498,7 @@ public class GUI extends javax.swing.JFrame {
         cmbNMSCeefaxRegion.setModel(new DefaultComboBoxModel<>(CeefaxRegions));
         // Read a previously saved region from the prefs store.
         // If not found or invalid, default to Worldwide.
-        int i = PREFS.getInt("CeefaxRegion", 9);
+        int i = PREFS.getInt("ceefaxregion", 9);
         if ( (i + 1 <= cmbNMSCeefaxRegion.getItemCount()) && (i >= 0) ) {
             cmbNMSCeefaxRegion.setSelectedIndex(i);
         }
@@ -5883,7 +5907,7 @@ public class GUI extends javax.swing.JFrame {
                         hackTVPath = exePath;
                         txtHackTVPath.setText(exePath);
                         // Store the specified path in the preferences store.
-                        PREFS.put("HackTVPath", hackTVPath);
+                        PREFS.put("hacktvpath", hackTVPath);
                         // Load the full path to a variable so we can use getParent on it
                         // and get its parent directory path
                         hackTVDirectory = new File(hackTVPath).getParent();    
@@ -9696,7 +9720,7 @@ public class GUI extends javax.swing.JFrame {
             hackTVPath = SharedInst.stripQuotes(file.toString());
             txtHackTVPath.setText(hackTVPath);
             // Store the specified path.
-            PREFS.put("HackTVPath", hackTVPath);
+            PREFS.put("hacktvpath", hackTVPath);
             // Load the full path to a variable so we can use getParent on it
             // and get its parent directory path
             hackTVDirectory = new File(hackTVPath).getParent();
@@ -9761,10 +9785,10 @@ public class GUI extends javax.swing.JFrame {
     private void btnClearMRUListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearMRUListActionPerformed
         if (JOptionPane.showConfirmDialog(null, "This will clear the list of most recently used "
                 + "files from the File menu. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION)  == JOptionPane.YES_OPTION) {
-            if ( PREFS.get("File1", null) != null ) PREFS.remove("File1");
-            if ( PREFS.get("File2", null) != null ) PREFS.remove("File2");
-            if ( PREFS.get("File3", null) != null ) PREFS.remove("File3");
-            if ( PREFS.get("File4", null) != null ) PREFS.remove("File4");
+            if ( PREFS.get("file1", null) != null ) PREFS.remove("File1");
+            if ( PREFS.get("file2", null) != null ) PREFS.remove("File2");
+            if ( PREFS.get("file3", null) != null ) PREFS.remove("File3");
+            if ( PREFS.get("file4", null) != null ) PREFS.remove("File4");
             checkMRUList();
         }
     }//GEN-LAST:event_btnClearMRUListActionPerformed
@@ -9942,10 +9966,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkLocalModesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalModesActionPerformed
         if (chkLocalModes.isSelected()) {
-            PREFS.putInt("UseLocalModesFile", 1);
+            PREFS.putInt("uselocalmodesfile", 1);
         }
         else {
-            PREFS.putInt("UseLocalModesFile", 0);
+            PREFS.putInt("uselocalmodesfile", 0);
         }
         // Reopen modes file with new settings
         selectModesFile();
@@ -10454,7 +10478,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuWikiActionPerformed
 
     private void cmbNMSCeefaxRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionActionPerformed
-        PREFS.putInt("CeefaxRegion", cmbNMSCeefaxRegion.getSelectedIndex());
+        PREFS.putInt("ceefaxregion", cmbNMSCeefaxRegion.getSelectedIndex());
     }//GEN-LAST:event_cmbNMSCeefaxRegionActionPerformed
 
     private void btnNMSCeefaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNMSCeefaxActionPerformed
