@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Stephen McGarry
+ * Copyright (C) 2025 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.steeviebops.hacktvgui;
+package ie.bops.hacktvgui;
 
 import javax.swing.JOptionPane;
 

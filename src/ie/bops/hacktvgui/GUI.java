@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package com.steeviebops.hacktvgui;
+package ie.bops.hacktvgui;
 
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
@@ -2753,7 +2753,7 @@ public class GUI extends javax.swing.JFrame {
     private void setIcons() {
         var icons = new ArrayList<Image>();
         try {
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("com/steeviebops/resources/test.gif")));
+            icons.add(ImageIO.read(getClass().getClassLoader().getResource("ie/bops/resources/test.gif")));
         }
         catch (IOException e) {
             System.err.println("Icon load failed, using default.\n" + e);
@@ -2932,7 +2932,7 @@ public class GUI extends javax.swing.JFrame {
     
     private String loadFlatLafINI(boolean loadProperties) {
         // Read the embedded flatlaf.ini file
-        String r = "com/steeviebops/resources/flatlaf.ini";
+        String r = "ie/bops/resources/flatlaf.ini";
         String f;
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(r)) {
             if (is == null) {
@@ -3129,7 +3129,7 @@ public class GUI extends javax.swing.JFrame {
         }
         try {
             var sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String classFilePath = "/com/steeviebops/hacktvgui/GUI.class";
+            String classFilePath = "/ie/bops/hacktvgui/GUI.class";
             Date date;
             if (Files.exists(Path.of(cp))) {
                 date = SharedInst.getLastUpdatedTime(cp, classFilePath);
@@ -3208,7 +3208,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + ".ini";
             }
             if (Files.exists(Path.of(jarDir + "/bandplans.ini"))) {
                 // Use the local file
@@ -3216,13 +3216,13 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Use the embedded copy
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
             }
         }
         else {
             // Download from Github
-            String v = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/" + getFork() + ".ini";
-            String b = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/com/steeviebops/resources/bandplans.ini";
+            String v = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/ie/bops/resources/" + getFork() + ".ini";
+            String b = "https://raw.githubusercontent.com/steeviebops/hacktv-gui/main/src/ie/bops/resources/bandplans.ini";
             modesFile = downloadModesFile(v);
             bpFile = downloadModesFile(b);
         }
@@ -3255,12 +3255,12 @@ public class GUI extends javax.swing.JFrame {
             String f = "";
             if (url.endsWith(v)) {
                 System.err.println("Error downloading " + v + "...\n" + ex);
-                modesFilePath = "com/steeviebops/resources/" + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + ".ini";
                 f = v;
             }
             else if (url.endsWith(b)) {
                 System.err.println("Error downloading " + b + "...\n" + ex);
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
                 f = b;
             }
             messageBox("Unable to download the " + f + " file from Github.\n"
@@ -3274,7 +3274,7 @@ public class GUI extends javax.swing.JFrame {
         if ( (modesFilePath.isEmpty()) && (modesFile != null) ) {
             modesFileLocation = "online";
         }
-        else if (modesFilePath.startsWith("com/steeviebops/resources/")) {
+        else if (modesFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded videomodes.ini to the modesFile string
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
                 if (is == null) {
@@ -3304,7 +3304,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the modes file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                modesFilePath = "com/steeviebops/resources/" + getFork() + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + getFork() + ".ini";
                 modesFileLocation = "embedded";
                 openModesFile();
             }
@@ -3330,7 +3330,7 @@ public class GUI extends javax.swing.JFrame {
         else if ( (bpFilePath.isEmpty()) && (bpFile != null) ) {
             bpFileLocation = "online";
         }
-        else if (bpFilePath.startsWith("com/steeviebops/resources/")) {
+        else if (bpFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded bandplans.ini to the bpFile string
             try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
                 if (is == null) {
@@ -3360,7 +3360,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the band plans file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                bpFilePath = "com/steeviebops/resources/bandplans.ini";
+                bpFilePath = "ie/bops/resources/bandplans.ini";
                 bpFileLocation = "embedded";
                 openBandPlanFile();
             }
