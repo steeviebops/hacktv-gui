@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 8 8" preserveAspectRatio="xMidYMid meet">
+	<!-- Transparent background -->
+	<rect width="8" height="8" fill="none"/>
+	<!-- Centered 4:3 image (8 wide x 6 high) -->
+	<g transform="translate(0,1)">
+		<path d="M0 0h8v6H0"/>
+		<path fill="#0000C0" d="M0 0h7v6H0"/>
+		<path fill="#C00000" d="M0 0h6v6H0"/>
+		<path fill="#C000C0" d="M0 0h5v6H0"/>
+		<path fill="#00C000" d="M0 0h4v6H0"/>
+		<path fill="#00C0C0" d="M0 0h3v6H0"/>
+		<path fill="#C0C000" d="M0 0h2v6H0"/>
+		<path fill="#FFF" d="M0 0h1v6H0"/>
+	</g>
+</svg>

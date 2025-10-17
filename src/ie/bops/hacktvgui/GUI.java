@@ -2754,9 +2754,9 @@ public class GUI extends javax.swing.JFrame {
     private void setIcons() {
         var icons = new ArrayList<Image>();
         try {
-            icons.add(ImageIO.read(getClass().getClassLoader().getResource("ie/bops/resources/test.gif")));
+            icons.add(ImageIO.read(getClass().getClassLoader().getResource("ie/bops/resources/ebubars.png")));
         }
-        catch (IOException e) {
+        catch (IOException | IllegalArgumentException e) {
             System.err.println("Icon load failed, using default.\n" + e);
             return;
         }
@@ -2834,7 +2834,11 @@ public class GUI extends javax.swing.JFrame {
         UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             // Get the implementation class for the look and feel
-            lafAL.add(lookAndFeel.getClassName());
+            // Don't add the GTK+ theme on Linux, it renders very poorly and is 
+            // the default on many distros.
+            if (!lookAndFeel.getClassName().equals("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")){
+                lafAL.add(lookAndFeel.getClassName());
+            }
             // Is this the system default?
             if (UIManager.getSystemLookAndFeelClassName().equals(lafAL.get(lafAL.size() - 1))) {
                 defaultLaf = lafAL.size() - 1;
@@ -2907,7 +2911,9 @@ public class GUI extends javax.swing.JFrame {
         var lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             // Get the name of the look and feel
-            LAF.add(lookAndFeel.getName());
+            if (!lookAndFeel.getName().equals("GTK+")) {
+                LAF.add(lookAndFeel.getName());
+            }
         }
         // Add FlatLaf if available
         if (lafAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
