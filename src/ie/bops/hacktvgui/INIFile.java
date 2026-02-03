@@ -254,19 +254,21 @@ public class INIFile implements Serializable {
             boolean sectionStart = false;
             boolean written = false;
             var sb = new StringBuilder();
+            if (fileContents.isEmpty()) {
+                // Create a new section
+                sb.append("[").append(section).append("]\n");
+            }
             while ((a = sr1.readLine()) != null) {
                 if (a.startsWith("[" + section + "]") && !sectionStart) {
                     // We know we're in the right section
                     sectionStart = true;
-                    sb.append(a);
-                    sb.append("\n");
+                    sb.append(a).append("\n");
                 } else if (a.startsWith(setting + "=") && (written)) {
                     // Duplicate entry, skip this one
                     System.err.println("Duplicate setting found, skipped");
                 } else if (!a.startsWith("[") && sectionStart && a.startsWith(setting + "=")) {
                     // Setting found in section, append new value instead
-                    sb.append(b);
-                    sb.append("\n");
+                    sb.append(b).append("\n");
                     // We've already applied the setting, don't write another one
                     written = true;
                 } else if (a.startsWith("[") && sectionStart) {
@@ -279,8 +281,7 @@ public class INIFile implements Serializable {
                         sectionStart = false;
                     }
                 } else {
-                    sb.append(a);
-                    sb.append("\n");
+                    sb.append(a).append("\n");
                 }
             }
             // Special handling if the section is at the end of the file and the
@@ -290,11 +291,7 @@ public class INIFile implements Serializable {
                 sb.append("\n");
             } else if (!written) {
                 // Section does not exist, create at end of file
-                sb.append("\n[");
-                sb.append(section);
-                sb.append("]\n");
-                sb.append(b);
-                sb.append("\n");
+                sb.append("\n[").append(section).append("]\n").append(b).append("\n");
             }
             return sb.toString();
         } catch (IOException e) {
