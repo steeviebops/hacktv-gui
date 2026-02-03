@@ -247,14 +247,14 @@ public class INIFile implements Serializable {
      * @return              Returns fileContents with the new setting added or changed
      */
     public String setINIValue(String fileContents, String section, String setting, String value) {
-        try (var sr1 = new BufferedReader(new StringReader(fileContents))) {
+        try (var sr1 = new BufferedReader(new StringReader(fileContents.trim()))) {
             // Extract the INI section that we want
             String a;
             String b = setting + "=" + value;
             boolean sectionStart = false;
             boolean written = false;
             var sb = new StringBuilder();
-            if (fileContents.isEmpty()) {
+            if (fileContents.isBlank()) {
                 // Create a new section
                 sb.append("[").append(section).append("]\n");
             }
