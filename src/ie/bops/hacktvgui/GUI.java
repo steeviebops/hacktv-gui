@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Stephen McGarry
+ * Copyright (C) 2026 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -3475,7 +3475,7 @@ public class GUI extends javax.swing.JFrame {
                 if (runningOnWindows ? oldPrefs.keys().length > 1 : oldPrefs.keys().length > 0) {
                     // Convert preferences to new format
                     for (String key : oldPrefs.keys()) {
-                        PREFS.put(key.toLowerCase(), oldPrefs.get(key, null));
+                        PREFS.put(key.toLowerCase(Locale.ENGLISH), oldPrefs.get(key, null));
                     }
                 }
                 PREFS.flush();
@@ -3565,8 +3565,8 @@ public class GUI extends javax.swing.JFrame {
         Set<String> foundStrings;
         try {
             foundStrings = extractMatchingStrings(Paths.get(hackTVPath), 10, Set.of(
+                "Usage: hacktv [options] input [input...]",
                 "--enableemm",
-                "Both VC1 and VC2 cannot be used together",
                 "pm8546g.bin"
             ));
             if (foundStrings.isEmpty()) {
@@ -3575,20 +3575,29 @@ public class GUI extends javax.swing.JFrame {
                 mattstvbarn = false;
                 return;
             }
-            if (foundStrings.contains("--enableemm")) {
-                lblFork.setText("Captain Jack");
-                captainJack = true;
-                mattstvbarn = false;
-            }
-            else if (foundStrings.contains("Both VC1 and VC2 cannot be used together")) {
-                captainJack = false;
+            else if (foundStrings.contains("Usage: hacktv [options] input [input...]")) {
+                captainJack = foundStrings.contains("--enableemm");
                 mattstvbarn = foundStrings.contains("pm8546g.bin");
-                if (mattstvbarn) {
+                if (captainJack) {
+                    lblFork.setText("Captain Jack");
+                }
+                else if (mattstvbarn) {
                     lblFork.setText("Matt's TV Barn");
                 }
                 else {
                     lblFork.setText("fsphil");
                 }
+            }
+            // Get the hacktv version if supported, by running hacktv --version
+            var pb = new ProcessBuilder(hackTVPath, "--version");
+            String v;
+            Process p = pb.start();
+            try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                // We only need the first line
+                v = br.readLine();
+            }
+            if ((v != null) && (!v.isBlank())) {
+                lblFork.setText(lblFork.getText() + " (" + v.substring(v.indexOf(" ") + 1) + ")");
             }
         }
         catch (IOException ex) {
@@ -9791,10 +9800,10 @@ public class GUI extends javax.swing.JFrame {
     private void btnClearMRUListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearMRUListActionPerformed
         if (JOptionPane.showConfirmDialog(null, "This will clear the list of most recently used "
                 + "files from the File menu. Do you wish to continue?", APP_NAME, JOptionPane.YES_NO_OPTION)  == JOptionPane.YES_OPTION) {
-            if ( PREFS.get("file1", null) != null ) PREFS.remove("File1");
-            if ( PREFS.get("file2", null) != null ) PREFS.remove("File2");
-            if ( PREFS.get("file3", null) != null ) PREFS.remove("File3");
-            if ( PREFS.get("file4", null) != null ) PREFS.remove("File4");
+            if ( PREFS.get("file1", null) != null ) PREFS.remove("file1");
+            if ( PREFS.get("file2", null) != null ) PREFS.remove("file2");
+            if ( PREFS.get("file3", null) != null ) PREFS.remove("file3");
+            if ( PREFS.get("file4", null) != null ) PREFS.remove("file4");
             checkMRUList();
         }
     }//GEN-LAST:event_btnClearMRUListActionPerformed
