@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
@@ -173,7 +174,7 @@ public class INIFile implements Serializable {
             if (b.contains(";")) b = b.substring(0, b.indexOf(";")).trim();
             return b;
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.err.println(e);
             return defaultValue;
         }
     }
@@ -274,9 +275,8 @@ public class INIFile implements Serializable {
                 } else if (a.startsWith("[") && sectionStart) {
                     // End of section but setting not found, append to the end.
                     if (!written) {
-                        b = b + "\n\n" + a;
-                        sb.replace(sb.lastIndexOf("\n"), sb.length(), b);
-                        sb.append("\n");
+                        sb.replace(sb.lastIndexOf("\n"), sb.length(), "");
+                        sb.append(b).append("\n\n").append(a).append("\n");
                         written = true;
                         sectionStart = false;
                     }
@@ -315,8 +315,7 @@ public class INIFile implements Serializable {
             while ((a = sr1.readLine()) != null) {
                 if (a.startsWith("[" + section + "]") && !sectionStart) {
                     // The header matches our query
-                    sb.append(a);
-                    sb.append("\n");
+                    sb.append(a).append("\n");
                     sectionStart = true;
                 } else if (!sectionStart || a.startsWith(";")) {
                     // Do nothing
@@ -344,8 +343,12 @@ public class INIFile implements Serializable {
         var f = new File(input);
         try {
             return Files.readString(f.toPath(), StandardCharsets.UTF_8);
+        } catch (MalformedInputException mie) {
+            System.err.println(
+                "Error reading " + f + "\nInvalid encoding received, UTF-8 expected.");
+            return null;
         } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            System.err.println(ioe);
             return null;
         }
     }
