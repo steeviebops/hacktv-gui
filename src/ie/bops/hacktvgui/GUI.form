@@ -743,6 +743,7 @@
                             <EventHandler event="valueChanged" listener="javax.swing.event.ListSelectionListener" parameters="javax.swing.event.ListSelectionEvent" handler="lstPlaylistValueChanged"/>
                           </Events>
                           <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="lstPlaylist.addMouseListener(new MouseAdapter() {&#xd;&#xa;    @Override&#xd;&#xa;    public void mousePressed(MouseEvent e) {&#xd;&#xa;        dragAnchor = lstPlaylist.locationToIndex(e.getPoint());&#xd;&#xa;    }&#xd;&#xa;});&#xd;&#xa;&#xd;&#xa;lstPlaylist.addMouseMotionListener(new MouseMotionAdapter() {&#xd;&#xa;    @Override&#xd;&#xa;    public void mouseDragged(MouseEvent e) {&#xd;&#xa;        int index = lstPlaylist.locationToIndex(e.getPoint());&#xd;&#xa;        if (dragAnchor != -1 &amp;&amp; index != -1) {&#xd;&#xa;            lstPlaylist.addSelectionInterval(&#xd;&#xa;                Math.min(dragAnchor, index),&#xd;&#xa;                Math.max(dragAnchor, index)&#xd;&#xa;            );&#xd;&#xa;        }&#xd;&#xa;    }&#xd;&#xa;});&#xd;&#xa;&#xd;&#xa;lstPlaylist.addMouseListener(new MouseAdapter() {&#xd;&#xa;    @Override&#xd;&#xa;    public void mouseReleased(MouseEvent e) {&#xd;&#xa;        dragAnchor = -1;&#xd;&#xa;    }&#xd;&#xa;});"/>
                             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                           </AuxValues>
                         </Component>

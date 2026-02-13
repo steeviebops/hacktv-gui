@@ -47,6 +47,9 @@ import java.awt.Image;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -207,7 +210,9 @@ public class GUI extends javax.swing.JFrame {
     final INIFile modesIni = new INIFile();
     final INIFile bpIni = new INIFile();
     final INIFile flIni = new INIFile();
-
+    
+    // Drag anchor for playlist box
+    private int dragAnchor = -1;
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -272,6 +277,32 @@ public class GUI extends javax.swing.JFrame {
         cmbARCorrection = new javax.swing.JComboBox<>();
         playlistScrollPane = new javax.swing.JScrollPane();
         lstPlaylist = new javax.swing.JList<>();
+        lstPlaylist.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                dragAnchor = lstPlaylist.locationToIndex(e.getPoint());
+            }
+        });
+
+        lstPlaylist.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int index = lstPlaylist.locationToIndex(e.getPoint());
+                if (dragAnchor != -1 && index != -1) {
+                    lstPlaylist.addSelectionInterval(
+                        Math.min(dragAnchor, index),
+                        Math.max(dragAnchor, index)
+                    );
+                }
+            }
+        });
+
+        lstPlaylist.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                dragAnchor = -1;
+            }
+        });
         btnAdd = new javax.swing.JButton();
         btnRemove = new javax.swing.JButton();
         btnPlaylistDown = new javax.swing.JButton();
@@ -987,7 +1018,7 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cmbMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+                    .addComponent(modeButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 516, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, modePanelLayout.createSequentialGroup()
                         .addGroup(modePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkAudio)
@@ -2149,7 +2180,7 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(txtHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(pathPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                            .addComponent(btnDownloadHackTV, javax.swing.GroupLayout.PREFERRED_SIZE, 92, Short.MAX_VALUE)
                             .addComponent(btnHackTVPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
@@ -3465,11 +3496,7 @@ public class GUI extends javax.swing.JFrame {
                 }                
             }
             // Convert the ArrayList to an array to populate the combobox
-            var b = new String[ml.size()];
-            for(int i = 0; i < b.length; i++) {
-                b[i] = ml.get(i);    
-            }
-            return b;
+            return ml.toArray(String[]::new);
         }
     }
 
@@ -5381,10 +5408,7 @@ public class GUI extends javax.swing.JFrame {
                         }
                     }
                     // Convert ArrayList to an array so we can populate the combobox
-                    playlistNames = new String[playlistNamesAL.size()];
-                    for (int i = 0; i < playlistNamesAL.size(); i++) {
-                        playlistNames[i] = playlistNamesAL.get(i);
-                    }
+                    playlistNames = playlistNamesAL.toArray(String[]::new);
                     return true;
                 }
             } // End doInBackground()
@@ -5436,7 +5460,7 @@ public class GUI extends javax.swing.JFrame {
             }
           }; // End SwingWorker
         m3uWorker.execute();       
-    }     
+    }
     
     private void resetM3UItems(boolean LoadSuccessful) {
         // Reset whatever we changed back to default upon thread exit
