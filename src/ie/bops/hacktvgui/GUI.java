@@ -3002,7 +3002,7 @@ public class GUI extends javax.swing.JFrame {
         String cn = flIni.get(iniSection, "class");
         flIni.removeKey(iniSection, "class");
         String[] sa = flIni.getKeys(iniSection);
-        if (sa != null) {
+        if (sa != null && sa.length > 0) {
             for (String cl : sa) {
                 if (!getFriendlyNames) {
                     lafClassName.add(cn + '\u002e' + cl);
@@ -3299,7 +3299,7 @@ public class GUI extends javax.swing.JFrame {
     } 
     
     private boolean openModesFile() {
-        if ( (modesFilePath.isEmpty()) && (modesFile != null) ) {
+        if (modesFilePath.isEmpty() && modesFile != null) {
             modesFileLocation = "online";
         }
         else if (modesFilePath.startsWith("ie/bops/resources/")) {
@@ -3314,24 +3314,6 @@ public class GUI extends javax.swing.JFrame {
                 System.err.println(ex);
                 return false;
             }
-            
-            
-            /*try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
-                if (is == null) {
-                    throw new FileSystemNotFoundException("Unable to open embedded resource " + modesFilePath);
-                }
-                else {
-                    modesFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                    modesFileLocation = "embedded";                            
-                }
-            }
-            catch (IOException | FileSystemNotFoundException ex) {
-                // No modes file to load, we cannot continue
-                messageBox("Critical error, unable to read the embedded modes file.\n"
-                        + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
-                System.err.println(ex);
-                return false;
-            }*/
         }
         else {
             // Read the videomodes.ini we specified previously
@@ -3372,15 +3354,6 @@ public class GUI extends javax.swing.JFrame {
         }
         else if (bpFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded bandplans.ini to the bpFile string
-            /*try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
-                if (is == null) {
-                    throw new FileSystemNotFoundException("Unable to open embedded resource " + bpFilePath);
-                }
-                else {
-                    bpFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                    bpFileLocation = "embedded";                            
-                }
-            }*/
             try {
                 bpIni.loadFromResource(bpFilePath);
                 bpFileLocation = "embedded";
@@ -3394,10 +3367,8 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Read the bandplans.ini we specified previously
-            //var f = new File(bpFilePath);
             try {
                 bpIni.loadFromDisk(Path.of(bpFilePath));
-                //bpFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
                 bpFileLocation = "external";
             }
             catch (IOException e) {
@@ -5816,7 +5787,7 @@ public class GUI extends javax.swing.JFrame {
         txtStatus.setText("Connecting to " + dUrl);
         var downloadHackTV = new SwingWorker<String, Integer>() {
             long p;
-            long size;
+            volatile long size;
             @Override
             protected String doInBackground() throws Exception {
                 createTempDirectory();
@@ -6109,7 +6080,7 @@ public class GUI extends javax.swing.JFrame {
         else {
             enableScramblingKey1();
             scramblingOptionsPanel.setEnabled(true);
-            emmPanel.setEnabled(true);    
+            emmPanel.setEnabled(true);
         }
         // Get the scrambling system name  
         String sconf = scramblingTypeArray.get(cmbScramblingType.getSelectedIndex()).substring(2);
@@ -6158,10 +6129,10 @@ public class GUI extends javax.swing.JFrame {
                 // This should never run
                 break;
         }
-        // Extract (from modesFile) the scrambling key section that we need
+        // Extract the scrambling key section that we need
         String[] slist = modesIni.getKeys(sconf);
         // If the INI section is present but no data is contained in it, stop
-        if (slist.length <= 1) {
+        if (slist.length == 0) {
             scramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
@@ -6195,7 +6166,7 @@ public class GUI extends javax.swing.JFrame {
             cmbScramblingKey2.removeAllItems();
             // Extract (from modesFile) the VC2 scrambling key section
             String[] slist2 = modesIni.getKeys(sconf2);
-            if (slist2.length <= 1) {
+            if (slist2.length == 0) {
                 scramblingType1 = "";
                 cmbScramblingType.setSelectedIndex(0);
                 addScramblingKey();
