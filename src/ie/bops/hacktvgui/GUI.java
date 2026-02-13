@@ -31,7 +31,6 @@ import java.math.BigDecimal;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.nio.file.Path;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.swing.JCheckBox;
@@ -53,6 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -68,8 +68,6 @@ import java.util.Date;
 import javax.swing.SwingWorker;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
@@ -202,9 +200,14 @@ public class GUI extends javax.swing.JFrame {
     // Default LNB local oscillator frequency in GHz
     public static final double DEFAULT_LO = 9.75;
     
-    // Class instances
+    // Shared class instance
     final Shared SharedInst = new Shared();
-    final INIFile INI = new INIFile();
+    
+    // INI class instances (one for each file)
+    final INIFile modesIni = new INIFile();
+    final INIFile bpIni = new INIFile();
+    final INIFile flIni = new INIFile();
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -2861,9 +2864,9 @@ public class GUI extends javax.swing.JFrame {
         if (flatLaf) {
             // Load embedded flatlaf.ini
             // Also sets FlatLaf system properties
-            String flConf = loadFlatLafINI(true);
+            boolean flConf = loadFlatLafINI(true);
             // Add the look and feels
-            if (flConf != null) lafAL.addAll(parseThemesINI(flConf, "core-themes", false));
+            if (flConf) lafAL.addAll(parseThemesINI("core-themes", false));
             // Version 3?
             boolean v3;
             try {
@@ -2873,9 +2876,9 @@ public class GUI extends javax.swing.JFrame {
             catch (ClassNotFoundException e) {
                 v3 = false;
             }
-            if ((v3) && (flConf != null)) {
+            if (v3 && flConf) {
                 // Add FlatLaf v3 themes
-                lafAL.addAll(parseThemesINI(flConf, "core-themes-v3", false));
+                lafAL.addAll(parseThemesINI("core-themes-v3", false));
             }
             // IntelliJ themes?
             boolean ij;
@@ -2886,10 +2889,10 @@ public class GUI extends javax.swing.JFrame {
             catch (ClassNotFoundException e) {
                 ij = false;
             }
-            if ((ij) && (flConf != null)) {
+            if (ij && flConf) {
                 // Read the IntellJ themes from flConf
-                lafAL.addAll(parseThemesINI(flConf, "intellij-themes", false));
-                lafAL.addAll(parseThemesINI(flConf, "materialthemeuilite", false));
+                lafAL.addAll(parseThemesINI("intellij-themes", false));
+                lafAL.addAll(parseThemesINI("materialthemeuilite", false));
             }
         }
         // Safeguard if the LookAndFeel preference is out of bounds
@@ -2917,13 +2920,13 @@ public class GUI extends javax.swing.JFrame {
         }
         // Add FlatLaf if available
         if (lafAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
-            LAF.addAll(parseThemesINI(loadFlatLafINI(false), "core-themes", true));
+            LAF.addAll(parseThemesINI("core-themes", true));
             if (lafAL.contains("com.formdev.flatlaf.themes.FlatMacLightLaf")) {
-                LAF.addAll(parseThemesINI(loadFlatLafINI(false), "core-themes-v3", true));
+                LAF.addAll(parseThemesINI("core-themes-v3", true));
                 for (String s : lafAL) {
                     if (s.startsWith("com.formdev.flatlaf.intellijthemes")) {
-                        LAF.addAll(parseThemesINI(loadFlatLafINI(false), "intellij-themes", true));
-                        LAF.addAll(parseThemesINI(loadFlatLafINI(false), "materialthemeuilite", true));
+                        LAF.addAll(parseThemesINI("intellij-themes", true));
+                        LAF.addAll(parseThemesINI("materialthemeuilite", true));
                         break;
                     }
                 }
@@ -2937,59 +2940,46 @@ public class GUI extends javax.swing.JFrame {
         cmbLookAndFeel.setSelectedIndex(PREFS.getInt("lookandfeel", defaultLaf));
     }
     
-    private String loadFlatLafINI(boolean loadProperties) {
+    private boolean loadFlatLafINI(boolean loadProperties) {
         // Read the embedded flatlaf.ini file
         String r = "ie/bops/resources/flatlaf.ini";
-        String f;
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(r)) {
-            if (is == null) {
-                throw new FileSystemNotFoundException("Unable to open embedded resource " + r);
-            }
-            else {
-                f = new String(is.readAllBytes(), StandardCharsets.UTF_8);                           
-            }
+        try {
+            flIni.loadFromResource(r);
         }
         catch (IOException | FileSystemNotFoundException ex) {
             System.err.println(ex);
-            return null;
+            return false;
         }
         if (loadProperties) {
             // Set FlatLaf system properties
             System.setProperty("flatlaf.useWindowDecorations",
-                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "UseWindowDecorations"))
+                    Boolean.toString(flIni.getBoolean("flatlaf", "UseWindowDecorations"))
             );
             System.setProperty("flatlaf.menuBarEmbedded",
-                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "MenuBarEmbedded"))
+                    Boolean.toString(flIni.getBoolean("flatlaf", "MenuBarEmbedded"))
             );
             System.setProperty("flatlaf.useRoundedPopupBorder",
-                    Boolean.toString(INI.getBooleanFromINI(f, "flatlaf", "UseRoundedPopupBorder"))
+                    Boolean.toString(flIni.getBoolean("flatlaf", "UseRoundedPopupBorder"))
             );
         }
-        return f;
+        return true;
     }
     
-    private ArrayList<String> parseThemesINI(String iniFile, String iniSection, boolean names) {
+    private ArrayList<String> parseThemesINI(String iniSection, boolean getFriendlyNames) {
         var name = new ArrayList<String>();
         var lafClassName = new ArrayList<String>();
-        String s = INI.splitINIfile(iniFile, iniSection);
-        if (s != null) {
-            String[] sa = s.substring(s.indexOf("\n") +1).split("\n");
-            String cn = "";
-            for (String a : sa) {
-                if (a.startsWith("class")) {
-                    cn = a.split("=")[1];
-                }
-                else {
-                    String[] sa2 = a.split("=");
-                    if (!names) {
-                        lafClassName.add(cn + '\u002e' + sa2[0]);
-                    }
-                    else {
-                        name.add("FlatLaf (" + sa2[1] + ")");
-                    }
+        String cn = flIni.get(iniSection, "class");
+        flIni.removeKey(iniSection, "class");
+        String[] sa = flIni.getKeys(iniSection);
+        if (sa != null) {
+            for (String cl : sa) {
+                if (!getFriendlyNames) {
+                    lafClassName.add(cn + '\u002e' + cl);
+                } else {
+                    name.add("FlatLaf (" + flIni.get(iniSection, cl) + ")");    
                 }
             }
-            if (!names) {
+            if (!getFriendlyNames) {
                 return lafClassName;
             }
             else {
@@ -3283,7 +3273,19 @@ public class GUI extends javax.swing.JFrame {
         }
         else if (modesFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded videomodes.ini to the modesFile string
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
+            try {
+                modesIni.loadFromResource(modesFilePath);
+                modesFileLocation = "embedded";
+            } catch (IOException | FileSystemNotFoundException ex) {
+                // No modes file to load, we cannot continue
+                messageBox("Critical error, unable to read the embedded modes file.\n"
+                        + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ex);
+                return false;
+            }
+            
+            
+            /*try (InputStream is = getClass().getClassLoader().getResourceAsStream(modesFilePath)) {
                 if (is == null) {
                     throw new FileSystemNotFoundException("Unable to open embedded resource " + modesFilePath);
                 }
@@ -3298,13 +3300,13 @@ public class GUI extends javax.swing.JFrame {
                         + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
                 System.err.println(ex);
                 return false;
-            }
+            }*/
         }
         else {
             // Read the videomodes.ini we specified previously
-            var f = new File(modesFilePath);
             try {
-                modesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+                //modesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+                modesIni.loadFromDisk(Path.of(modesFilePath));
                 modesFileLocation = "external";
             }
             catch (IOException e) {
@@ -3317,7 +3319,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Read modes file version
-        modesFileVersion = INI.getStringFromINI(modesFile, "Modes.ini", "FileVersion", "unknown", true);
+        modesFileVersion = modesIni.get("Modes.ini", "FileVersion", "unknown");
         return true;
     }
     
@@ -3339,7 +3341,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else if (bpFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded bandplans.ini to the bpFile string
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
+            /*try (InputStream is = getClass().getClassLoader().getResourceAsStream(bpFilePath)) {
                 if (is == null) {
                     throw new FileSystemNotFoundException("Unable to open embedded resource " + bpFilePath);
                 }
@@ -3347,8 +3349,11 @@ public class GUI extends javax.swing.JFrame {
                     bpFile = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                     bpFileLocation = "embedded";                            
                 }
-            }
-            catch (IOException | FileSystemNotFoundException ex) {
+            }*/
+            try {
+                bpIni.loadFromResource(bpFilePath);
+                bpFileLocation = "embedded";
+            } catch (IOException | FileSystemNotFoundException ex) {
                 // No modes file to load, we cannot continue
                 messageBox("Critical error, unable to read the embedded band plans file.\n"
                         + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
@@ -3358,9 +3363,10 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             // Read the bandplans.ini we specified previously
-            var f = new File(bpFilePath);
+            //var f = new File(bpFilePath);
             try {
-                bpFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+                bpIni.loadFromDisk(Path.of(bpFilePath));
+                //bpFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
                 bpFileLocation = "external";
             }
             catch (IOException e) {
@@ -3374,8 +3380,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Read bandplans.ini file version if not in legacy mode
         if (!bpFileLocation.equals("legacy")) {
-            bpFileVersion = INI.getStringFromINI(bpFile, "bandplans.ini", "Version", "unknown", true);
-        }        
+            bpFileVersion = bpIni.get("bandplans.ini", "Version", "unknown");
+        }
         return true;
     }
     
@@ -3433,7 +3439,7 @@ public class GUI extends javax.swing.JFrame {
          * 1 = return the mode parameter used at the command line
          */
         
-        String m = INI.getStringFromINI(modesFile, "videomodes", ColourStandard, "", false);
+        String m = modesIni.get("videomodes", ColourStandard, "").toLowerCase(Locale.ENGLISH);
         String[] q;
         
         String regex = "(,\\s*)";
@@ -3448,7 +3454,7 @@ public class GUI extends javax.swing.JFrame {
             // Check if the specified modes are defined, if not, don't add them
             var ml = new ArrayList<String>();
             for (String s : q) {
-                String a = INI.getStringFromINI(modesFile, s, "name", "", true);
+                String a = modesIni.get(s, "name", "");
                 if (!a.isBlank()) {
                     // Add the friendly name of the mode
                     ml.add(a);
@@ -3851,16 +3857,43 @@ public class GUI extends javax.swing.JFrame {
         }    
     }
     
+    private String extractPlaylist(String input) {
+        // Extracts the playlist from a HTV config file
+        String target = "[playlist]";
+        int length = target.length() + 1;
+        if (input == null || !input.contains(target)) return null;
+        int s = input.indexOf(target);
+        int e = input.lastIndexOf("\n[") + 1;
+        // Extract the data from below the [playlist] header
+        String t = input.substring(s + length);
+        // Section is at the end of the file if 's' and 'e' match
+        if (s == e) return t.trim();
+        // Find where the next section starts and stop there
+        return t.substring(0, t.indexOf("\n[")).trim();
+    }
+    
     private void checkSelectedFile(File SourceFile) {
-        String f;
+        // Create a separate instance for the config file
+        var htvFile = new INIFile();
         try {
             // Check if the file is too large. We really don't need to read
             // anything larger than a few kilobytes but we'll set it to 1 MB.
+            String iniFile;
+            String playlist = null;
             if (SourceFile.length() < 1048576)  {
-                // Read the file into memory
-                f = Files.readString(SourceFile.toPath(), StandardCharsets.UTF_8);
+                /**
+                  * Read the file into memory.
+                  * 
+                  * As this isn't necessarily a standard INI file (it could
+                  * have a playlist appended to the end), we won't use the INI 
+                  * loadFromDisk() function. Instead, we'll load the file to a
+                  * string, extract the playlist from it, and then load that 
+                  * string to the INI handler directly.
+                  */
+                iniFile = Files.readString(SourceFile.toPath(), StandardCharsets.UTF_8);
                 // Remove a UTF-8 BOM if it exists
-                f = f.replaceAll("\\A\uFEFF", "");
+                iniFile = iniFile.replaceAll("\\A\uFEFF", "");
+                htvFile.load(new StringReader(iniFile));
             }
             else {
                 messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
@@ -3868,10 +3901,13 @@ public class GUI extends javax.swing.JFrame {
                 return;
             }
             // Check the file to see if it's in the correct format.
-            if ( (INI.splitINIfile(f, "hacktv")) != null ) {
+            if (iniFile.contains("[hacktv]\n")) {
                 // This is OK, continue opening this file
                 htvLoadInProgress = true;
-                if (openConfigFile(f)) {
+                if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
+                    playlist = extractPlaylist(iniFile);
+                }
+                if (openConfigFile(htvFile, playlist)) {
                     // Display the opened filename in the title bar
                     // Back up the original title once
                     if (!titleBarChanged) {
@@ -3900,25 +3936,10 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private boolean openConfigFile(String fileContents) throws IOException {
-        /**
-         * HTV configuration file loader.
-         * 
-         * We read the file as a Windows INI format. The syntax for strings is as follows:
-         * 
-         * INI.getStringFromINI(source file or string, "section", "setting", "Default value", Preserve case?);
-         * 
-         * If the first parameter is a single line string, it's treated as a file path
-         * Otherwise, it's treated as the contents of the file
-         * 
-         * If the setting is not specified in the file, use the default value specified
-         * 
-         * If preserve-case is set to true, the value is returned as-is
-         * If false, it is converted to lower case so we can manage it more easily
-         * At present, we enable case-sensitivity for file and channel names only
-         */
+    private boolean openConfigFile(INIFile htvFile, String playlist) throws IOException {
+        // HTV configuration file loader.
         // Check that the fork value matches the one we're using
-        String ImportedFork = INI.getStringFromINI(fileContents, "hacktv-gui3", "fork", "", false);
+        String ImportedFork = htvFile.get("hacktv-gui3", "fork", "").toLowerCase(Locale.ENGLISH);
         String WrongFork = "This file was created with a different fork of " +
             "hacktv. We will attempt to process the file but some options " +
             "may not be available.";
@@ -3935,7 +3956,7 @@ public class GUI extends javax.swing.JFrame {
            interpreted as hackrf. Anything other than these values is handled
            as an output file.
          */
-        String ImportedOutputDevice = INI.getStringFromINI(fileContents, "hacktv", "output", "hackrf", false);
+        String ImportedOutputDevice = htvFile.get("hacktv", "output", "hackrf").toLowerCase(Locale.ENGLISH);
         if ((ImportedOutputDevice.isEmpty()) || (ImportedOutputDevice.toLowerCase(Locale.ENGLISH).startsWith("hackrf"))) {
             cmbOutputDevice.setSelectedIndex(0);
             if (ImportedOutputDevice.contains(":")) {
@@ -3953,7 +3974,7 @@ public class GUI extends javax.swing.JFrame {
             if (ImportedOutputDevice.contains(":")) {
                 txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
             }
-            switch (INI.getStringFromINI(fileContents, "hacktv", "fl2k-audio", "", false)) {
+            switch (htvFile.get("hacktv", "fl2k-audio", "").toLowerCase(Locale.ENGLISH)) {
                 case "stereo":
                     cmbFl2kAudio.setSelectedIndex(1);
                     break;
@@ -3970,7 +3991,7 @@ public class GUI extends javax.swing.JFrame {
             txtOutputDevice.setText(ImportedOutputDevice);
         }
         // Video mode
-        String ImportedVideoMode = INI.getINIValue(fileContents, "hacktv", "mode", "");
+        String ImportedVideoMode = htvFile.get("hacktv", "mode", "");
         boolean ModeFound = false;
         for (int i = 0; i < palModeArray.length; i++) {
             // Check if the mode we imported is in the PAL mode array
@@ -4064,11 +4085,11 @@ public class GUI extends javax.swing.JFrame {
            return false;
         }
         // Is this a baseband mode?
-        boolean bb = INI.getINIValue(modesFile, ImportedVideoMode, "modulation", "").equals("baseband");
+        boolean bb = htvFile.get(ImportedVideoMode, "modulation", "").equals("baseband");
         // Input source or test card
-        String ImportedSource = INI.getStringFromINI(fileContents, "hacktv", "input", "", true);
-        String M3USource = (INI.getStringFromINI(fileContents, "hacktv-gui3", "m3usource", "", true));
-        Integer M3UIndex = (INI.getIntegerFromINI(fileContents, "hacktv-gui3", "m3uindex"));
+        String ImportedSource = htvFile.get("hacktv", "input", "");
+        String M3USource = (htvFile.get("hacktv-gui3", "m3usource", ""));
+        Integer M3UIndex = htvFile.getInt("hacktv-gui3", "m3uindex");
         if (ImportedSource.toLowerCase(Locale.ENGLISH).startsWith("test:")) {
             radTest.doClick();
             if (captainJack) {
@@ -4096,21 +4117,17 @@ public class GUI extends javax.swing.JFrame {
             m3uHandler(M3UFile.getAbsolutePath(), M3UIndex);
             txtSource.setText(M3USource);
         }
-        else if (INI.getBooleanFromINI(fileContents, "hacktv-gui3", "playlist")) {
-            // Split the [playlist] section from the HTV file.
-            // We then split the section into an array (minus the header) 
-            // and use that to populate playlistAL.
-            if (INI.splitINIfile(fileContents, "playlist") != null) {
-                String[] pl = INI.splitINIfile(fileContents, "playlist").split("\\n");
-                for (int i = 1; i < pl.length; i++) {
-                    playlistAL.add(pl[i]);
-                }
-                if ((INI.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart")) != null) {
-                    startPoint = INI.getIntegerFromINI(fileContents, "hacktv-gui3", "playliststart") - 1;
+        else if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
+            // Use the playlist we got from checkSelectedFile();
+            if (playlist != null) {
+                String[] pl = playlist.split("\n");
+                playlistAL.addAll(Arrays.asList(pl));
+                if (htvFile.getInt("hacktv-gui3", "playliststart") != null) {
+                    startPoint = htvFile.getInt("hacktv-gui3", "playliststart") - 1;
                     // Don't accept values lower than one
                     if (startPoint < 1) startPoint = -1;
                 }
-                chkRandom.setSelected(INI.getBooleanFromINI(fileContents, "hacktv-gui3", "random"));
+                chkRandom.setSelected(htvFile.getBoolean("hacktv-gui3", "random"));
                 populatePlaylist();
             }
         }
@@ -4120,11 +4137,11 @@ public class GUI extends javax.swing.JFrame {
         // Frequency or channel number
         if ( ((cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) && (!bb) ) {
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
-            String ImportedChannel = INI.getStringFromINI(fileContents, "hacktv-gui3", "channel", "", true);
-            String ImportedBandPlan = INI.getStringFromINI(fileContents, "hacktv-gui3", "bandplan", "", false);
+            String ImportedChannel = htvFile.get("hacktv-gui3", "channel", "");
+            String ImportedBandPlan = htvFile.get("hacktv-gui3", "bandplan", "").toLowerCase(Locale.ENGLISH);
             Double ImportedFrequency;
-            if (INI.getDoubleFromINI(fileContents, "hacktv", "frequency") != null) {
-                ImportedFrequency = INI.getDoubleFromINI(fileContents, "hacktv", "frequency");
+            if (htvFile.getDouble("hacktv", "frequency") != null) {
+                ImportedFrequency = htvFile.getDouble("hacktv", "frequency");
             }
             else {
                 // Return a value of -250 if the value is null so we can handle it
@@ -4215,23 +4232,23 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // SECAM field ID
-        if ((INI.getBooleanFromINI(fileContents, "hacktv", "secam-field-id")) && radSECAM.isSelected()) {
+        if ((htvFile.getBoolean("hacktv", "secam-field-id")) && radSECAM.isSelected()) {
             chkSecamId.doClick();
-            if (INI.getIntegerFromINI(fileContents, "hacktv", "secam-field-id-lines") != null) {
-                int id = INI.getIntegerFromINI(fileContents, "hacktv", "secam-field-id-lines");
+            if (htvFile.getInt("hacktv", "secam-field-id-lines") != null) {
+                int id = htvFile.getInt("hacktv", "secam-field-id-lines");
                 if ((id >= 1) && (id <= 8)) {
                     cmbSecamIdLines.setSelectedIndex(id - 1);
                 }
             }
         }
         // Swap IQ
-        if ((INI.getBooleanFromINI(fileContents, "hacktv", "swap-iq")) &&
-                (!INI.getStringFromINI(modesFile, mode, "modulation", "", false).equals("baseband")) ) {
+        if (htvFile.getBoolean("hacktv", "swap-iq") &&
+                !htvFile.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH).equals("baseband") ) {
             chkSwapIQ.doClick();
         }
         // Gain
-        if (INI.getIntegerFromINI(fileContents, "hacktv", "gain") != null) {
-            txtGain.setText(INI.getIntegerFromINI(fileContents, "hacktv", "gain").toString());
+        if (htvFile.getInt("hacktv", "gain") != null) {
+            txtGain.setText(htvFile.getInt("hacktv", "gain").toString());
         }
         // If value is null and output device is hackrf or soapysdr, set gain to zero
         else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
@@ -4239,42 +4256,42 @@ public class GUI extends javax.swing.JFrame {
         }
         // Amp
         if (cmbOutputDevice.getSelectedIndex() == 0) {
-            if (INI.getBooleanFromINI(fileContents, "hacktv", "amp")) {
+            if (htvFile.getBoolean("hacktv", "amp")) {
                 chkAmp.doClick();
             }            
         }
         // FM deviation
-        if ((chkFMDev.isEnabled()) && (INI.getDoubleFromINI(fileContents, "hacktv", "deviation") != null)) {
-            Double ImportedDeviation = (INI.getDoubleFromINI(fileContents, "hacktv", "deviation") / 1000000);
+        if ((chkFMDev.isEnabled()) && (htvFile.getDouble("hacktv", "deviation") != null)) {
+            Double ImportedDeviation = (htvFile.getDouble("hacktv", "deviation") / 1000000);
             chkFMDev.doClick();
             txtFMDev.setText(ImportedDeviation.toString().replace(".0",""));
         }
         // Output level
-        String ImportedLevel = INI.getStringFromINI(fileContents, "hacktv", "level", "", false);
+        String ImportedLevel = htvFile.get("hacktv", "level", "").toLowerCase(Locale.ENGLISH);
         if (!ImportedLevel.isEmpty()) {
             chkOutputLevel.doClick();
             txtOutputLevel.setText(ImportedLevel);
         }
         // Gamma
-        String ImportedGamma = INI.getStringFromINI(fileContents, "hacktv", "gamma", "", false);
+        String ImportedGamma = htvFile.get("hacktv", "gamma", "").toLowerCase(Locale.ENGLISH);
         if (!ImportedGamma.isEmpty()) {
             chkGamma.doClick();
             txtGamma.setText(ImportedGamma);
         }
         // Position
         if (chkPosition.isEnabled()) {
-            if (INI.getIntegerFromINI(fileContents, "hacktv", "position") != null) {
+            if (htvFile.getInt("hacktv", "position") != null) {
                 chkPosition.doClick();
-                txtPosition.setText(INI.getIntegerFromINI(fileContents, "hacktv", "position").toString());
+                txtPosition.setText(htvFile.getInt("hacktv", "position").toString());
             }
         }
         // Verbose mode
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "verbose")) {
+        if (htvFile.getBoolean("hacktv", "verbose")) {
             chkVerbose.doClick();
         }
         // Logo
         if (chkLogo.isEnabled()) {
-            String ImportedLogo = INI.getStringFromINI(fileContents, "hacktv", "logo", "", true).toLowerCase(Locale.ENGLISH);
+            String ImportedLogo = htvFile.get("hacktv", "logo", "").toLowerCase(Locale.ENGLISH);
             // Check first if the imported string is a .png file.
             // hacktv now contains its own internal resources so external files
             // are no longer supported.
@@ -4299,16 +4316,16 @@ public class GUI extends javax.swing.JFrame {
         }
         // Timestamp
         if (chkTimestamp.isEnabled()) {
-            if (INI.getBooleanFromINI(fileContents, "hacktv", "timestamp")) {
+            if (htvFile.getBoolean("hacktv", "timestamp")) {
                 chkTimestamp.doClick();
             }
         }
         // Interlace
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "interlace")) {
+        if (htvFile.getBoolean("hacktv", "interlace")) {
             chkTimestamp.doClick();
         }
         // Teletext
-        String ImportedTeletext = INI.getStringFromINI(fileContents, "hacktv", "teletext", "", true);
+        String ImportedTeletext = htvFile.get("hacktv", "teletext", "");
         if (!ImportedTeletext.isEmpty()) {
             chkTeletext.doClick();
             if (ImportedTeletext.toLowerCase(Locale.ENGLISH).startsWith("raw:")) {
@@ -4319,8 +4336,8 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // WSS
-        if ((INI.getIntegerFromINI(fileContents, "hacktv", "wss")) != null) {
-            Integer ImportedWSS = (INI.getIntegerFromINI(fileContents, "hacktv", "wss"));
+        if ((htvFile.getInt("hacktv", "wss")) != null) {
+            Integer ImportedWSS = (htvFile.getInt("hacktv", "wss"));
             // Only accept values between 1 and 5
             if ((ImportedWSS > 0) && (ImportedWSS <= 5)) {
                 chkWSS.doClick();
@@ -4332,15 +4349,15 @@ public class GUI extends javax.swing.JFrame {
          * If the arcorrection value is not defined, leave the option unchecked
          * Otherwise, check the option and process it as normal
          */
-        if ((INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection")) != null) {
-            Integer ImportedAR = (INI.getIntegerFromINI(fileContents, "hacktv", "arcorrection"));
+        if ((htvFile.getInt("hacktv", "arcorrection")) != null) {
+            Integer ImportedAR = (htvFile.getInt("hacktv", "arcorrection"));
             chkARCorrection.doClick();
             cmbARCorrection.setSelectedIndex(ImportedAR);
         }
         // Scrambling system
-        String ImportedScramblingSystem = INI.getStringFromINI(fileContents, "hacktv", "scramblingtype", "", false);
-        String ImportedKey = INI.getStringFromINI(fileContents, "hacktv", "scramblingkey", "", false);
-        String ImportedKey2 = INI.getStringFromINI(fileContents, "hacktv", "scramblingkey2", "", false);
+        String ImportedScramblingSystem = htvFile.get("hacktv", "scramblingtype", "").toLowerCase(Locale.ENGLISH);
+        String ImportedKey = htvFile.get("hacktv", "scramblingkey", "").toLowerCase(Locale.ENGLISH);
+        String ImportedKey2 = htvFile.get("hacktv", "scramblingkey2", "").toLowerCase(Locale.ENGLISH);
         if ((radPAL.isSelected()) || radSECAM.isSelected()) {
             int i;
             switch (ImportedScramblingSystem) {
@@ -4442,17 +4459,17 @@ public class GUI extends javax.swing.JFrame {
         }
         // EMM
         if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
-            if ((INI.getIntegerFromINI(fileContents, "hacktv", "emm")) != null) {
-                Integer ImportedEMM = (INI.getIntegerFromINI(fileContents, "hacktv", "emm"));
+            if ((htvFile.getInt("hacktv", "emm")) != null) {
+                Integer ImportedEMM = (htvFile.getInt("hacktv", "emm"));
                 String ImportedCardNumber;
                 String Imported13Prefix;
                 if ( (ImportedEMM.equals(1)) || (ImportedEMM.equals(2)) ){
                     if (ImportedEMM.equals(1)) chkActivateCard.doClick();
                     if (ImportedEMM.equals(2)) chkDeactivateCard.doClick();
-                    ImportedCardNumber = INI.getStringFromINI(fileContents, "hacktv", "cardnumber", "", false);
+                    ImportedCardNumber = htvFile.get("hacktv", "cardnumber", "").toLowerCase(Locale.ENGLISH);
                     // Handling of legacy files
                     if (ImportedCardNumber.length() == 8) {
-                        Imported13Prefix = INI.getStringFromINI(fileContents, "hacktv-gui3", "13digitprefix", "", false);
+                        Imported13Prefix = htvFile.get("hacktv-gui3", "13digitprefix", "").toLowerCase(Locale.ENGLISH);
                         // The ImportedCardNumber value only contains 8 digits of the card number
                         // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
                         if (SharedInst.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
@@ -4466,21 +4483,21 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Show card serial
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "showserial")) {
+        if (htvFile.getBoolean("hacktv", "showserial")) {
             chkShowCardSerial.doClick();
         }
         // Brute force PPV key
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "findkey")) {
+        if (htvFile.getBoolean("hacktv", "findkey")) {
             chkFindKeys.doClick();
         }
         // Scramble audio
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "scramble-audio")) {
+        if (htvFile.getBoolean("hacktv", "scramble-audio")) {
             chkScrambleAudio.doClick();
         }
         // Syster permutation table
         int ImportedPermutationTable;
-        if (INI.getIntegerFromINI(fileContents, "hacktv", "permutationtable") != null) {
-            ImportedPermutationTable = INI.getIntegerFromINI(fileContents, "hacktv", "permutationtable");
+        if (htvFile.getInt("hacktv", "permutationtable") != null) {
+            ImportedPermutationTable = htvFile.getInt("hacktv", "permutationtable");
             if ( (scramblingType1.equals("--syster")) || (scramblingType1.equals("--systercnr")) ) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
@@ -4489,8 +4506,8 @@ public class GUI extends javax.swing.JFrame {
         }    
         // EuroCrypt maturity rating
         int ImportedMaturityRating;
-        if (INI.getIntegerFromINI(fileContents, "hacktv", "ec-mat-rating") != null) {
-            ImportedMaturityRating = INI.getIntegerFromINI(fileContents, "hacktv", "ec-mat-rating");
+        if (htvFile.getInt("hacktv", "ec-mat-rating") != null) {
+            ImportedMaturityRating = htvFile.getInt("hacktv", "ec-mat-rating");
             if ( (cmbECMaturity.isEnabled()) && (ImportedMaturityRating >= 0) && (ImportedMaturityRating <= 15) ) {
                 cmbECMaturity.setSelectedIndex(ImportedMaturityRating);
             }
@@ -4498,16 +4515,16 @@ public class GUI extends javax.swing.JFrame {
         // EuroCrypt PPV
         int ImportedProgNumber;
         int ImportedProgCost;
-        if ( (chkECppv.isEnabled()) && (INI.getBooleanFromINI(fileContents, "hacktv", "ec-ppv")) ) {
+        if ( (chkECppv.isEnabled()) && (htvFile.getBoolean("hacktv", "ec-ppv")) ) {
             chkECppv.doClick();
-            if (INI.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-num") != null) {
-                ImportedProgNumber = INI.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-num");
+            if (htvFile.getInt("hacktv", "ec-ppv-num") != null) {
+                ImportedProgNumber = htvFile.getInt("hacktv", "ec-ppv-num");
             }
             else {
                 ImportedProgNumber = 0;
             }
-            if (INI.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-cost") != null) {
-                ImportedProgCost = INI.getIntegerFromINI(fileContents, "hacktv", "ec-ppv-cost");
+            if (htvFile.getInt("hacktv", "ec-ppv-cost") != null) {
+                ImportedProgCost = htvFile.getInt("hacktv", "ec-ppv-cost");
             }
             else {
                 ImportedProgCost = 0;
@@ -4516,100 +4533,100 @@ public class GUI extends javax.swing.JFrame {
             txtECprogcost.setText(String.valueOf(ImportedProgCost));
         }
         // EuroCrypt "No Date" setting
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "ec-nodate")) {
+        if (htvFile.getBoolean("hacktv", "ec-nodate")) {
             chkNoDate.doClick();
         }
         // ACP
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "acp")) {
+        if (htvFile.getBoolean("hacktv", "acp")) {
             chkACP.doClick();
         }
         // Filter
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "filter")) {
+        if (htvFile.getBoolean("hacktv", "filter")) {
             chkVideoFilter.doClick();
         }
         // Audio
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "audio") == false) {
+        if (htvFile.getBoolean("hacktv", "audio") == false) {
             if (chkAudio.isSelected() ) chkAudio.doClick();
         }
         // NICAM
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "nicam") == false) {
+        if (htvFile.getBoolean("hacktv", "nicam") == false) {
             if (chkNICAM.isSelected() ) chkNICAM.doClick();
         }
         // A2 Stereo
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "a2stereo") == true) {
+        if (htvFile.getBoolean("hacktv", "a2stereo") == true) {
             if ( (!chkA2Stereo.isSelected()) && (a2Supported) ) chkA2Stereo.doClick();
         }
         // ECM
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "showecm")) {
+        if (htvFile.getBoolean("hacktv", "showecm")) {
             chkShowECM.doClick();
         }
         // VITS
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "vits")) {
+        if (htvFile.getBoolean("hacktv", "vits")) {
             chkVITS.doClick();
         }
         // VITC
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "vitc")) {
+        if (htvFile.getBoolean("hacktv", "vitc")) {
             chkVITC.doClick();
         }
         // SiS
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "sis")) {
+        if (htvFile.getBoolean("hacktv", "sis")) {
             chkSiS.doClick();
         }
         // Subtitles
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "subtitles")) {
+        if (htvFile.getBoolean("hacktv", "subtitles")) {
             chkSubtitles.doClick();
-            if ( (INI.getIntegerFromINI(fileContents, "hacktv", "subtitleindex")) != null ) {
-                txtSubtitleIndex.setText(Integer.toString((INI.getIntegerFromINI(fileContents, "hacktv", "subtitleindex"))));
+            if ( (htvFile.getInt("hacktv", "subtitleindex")) != null ) {
+                txtSubtitleIndex.setText(Integer.toString((htvFile.getInt("hacktv", "subtitleindex"))));
             }
         }
         // MAC channel ID
-        String ImportedChID = INI.getStringFromINI(fileContents, "hacktv", "chid", "", true);
+        String ImportedChID = htvFile.get("hacktv", "chid", "");
         if (!ImportedChID.isEmpty()) {
             if (!chkMacChId.isSelected()) chkMacChId.doClick();
             txtMacChId.setText(ImportedChID);
         }
         // MAC audio options
         if (radMAC.isSelected()) {
-            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-mode", "stereo", false).equals("mono")) {
+            if (htvFile.get("hacktv", "mac-audio-mode", "stereo").toLowerCase(Locale.ENGLISH).equals("mono")) {
                 chkMacMono.setSelected(true);
             }
-            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-quality", "high", false).equals("medium")) {
+            if (htvFile.get("hacktv", "mac-audio-quality", "high").toLowerCase(Locale.ENGLISH).equals("medium")) {
                 chkMac16k.setSelected(true);
             }
-            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-compression", "companded", false).equals("linear")) {
+            if (htvFile.get("hacktv", "mac-audio-compression", "companded").toLowerCase(Locale.ENGLISH).equals("linear")) {
                 chkMacLinear.setSelected(true);
             }
-            if (INI.getStringFromINI(fileContents, "hacktv", "mac-audio-protection", "l1", false).equals("l2")) {
+            if (htvFile.get("hacktv", "mac-audio-protection", "l1").toLowerCase(Locale.ENGLISH).equals("l2")) {
                 chkMacL2.setSelected(true);
             }
         }
         // Disable colour
         if (chkColour.isEnabled()) {
             // Accept both UK and US English spelling
-            if ( (INI.getBooleanFromINI(fileContents, "hacktv", "nocolour")) ||
-                    (INI.getBooleanFromINI(fileContents, "hacktv", "nocolor")) ){
+            if ( (htvFile.getBoolean("hacktv", "nocolour")) ||
+                    (htvFile.getBoolean("hacktv", "nocolor")) ){
                 chkColour.doClick();
             }
         }
         // S-Video mode
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "s-video") ){
+        if (htvFile.getBoolean("hacktv", "s-video") ){
             if (chkSVideo.isEnabled()) chkSVideo.doClick();
         }
         // Closed captioning
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "cc608") ){
+        if (htvFile.getBoolean("hacktv", "cc608") ){
             if (chkCC608.isEnabled()) chkCC608.doClick();
         }
         // Invert video polarity
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "invert-video") ){
+        if (htvFile.getBoolean("hacktv", "invert-video") ){
             chkInvertVideo.doClick();
         }
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
-            txtAntennaName.setText(INI.getStringFromINI(fileContents, "hacktv", "antennaname", "", false));
+            txtAntennaName.setText(htvFile.get("hacktv", "antennaname", "").toLowerCase(Locale.ENGLISH));
         }
         // Output file type
         if (cmbOutputDevice.getSelectedIndex() == 3) {
-            switch (INI.getStringFromINI(fileContents, "hacktv", "filetype", "", false)) {
+            switch (htvFile.get("hacktv", "filetype", "").toLowerCase(Locale.ENGLISH)) {
                 case "uint8":
                     cmbFileType.setSelectedIndex(0);
                     break;
@@ -4632,48 +4649,48 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // Volume
-        String ImportedVolume = INI.getStringFromINI(fileContents, "hacktv", "volume", "", false);
+        String ImportedVolume = htvFile.get("hacktv", "volume", "").toLowerCase(Locale.ENGLISH);
         if (!ImportedVolume.isEmpty()) {
             chkVolume.doClick();
             txtVolume.setText(ImportedVolume);
         }
         // Downmix
-        if (INI.getBooleanFromINI(fileContents, "hacktv", "downmix")) {
+        if (htvFile.getBoolean("hacktv", "downmix")) {
             chkDownmix.doClick();
         }
         // Teletext subtitles
-        if ( (INI.getBooleanFromINI(fileContents, "hacktv", "tx-subtitles")) ){
+        if ( (htvFile.getBoolean("hacktv", "tx-subtitles")) ){
             chkTextSubtitles.doClick();
-            if ( (INI.getIntegerFromINI(fileContents, "hacktv", "tx-subindex")) != null ) {
-                txtTextSubtitleIndex.setText(Integer.toString((INI.getIntegerFromINI(fileContents, "hacktv", "tx-subindex"))));
+            if ( (htvFile.getInt("hacktv", "tx-subindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString((htvFile.getInt("hacktv", "tx-subindex"))));
             }
         }
-        else if ( (INI.getBooleanFromINI(fileContents, "hacktv", "teletextsubtitles")) ){
+        else if ( (htvFile.getBoolean("hacktv", "teletextsubtitles")) ){
             chkTextSubtitles.doClick();
-            if ( (INI.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex")) != null ) {
-                txtTextSubtitleIndex.setText(Integer.toString((INI.getIntegerFromINI(fileContents, "hacktv", "teletextsubindex"))));
+            if ( (htvFile.getInt("hacktv", "teletextsubindex")) != null ) {
+                txtTextSubtitleIndex.setText(Integer.toString(htvFile.getInt("hacktv", "teletextsubindex")));
             }
         }
         // Offset
         Double ImportedOffset;
-        if ((INI.getDoubleFromINI(fileContents, "hacktv", "offset")) != null) {
+        if (htvFile.getDouble("hacktv", "offset") != null) {
             if (!chkOffset.isSelected()) chkOffset.doClick();
-            ImportedOffset = (INI.getDoubleFromINI(fileContents, "hacktv", "offset") / 1000000);
+            ImportedOffset = (htvFile.getDouble("hacktv", "offset") / 1000000);
             txtOffset.setText(ImportedOffset.toString().replace(".0","")); 
         }
         // Pixel rate
         Double ImportedPixelRate;
-        if ((INI.getDoubleFromINI(fileContents, "hacktv", "pixelrate")) != null) {
+        if ((htvFile.getDouble("hacktv", "pixelrate")) != null) {
             if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-            ImportedPixelRate = (INI.getDoubleFromINI(fileContents, "hacktv", "pixelrate") / 1000000);
+            ImportedPixelRate = (htvFile.getDouble("hacktv", "pixelrate") / 1000000);
             txtPixelRate.setText(ImportedPixelRate.toString().replace(".0","")); 
         }
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
         Double ImportedSampleRate;
-        if ((INI.getDoubleFromINI(fileContents, "hacktv", "samplerate")) != null) {
-            ImportedSampleRate = (INI.getDoubleFromINI(fileContents, "hacktv", "samplerate") / 1000000);
+        if ((htvFile.getDouble("hacktv", "samplerate")) != null) {
+            ImportedSampleRate = (htvFile.getDouble("hacktv", "samplerate") / 1000000);
         }
         else {
             ImportedSampleRate = Double.valueOf("16");
@@ -4681,7 +4698,7 @@ public class GUI extends javax.swing.JFrame {
         }
         txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
         // Philips test signal
-        String importedTS = INI.getStringFromINI(fileContents, "hacktv", "testsignal", "", false);
+        String importedTS = htvFile.get("hacktv", "testsignal", "").toLowerCase(Locale.ENGLISH);
         if (mattstvbarn) {
             boolean TSFound = false;
             if (!importedTS.isEmpty()) {
@@ -4708,7 +4725,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Repeat
         if (chkRepeat.isEnabled()) {
-            if (INI.getBooleanFromINI(fileContents, "hacktv", "repeat")) {
+            if (htvFile.getBoolean("hacktv", "repeat")) {
                 chkRepeat.doClick();
             }
         }
@@ -4727,7 +4744,7 @@ public class GUI extends javax.swing.JFrame {
          * For example, checkAltModeNames("g", "b") will check if section 'g'
          * contains an alt value of 'b' and return true if it finds it.
          */
-        return (INI.getStringFromINI(modesFile, modeToCheck, "alt", "", false).equals(alt));
+        return (modesIni.get(modeToCheck, "alt", "").toLowerCase(Locale.ENGLISH).equals(alt));
     }
     
     private void invalidConfigFileValue (String settingName, String value) {
@@ -4758,39 +4775,39 @@ public class GUI extends javax.swing.JFrame {
         // Check the frequency to commit it to a variable before we start
         // If invalid, then abort
         if (!checkCustomFrequency()) return;
-        // Create a new, empty string to populate the new file with.
-        String FileContents = "";
+        // New class instance to create empty file
+        var newHtv = new INIFile();
         // Output device
         switch (cmbOutputDevice.getSelectedIndex()) {
             case 0:
                 if (txtOutputDevice.getText().isBlank()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "hackrf");
+                    newHtv.set("hacktv", "output", "hackrf");
                 }
                 else {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "hackrf:" + txtOutputDevice.getText());
+                    newHtv.set("hacktv", "output", "hackrf:" + txtOutputDevice.getText());
                 }
                 break;
             case 1:
                 if (txtOutputDevice.getText().isBlank()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "soapysdr");
+                    newHtv.set("hacktv", "output", "soapysdr");
                 }
                 else {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "soapysdr:" + txtOutputDevice.getText());
+                    newHtv.set("hacktv", "output", "soapysdr:" + txtOutputDevice.getText());
                 }
                 break;
             case 2:
                 if (txtOutputDevice.getText().isBlank()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "fl2k");
+                    newHtv.set("hacktv", "output", "fl2k");
                 }
                 else {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", "fl2k:" + txtOutputDevice.getText());
+                    newHtv.set("hacktv", "output", "fl2k:" + txtOutputDevice.getText());
                 }
                 switch (cmbFl2kAudio.getSelectedIndex()) {
                     case 1:
-                        FileContents = INI.setINIValue(FileContents, "hacktv", "fl2k-audio", "stereo");
+                        newHtv.set("hacktv", "fl2k-audio", "stereo");
                         break;
                     case 2:
-                        FileContents = INI.setINIValue(FileContents, "hacktv", "fl2k-audio", "spdif");
+                        newHtv.set("hacktv", "fl2k-audio", "spdif");
                         break;
                     default:
                         break;
@@ -4801,32 +4818,32 @@ public class GUI extends javax.swing.JFrame {
                     messageBox("Please select an output file or change the output device.", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "output", txtOutputDevice.getText());
+                    newHtv.set("hacktv", "output", txtOutputDevice.getText());
                 }                
                 break;
             default:
                 break;
         }
         // Save current fork if applicable
-        if (captainJack) FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "fork", "CaptainJack");
+        if (captainJack) newHtv.set("hacktv-gui3", "fork", "CaptainJack");
         // Input source or test card
         if (!playlistAL.isEmpty()) {
             // We'll populate the playlist section later
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "playlist", 1);
+            newHtv.setInt("hacktv-gui3", "playlist", 1);
             // Set start point of playlist
-            if (startPoint != -1) FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "playliststart", startPoint + 1);
+            if (startPoint != -1) newHtv.setInt("hacktv-gui3", "playliststart", startPoint + 1);
             // Random option
-            if (chkRandom.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "random", 1);
+            if (chkRandom.isSelected()) newHtv.setInt("hacktv-gui3", "random", 1);
         }
         else {
             // We'll add Philips patterns later, if any
             if ( (radTest.isSelected()) && (!isPhilipsTestSignal()) ) {
                 if ((cmbTest.isEnabled()) && (tcArray != null)) {
                     String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-                    if (sa.length > 0) FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:" + sa[0]);
+                    if (sa.length > 0) newHtv.set("hacktv", "input", "test:" + sa[0]);
                 }
                 else {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "input", "test:colourbars");
+                    newHtv.set("hacktv", "input", "test:colourbars");
                 }
             }
             else if ((txtSource.getText().toLowerCase(Locale.ENGLISH).endsWith(".m3u")) ||
@@ -4835,33 +4852,33 @@ public class GUI extends javax.swing.JFrame {
                 if (Files.exists(Path.of(txtSource.getText()))) {
                     // Save the selected item from the Extended M3U file
                     int M3UIndex = cmbM3USource.getSelectedIndex();
-                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "m3usource", txtSource.getText());
-                    FileContents = INI.setIntegerINIValue(FileContents, "hacktv-gui3", "m3uindex", M3UIndex);
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "input", playlistURLsAL.get(M3UIndex));    
+                    newHtv.set("hacktv-gui3", "m3usource", txtSource.getText());
+                    newHtv.setInt("hacktv-gui3", "m3uindex", M3UIndex);
+                    newHtv.set("hacktv", "input", playlistURLsAL.get(M3UIndex));    
                 }
                 else {
                     // Save path as-is. This may or may not be valid but will be caught when re-opened.
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
+                    newHtv.set("hacktv", "input", txtSource.getText());
                 }
             }
             else {
-                FileContents = INI.setINIValue(FileContents, "hacktv", "input", txtSource.getText());
+                newHtv.set("hacktv", "input", txtSource.getText());
             }
         }
         // Video format/mode
-        FileContents = INI.setINIValue(FileContents, "hacktv", "mode", mode);
+        newHtv.set("hacktv", "mode", mode);
         // Is this a baseband mode?
-        boolean bb = (INI.getINIValue(modesFile, mode, "modulation", "").equals("baseband"));
+        boolean bb = (modesIni.get(mode, "modulation", "").equals("baseband"));
         // Frequency and channel
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if ( (!radCustom.isSelected()) && (!bb) ) {
-                FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
+                newHtv.set("hacktv-gui3", "channel", cmbChannel.getSelectedItem().toString());
                 // Save band plan identifier, this uses the section name from modes file
                 if (radUHF.isSelected()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "bandplan", uhfAL.get(cmbRegion.getSelectedIndex()));
+                    newHtv.set("hacktv-gui3", "bandplan", uhfAL.get(cmbRegion.getSelectedIndex()));
                 }
                 else if (radVHF.isSelected()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "bandplan", vhfAL.get(cmbRegion.getSelectedIndex()));
+                    newHtv.set("hacktv-gui3", "bandplan", vhfAL.get(cmbRegion.getSelectedIndex()));
                 }
             }
             if (sat) {
@@ -4872,77 +4889,77 @@ public class GUI extends javax.swing.JFrame {
                     return;
                 }
                 else {
-                    FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", f);
+                    newHtv.setLong("hacktv", "frequency", f);
                     // This setting is not yet used for anything, but we may need it in future
-                    FileContents = INI.setINIValue(FileContents, "hacktv-gui3", "satellite", "1");
+                    newHtv.set("hacktv-gui3", "satellite", "1");
                 }
             }
             else {
-                if (!bb) FileContents = INI.setLongINIValue(FileContents, "hacktv", "frequency", frequency);
+                if (!bb) newHtv.setLong("hacktv", "frequency", frequency);
             }
         }
         // Sample rate
         if (SharedInst.isNumeric(txtSampleRate.getText())) {
-            FileContents = INI.setLongINIValue(FileContents, "hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
+            newHtv.setLong("hacktv", "samplerate", (long) (Double.parseDouble(txtSampleRate.getText()) * 1000000));
         }
         // Pixel rate
         if (SharedInst.isNumeric(txtPixelRate.getText())) {
-            FileContents = INI.setLongINIValue(FileContents, "hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
+            newHtv.setLong("hacktv", "pixelrate", (long) (Double.parseDouble(txtPixelRate.getText()) * 1000000));
         }
         // Offset
         if (SharedInst.isNumeric(txtOffset.getText())) {
-            FileContents = INI.setLongINIValue(FileContents, "hacktv", "offset", (long) (Double.parseDouble(txtOffset.getText()) * 1000000));
+            newHtv.setLong("hacktv", "offset", (long) (Double.parseDouble(txtOffset.getText()) * 1000000));
         }
         // SECAM field ID
         if (chkSecamId.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id", 1);
+            newHtv.setInt("hacktv", "secam-field-id", 1);
             int id = cmbSecamIdLines.getSelectedIndex() + 1;
             if ((id >= 1) && (id <= 8)) {
-                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "secam-field-id-lines", id);
+                newHtv.setInt("hacktv", "secam-field-id-lines", id);
             }
         }
         // Swap IQ
         if (chkSwapIQ.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "swap-iq", 1);
+            newHtv.setInt("hacktv", "swap-iq", 1);
         }
         // Gain
         if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
-            if (!bb) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "gain", Integer.valueOf(txtGain.getText()));
+            if (!bb) newHtv.setInt("hacktv", "gain", Integer.parseInt(txtGain.getText()));
         }
         // RF Amp
-        if (chkAmp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "amp", 1);
+        if (chkAmp.isSelected()) newHtv.setInt("hacktv", "amp", 1);
         // Output level
-        if (chkOutputLevel.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "level", txtOutputLevel.getText());
+        if (chkOutputLevel.isSelected()) newHtv.set("hacktv", "level", txtOutputLevel.getText());
         // FM deviation
-        if (chkFMDev.isSelected()) FileContents = INI.setLongINIValue(FileContents, "hacktv", "deviation", (long) (Double.parseDouble(txtFMDev.getText()) * 1000000));
+        if (chkFMDev.isSelected()) newHtv.setLong("hacktv", "deviation", (long) (Double.parseDouble(txtFMDev.getText()) * 1000000));
         // Gamma
-        if (chkGamma.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "gamma", txtGamma.getText());
+        if (chkGamma.isSelected()) newHtv.set("hacktv", "gamma", txtGamma.getText());
         // Repeat
-        if (chkRepeat.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "repeat", 1);
+        if (chkRepeat.isSelected()) newHtv.setInt("hacktv", "repeat", 1);
         // Position
-        if (chkPosition.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "position", Integer.valueOf(txtPosition.getText()));
+        if (chkPosition.isSelected()) newHtv.setInt("hacktv", "position", Integer.parseInt(txtPosition.getText()));
         // Verbose
-        if (chkVerbose.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "verbose", 1);
+        if (chkVerbose.isSelected()) newHtv.setInt("hacktv", "verbose", 1);
         // Logo
-        if (chkLogo.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "logo", logoArray[cmbLogo.getSelectedIndex()]) ;
+        if (chkLogo.isSelected()) newHtv.set("hacktv", "logo", logoArray[cmbLogo.getSelectedIndex()]) ;
         // Timestamp
-        if (chkTimestamp.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "timestamp", 1);
+        if (chkTimestamp.isSelected()) newHtv.setInt("hacktv", "timestamp", 1);
         // Interlace
-        if (chkInterlace.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "interlace", 1);
+        if (chkInterlace.isSelected()) newHtv.setInt("hacktv", "interlace", 1);
         // Teletext
         if (txtTeletextSource.getText().endsWith(".t42")) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "teletext", "raw:" + txtTeletextSource.getText());
+            newHtv.set("hacktv", "teletext", "raw:" + txtTeletextSource.getText());
         }
         else if (!txtTeletextSource.getText().isEmpty()) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "teletext", txtTeletextSource.getText());
+            newHtv.set("hacktv", "teletext", txtTeletextSource.getText());
         }
         /* WSS
          * We increase the value by one, because zero is interpreted as "option disabled" while 1 is
          * interpreted as "auto". We will subtract this again when opening.
         */
-        if (chkWSS.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "wss", cmbWSS.getSelectedIndex() + 1);
+        if (chkWSS.isSelected()) newHtv.setInt("hacktv", "wss", cmbWSS.getSelectedIndex() + 1);
         // AR Correction
-        if (chkARCorrection.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "arcorrection", cmbARCorrection.getSelectedIndex());
+        if (chkARCorrection.isSelected()) newHtv.setInt("hacktv", "arcorrection", cmbARCorrection.getSelectedIndex());
         // Scrambling
         switch (scramblingTypeArray.get(cmbScramblingType.getSelectedIndex())) {
             case (""):
@@ -4951,169 +4968,173 @@ public class GUI extends javax.swing.JFrame {
             case ("--videocrypt"):
                 if (scramblingType2.isEmpty()) {
                     // VideoCrypt I only
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                    newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
+                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
                 }
                 else {
                     // VideoCrypt I+II
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "videocrypt1+2");
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey2", scramblingKey2);
+                    newHtv.set("hacktv", "scramblingtype", "videocrypt1+2");
+                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
+                    newHtv.set("hacktv", "scramblingkey2", scramblingKey2);
                 }
                 break;
             case ("--syster"):
                 if (scramblingType2.isEmpty()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                    newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
+                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
                 }
                 else {
                     // Syster dual mode (line shuffling + cut-and-rotate)
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", "systerls+cnr");
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);   
+                    newHtv.set("hacktv", "scramblingtype", "systerls+cnr");
+                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);   
                 }
                 break;
             case ("--single-cut"):
             case ("--double-cut"):
-                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
+                newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
                 if (!scramblingType2.isEmpty()) {
-                    FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingType2.substring(2) + '\u0020' + scramblingKey2);
+                    newHtv.set("hacktv", "scramblingkey", scramblingType2.substring(2) + '\u0020' + scramblingKey2);
                 }
                 break;
             default:
-                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingtype", scramblingType1.substring(2));
-                FileContents = INI.setINIValue(FileContents, "hacktv", "scramblingkey", scramblingKey1);
+                newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
+                newHtv.set("hacktv", "scramblingkey", scramblingKey1);
                 break;
         }
         if (chkActivateCard.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "emm", 1);
+            newHtv.setInt("hacktv", "emm", 1);
         }
         else if (chkDeactivateCard.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "emm", 2);
+            newHtv.setInt("hacktv", "emm", 2);
         }
         if (SharedInst.isNumeric(txtCardNumber.getText())) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "cardnumber", txtCardNumber.getText());
+            newHtv.set("hacktv", "cardnumber", txtCardNumber.getText());
         }
         // Syster permutation table
         if ( (cmbSysterPermTable.getSelectedIndex() == 1) || (cmbSysterPermTable.getSelectedIndex() == 2) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "permutationtable", cmbSysterPermTable.getSelectedIndex());
+            newHtv.setInt("hacktv", "permutationtable", cmbSysterPermTable.getSelectedIndex());
         }
         // EuroCrypt maturity rating
         if (cmbECMaturity.getSelectedIndex() > 0) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-mat-rating", cmbECMaturity.getSelectedIndex());
+            newHtv.setInt("hacktv", "ec-mat-rating", cmbECMaturity.getSelectedIndex());
         }
         // EuroCrypt PPV
         if (chkECppv.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv", 1);
+            newHtv.setInt("hacktv", "ec-ppv", 1);
             if (!txtECprognum.getText().isBlank()) {
-                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-num", Integer.valueOf(txtECprognum.getText()));
+                newHtv.setInt("hacktv", "ec-ppv-num", Integer.parseInt(txtECprognum.getText()));
             }
             if (!txtECprogcost.getText().isBlank()) {
-                FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-ppv-cost", Integer.valueOf(txtECprogcost.getText()));
+                newHtv.setInt("hacktv", "ec-ppv-cost", Integer.parseInt(txtECprogcost.getText()));
             }
         }
         // EuroCrypt "No Date" setting
         if (chkNoDate.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "ec-nodate", 1);
+            newHtv.setInt("hacktv", "ec-nodate", 1);
         }
         // Show card serial
-        if (chkShowCardSerial.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showserial", 1);
+        if (chkShowCardSerial.isSelected()) newHtv.setInt("hacktv", "showserial", 1);
         // Brute force PPV key
-        if (chkFindKeys.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "findkey", 1);
+        if (chkFindKeys.isSelected()) newHtv.setInt("hacktv", "findkey", 1);
         // Scramble audio
-        if (chkScrambleAudio.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "scramble-audio", 1);
+        if (chkScrambleAudio.isSelected()) newHtv.setInt("hacktv", "scramble-audio", 1);
         // ACP
-        if (chkACP.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "acp", 1);
+        if (chkACP.isSelected()) newHtv.setInt("hacktv", "acp", 1);
         // Filter
-        if (chkVideoFilter.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "filter", 1);
+        if (chkVideoFilter.isSelected()) newHtv.setInt("hacktv", "filter", 1);
         // Audio
         if ( (chkAudio.isSelected()) && (chkAudio.isEnabled()) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "audio", 1);
+            newHtv.setInt("hacktv", "audio", 1);
         }
         else if (chkAudio.isEnabled()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "audio", 0); 
+            newHtv.setInt("hacktv", "audio", 0); 
         }
         // NICAM
         if (chkNICAM.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nicam", 1);
+            newHtv.setInt("hacktv", "nicam", 1);
         }
         else if ( (!chkNICAM.isSelected()) && (nicamSupported) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nicam", 0);
+            newHtv.setInt("hacktv", "nicam", 0);
         }
         // A2 stereo
         if (chkA2Stereo.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "a2stereo", 1);
+            newHtv.setInt("hacktv", "a2stereo", 1);
         }
         else if ( (!chkA2Stereo.isSelected()) && (a2Supported) ) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "a2stereo", 0);
+            newHtv.setInt("hacktv", "a2stereo", 0);
         }
         // Show ECMs
-        if (chkShowECM.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "showecm", 1);
+        if (chkShowECM.isSelected()) newHtv.setInt("hacktv", "showecm", 1);
         // Subtitles
         if (chkSubtitles.isSelected()) { 
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "subtitles", 1); 
-            FileContents = INI.setINIValue(FileContents, "hacktv", "subtitleindex", txtSubtitleIndex.getText());
+            newHtv.setInt("hacktv", "subtitles", 1); 
+            newHtv.set("hacktv", "subtitleindex", txtSubtitleIndex.getText());
         }
         // VITS
-        if (chkVITS.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vits", 1);
+        if (chkVITS.isSelected()) newHtv.setInt("hacktv", "vits", 1);
         // VITC
-        if (chkVITC.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "vitc", 1);
+        if (chkVITC.isSelected()) newHtv.setInt("hacktv", "vitc", 1);
         // SiS
         if (chkSiS.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "sis", 1);
+            newHtv.setInt("hacktv", "sis", 1);
             // This setting has been added for possible future use but is not currently read
-            FileContents = INI.setINIValue(FileContents, "hacktv", "sismode", "dcsis");
+            newHtv.set("hacktv", "sismode", "dcsis");
         }
         // Disable colour
-        if (chkColour.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "nocolour", 1);
+        if (chkColour.isSelected()) newHtv.setInt("hacktv", "nocolour", 1);
         // S-Video
-        if (chkSVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "s-video", 1);
+        if (chkSVideo.isSelected()) newHtv.setInt("hacktv", "s-video", 1);
         // Closed captioning
-        if (chkCC608.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "cc608", 1);
+        if (chkCC608.isSelected()) newHtv.setInt("hacktv", "cc608", 1);
         // Invert video
-        if (chkInvertVideo.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "invert-video", 1);
+        if (chkInvertVideo.isSelected()) newHtv.setInt("hacktv", "invert-video", 1);
         // MAC channel ID
-        if (chkMacChId.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "chid", txtMacChId.getText());
+        if (chkMacChId.isSelected()) newHtv.set("hacktv", "chid", txtMacChId.getText());
         // MAC audio options
-        if (chkMacMono.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-mode", "mono");
-        if (chkMac16k.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-quality", "medium");
-        if (chkMacLinear.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-compression", "linear");
-        if (chkMacL2.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "mac-audio-protection", "l2");
+        if (chkMacMono.isSelected()) newHtv.set("hacktv", "mac-audio-mode", "mono");
+        if (chkMac16k.isSelected()) newHtv.set("hacktv", "mac-audio-quality", "medium");
+        if (chkMacLinear.isSelected()) newHtv.set("hacktv", "mac-audio-compression", "linear");
+        if (chkMacL2.isSelected()) newHtv.set("hacktv", "mac-audio-protection", "l2");
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
             if (!txtAntennaName.getText().isBlank())
-            FileContents = INI.setINIValue(FileContents, "hacktv", "antennaname", txtAntennaName.getText());
+            newHtv.set("hacktv", "antennaname", txtAntennaName.getText());
         }
         // Output file type
         if (cmbOutputDevice.getSelectedIndex() == 3) {
-            FileContents = INI.setINIValue(FileContents, "hacktv", "filetype", cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
+            newHtv.set("hacktv", "filetype", cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
         }
         // Volume
-        if (chkVolume.isSelected()) FileContents = INI.setINIValue(FileContents, "hacktv", "volume", txtVolume.getText());
+        if (chkVolume.isSelected()) newHtv.set("hacktv", "volume", txtVolume.getText());
         // Downmix
-        if (chkDownmix.isSelected()) FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "downmix", 1);
+        if (chkDownmix.isSelected()) newHtv.setInt("hacktv", "downmix", 1);
         // Teletext subtitles
         if (chkTextSubtitles.isSelected()) {
-            FileContents = INI.setIntegerINIValue(FileContents, "hacktv", "tx-subtitles", 1);
-            FileContents = INI.setINIValue(FileContents, "hacktv", "tx-subindex", txtTextSubtitleIndex.getText());
+            newHtv.setInt("hacktv", "tx-subtitles", 1);
+            newHtv.set("hacktv", "tx-subindex", txtTextSubtitleIndex.getText());
         }
         // Philips test signals
         if (isPhilipsTestSignal()) {
             String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-            if (sa.length > 0) FileContents = INI.setINIValue(FileContents, "hacktv", "testsignal", sa[0]);
+            if (sa.length > 0) newHtv.set("hacktv", "testsignal", sa[0]);
         }
+        String newFile;
         // The playlist doesn't follow a standard INI format. We just dump the
         // playlist array into the file as-is.
         if (!playlistAL.isEmpty()) {
             var sb = new StringBuilder();
-            FileContents = FileContents + "\n\n[playlist]\n";
+            sb.append(newHtv.toString());
+            sb.append("[playlist]\n");
             for (int i = 1; i <= playlistAL.size(); i++) {
                 sb.append(playlistAL.get(i - 1)).append("\n");
             }
-            FileContents = FileContents + sb.toString();
+            newFile = sb.toString();
+        } else {
+            newFile = newHtv.toString();
         }
         // Commit to disk
         try {
-            Files.writeString(DestinationFileName.toPath(), FileContents, StandardCharsets.UTF_8);
+            Files.writeString(DestinationFileName.toPath(), newFile, StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             messageBox("An error occurred while writing to this file. "
@@ -5975,29 +5996,27 @@ public class GUI extends javax.swing.JFrame {
         scramblingTypeArray.add("");
         dualVC = -2;
         // Check if modes file contains a section for these scrambling systems
-        String vc1 = INI.splitINIfile(modesFile, "videocrypt");
-        String vc2 = INI.splitINIfile(modesFile, "videocrypt2");
-        String vcs = INI.splitINIfile(modesFile, "videocrypts");
-        String syster = INI.splitINIfile(modesFile, "syster");
-        if (vc1 != null) {
+        int vc1 = modesIni.getKeys("videocrypt").length;
+        int vc2 = modesIni.getKeys("videocrypt2").length;
+        if (vc1 > 0) {
             ScramblingTypeAL.add("VideoCrypt I");
             scramblingTypeArray.add("--videocrypt");
         }
-        if (vc2 != null) {
+        if (vc2 > 0) {
             ScramblingTypeAL.add("VideoCrypt II");
             scramblingTypeArray.add("--videocrypt2");
         }
-        if ((vc1 != null) && (vc2 != null)) {
+        if ((vc1 > 0) && (vc2 > 0)) {
             ScramblingTypeAL.add("VideoCrypt I+II");
             scramblingTypeArray.add("--videocrypt");
             // Specify that both key fields should be enabled for this system
             dualVC = scramblingTypeArray.size() - 1;
         }
-        if (vcs != null) {
+        if (modesIni.getKeys("videocrypts").length > 0) {
             ScramblingTypeAL.add("VideoCrypt S");
             scramblingTypeArray.add("--videocrypts");
         }
-        if (syster != null) {
+        if (modesIni.getKeys("syster").length > 0) {
             ScramblingTypeAL.add("Nagravision Syster");
             scramblingTypeArray.add("--syster");
             ScramblingTypeAL.add("Discret 11");
@@ -6027,7 +6046,7 @@ public class GUI extends javax.swing.JFrame {
         ScramblingTypeAL.add("No scrambling");
         scramblingTypeArray.add("");
         dualVC = -2;
-        if (INI.splitINIfile(modesFile, "eurocrypt") != null) {
+        if (modesIni.getKeys("eurocrypt").length > 0) {
             ScramblingTypeAL.add("Single cut");
             ScramblingTypeAL.add("Double cut");
             scramblingTypeArray.add("--single-cut");
@@ -6116,9 +6135,9 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
         // Extract (from modesFile) the scrambling key section that we need
-        String slist = INI.splitINIfile(modesFile, sconf);
+        String[] slist = modesIni.getKeys(sconf);
         // If the INI section is present but no data is contained in it, stop
-        if ((slist.trim().lines().count()) <= 1) {
+        if (slist.length <= 1) {
             scramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
@@ -6126,17 +6145,13 @@ public class GUI extends javax.swing.JFrame {
                     + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        else {
-            // We just want the commands so remove everything after =
-            slist = slist.replaceAll("\\=.*", "");
-        }
         // Add commands to an ArrayList
         scramblingKeyArray = new ArrayList<>();
-        scramblingKeyArray.addAll(Arrays.asList(slist.substring(slist.indexOf("\n") + 1).split("\\r?\\n")));
+        scramblingKeyArray.addAll(Arrays.asList(slist));
         // Extract friendly names and populate the combobox with them
         var skn = new String[scramblingKeyArray.size()];
         for (int i = 0; i < scramblingKeyArray.size(); i++) {
-            skn[i] = INI.getStringFromINI(modesFile , sconf, scramblingKeyArray.get(i), "", true);
+            skn[i] = modesIni.get(sconf, scramblingKeyArray.get(i), "");
         }
         // Populate key 1 combobox
         cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(skn));
@@ -6155,8 +6170,8 @@ public class GUI extends javax.swing.JFrame {
             }
             cmbScramblingKey2.removeAllItems();
             // Extract (from modesFile) the VC2 scrambling key section
-            String slist2 = INI.splitINIfile(modesFile, sconf2);
-            if ((slist2.trim().lines().count()) <= 1) {
+            String[] slist2 = modesIni.getKeys(sconf2);
+            if (slist2.length <= 1) {
                 scramblingType1 = "";
                 cmbScramblingType.setSelectedIndex(0);
                 addScramblingKey();
@@ -6164,15 +6179,13 @@ public class GUI extends javax.swing.JFrame {
                         + "missing or corrupt for the secondary scrambling type.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            // We just want the commands so remove everything after =
-            slist2 = slist2.replaceAll("\\=.*", "");
             // Add commands to an ArrayList
             scramblingKey2Array = new ArrayList<>();
-            scramblingKey2Array.addAll(Arrays.asList(slist2.substring(slist2.indexOf("\n") + 1).split("\\r?\\n")));
+            scramblingKey2Array.addAll(Arrays.asList(slist2));
             // Extract friendly names and populate the combobox with them
             var skn2 = new String[scramblingKey2Array.size()];
             for (int i = 0; i < scramblingKey2Array.size(); i++) {
-                skn2[i] = INI.getStringFromINI(modesFile , sconf2, scramblingKey2Array.get(i), "", true);
+                skn2[i] = modesIni.get(sconf2, scramblingKey2Array.get(i), "");
             }
             // Populate key 2 combobox
             cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(skn2));
@@ -6427,23 +6440,18 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addLogoOptions() {
-        // Extract (from modesFile) the logo list
-        String logos = INI.splitINIfile(modesFile, "logos");
-        if (logos == null) {
+        // Extract the list of logos from the INI file
+        logoArray = modesIni.getKeys("logos");
+        if (logoArray.length == 0) {
             // If nothing was found, disable the logo options and stop
             if (chkLogo.isSelected()) chkLogo.doClick();
             chkLogo.setEnabled(false);
             return;
         }
-        // We just want the commands so remove everything after =
-        logos = logos.replaceAll("\\=.*", "");          
-        // Add a headerless string to logoArray by splitting off the first line
-        logoArray = logos.substring(logos.indexOf("\n") +1).split("\\r?\\n");
-        // Populate LogoNames by reading modesFile using what we added
-        // to logoArray.
+        // Populate LogoNames using what we added to logoArray.
         var LogoNames = new String[logoArray.length];
         for (int i = 0; i < logoArray.length; i++) {
-            LogoNames[i] = (INI.getStringFromINI(modesFile, "logos", logoArray[i], "", true));
+            LogoNames[i] = (modesIni.get("logos", logoArray[i], ""));
         }
         cmbLogo.removeAllItems();
         cmbLogo.setModel(new DefaultComboBoxModel<>(LogoNames));
@@ -6462,11 +6470,13 @@ public class GUI extends javax.swing.JFrame {
     
     private void addTestCardOptions() {
         // Reads the available test cards/signals/patterns from the modes file
-        String t;
+        String[] t;
         if ((tcArray == null) || (tcArray.length == 0)) tcArray = new String[0];
+        String tcc;
         if (captainJack) {
             // Extract (from modesFile) the test card list
-            t = INI.splitINIfile(modesFile, "testcards");
+            t = modesIni.getKeys("testcards");
+            tcc = null;
         }
         else if (mattstvbarn) {
             // PM5644/PT8631 emulation
@@ -6474,17 +6484,20 @@ public class GUI extends javax.swing.JFrame {
             if (c.isEmpty()) {
                 // Unsupported mode, set to null (we'll catch it later)
                 t = null;
+                tcc = null;
             }
             else {
                 // Extract (from modesFile) the test signal list (e.g. [testsignals_625_pal])
                 // This will return null if the section does not exist
-                t = INI.splitINIfile(modesFile, "testsignals" + "_" + Integer.toString(lines) + "_" + c);
+                tcc = "testsignals" + "_" + Integer.toString(lines) + "_" + c;
+                t = modesIni.getKeys(tcc);
             }
         }
         else {
             t = null;
+            tcc = null;
         }
-        if (t == null) {
+        if (t == null || tcc == null || t.length == 0) {
             // If nothing was found, disable the test card combobox
             // Use a dummy string to preserve the length of the combobox
             // This won't be seen as the combobox is disabled
@@ -6497,8 +6510,12 @@ public class GUI extends javax.swing.JFrame {
         else {
             // Variable for storing pattern directory location
             String p = PREFS.get("testdir", hackTVDirectory);
-            // Remove the first line from t (the INI header) and split each line to tcArray
-            tcArray = t.replace("=", ",").substring(t.indexOf("\n") +1).split("\n");
+            var sb = new StringBuilder();
+            for (String s : t) {
+                sb.append(s).append(",").append(modesIni.get(tcc, s)).append("\n");
+            }
+            // Split each line to tcArray (backwards compatibility with old code)
+            tcArray = sb.toString().split("\n");
             /* tcArray contains five pieces of data, separated by commas:
                [0]      [1]           [2]               [3]                 [4]
                Command, Display name, Pattern filename, Text/clock support, Sample rate
@@ -6542,12 +6559,10 @@ public class GUI extends javax.swing.JFrame {
                     tcArray = new String[tal.size()];
                     for (int i = 0; i < tal.size(); i++) {
                         // Query the modes file to get the missing parameters back
-                        String s = INI.getStringFromINI(
-                                modesFile,
+                        String s = modesIni.get(
                                 "testsignals" + "_" + Integer.toString(lines) + "_" + getSelectedColourSystem(),
                                 tal.get(i),
-                                "",
-                                true
+                                ""
                         );
                         if (!s.isBlank()) tcArray[i] = tal.get(i) + "," + s;
                     }
@@ -6817,8 +6832,8 @@ public class GUI extends javax.swing.JFrame {
         // Save the line count from the previously selected mode
         int oldLines = lines;
         // Start reading the section we found above, starting with line count
-        if (INI.getIntegerFromINI(modesFile, mode, "lines") != null) {
-            lines = INI.getIntegerFromINI(modesFile, mode, "lines");
+        if (modesIni.getInt(mode, "lines") != null) {
+            lines = modesIni.getInt(mode, "lines");
         }
         else {
             messageBox("Unable to read the \"lines\" value for this mode. "
@@ -6832,7 +6847,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         boolean baseband = false;
-        switch (INI.getStringFromINI(modesFile, mode, "modulation", "", false)) {
+        switch (modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH)) {
             case "vsb":
                 if (!chkVideoFilter.isEnabled()) chkVideoFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
@@ -6858,14 +6873,14 @@ public class GUI extends javax.swing.JFrame {
                 disableFMDeviation();
                 break;
         }
-        if (INI.getDoubleFromINI(modesFile, mode, "sr") != null) {
+        if (modesIni.getDouble(mode, "sr") != null) {
             if ((cmbOutputDevice.getSelectedIndex() == 0) && (PREFS.getInt("hackdac", 0) == 1) && (baseband)) {
                 // HackDAC works at 13.5 MHz only 
                 defaultSampleRate = "13.5";
                 txtSampleRate.setEnabled(false);
             }
             else {
-                defaultSampleRate = Double.toString(INI.getDoubleFromINI(modesFile, mode, "sr") / 1000000).replace(".0", "");
+                defaultSampleRate = Double.toString(modesIni.getDouble(mode, "sr") / 1000000).replace(".0", "");
                 if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
             }
         }
@@ -6874,7 +6889,7 @@ public class GUI extends javax.swing.JFrame {
             defaultSampleRate = "16";
             if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
         }
-        if ( (INI.getBooleanFromINI(modesFile, mode, "colour")) &&
+        if ( (modesIni.getBoolean(mode, "colour")) &&
                 ( (radPAL.isSelected()) ||
                   (radNTSC.isSelected()) ||
                   (radSECAM.isSelected()) )
@@ -6890,37 +6905,37 @@ public class GUI extends javax.swing.JFrame {
                 chkColour.setEnabled(false);
             }
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "audio")) {
+        if (modesIni.getBoolean(mode, "audio")) {
             enableAudioOption();
         }
         else {
             disableAudioOption();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "nicam")) {
+        if (modesIni.getBoolean(mode, "nicam")) {
             enableNICAM();
         }
         else {
             disableNICAM();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "a2stereo")) {
+        if (modesIni.getBoolean(mode, "a2stereo")) {
             enableA2Stereo();
         }
         else {
             disableA2Stereo();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "teletext")) {
+        if (modesIni.getBoolean(mode, "teletext")) {
             enableTeletext();
         }
         else {
             disableTeletext();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "wss")) {
+        if (modesIni.getBoolean(mode, "wss")) {
             enableWSS();
         }
         else {
             disableWSS();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "vits")) {
+        if (modesIni.getBoolean(mode, "vits")) {
             enableVITS();
         }
         else {
@@ -6933,7 +6948,7 @@ public class GUI extends javax.swing.JFrame {
             if (chkVITC.isSelected()) chkVITC.doClick();
             chkVITC.setEnabled(false);
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "acp")) {
+        if (modesIni.getBoolean(mode, "acp")) {
             acpSupported = true;
             enableACP();
         }
@@ -6941,7 +6956,7 @@ public class GUI extends javax.swing.JFrame {
             acpSupported = false;
             disableACP();
         }
-        if (INI.getBooleanFromINI(modesFile, mode, "scrambling")) {
+        if (modesIni.getBoolean(mode, "scrambling")) {
             enableScrambling();
             if ((radPAL.isSelected()) || radSECAM.isSelected() ) {
                 add625ScramblingTypes();
@@ -7014,7 +7029,7 @@ public class GUI extends javax.swing.JFrame {
                     s = Integer.toString(i);
                     break;
             }
-            String u = INI.getStringFromINI(modesFile, mode, "uhf" + s, "0", false);
+            String u = modesIni.get(mode, "uhf" + s, "0").toLowerCase(Locale.ENGLISH);
             if (!u.equals("0")) {
                 // If the UHF radio button label was renamed, set it back
                 if (radUHF.getText().equals("Satellite")) radUHF.setText("UHF");
@@ -7023,7 +7038,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Check if any satellite band plans are defined
-                u = INI.getStringFromINI(modesFile, mode, "sat" + s, "0", false);
+                u = modesIni.get(mode, "sat" + s, "0").toLowerCase(Locale.ENGLISH);
                 if (!u.equals("0")) {
                     // Rename the UHF radio button label to Satellite instead
                     radUHF.setText("Satellite");
@@ -7050,7 +7065,7 @@ public class GUI extends javax.swing.JFrame {
                     t = Integer.toString(j);
                     break;
             }
-            String v = INI.getStringFromINI(modesFile, mode, "vhf" + t, "0", false);
+            String v = modesIni.get(mode, "vhf" + t, "0").toLowerCase(Locale.ENGLISH);
             if (!v.equals("0")) {
                 vhfAL.add(v);
             }
@@ -7141,7 +7156,7 @@ public class GUI extends javax.swing.JFrame {
                     return false;
                 }
                 for (String s : l) {
-                    String m = INI.getStringFromINI(modesFile, s, "modulation", "", false);
+                    String m = modesIni.get(s, "modulation", "").toLowerCase(Locale.ENGLISH);
                     if ((m.equals("vsb")) || (m.equals("fm"))) {
                         cmbMode.setSelectedIndex(l.indexOf(s));
                         return true;
@@ -7359,34 +7374,28 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(false);
         try {
             // Get the band plan list from the requested video mode and band
-            String bpname = INI.getStringFromINI(modesFile, mode, band, "", false);
+            String bpname = modesIni.get(mode, band, "").toLowerCase(Locale.ENGLISH);
             // Extract (from bpFile) the band plan section that we need
-            String bp = INI.splitINIfile(bpFile, bpname);
-            if (bp == null) {
+            String[] bp = bpIni.getKeys(bpname);
+            if (bp.length == 0) {
                  messageBox(band + " was not found in bandplans.ini", JOptionPane.ERROR_MESSAGE);
                  return;
             }
-            // We just want the channel names/numbers so remove everything after =
-            bp = bp.replaceAll("\\=.*", "");
-            // Remove region identifier, chid and local oscillator lines if they exist.
-            // These should not be processed here.
-            bp = Stream.of(bp.split("\n"))
-                    .filter(g -> !g.contains("region"))
-                    .collect(Collectors.joining("\n"));
-            bp = Stream.of(bp.split("\n"))
-                    .filter(g -> !g.contains("chid"))
-                    .collect(Collectors.joining("\n"));
-            bp = Stream.of(bp.split("\n"))
-                    .filter(g -> !g.contains("lo"))
-                    .collect(Collectors.joining("\n"));
-            // Add a headerless string to channelArray by splitting off the first line
-            channelArray = bp.substring(bp.indexOf("\n") +1).split("\\r?\\n");
+            var trimmed = new ArrayList<String>();
+            for (String s : bp) {
+                // Remove region identifier, chid and local oscillator lines if they exist.
+                // These should not be processed here.
+                if (!s.equals("region") && !s.equals("chid") && !s.equals("lo")) {
+                    trimmed.add(s);
+                }
+            }
+            channelArray = trimmed.toArray(String[]::new);
             // Populate frequencyArray by reading modesFile using what we added
             // to channelArray.
             frequencyArray = new long[channelArray.length];
             for (int i = 0; i < channelArray.length; i++) {
-                if (INI.getLongFromINI(bpFile, bpname, channelArray[i]) != null) {
-                    frequencyArray[i] = INI.getLongFromINI(bpFile, bpname, channelArray[i]);
+                if (bpIni.getLong(bpname, channelArray[i]) != null) {
+                    frequencyArray[i] = bpIni.getLong(bpname, channelArray[i]);
                 }
                 else {
                      messageBox("Invalid data returned from bandplans.ini, section name: "
@@ -7728,9 +7737,9 @@ public class GUI extends javax.swing.JFrame {
         else {
             b = "sat";
         }
-        String bp = INI.getStringFromINI(modesFile, mode, b, "", false);
-        if ((INI.getLongFromINI(bpFile, bp, "lo")) != null) {
-            long lo = INI.getLongFromINI(bpFile, bp, "lo");
+        String bp = modesIni.get(mode, b, "").toLowerCase(Locale.ENGLISH);
+        if ((bpIni.getLong(bp, "lo")) != null) {
+            long lo = bpIni.getLong(bp, "lo");
             return lo;
         }
         else {
@@ -8373,7 +8382,7 @@ public class GUI extends javax.swing.JFrame {
         allArgs.add("-m");
         allArgs.add(mode);
         // Only add frequency for HackRF (not in baseband mode) or SoapySDR
-        String mod = (INI.getStringFromINI(modesFile, mode, "modulation", "", false));        
+        String mod = (modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH));
         if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (!mod.equals("baseband"))) ||
                 (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!checkCustomFrequency()) return;
@@ -8758,23 +8767,23 @@ public class GUI extends javax.swing.JFrame {
                 // We need to handle carriage returns (CRs) differently on
                 // Windows, due to it using CR+LF for new lines. But this
                 // method works on other systems too.
-                boolean cr = false;
-                for (String o : chunks) {
-                    // Start of CR handling.
-                    if (o.equals("\r")) {
-                        // Let the next loop know that we found a CR
-                        cr = true;
+                var currentLine = new StringBuilder();
+                for (String c : chunks) {
+                    switch (c) {
+                        case "\r":
+                            int start = txtConsoleOutput.getText().lastIndexOf('\n') + 1;
+                            txtConsoleOutput.replaceRange(currentLine.toString(), start, txtConsoleOutput.getText().length());
+                            currentLine.setLength(0);
+                            break;
+                        case "\n":
+                            txtConsoleOutput.append(currentLine.toString() + "\n");
+                            currentLine.setLength(0);
+                            break;
+                        default:
+                            currentLine.append(c);
+                            break;
                     }
-                    else if ((cr) && (!o.equals("\n"))) {
-                        String s = txtConsoleOutput.getText();
-                        txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
-                        cr = false;
-                    }
-                    // End of CR handling
-                    else {
-                        // Append the character as normal
-                        txtConsoleOutput.append(o);
-                    }
+                    txtConsoleOutput.setCaretPosition(txtConsoleOutput.getDocument().getLength());
                 }
             }// End of process
         }; // End of SwingWorker
@@ -8869,23 +8878,23 @@ public class GUI extends javax.swing.JFrame {
             } // End doInBackground
             @Override
             protected void process(List<String> chunks) {
-                boolean cr = false;
+                var currentLine = new StringBuilder();
                 for (String o : chunks) {
-                    // Start of carriage return (CR) handling.
-                    if (o.equals("\r")) {
-                        // Let the next loop know that we found a CR
-                        cr = true;
+                    switch (o) {
+                        case "\r":
+                            int start = txtConsoleOutput.getText().lastIndexOf('\n') + 1;
+                            txtConsoleOutput.replaceRange(currentLine.toString(), start, txtConsoleOutput.getText().length());
+                            currentLine.setLength(0);
+                            break;
+                        case "\n":
+                            txtConsoleOutput.append(currentLine.toString() + "\n");
+                            currentLine.setLength(0);
+                            break;
+                        default:
+                            currentLine.append(o);
+                            break;
                     }
-                    else if ((cr) && (!o.equals("\n"))) {
-                        String s = txtConsoleOutput.getText();
-                        txtConsoleOutput.replaceRange(o, s.lastIndexOf("\n") + 1, s.length());
-                        cr = false;
-                    }
-                    // End of CR handling
-                    else {
-                        // Append the character as normal
-                        txtConsoleOutput.append(o);
-                    }
+                    txtConsoleOutput.setCaretPosition(txtConsoleOutput.getDocument().getLength());
                 }
             }// End of process
             @Override
@@ -9620,12 +9629,12 @@ public class GUI extends javax.swing.JFrame {
                     b = "vhf";
                 }
                 // Retrieve band plan
-                String bp = INI.getStringFromINI(modesFile, mode, b, "", false);
+                String bp = modesIni.get(mode, b, "").toLowerCase(Locale.ENGLISH);
                 // Retrieve channel ID list
-                String c = INI.getStringFromINI(bpFile, bp, "chid", "", false);
+                String c = bpIni.get(bp, "chid", "").toLowerCase(Locale.ENGLISH);
                 // Retrieve ID using the channel name from the ID list
                 // This name must be identical to the name specified in the band plan
-                String id = INI.getStringFromINI(bpFile, c, channelArray[cmbChannel.getSelectedIndex()], "", false).toUpperCase(Locale.ENGLISH);
+                String id = bpIni.get(c, channelArray[cmbChannel.getSelectedIndex()], "").toUpperCase(Locale.ENGLISH);
                 if (id.isBlank()) {
                     // Nothing found, deselect the channel ID checkbox
                     if (chkMacChId.isSelected()) chkMacChId.doClick();
@@ -9653,7 +9662,7 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < uhfAL.size(); i++) {
-            cmbRegion.addItem(INI.getStringFromINI(bpFile, uhfAL.get(i), "region", uhfAL.get(i), true));
+            cmbRegion.addItem(bpIni.get(uhfAL.get(i), "region", uhfAL.get(i)));
         }
         // Enable the region combobox if multiple options are available.
         if (cmbRegion.getItemCount() > 1) {
@@ -9687,7 +9696,7 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         for (int i = 0; i < vhfAL.size(); i++) {
-            cmbRegion.addItem(INI.getStringFromINI(bpFile, vhfAL.get(i), "region", vhfAL.get(i), true));
+            cmbRegion.addItem(bpIni.get(vhfAL.get(i), "region", vhfAL.get(i)));
         }
         // Enable the region combobox if multiple options are available.
         if (cmbRegion.getItemCount() > 1) {
@@ -9829,7 +9838,7 @@ public class GUI extends javax.swing.JFrame {
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
         String ModeChanged = "The selected video mode has been changed "
                 + "because this output device does not support it. Please select another mode.";
-        boolean bb = INI.getStringFromINI(modesFile, mode, "modulation", "", false).equals("baseband");
+        boolean bb = modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH).equals("baseband");
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
         switch(cmbOutputDevice.getSelectedIndex()) {
             // hackrf
@@ -10761,7 +10770,7 @@ public class GUI extends javax.swing.JFrame {
             chkSVideo.setEnabled(false);
         }
         else {
-            if ( (INI.getStringFromINI(modesFile, mode, "modulation", "vsb", false).equals("baseband")) &&
+            if ( (modesIni.get(mode, "modulation", "vsb").toLowerCase(Locale.ENGLISH).equals("baseband")) &&
                 ( (cmbOutputDevice.getSelectedIndex() == 2)  ||
                 (cmbOutputDevice.getSelectedIndex() == 3) ) &&
                 ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
@@ -10778,7 +10787,7 @@ public class GUI extends javax.swing.JFrame {
             chkColour.setEnabled(false);
         }
         else {
-            if ( ((INI.getIntegerFromINI(modesFile, mode, "colour") == 1)) &&
+            if ( ((modesIni.getInt(mode, "colour") == 1)) &&
                 ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
                     (radSECAM.isSelected()) ) ){
                 chkColour.setEnabled(true);
@@ -10812,7 +10821,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             PREFS.remove("hackdac");
-            if (INI.getStringFromINI(modesFile, mode, "modulation", "", false).equals("baseband")) checkBasebandSupport();
+            if (modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH).equals("baseband")) checkBasebandSupport();
         }
     }//GEN-LAST:event_chkHackDACActionPerformed
 
