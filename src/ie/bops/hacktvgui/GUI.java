@@ -1569,7 +1569,7 @@ public class GUI extends javax.swing.JFrame {
 
         lblFl2kAudio.setText("Audio mode");
 
-        cmbFl2kAudio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Stereo", "S/PDIF" }));
+        cmbFl2kAudio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Mono", "Stereo", "S/PDIF" }));
 
         javax.swing.GroupLayout frequencyPanelLayout = new javax.swing.GroupLayout(frequencyPanel);
         frequencyPanel.setLayout(frequencyPanelLayout);
@@ -3973,11 +3973,14 @@ public class GUI extends javax.swing.JFrame {
                 txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
             }
             switch (htvFile.get("hacktv", "fl2k-audio", "").toLowerCase(Locale.ENGLISH)) {
-                case "stereo":
+                case "mono":
                     cmbFl2kAudio.setSelectedIndex(1);
                     break;
-                case "spdif":
+                case "stereo":
                     cmbFl2kAudio.setSelectedIndex(2);
+                    break;
+                case "spdif":
+                    cmbFl2kAudio.setSelectedIndex(3);
                     break;
                 default:
                     cmbFl2kAudio.setSelectedIndex(0);
@@ -4802,9 +4805,12 @@ public class GUI extends javax.swing.JFrame {
                 }
                 switch (cmbFl2kAudio.getSelectedIndex()) {
                     case 1:
-                        newHtv.set("hacktv", "fl2k-audio", "stereo");
+                        newHtv.set("hacktv", "fl2k-audio", "mono");
                         break;
                     case 2:
+                        newHtv.set("hacktv", "fl2k-audio", "stereo");
+                        break;
+                    case 3:
                         newHtv.set("hacktv", "fl2k-audio", "spdif");
                         break;
                     default:
@@ -8196,11 +8202,16 @@ public class GUI extends javax.swing.JFrame {
                         // No audio
                         break;
                     case 1:
+                        // Mono
+                        al.add("--fl2k-audio");
+                        al.add("mono");
+                        break;
+                    case 2:
                         // Stereo
                         al.add("--fl2k-audio");
                         al.add("stereo");
                         break;
-                    case 2:
+                    case 3:
                         // S/PDIF
                         al.add("--fl2k-audio");
                         al.add("spdif");

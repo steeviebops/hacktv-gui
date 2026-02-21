@@ -1970,10 +1970,11 @@
                     <Component class="javax.swing.JComboBox" name="cmbFl2kAudio">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="3">
+                          <StringArray count="4">
                             <StringItem index="0" value="None"/>
-                            <StringItem index="1" value="Stereo"/>
-                            <StringItem index="2" value="S/PDIF"/>
+                            <StringItem index="1" value="Mono"/>
+                            <StringItem index="2" value="Stereo"/>
+                            <StringItem index="3" value="S/PDIF"/>
                           </StringArray>
                         </Property>
                       </Properties>
