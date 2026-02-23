@@ -42,7 +42,6 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
@@ -51,7 +50,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -74,10 +72,8 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Random;
-import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.KeyStroke;
@@ -2598,60 +2594,8 @@ public class GUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
-    // Main method
-    public static void main(String args[]) {
-        // If the emergency reset command is specified, remove all prefs.
-        // This is a safety net, in case any bad preferences prevent us from running.
-        // We handle this as early as possible to ensure it will work correctly.
-        if (args.length > 0) {
-            switch (args[0].toLowerCase(Locale.ENGLISH)) {
-                case "reset":
-                case "-reset":
-                case "--reset":
-                case "/reset":
-                // Reset all preferences and exit
-                resetPreferences();
-                return;                    
-            }
-        }
-        // Pre-initialisation macOS tasks
-        // These need to be done before creating the GUI class instance.
-        // We'll set the dock icon later because that needs to be done after
-        // the GUI class instance is created.
-        if (System.getProperty("os.name").contains("Mac")) {
-            // Put app name in the menu bar
-            System.setProperty("apple.awt.application.name", APP_NAME);
-            // Use the Mac menu bar
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            // Set light/dark mode to current setting, seems to be broken
-            // System.setProperty("apple.awt.application.appearance", "system");
-        }
-        try {
-            SwingUtilities.invokeLater(() -> {
-                // Create GUI class instance
-                final var g = new GUI();
-                if (g.populateUI(args)) {
-                    // Prevent window from being resized below the current size
-                    g.setMinimumSize(g.getSize());
-                    g.setVisible(true);
-                }
-                else {
-                    System.exit(1);
-                }                
-            });
-        }
-	catch (HeadlessException e) {
-            // Catch this error if we find we're running on a headless JRE or an
-            // OS with no GUI support (e.g. WSL or Unix without X).
-            System.err.println("A fatal error occurred while attempting to "
-                    + "initialise the window, please see details below.\n" + 
-                    e.getMessage());
-            System.exit(1);
-        }
-    }
-    
-    private boolean populateUI(String[] args) {
+        
+    public int populateUI(String[] args) {
         // Add a shutdown hook to run exit tasks
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -2706,10 +2650,10 @@ public class GUI extends javax.swing.JFrame {
         populateCheckboxArray();
         migratePreferences();
         loadPreferences();
-        detectFork();
+        lblFork.setText(setForkLabel(getFork()));
         selectModesFile();
-        if (!openModesFile()) return false;
-        if (!openBandPlanFile()) return false;
+        if (!openModesFile()) return 2;
+        if (!openBandPlanFile()) return 3;
         populateVideoModes();
         addARCorrectionOptions();
         populateWSS();
@@ -2725,7 +2669,7 @@ public class GUI extends javax.swing.JFrame {
         populateLafList();
         // Set default values when form loads
         radLocalSource.doClick();
-        if (!selectDefaultMode()) return false;
+        if (!selectDefaultMode()) return 4;
         cmbM3USource.setVisible(false);
         txtGain.setText("0");
         updateMenu.setVisible(false);
@@ -2754,7 +2698,7 @@ public class GUI extends javax.swing.JFrame {
                 txtSource.setText(args[0]);
             }
         }
-        return true;
+        return 0;
     }
     
     private static FileFilter createFileFilter() {
@@ -3525,126 +3469,156 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private static void resetPreferences() {
-        // Delete the preference store and everything in it
+    private boolean getHackTVHash() {
         try {
-            PREFS.removeNode();
-            System.out.println("All preferences have been reset to defaults.");
-        }
-        catch (BackingStoreException e) {
-            System.err.println("Reset failed: " + e.getMessage());
+            String fileHash = SharedInst.sha256Calc(Path.of(hackTVPath));
+            if (fileHash.equals(PREFS.get("hash", ""))) {
+                // Hash is the same, all good
+                return true;
+            } else {
+                String msg = "The current hacktv file is different from the file previously detected.\n"
+                        + "If you weren’t expecting a change, please verify the file before continuing.\n"
+                        + "Do you want to continue?";
+                int q = JOptionPane.showConfirmDialog(null, msg, APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (q == JOptionPane.YES_OPTION) {
+                    // Update saved hash amd continue
+                    PREFS.put("hash", fileHash);
+                    return true;
+                }
+                // Stop execution
+                return false;
+            }
+        } catch (IOException ioe) {
+            System.err.println("File hash verification failed.\n" + ioe);
+            return false;
         }
     }
     
-    private void detectFork() {
-        /*  Loads the hacktv binary into RAM and attempts to find a specified
-         *  string to detect what build or fork it is.
-         */
-        
+    private String detectFork() {
+        Path hp = Path.of(hackTVPath);
         // Check if the specified path does not exist or is a directory
-        if (!Files.exists(Path.of(hackTVPath))) {
-            lblFork.setText("Not found");
+        if (!Files.exists(hp)) {
             captainJack = false;
             mattstvbarn = false;
-            return;
+            return "Not found";
         }
-        else if (Files.isDirectory(Path.of(hackTVPath))) {
-            lblFork.setText("Invalid path");
+        else if (Files.isDirectory(hp)) {
             captainJack = false;
             mattstvbarn = false;
-            return;    
+            return "Invalid path";    
         }
-        /*  Check the size of the specified file.
-         *  If larger than 100MB, call the fsphil method and don't go any further.
-         *  This is to avoid memory leaks or hangs by loading a bad file.
-         */
-        var f = new File(hackTVPath);
-        if (f.length() > 104857600) {
-            lblFork.setText("Invalid file (too large)");
-            captainJack = false;
-            mattstvbarn = false;
-            return;
-        }
-        // Create a set of strings to look for in the binary
-        Set<String> foundStrings;
+        String out;
         try {
-            foundStrings = extractMatchingStrings(Paths.get(hackTVPath), 10, Set.of(
-                "Usage: hacktv [options] input [input...]",
-                "--enableemm",
-                "pm8546g.bin"
-            ));
-            if (foundStrings.isEmpty()) {
-                lblFork.setText("Invalid file (not hacktv?)");
-                captainJack = false;
-                mattstvbarn = false;
-                return;
-            }
-            else if (foundStrings.contains("Usage: hacktv [options] input [input...]")) {
-                captainJack = foundStrings.contains("--enableemm");
-                mattstvbarn = foundStrings.contains("pm8546g.bin");
-                if (captainJack) {
-                    lblFork.setText("Captain Jack");
-                }
-                else if (mattstvbarn) {
-                    lblFork.setText("Matt's TV Barn");
-                }
-                else {
-                    lblFork.setText("fsphil");
-                }
-            }
-            // Get the hacktv version if supported, by running hacktv --version
-            var pb = new ProcessBuilder(hackTVPath, "--version");
-            String v;
+            // Get the output of hacktv --help
+            var pb = new ProcessBuilder(hackTVPath, "--help");
+            pb.redirectErrorStream(true);
+            var sb = new StringBuilder();
             Process p = pb.start();
             try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                // Add each line from the output to the StringBuilder
+                String s;
+                while ((s = br.readLine()) != null) sb.append(s).append("\n");
+            }
+            if (!sb.toString().isBlank()) {
+                String output = sb.toString();
+                if (output.contains("--enableemm")) {
+                    PREFS.remove("testsignals");
+                    PREFS.put("fork", "captainjack");
+                    out = "captainjack";
+                } else if (output.contains("--testsignal")) {
+                    PREFS.put("testsignals", "1");
+                    PREFS.remove("fork");
+                    out = "fsphil";
+                } else if (output.contains("Usage: hacktv [options] input [input...]")) {
+                    PREFS.remove("testsignals");
+                    PREFS.remove("fork");
+                    out = "fsphil";
+                } else {
+                    return "Invalid file (not hacktv?)";
+                }
+                // Save SHA-256 hash to preferences. Use this to verify that the
+                // hacktv binary hasn't been modified since the last run.
+                PREFS.put("hash", SharedInst.sha256Calc(hp));
+                getHackTVVersion();
+                return out;
+            } else {
+                return "File access error";
+            }
+        }
+        catch (IOException ex) {
+            return "File access error";
+        }
+    }
+    
+    private void getHackTVVersion() {
+        // Get the hacktv version if supported, by running hacktv --version
+        try {
+            var pb = new ProcessBuilder(hackTVPath, "--version");
+            String v;
+            Process p2 = pb.start();
+            try (var br = new BufferedReader(new InputStreamReader(p2.getInputStream(), StandardCharsets.UTF_8))) {
                 // We only need the first line
                 v = br.readLine();
             }
             if ((v != null) && (!v.isBlank())) {
-                lblFork.setText(lblFork.getText() + " (" + v.substring(v.indexOf(" ") + 1) + ")");
+                v = v.substring(v.indexOf(" ") + 1);
+                PREFS.put("hacktvversion", v);
+                return;
             }
+        } catch (IOException ioe) {
+            System.err.println(ioe);
         }
-        catch (IOException ex) {
-            lblFork.setText("File access error");
-            captainJack = false;
-            mattstvbarn = false;
-        }
-    }
-    
-    private Set<String> extractMatchingStrings(Path binaryPath, int minLength, Set<String> targets) throws IOException {
-        var found = new HashSet<String>();
-        try (var is = new BufferedInputStream(Files.newInputStream(binaryPath))) {
-            var baos = new ByteArrayOutputStream();
-            int b;
-            while ((b = is.read()) != -1) {
-                // Only write printable ASCII characters to the ByteArrayOutputStream
-                if (b >= 32 && b <= 126) {
-                    baos.write(b);
-                }
-                else {
-                    if (baos.size() >= minLength) {
-                        String s = baos.toString("US-ASCII");
-                        for (String target : targets) {
-                            if (s.contains(target)) {
-                                found.add(target);
-                                // Early return if all found
-                                if (found.containsAll(targets)) return found;
-                            }
-                        }
-                    }
-                    baos.reset();
-                }
-            }
-        }
-        return found;
+        PREFS.remove("hacktvversion");
     }
 
     private String getFork() {
-        if (captainJack) {
+        if (PREFS.get("fork", "fsphil").equals("captainjack")) {
+            captainJack = true;
+            mattstvbarn = false;
             return "captainjack";
-        }
-        else {
+        } else {
+            captainJack = false;
+            mattstvbarn = PREFS.get("testsignals", "0").equals("1");
             return "fsphil";
+        }
+    }
+    
+    private String setForkLabel(String fork) {
+        String version = PREFS.get("hacktvversion", "");
+        if (!version.isBlank()) version = " (" + PREFS.get("hacktvversion", "") + ")";
+        Path hp = Path.of(hackTVPath);
+        // Check if the specified path does not exist or is a directory
+        if (!Files.exists(hp)) {
+            PREFS.remove("fork");
+            PREFS.remove("hash");
+            captainJack = false;
+            mattstvbarn = false;
+            return "Not found";
+        }
+        else if (Files.isDirectory(hp)) {
+            PREFS.remove("fork");
+            PREFS.remove("hash");
+            captainJack = false;
+            mattstvbarn = false;
+            return "Invalid path";    
+        }
+        if (fork.startsWith("captainjack")) {
+            return "Captain Jack" + version;
+        } else if (fork.startsWith("fsphil")) {
+            if (PREFS.get("testsignals", "0").equals("1")) {
+                captainJack = false;
+                mattstvbarn = true;
+                return "Matt's TV Barn" + version;
+            }
+            captainJack = false;
+            mattstvbarn = false;
+            return "fsphil" + version;
+        } else {
+            PREFS.remove("testsignals");
+            PREFS.remove("fork");
+            captainJack = false;
+            mattstvbarn = false;
+            return fork;
         }
     }
 
@@ -5949,7 +5923,7 @@ public class GUI extends javax.swing.JFrame {
                         // and get its parent directory path
                         hackTVDirectory = new File(hackTVPath).getParent();    
                         // Detect what were provided with
-                        detectFork();
+                        lblFork.setText(setForkLabel(detectFork()));
                         selectModesFile();
                         if (captainJack) {
                             captainJack();
@@ -6470,35 +6444,34 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addTestCardOptions() {
-        // Reads the available test cards/signals/patterns from the modes file
-        String[] t;
+        String[] tcArgs;
         if ((tcArray == null) || (tcArray.length == 0)) tcArray = new String[0];
-        String tcc;
+        String tcSection;
         if (captainJack) {
             // Extract (from modesFile) the test card list
-            t = modesIni.getKeys("testcards");
-            tcc = null;
+            tcArgs = modesIni.getKeys("testcards");
+            tcSection = "testcards";
         }
         else if (mattstvbarn) {
             // PM5644/PT8631 emulation
             String c = getSelectedColourSystem();
             if (c.isEmpty()) {
                 // Unsupported mode, set to null (we'll catch it later)
-                t = null;
-                tcc = null;
+                tcArgs = null;
+                tcSection = null;
             }
             else {
                 // Extract (from modesFile) the test signal list (e.g. [testsignals_625_pal])
                 // This will return null if the section does not exist
-                tcc = "testsignals" + "_" + Integer.toString(lines) + "_" + c;
-                t = modesIni.getKeys(tcc);
+                tcSection = "testsignals" + "_" + Integer.toString(lines) + "_" + c;
+                tcArgs = modesIni.getKeys(tcSection);
             }
         }
         else {
-            t = null;
-            tcc = null;
+            tcArgs = null;
+            tcSection = null;
         }
-        if (t == null || tcc == null || t.length == 0) {
+        if (tcArgs == null || tcArgs.length == 0) {
             // If nothing was found, disable the test card combobox
             // Use a dummy string to preserve the length of the combobox
             // This won't be seen as the combobox is disabled
@@ -6512,8 +6485,8 @@ public class GUI extends javax.swing.JFrame {
             // Variable for storing pattern directory location
             String p = PREFS.get("testdir", hackTVDirectory);
             var sb = new StringBuilder();
-            for (String s : t) {
-                sb.append(s).append(",").append(modesIni.get(tcc, s)).append("\n");
+            for (String s : tcArgs) {
+                sb.append(s).append(",").append(modesIni.get(tcSection, s)).append("\n");
             }
             // Split each line to tcArray (backwards compatibility with old code)
             tcArray = sb.toString().split("\n");
@@ -7242,7 +7215,6 @@ public class GUI extends javax.swing.JFrame {
                 txtTeletextSource.setText(txtTeletextSource.getText().replaceAll(String.valueOf((char)34), ""));
             }
             if ((txtTeletextSource.getText()).isBlank()) {
-                tabPane.setSelectedIndex(3);
                 messageBox("Please specify a directory that contains teletext files, or a teletext archive file.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7543,7 +7515,6 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 if (!isPhilipsTestSignal()) {
-                    tabPane.setSelectedIndex(0);
                     messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
                     return null;
                 }
@@ -7564,7 +7535,6 @@ public class GUI extends javax.swing.JFrame {
             return (int) (SR * 1000000);
         }
         else {
-            tabPane.setSelectedIndex(1);
             messageBox("Please specify a valid sample rate in MHz.", JOptionPane.WARNING_MESSAGE);
             return null;
         }
@@ -7580,7 +7550,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add(Integer.toString(PixelRate));
             }
             catch (NumberFormatException nfe) {
-                tabPane.setSelectedIndex(1);
                 messageBox("Please specify a valid pixel rate in MHz.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7598,7 +7567,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add(Integer.toString(offset));
             }
             catch (NumberFormatException nfe) {
-                tabPane.setSelectedIndex(1);
                 messageBox("Please specify a valid offset in MHz.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7616,7 +7584,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add(Integer.toString(i));
             }
             else {
-                tabPane.setSelectedIndex(1);
                 messageBox("Please specify a valid deviation in MHz.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7788,7 +7755,6 @@ public class GUI extends javax.swing.JFrame {
                     else {
                         messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
                     }
-                    tabPane.setSelectedIndex(2);
                     return false;
                 }
                 else {
@@ -7801,7 +7767,6 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(2);
                 return false;  
             }
         }
@@ -7816,7 +7781,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add("0x" + txtMacChId.getText());
             }
             else {
-                tabPane.setSelectedIndex(1);
                 messageBox("Please specify a valid hexadecimal channel ID.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }            
@@ -7832,7 +7796,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add(txtGamma.getText());
             }
             else {    
-                tabPane.setSelectedIndex(2);
                 messageBox("Gamma should be a decimal value.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7848,7 +7811,6 @@ public class GUI extends javax.swing.JFrame {
                 al.add(txtOutputLevel.getText());
             }
             else {
-                tabPane.setSelectedIndex(2);
                 messageBox("Output level should be a decimal value.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7860,7 +7822,6 @@ public class GUI extends javax.swing.JFrame {
         var al = new ArrayList<String>();
         if (chkPosition.isSelected()) {
             if (!SharedInst.isNumeric(txtPosition.getText())) {
-                tabPane.setSelectedIndex(0);
                 messageBox("Please specify a valid position.", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
@@ -7883,13 +7844,11 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(2);
                 return null;
             }
         }
         else {
             messageBox(InvalidGain, JOptionPane.WARNING_MESSAGE);
-            tabPane.setSelectedIndex(2);
             return null;
         }
         return al;
@@ -7978,12 +7937,10 @@ public class GUI extends javax.swing.JFrame {
                 break;
         }
         if (!SharedInst.isNumeric(cardNumber) || keyStart == -1) {
-            tabPane.setSelectedIndex(4);
             messageBox("Card number should be exactly " + length + " digits.", JOptionPane.WARNING_MESSAGE);
             return null;
         }
         else if ((!qs) && (!SharedInst.luhnCheck(Long.valueOf(cardNumber.substring(keyStart, keyEnd))))) {
-            tabPane.setSelectedIndex(4);
             messageBox("Card number appears to be invalid (Luhn check failed).", JOptionPane.WARNING_MESSAGE);
             return null;
         }
@@ -8010,7 +7967,6 @@ public class GUI extends javax.swing.JFrame {
             return cardNumber.substring(3);
         }
         else {
-            tabPane.setSelectedIndex(4);
             messageBox("Card number should be exactly 11 digits.", JOptionPane.WARNING_MESSAGE);
             return null;
         }
@@ -8034,7 +7990,6 @@ public class GUI extends javax.swing.JFrame {
             return true;
         }
         else {
-            tabPane.setSelectedIndex(4);
             messageBox("Card number appears to be invalid (Luhn check failed).", JOptionPane.WARNING_MESSAGE);
             return false;
         }
@@ -8158,7 +8113,6 @@ public class GUI extends javax.swing.JFrame {
             case 3:
                 // If File is selected, check if the path is blank
                 if (txtOutputDevice.getText().isBlank()) {
-                    tabPane.setSelectedIndex(2);
                      messageBox("Please select an output file or change the output device.",
                              JOptionPane.WARNING_MESSAGE);
                      return null;
@@ -9067,12 +9021,11 @@ public class GUI extends javax.swing.JFrame {
                 downloadCancelled = true;
                 btnRun.setEnabled(false);
             }
-            else if ( (!chkSyntaxOnly.isSelected()) && (!Files.exists(Path.of(hackTVPath))) || ((hackTVPath.isBlank())) ) {
+            else if ( !chkSyntaxOnly.isSelected() && !Files.exists(Path.of(hackTVPath)) || hackTVPath.isBlank() ) {
                 messageBox("Unable to find hacktv. Please go to the GUI settings tab to add its location.", JOptionPane.WARNING_MESSAGE);
-                tabPane.setSelectedIndex(5);
             }
             else {
-                populateArguments("");
+                if (getHackTVHash()) populateArguments("");
             }
         }
         else {
@@ -9098,14 +9051,14 @@ public class GUI extends javax.swing.JFrame {
                 "\nUsing " + modesFileLocation + " modes file, version " + modesFileVersion +
                 "\nUsing " + bpFileLocation + " band plan file, version " + bpFileVersion +
                 "\nUsing Java Runtime Environment version " + jv +
-                "\n\nCreated" + y + " by Stephen McGarry.\n" +
+                "\n\nCopyright" + y + " Stephen McGarry.\n" +
                 "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
                 "https://github.com/steeviebops/hacktv-gui\n\n",
             "About " + APP_NAME, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
 
     private void menuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExitActionPerformed
-        System.exit(0);
+        dispose();
     }//GEN-LAST:event_menuExitActionPerformed
       
     private void txtCardNumberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCardNumberKeyTyped
@@ -9744,6 +9697,17 @@ public class GUI extends javax.swing.JFrame {
         hacktvFileChooser.setAcceptAllFileFilterUsed(true);
         int returnVal = hacktvFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String msg = "Selected file:\n"
+                    + hacktvFileChooser.getSelectedFile().toString()
+                    + "\nThis file will be executed to detect supported features."
+                    + "\nOnly continue if you trust this file."
+                    + "\n\nDo you want to continue?";
+            int q = JOptionPane.showConfirmDialog(null, msg, APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (q == JOptionPane.NO_OPTION) {
+                PREFS.remove("lasthtvdir");
+                PREFS.remove("hacktvpath");
+                return;
+            }
             // Save the chosen directory to prefs
             PREFS.put("lasthtvdir", hacktvFileChooser.getCurrentDirectory().toString());
             File file = hacktvFileChooser.getSelectedFile();
@@ -9755,7 +9719,7 @@ public class GUI extends javax.swing.JFrame {
             // and get its parent directory path
             hackTVDirectory = new File(hackTVPath).getParent();
             // Detect what were provided with
-            detectFork();
+            lblFork.setText(setForkLabel(detectFork()));
             selectModesFile();
             addTestCardOptions();
             addARCorrectionOptions();
@@ -9827,7 +9791,7 @@ public class GUI extends javax.swing.JFrame {
         if (JOptionPane.showConfirmDialog(null, "This will remove all of this application's "
                 + "saved settings and exit. Do you wish to continue?",
                 APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-            resetPreferences();
+            Shared.resetPreferences();
             this.dispose();
         }
     }//GEN-LAST:event_btnResetAllSettingsActionPerformed
