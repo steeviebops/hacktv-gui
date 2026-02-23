@@ -39,11 +39,14 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.prefs.BackingStoreException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.JComboBox;
@@ -51,6 +54,17 @@ import javax.swing.JComboBox;
 public class Shared implements Serializable {
     
     private static final long serialVersionUID = -8155770639405775482L;
+    
+    public static void resetPreferences() {
+        // Delete the preference store and everything in it
+        try {
+            GUI.PREFS.removeNode();
+            System.out.println("All preferences have been reset to defaults.");
+        }
+        catch (BackingStoreException e) {
+            System.err.println("Reset failed: " + e.getMessage());
+        }
+    }
   
     public int calculateLuhnCheckDigit(long input) {
         // Calculates a check digit for the specified input using the Luhn algorithm
@@ -292,6 +306,38 @@ public class Shared implements Serializable {
                 if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
             }
         }
+    }
+
+    public String sha256Calc(Path path) throws IOException {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            // Practically impossible on a normal JVM
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
+
+        try (InputStream in = Files.newInputStream(path)) {
+            byte[] buf = new byte[8192];
+            int read;
+            while ((read = in.read(buf)) != -1) {
+                md.update(buf, 0, read);
+            }
+        }
+
+        byte[] digest = md.digest();
+        return toHex(digest);
+    }
+
+    private String toHex(byte[] bytes) {
+        char[] hex = new char[bytes.length * 2];
+        final char[] digits = "0123456789abcdef".toCharArray();
+        for (int i = 0; i < bytes.length; i++) {
+            int v = bytes[i] & 0xFF;
+            hex[i * 2] = digits[v >>> 4];
+            hex[i * 2 + 1] = digits[v & 0x0F];
+        }
+        return new String(hex);
     }
     
 }
