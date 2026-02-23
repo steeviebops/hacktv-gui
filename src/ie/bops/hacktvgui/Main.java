@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Stephen
+ * Copyright (C) 2026 Stephen McGarry
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,10 +21,6 @@ import java.awt.HeadlessException;
 import java.util.Locale;
 import javax.swing.SwingUtilities;
 
-/**
- *
- * @author Stephen
- */
 public class Main {
     // Main method
     public static void main(String args[]) {
