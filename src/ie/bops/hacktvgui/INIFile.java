@@ -143,7 +143,11 @@ public class INIFile implements Serializable {
     }   
     
     public String[] getKeys(String section) {
-        return sections.get(section).keySet().toArray(String[]::new);
+        var sec = sections.get(section);
+        if (sec == null) {
+            return new String[0];
+        }
+        return sec.keySet().toArray(String[]::new);
     }
 
     // Setters
