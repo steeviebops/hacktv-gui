@@ -42,6 +42,7 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
@@ -72,10 +73,13 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
+import javax.swing.ComboBoxModel;
 import javax.swing.KeyStroke;
 
 public class GUI extends javax.swing.JFrame {    
@@ -112,7 +116,7 @@ public class GUI extends javax.swing.JFrame {
 
     // Declare a variable to determine the selected fork
     private boolean captainJack;
-    private boolean mattstvbarn;
+    private boolean supportsPhilipsTestSignal;
 
     // Declare Teletext-related variables that are reused across multiple subs
     private String htmlTempFile;
@@ -153,10 +157,11 @@ public class GUI extends javax.swing.JFrame {
     private ArrayList<String> scramblingKeyArray;
     private ArrayList<String> scramblingKey2Array;
     private String[] logoArray;
-    private String[] tcArray;
     private final ArrayList<String> playlistAL = new ArrayList<>();
     private ArrayList<String> uhfAL;
     private ArrayList<String> vhfAL;
+    
+    private final Map<String, Integer> testCommandToIndex = new HashMap<>();
 
     // Checkbox array for the File > New option
     private javax.swing.JCheckBox[] checkBoxes;
@@ -258,6 +263,10 @@ public class GUI extends javax.swing.JFrame {
         radLocalSource = new javax.swing.JRadioButton();
         radTest = new javax.swing.JRadioButton();
         cmbTest = new javax.swing.JComboBox<>();
+        Dimension pref = cmbTest.getPreferredSize();
+        cmbTest.setPrototypeDisplayValue(
+            new TestSignalOption("", "XXXXXXXXXXXXXXX", "", false, "")
+        );
         btnTestSettings = new javax.swing.JButton();
         chkRepeat = new javax.swing.JCheckBox();
         chkTimestamp = new javax.swing.JCheckBox();
@@ -1566,6 +1575,11 @@ public class GUI extends javax.swing.JFrame {
         lblFl2kAudio.setText("Audio mode");
 
         cmbFl2kAudio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Mono", "Stereo", "S/PDIF" }));
+        cmbFl2kAudio.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                cmbFl2kAudioMouseWheelMoved(evt);
+            }
+        });
 
         javax.swing.GroupLayout frequencyPanelLayout = new javax.swing.GroupLayout(frequencyPanel);
         frequencyPanel.setLayout(frequencyPanelLayout);
@@ -2594,15 +2608,62 @@ public class GUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-        
-    public int populateUI(String[] args) {
-        // Add a shutdown hook to run exit tasks
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                cleanupBeforeExit();
+    
+    // Main method
+    public static void main(String args[]) {
+        // If the emergency reset command is specified, remove all prefs.
+        // This is a safety net, in case any bad preferences prevent us from running.
+        // We handle this as early as possible to ensure it will work correctly.
+        if (args.length > 0) {
+            switch (args[0].toLowerCase(Locale.ENGLISH)) {
+                case "reset":
+                case "-reset":
+                case "--reset":
+                case "/reset":
+                // Reset all preferences and exit
+                Shared.resetPreferences();
+                return;                    
             }
-        });
+        }
+        // Pre-initialisation macOS tasks
+        // These need to be done before creating the GUI class instance.
+        // We'll set the dock icon later because that needs to be done after
+        // the GUI class instance is created.
+        if (System.getProperty("os.name").contains("Mac")) {
+            // Put app name in the menu bar
+            System.setProperty("apple.awt.application.name", GUI.APP_NAME);
+            // Use the Mac menu bar
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            // Set light/dark mode to current setting, seems to be broken
+            // System.setProperty("apple.awt.application.appearance", "system");
+        }
+        try {
+            SwingUtilities.invokeLater(() -> {
+                // Create GUI class instance
+                final var g = new GUI();
+                g.initUI();
+                int s = g.postInitUI(args);
+                if (s == 0) { // Exit code from postInitUI()
+                    // Prevent window from being resized below the current size
+                    g.setMinimumSize(g.getSize());
+                    g.setVisible(true);
+                }
+                else {
+                    System.exit(s);
+                }
+            });
+        }
+	catch (HeadlessException e) {
+            // Catch this error if we find we're running on a headless JRE or an
+            // OS with no GUI support (e.g. WSL or Unix without X).
+            System.err.println("A fatal error occurred while attempting to "
+                    + "initialise the window, please see details below.\n" + 
+                    e.getMessage());
+            System.exit(-1);
+        }
+    }
+    
+    public void initUI() {
         // Set application icons
         setIcons();
         // Set look and feel
@@ -2614,6 +2675,16 @@ public class GUI extends javax.swing.JFrame {
         if (lafAL.get(lafAL.size() - 1).startsWith("com.formdev.flatlaf.intellijthemes")) {
             cmbLookAndFeel.setPreferredSize(new Dimension(166, cmbLookAndFeel.getSize().height));
         }
+    }
+    
+    public int postInitUI(String[] args) {
+        // Add a shutdown hook to run exit tasks
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                cleanupBeforeExit();
+            }
+        });
         // Set the jarDir variable so we know where we're located
         jarDir = Path.of(SharedInst.getCurrentDirectory());
         // Check operating system and set OS-specific options
@@ -3499,12 +3570,12 @@ public class GUI extends javax.swing.JFrame {
         // Check if the specified path does not exist or is a directory
         if (!Files.exists(hp)) {
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "Not found";
         }
         else if (Files.isDirectory(hp)) {
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "Invalid path";    
         }
         String out;
@@ -3574,32 +3645,32 @@ public class GUI extends javax.swing.JFrame {
     private String getFork() {
         if (PREFS.get("fork", "fsphil").equals("captainjack")) {
             captainJack = true;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "captainjack";
         } else {
             captainJack = false;
-            mattstvbarn = PREFS.get("testsignals", "0").equals("1");
+            supportsPhilipsTestSignal = PREFS.get("testsignals", "0").equals("1");
             return "fsphil";
         }
     }
     
     private String setForkLabel(String fork) {
         String version = PREFS.get("hacktvversion", "");
-        if (!version.isBlank()) version = " (" + PREFS.get("hacktvversion", "") + ")";
+        if (!version.isBlank()) version = " (" + version + ")";
         Path hp = Path.of(hackTVPath);
         // Check if the specified path does not exist or is a directory
         if (!Files.exists(hp)) {
             PREFS.remove("fork");
             PREFS.remove("hash");
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "Not found";
         }
         else if (Files.isDirectory(hp)) {
             PREFS.remove("fork");
             PREFS.remove("hash");
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "Invalid path";    
         }
         if (fork.startsWith("captainjack")) {
@@ -3607,24 +3678,24 @@ public class GUI extends javax.swing.JFrame {
         } else if (fork.startsWith("fsphil")) {
             if (PREFS.get("testsignals", "0").equals("1")) {
                 captainJack = false;
-                mattstvbarn = true;
+                supportsPhilipsTestSignal = true;
                 return "Matt's TV Barn" + version;
             }
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return "fsphil" + version;
         } else {
             PREFS.remove("testsignals");
             PREFS.remove("fork");
             captainJack = false;
-            mattstvbarn = false;
+            supportsPhilipsTestSignal = false;
             return fork;
         }
     }
 
     private void fsphil() {
         // Enable test signal settings button
-        btnTestSettings.setVisible(mattstvbarn);
+        btnTestSettings.setVisible(supportsPhilipsTestSignal);
         // Disable features unsupported in fsphil's build
         if (chkTimestamp.isSelected()) chkTimestamp.doClick();
         if (chkLogo.isSelected()) chkLogo.doClick();
@@ -4068,19 +4139,12 @@ public class GUI extends javax.swing.JFrame {
         if (ImportedSource.toLowerCase(Locale.ENGLISH).startsWith("test:")) {
             radTest.doClick();
             if (captainJack) {
-                String ImportedTC = ImportedSource.replace("test:", "");
-                boolean TCFound = false;
-                if (!ImportedTC.isEmpty()) {
-                    for (int i = 0; i <= tcArray.length - 1; i++) {
-                        if ((tcArray[i].split("\\s*,\\s*")[0].toLowerCase(Locale.ENGLISH)).equals(ImportedTC)) {
-                            cmbTest.setSelectedIndex(i);
-                            TCFound = true;
-                            break;
-                        }
-                    }
-                    if (!TCFound) {
-                        invalidConfigFileValue("test card", ImportedTC);
-                    }
+                String importedTC = ImportedSource.replace("test:", "").trim().toLowerCase(Locale.ENGLISH);
+                Integer idx = testCommandToIndex.get(importedTC);
+                if (idx != null) {
+                    cmbTest.setSelectedIndex(idx);
+                } else if (!importedTC.isEmpty()) {
+                    invalidConfigFileValue("test card", importedTC);
                 }
             }
         }
@@ -4313,8 +4377,8 @@ public class GUI extends javax.swing.JFrame {
         // WSS
         if ((htvFile.getInt("hacktv", "wss")) != null) {
             Integer ImportedWSS = (htvFile.getInt("hacktv", "wss"));
-            // Only accept values between 1 and 5
-            if ((ImportedWSS > 0) && (ImportedWSS <= 5)) {
+            // Only accept values within the range of the combobox
+            if ((ImportedWSS > 0) && (ImportedWSS <= cmbWSS.getItemCount())) {
                 chkWSS.doClick();
                 // Since we increased the value by one when saving, decrease by one when loading
                 cmbWSS.setSelectedIndex(ImportedWSS - 1);
@@ -4673,17 +4737,18 @@ public class GUI extends javax.swing.JFrame {
         }
         txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
         // Philips test signal
-        String importedTS = htvFile.get("hacktv", "testsignal", "").toLowerCase(Locale.ENGLISH);
-        if (mattstvbarn) {
+        String importedTS = htvFile.get("hacktv", "testsignal", "");
+        if (supportsPhilipsTestSignal) {
             boolean TSFound = false;
             if (!importedTS.isEmpty()) {
-                for (int i = 0; i < tcArray.length; i++) {
-                    int j = tcArray[i].indexOf(",");
-                    if (j == -1) continue;
-                    if ((tcArray[i].substring(0, j).toLowerCase(Locale.ENGLISH)).equals(importedTS)) {
+                var model = cmbTest.getModel();
+                for (int i = 0; i < model.getSize(); i++) {
+                    var opt = model.getElementAt(i);
+                    if (opt != null && opt.command() != null &&
+                        importedTS.equalsIgnoreCase(opt.command())) {
+                        if (!ImportedSource.isBlank()) txtSource.setText(ImportedSource);
                         radTest.doClick();
                         cmbTest.setSelectedIndex(i);
-                        if (!ImportedSource.isBlank()) txtSource.setText(ImportedSource);
                         TSFound = true;
                         break;
                     }
@@ -4816,9 +4881,9 @@ public class GUI extends javax.swing.JFrame {
         else {
             // We'll add Philips patterns later, if any
             if ( (radTest.isSelected()) && (!isPhilipsTestSignal()) ) {
-                if ((cmbTest.isEnabled()) && (tcArray != null)) {
-                    String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-                    if (sa.length > 0) newHtv.set("hacktv", "input", "test:" + sa[0]);
+                var ts = (TestSignalOption) cmbTest.getSelectedItem();
+                if ((cmbTest.isEnabled()) && (ts.command() != null)) {
+                    newHtv.set("hacktv", "input", "test:" + ts.command());
                 }
                 else {
                     newHtv.set("hacktv", "input", "test:colourbars");
@@ -5031,15 +5096,9 @@ public class GUI extends javax.swing.JFrame {
         if (chkNICAM.isSelected()) {
             newHtv.setInt("hacktv", "nicam", 1);
         }
-        else if ( (!chkNICAM.isSelected()) && (nicamSupported) ) {
-            newHtv.setInt("hacktv", "nicam", 0);
-        }
         // A2 stereo
         if (chkA2Stereo.isSelected()) {
             newHtv.setInt("hacktv", "a2stereo", 1);
-        }
-        else if ( (!chkA2Stereo.isSelected()) && (a2Supported) ) {
-            newHtv.setInt("hacktv", "a2stereo", 0);
         }
         // Show ECMs
         if (chkShowECM.isSelected()) newHtv.setInt("hacktv", "showecm", 1);
@@ -5093,8 +5152,12 @@ public class GUI extends javax.swing.JFrame {
         }
         // Philips test signals
         if (isPhilipsTestSignal()) {
-            String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-            if (sa.length > 0) newHtv.set("hacktv", "testsignal", sa[0]);
+            var ts = (TestSignalOption) cmbTest.getSelectedItem();
+            if (ts.command().equals("colourbars")) {
+                newHtv.set("hacktv", "input", "test:colourbars");
+            } else {
+                newHtv.set("hacktv", "testsignal", ts.command());
+            }
         }
         String newFile;
         // The playlist doesn't follow a standard INI format. We just dump the
@@ -6313,23 +6376,18 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void populateWSS() {
-        var WSSModesAL = new ArrayList<String>();
-        WSSModesAL.add("auto");
-        WSSModesAL.add("4:3");
-        WSSModesAL.add("14:9 letterbox");
-        WSSModesAL.add("14:9 top");
-        WSSModesAL.add("16:9 letterbox");
-        WSSModesAL.add("16:9 top");
-        WSSModesAL.add("16:9+-letterbox");
-        WSSModesAL.add("14:9 window");
-        WSSModesAL.add("16:9");
-        // Convert to an array so we can populate
-        var WSSModes = new String[WSSModesAL.size()];
-        for(int i = 0; i < WSSModes.length; i++) {
-            WSSModes[i] = WSSModesAL.get(i);
-        } 
-        cmbWSS.removeAllItems();
-        cmbWSS.setModel(new DefaultComboBoxModel<>(WSSModes));
+        var wssOptions = new ComboBoxOption[] {
+            new ComboBoxOption("auto", "auto"),
+            new ComboBoxOption("4:3", "4:3"),
+            new ComboBoxOption("14:9-letterbox", "14:9 letterbox"),
+            new ComboBoxOption("14:9-top", "14:9 top"),
+            new ComboBoxOption("16:9-letterbox", "16:9 letterbox"),
+            new ComboBoxOption("16:9-top", "16:9 top"),
+            new ComboBoxOption("16:9+-letterbox", "16:9+-letterbox"),
+            new ComboBoxOption("14:9-window", "14:9 window"),
+            new ComboBoxOption("16:9", "16:9")
+        };
+        cmbWSS.setModel(new DefaultComboBoxModel<>(wssOptions));
         cmbWSS.setSelectedIndex(0);
     }
     
@@ -6337,19 +6395,9 @@ public class GUI extends javax.swing.JFrame {
         // Populate WSS parameters if enabled
         var al = new ArrayList<String>();
         if (chkWSS.isSelected()) {
-            var wssModes = new String[] {
-                "auto",
-                "4:3",
-                "14:9-letterbox",
-                "14:9-top",
-                "16:9-letterbox",
-                "16:9-top",
-                "16:9+-letterbox",
-                "14:9-window",
-                "16:9"
-            };
+            var m = (ComboBoxOption) cmbWSS.getSelectedItem();
             al.add("--wss");
-            al.add(wssModes[cmbWSS.getSelectedIndex()]);
+            al.add(m.value());
         }
         return al;
     }
@@ -6409,7 +6457,6 @@ public class GUI extends javax.swing.JFrame {
                         break;
                 }
             }
-
         }
         return al;
     }
@@ -6443,137 +6490,91 @@ public class GUI extends javax.swing.JFrame {
         return al;
     }
     
+    private TestSignalOption parseTestCard(String command, String value) {
+        return new TestSignalOption(command, value.trim(), "", false, "");
+    }
+    
+    private TestSignalOption parseTestSignal(String command, String value) {
+        // Parses the INI value returned from a [testsignals_*_*] section
+        String[] parts = value.split("\\s*,\\s*", -1);
+
+        String name = parts.length > 0 ? parts[0].trim() : "";
+        String file = parts.length > 1 ? parts[1].trim() : "";
+        boolean text = parts.length > 2 && "1".equals(parts[2].trim());
+        String rate = parts.length > 3 ? parts[3].trim() : "";
+
+        return new TestSignalOption(command, name, file, text, rate);
+    }
+    
+    private void disableTestCardComboBox() {
+        cmbTest.setModel(new DefaultComboBoxModel<>());
+        cmbTest.setEnabled(false);
+        cmbTest.setSelectedIndex(-1);
+    }
+    
     private void addTestCardOptions() {
-        String[] tcArgs;
-        if ((tcArray == null) || (tcArray.length == 0)) tcArray = new String[0];
-        String tcSection;
-        if (captainJack) {
-            // Extract (from modesFile) the test card list
-            tcArgs = modesIni.getKeys("testcards");
-            tcSection = "testcards";
-        }
-        else if (mattstvbarn) {
-            // PM5644/PT8631 emulation
+        String tcSection; // The INI section name
+        String[] tcKeys;  // The INI setting names
+        if (supportsPhilipsTestSignal) {
+            // PT8631 emulation
             String c = getSelectedColourSystem();
             if (c.isEmpty()) {
-                // Unsupported mode, set to null (we'll catch it later)
-                tcArgs = null;
-                tcSection = null;
-            }
-            else {
-                // Extract (from modesFile) the test signal list (e.g. [testsignals_625_pal])
-                // This will return null if the section does not exist
+                // Unsupported mode, disable the test card combobox
+                disableTestCardComboBox();
+                return;
+            } else {
+                // Get the keys from a testsignals section (e.g. [testsignals_625_pal])
+                // This will return an empty string array if the section does not exist
                 tcSection = "testsignals" + "_" + Integer.toString(lines) + "_" + c;
-                tcArgs = modesIni.getKeys(tcSection);
+                tcKeys = modesIni.getKeys(tcSection);
             }
-        }
-        else {
-            tcArgs = null;
-            tcSection = null;
-        }
-        if (tcArgs == null || tcArgs.length == 0) {
-            // If nothing was found, disable the test card combobox
-            // Use a dummy string to preserve the length of the combobox
-            // This won't be seen as the combobox is disabled
-            String[] n = {"No items found"};
-            cmbTest.setEnabled(false);
-            cmbTest.removeAllItems();
-            cmbTest.setModel(new DefaultComboBoxModel<>(n));
-            cmbTest.setSelectedIndex(-1);
-        }
-        else {
-            // Variable for storing pattern directory location
-            String p = PREFS.get("testdir", hackTVDirectory);
-            var sb = new StringBuilder();
-            for (String s : tcArgs) {
-                sb.append(s).append(",").append(modesIni.get(tcSection, s)).append("\n");
+        } else {
+            // Get the test card list
+            tcSection = "testcards";
+            tcKeys = modesIni.getKeys(tcSection);
+        }        
+        if (tcKeys.length == 0) {
+            // Nothing was found, disable the test card combobox
+            disableTestCardComboBox();
+        } else {           
+            var options = new ArrayList<TestSignalOption>();
+            for (String key : tcKeys) {
+                String value = modesIni.get(tcSection, key, "");
+                if (value.isBlank()) continue;
+
+                TestSignalOption opt;
+                if (tcSection.equals("testcards")) {
+                    opt = parseTestCard(key, value);
+                } else {
+                    opt = parseTestSignal(key, value);
+                }
+                options.add(opt);
             }
-            // Split each line to tcArray (backwards compatibility with old code)
-            tcArray = sb.toString().split("\n");
-            /* tcArray contains five pieces of data, separated by commas:
-               [0]      [1]           [2]               [3]                 [4]
-               Command, Display name, Pattern filename, Text/clock support, Sample rate
-             */
-            String[] tcNames;
-            if (captainJack) {
-                // Populate tcNames by adding element 1 of tcArray
-                tcNames = new String[tcArray.length];
-                for (int i = 0; i < tcArray.length; i++) {
-                    String[] sa = tcArray[i].split(",");
-                    if (sa.length > 1) tcNames[i] = sa[1];
+            // Remove any items where the pattern file is missing
+            if (supportsPhilipsTestSignal) {
+                String dir = PREFS.get("testdir", hackTVDirectory);
+                if (!Files.exists(Paths.get(dir, "pm8546g.bin"))) {
+                    // Remove everything, this file is a prerequisite
+                    options.clear();
+                } else {
+                    options.removeIf(o ->
+                        o.patternFilename() != null &&
+                        !o.patternFilename().isBlank() &&
+                        !Files.exists(Paths.get(dir, o.patternFilename()))
+                    );    
                 }
             }
-            else if ((mattstvbarn) && (Files.exists(Path.of(p + File.separator + "pm8546g.bin")))) {
-                // PM5644/PT8631 emulation continued
-                var tal = new ArrayList<String>();
-                for (String s : tcArray) {
-                    // Split tcArray to another array and check the existence of
-                    // the third element of each item (the filename).
-                    String[] sa = s.split("\\s*,\\s*");
-                    if (sa.length > 2) {
-                        if (Files.exists(Path.of(p + File.separator + sa[2]))) {
-                            // Add command line argument to temp tal ArrayList
-                            tal.add(sa[0]);
-                        }
-                        else {
-                            System.err.println("Unable to add test pattern " + sa[0] + ".\n"
-                                    + "The file " + sa[2] + " could not be found.");
-                        }
-                    }
-                    else {
-                        // Treat this as an internal hacktv pattern (not emulated Philips)
-                        // Add command line argument to temp tal ArrayList
-                        tal.add(sa[0]);
-                    } 
-                }
-                // If the number of elements in tcArray and tal do not match,
-                // then something was removed.
-                // We need to repopulate tcArray with the correct data.
-                if (tcArray.length != tal.size()) {
-                    tcArray = new String[tal.size()];
-                    for (int i = 0; i < tal.size(); i++) {
-                        // Query the modes file to get the missing parameters back
-                        String s = modesIni.get(
-                                "testsignals" + "_" + Integer.toString(lines) + "_" + getSelectedColourSystem(),
-                                tal.get(i),
-                                ""
-                        );
-                        if (!s.isBlank()) tcArray[i] = tal.get(i) + "," + s;
-                    }
-                }
-                // Populate tcNames by adding element 1 of tcArray
-                tcNames = new String[tcArray.length];
-                for (int i = 0; i < tcArray.length; i++) {
-                    String[] sa = tcArray[i].split("\\s*,\\s*");
-                    if (sa.length > 1) tcNames[i] = sa[1];
-                }
+            // Cache the options to a hashmap we can check later
+            testCommandToIndex.clear();
+            for (int i = 0; i < options.size(); i++) {
+                testCommandToIndex.put(options.get(i).command().toLowerCase(Locale.ENGLISH), i);
             }
-            else {
-                // Initialise empty array
-                tcNames = new String[0];
-            }
-            // Populate cmbTest combobox
-            if ((tcNames.length) > 0) {
-                cmbTest.removeAllItems();
-                cmbTest.setModel(new DefaultComboBoxModel<>(tcNames));
-                if (!radTest.isSelected()) {
-                    cmbTest.setSelectedIndex(-1);
-                }
-                else {
-                    cmbTest.setSelectedIndex(0);
-                }
-            }
-            else {
-                // If nothing was found, disable the test card combobox
-                // Use a dummy string to preserve the length of the combobox
-                // This won't be seen as the combobox is disabled
-                tcArray = new String[]{};
-                String[] n = {"No items found"};
-                cmbTest.setEnabled(false);
-                cmbTest.removeAllItems();
-                cmbTest.setModel(new DefaultComboBoxModel<>(n));
-                cmbTest.setSelectedIndex(-1);
-            }
+            // Apply the model to the combobox
+            DefaultComboBoxModel<TestSignalOption> model = new DefaultComboBoxModel<>();
+            for (TestSignalOption o : options) model.addElement(o);
+            cmbTest.setModel(model);
+            // Hide the first entry if the radio button is not selected
+            if (!radTest.isSelected()) cmbTest.setSelectedIndex(-1);
         }
     }
     
@@ -6595,15 +6596,14 @@ public class GUI extends javax.swing.JFrame {
     private ArrayList<String> checkTestCard() {
         var al = new ArrayList<String>();
         if (cmbTest.isEnabled()) {
+            var ts = (TestSignalOption) cmbTest.getSelectedItem();
             if (captainJack) {
-                String[] sa = tcArray[cmbTest.getSelectedIndex()].split(",");
-                if (!sa[0].isBlank()) al.add("test:" + sa[0]);
+                al.add("test:" + ts.command());
             }
-            else if (mattstvbarn) {
-                String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-                if (sa[0].equals("colourbars")) {
+            else if (supportsPhilipsTestSignal) {
+                if (ts.command().equals("colourbars")) {
                     // Use internal hacktv bars rather than the Philips one
-                    if (!playlistAL.contains("test:" + sa[0])) al.add("test:" + sa[0]);
+                    if (!playlistAL.contains("test:" + ts.command())) al.add("test:" + ts.command());
                     return al;
                 }
                 else if (isPhilipsTestSignal()) {
@@ -6631,9 +6631,9 @@ public class GUI extends javax.swing.JFrame {
                     }
                     // Add test signal parameters
                     al.add("--testsignal");
-                    al.add(sa[0]);
+                    al.add(ts.command());
                     // Check if the selected pattern supports text insertion
-                    if ((sa.length >= 3) && (sa[3].equals("1"))) {
+                    if (ts.textInsertSupported()) {
                         String t1 = PREFS.get("philipstext1", "");
                         String t2 = PREFS.get("philipstext2", "");
                         // Populate text fields and clock/date
@@ -6673,11 +6673,12 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private boolean isPhilipsTestSignal() {
-        if (!mattstvbarn) return false;
+        if (!supportsPhilipsTestSignal) return false;
         if (cmbTest.getSelectedIndex() == -1) return false;
-        String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+        var ts = (TestSignalOption) cmbTest.getSelectedItem();
         String d = PREFS.get("testdir", hackTVDirectory);
-        return ((sa.length > 3) && (Files.exists(Path.of(d + File.separator + sa[2]))));
+        if (!Files.exists(Paths.get(d, "pm8546g.bin"))) return false;
+        return Files.exists(Paths.get(d, ts.patternFilename()));
     }
     
     private String getTCSampleRate() {
@@ -6685,9 +6686,9 @@ public class GUI extends javax.swing.JFrame {
         // Default sample rate (if not defined) is 13.5 MHz
         String sr = "13.5";
         // Check if the sample rate has been overriden for the selected pattern
-        String sa[] = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-        if ((sa.length == 5) && (SharedInst.isNumeric(sa[4]))) {
-            return sa[4];
+        var ts = (TestSignalOption) cmbTest.getSelectedItem();
+        if (SharedInst.isNumeric(ts.sampleRate())) {
+            return ts.sampleRate();
         }
         else {
             return sr;
@@ -7003,8 +7004,8 @@ public class GUI extends javax.swing.JFrame {
                     s = Integer.toString(i);
                     break;
             }
-            String u = modesIni.get(mode, "uhf" + s, "0").toLowerCase(Locale.ENGLISH);
-            if (!u.equals("0")) {
+            String u = modesIni.get(mode, "uhf" + s, "0");
+            if (!u.equalsIgnoreCase("0")) {
                 // If the UHF radio button label was renamed, set it back
                 if (radUHF.getText().equals("Satellite")) radUHF.setText("UHF");
                 sat = false;
@@ -7012,8 +7013,8 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Check if any satellite band plans are defined
-                u = modesIni.get(mode, "sat" + s, "0").toLowerCase(Locale.ENGLISH);
-                if (!u.equals("0")) {
+                u = modesIni.get(mode, "sat" + s, "0");
+                if (!u.equalsIgnoreCase("0")) {
                     // Rename the UHF radio button label to Satellite instead
                     radUHF.setText("Satellite");
                     sat = true;
@@ -7039,8 +7040,8 @@ public class GUI extends javax.swing.JFrame {
                     t = Integer.toString(j);
                     break;
             }
-            String v = modesIni.get(mode, "vhf" + t, "0").toLowerCase(Locale.ENGLISH);
-            if (!v.equals("0")) {
+            String v = modesIni.get(mode, "vhf" + t, "0");
+            if (!v.equalsIgnoreCase("0")) {
                 vhfAL.add(v);
             }
             else {
@@ -7130,8 +7131,8 @@ public class GUI extends javax.swing.JFrame {
                     return false;
                 }
                 for (String s : l) {
-                    String m = modesIni.get(s, "modulation", "").toLowerCase(Locale.ENGLISH);
-                    if ((m.equals("vsb")) || (m.equals("fm"))) {
+                    String m = modesIni.get(s, "modulation", "");
+                    if ((m.equalsIgnoreCase("vsb")) || (m.equalsIgnoreCase("fm"))) {
                         cmbMode.setSelectedIndex(l.indexOf(s));
                         return true;
                     }
@@ -8342,8 +8343,8 @@ public class GUI extends javax.swing.JFrame {
         allArgs.add("-m");
         allArgs.add(mode);
         // Only add frequency for HackRF (not in baseband mode) or SoapySDR
-        String mod = (modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH));
-        if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (!mod.equals("baseband"))) ||
+        String mod = (modesIni.get(mode, "modulation", ""));
+        if ( ((cmbOutputDevice.getSelectedIndex() == 0) && (!mod.equalsIgnoreCase("baseband"))) ||
                 (cmbOutputDevice.getSelectedIndex() == 1) ) {
             if (!checkCustomFrequency()) return;
             long f = calculateFrequency(frequency, false);
@@ -8546,7 +8547,7 @@ public class GUI extends javax.swing.JFrame {
             String InputSource = checkInput();
             if (InputSource == null) return;
             // Add test card options if defined
-            if (radTest.isSelected()) {
+            if (playlistAL.isEmpty() && radTest.isSelected()) {
                 if (checkTestCard() != null) {
                     allArgs.addAll(checkTestCard());
                 }
@@ -9808,7 +9809,7 @@ public class GUI extends javax.swing.JFrame {
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
         String ModeChanged = "The selected video mode has been changed "
                 + "because this output device does not support it. Please select another mode.";
-        boolean bb = modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH).equals("baseband");
+        boolean bb = modesIni.get(mode, "modulation", "").equalsIgnoreCase("baseband");
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
         switch(cmbOutputDevice.getSelectedIndex()) {
             // hackrf
@@ -10091,8 +10092,10 @@ public class GUI extends javax.swing.JFrame {
             }
             if (cmbTest.isEnabled()) {
                 // Add the selected test card
-                String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-                if (sa.length > 0) playlistAL.add("test:" + sa[0]);
+                var ts = (TestSignalOption) cmbTest.getSelectedItem();
+                playlistAL.add("test:" + ts.command());
+                /*String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
+                if (sa.length > 0) playlistAL.add("test:" + sa[0]);*/
             }
             else {
                 // Add the test card
@@ -10121,13 +10124,22 @@ public class GUI extends javax.swing.JFrame {
         int[] ia = lstPlaylist.getSelectedIndices();
         // If only one item was selected, put it back in the source box
         if (ia.length == 1) {
+            String item = playlistAL.get(ia[0]);
+
             if (radLocalSource.isSelected()) {
-                txtSource.setText(playlistAL.get(ia[0]));
+                txtSource.setText(item);
             }
-            else if ((radTest.isSelected()) && cmbTest.isEnabled()) {
-                for (int i = 0; i < tcArray.length; i++) {
-                    if (tcArray[i].equals(playlistAL.get(ia[0]).substring(5))) {
-                        cmbTest.setSelectedIndex(i);
+            else if (radTest.isSelected() && cmbTest.isEnabled()) {
+                if (item != null && item.startsWith("test:")) {
+                    String cmd = item.substring(5).trim(); // after "test:"
+
+                    ComboBoxModel<TestSignalOption> model = cmbTest.getModel();
+                    for (int i = 0; i < model.getSize(); i++) {
+                        TestSignalOption opt = model.getElementAt(i);
+                        if (opt != null && opt.command() != null && opt.command().equalsIgnoreCase(cmd)) {
+                            cmbTest.setSelectedIndex(i);
+                            break;
+                        }
                     }
                 }
             }
@@ -10740,7 +10752,7 @@ public class GUI extends javax.swing.JFrame {
             chkSVideo.setEnabled(false);
         }
         else {
-            if ( (modesIni.get(mode, "modulation", "vsb").toLowerCase(Locale.ENGLISH).equals("baseband")) &&
+            if ( (modesIni.get(mode, "modulation", "vsb").equalsIgnoreCase("baseband")) &&
                 ( (cmbOutputDevice.getSelectedIndex() == 2)  ||
                 (cmbOutputDevice.getSelectedIndex() == 3) ) &&
                 ( (radPAL.isSelected()) || (radNTSC.isSelected()) ||
@@ -10791,7 +10803,7 @@ public class GUI extends javax.swing.JFrame {
         }
         else {
             PREFS.remove("hackdac");
-            if (modesIni.get(mode, "modulation", "").toLowerCase(Locale.ENGLISH).equals("baseband")) checkBasebandSupport();
+            if (modesIni.get(mode, "modulation", "").equalsIgnoreCase("baseband")) checkBasebandSupport();
         }
     }//GEN-LAST:event_chkHackDACActionPerformed
 
@@ -10809,6 +10821,10 @@ public class GUI extends javax.swing.JFrame {
         // Show tooltip as the friendly name may be longer than the combobox
         cmbLookAndFeel.setToolTipText(cmbLookAndFeel.getItemAt(cmbLookAndFeel.getSelectedIndex()));
     }//GEN-LAST:event_cmbLookAndFeelMouseEntered
+
+    private void cmbFl2kAudioMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbFl2kAudioMouseWheelMoved
+        SharedInst.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbFl2kAudio);
+    }//GEN-LAST:event_cmbFl2kAudioMouseWheelMoved
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel additionalOptionsPanel;
@@ -10898,8 +10914,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbScramblingType;
     private javax.swing.JComboBox<String> cmbSecamIdLines;
     private javax.swing.JComboBox<String> cmbSysterPermTable;
-    private javax.swing.JComboBox<String> cmbTest;
-    private javax.swing.JComboBox<String> cmbWSS;
+    private javax.swing.JComboBox<TestSignalOption> cmbTest;
+    private javax.swing.JComboBox<ComboBoxOption> cmbWSS;
     private javax.swing.JFileChooser configFileChooser;
     private javax.swing.JPanel consoleOutputPanel;
     private javax.swing.JScrollPane consoleScrollPane;
