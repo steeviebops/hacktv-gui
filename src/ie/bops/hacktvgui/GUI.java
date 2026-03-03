@@ -4171,7 +4171,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else {
-            if ( (!ImportedSource.endsWith(".m3u")) || (!ImportedSource.endsWith(".m3u8")) ) txtSource.setText(ImportedSource);
+            if ( !ImportedSource.endsWith(".m3u") && !ImportedSource.endsWith(".m3u8") ) txtSource.setText(ImportedSource);
         }
         // Frequency or channel number
         if ( ((cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) && (!bb) ) {
@@ -4361,7 +4361,7 @@ public class GUI extends javax.swing.JFrame {
         }
         // Interlace
         if (htvFile.getBoolean("hacktv", "interlace")) {
-            chkTimestamp.doClick();
+            chkInterlace.doClick();
         }
         // Teletext
         String ImportedTeletext = htvFile.get("hacktv", "teletext", "");
