@@ -213,18 +213,24 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
 
     private void download(int fork) {
         // Downloads the latest pre-compiled Windows build from my build server
+        String arch;
+        if (System.getProperty("os.arch").equals("aarch64")) {
+            arch = "arm64/";
+        } else {
+            arch = "";
+        }
         switch (fork) {
             case 0:
                 // fsphil download
-                selection = "https://download.bops.ie/hacktv/fsphil.zip";
+                selection = "https://download.bops.ie/hacktv/" + arch + "fsphil.zip";
                 break;
             case 1:
                 // Captain Jack download
-                selection = "https://download.bops.ie/hacktv/captainjack.zip";
+                selection = "https://download.bops.ie/hacktv/" + arch + "captainjack.zip";
                 break;
             case 2:
                 // Matt's TV Barn (inaxeon)
-                selection = "https://download.bops.ie/hacktv/mattstvbarn.zip";
+                selection = "https://download.bops.ie/hacktv/" + arch + "mattstvbarn.zip";
                 break;
             default:
                 break;

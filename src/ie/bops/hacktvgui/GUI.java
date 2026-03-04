@@ -263,7 +263,6 @@ public class GUI extends javax.swing.JFrame {
         radLocalSource = new javax.swing.JRadioButton();
         radTest = new javax.swing.JRadioButton();
         cmbTest = new javax.swing.JComboBox<>();
-        Dimension pref = cmbTest.getPreferredSize();
         cmbTest.setPrototypeDisplayValue(
             new TestSignalOption("", "XXXXXXXXXXXXXXX", "", false, "")
         );
@@ -456,6 +455,9 @@ public class GUI extends javax.swing.JFrame {
         chkLocalModes = new javax.swing.JCheckBox();
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
+        cmbLookAndFeel.setPrototypeDisplayValue(
+            new String("XXXXXXXXXXXXXXXXXXXX")
+        );
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
@@ -623,7 +625,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbLogo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbLogo.setEnabled(false);
         cmbLogo.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -650,7 +651,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbARCorrection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbARCorrection.setEnabled(false);
         cmbARCorrection.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -2690,6 +2690,8 @@ public class GUI extends javax.swing.JFrame {
         // Check operating system and set OS-specific options
         if (System.getProperty("os.name").contains("Windows")) {
             runningOnWindows = true;
+            String arch = System.getProperty("os.arch");
+            btnDownloadHackTV.setVisible(arch.equals("amd64") || arch.equals("aarch64"));
             defaultHackTVPath = System.getProperty("user.dir") + File.separator + "hacktv.exe";
         }
         else {
@@ -3552,8 +3554,8 @@ public class GUI extends javax.swing.JFrame {
                         + "Do you want to continue?";
                 int q = JOptionPane.showConfirmDialog(null, msg, APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (q == JOptionPane.YES_OPTION) {
-                    // Update saved hash amd continue
-                    PREFS.put("hash", fileHash);
+                    // Redetect the selected file
+                    detectFork();
                     return true;
                 }
                 // Stop execution
@@ -3936,6 +3938,8 @@ public class GUI extends javax.swing.JFrame {
                 iniFile = Files.readString(SourceFile.toPath(), StandardCharsets.UTF_8);
                 // Remove a UTF-8 BOM if it exists
                 iniFile = iniFile.replaceAll("\\A\uFEFF", "");
+                // Remove any Windows-style line breaks
+                iniFile = iniFile.replaceAll("\r\n", "\n");
                 htvFile.load(new StringReader(iniFile));
             }
             else {
@@ -6603,7 +6607,7 @@ public class GUI extends javax.swing.JFrame {
             else if (supportsPhilipsTestSignal) {
                 if (ts.command().equals("colourbars")) {
                     // Use internal hacktv bars rather than the Philips one
-                    if (!playlistAL.contains("test:" + ts.command())) al.add("test:" + ts.command());
+                    al.add("test:colourbars");
                     return al;
                 }
                 else if (isPhilipsTestSignal()) {
@@ -7518,8 +7522,10 @@ public class GUI extends javax.swing.JFrame {
                 if (!isPhilipsTestSignal()) {
                     messageBox("Please specify an input file to broadcast or choose the test card option.", JOptionPane.WARNING_MESSAGE);
                     return null;
-                }
-                else {
+                } else if (((TestSignalOption) cmbTest.getSelectedItem()).command().equals("colourbars")) {
+                    // Return an empty string on standard hacktv bars, this is set elsewhere
+                    return "";
+                } else {
                     // No file defined, return "test" to play standard GLITS tone
                     return "test";
                 }
