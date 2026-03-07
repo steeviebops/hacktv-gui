@@ -183,7 +183,7 @@ public class Shared implements Serializable {
         try (var jar = new JarFile(jarFilePath)) {
             Enumeration<JarEntry> enumEntries = jar.entries();
             while (enumEntries.hasMoreElements()) {
-                JarEntry file = (JarEntry) enumEntries.nextElement();
+                JarEntry file = enumEntries.nextElement();
                 if (file.getName().equals(classFilePath.substring(1))) {
                     long time=file.getTime();
                     return time==-1?null: new Date(time);
