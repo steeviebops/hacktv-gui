@@ -17,28 +17,28 @@
  */
 package ie.bops.hacktvgui;
 
-public final class ComboBoxOption {
+// Class for comboboxes storing <Long, String> instead of <String, String>
+// Avoids the complexity of explicit type casting everywhere if using generics
+public final class ComboBoxOptionLong {
     
-    private final String value;
+    private final Long value;
     private final String label;
 
-    public ComboBoxOption(String value, String label) {
-        this.value = value == null ? "" : value;
+    public ComboBoxOptionLong(Long value, String label) {
+        this.value = value;
         this.label = label == null ? "" : label;
     }
-    public String value() { return value; }
+
+    public Long value() { return value; }
     public String label() { return label; }
-    
-    @Override
-    public String toString() {
-        return label;
-    }
-    
+
+    @Override public String toString() { return label; }
+        
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof ComboBoxOption)) return false;
-        ComboBoxOption other = (ComboBoxOption) obj;
+        if (!(obj instanceof ComboBoxOptionLong)) return false;
+        ComboBoxOptionLong other = (ComboBoxOptionLong) obj;
         return value.equals(other.value);
     }
 

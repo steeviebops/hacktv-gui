@@ -92,9 +92,8 @@ public class GUI extends javax.swing.JFrame {
     // Boolean used for Microsoft Windows detection and handling
     private boolean runningOnWindows;
     
-    // Look and feel arraylist
-    private ArrayList<String> lafAL;
-    int defaultLaf;
+    // Look and feel
+    String defaultLaf;
     
     // String to set the directory where this application's JAR is located
     private Path jarDir;
@@ -146,20 +145,14 @@ public class GUI extends javax.swing.JFrame {
     
     // Declare combobox arrays and ArrayLists
     // These are used to store secondary information (frequencies, parameters, etc)
-    private long[] frequencyArray;
     private String[] palModeArray;
     private String[] ntscModeArray;
     private String[] secamModeArray;
     private String[] otherModeArray;
     private String[] macModeArray;
-    private String[] channelArray;
-    private ArrayList<String> scramblingTypeArray;
-    private ArrayList<String> scramblingKeyArray;
-    private ArrayList<String> scramblingKey2Array;
-    private String[] logoArray;
     private final ArrayList<String> playlistAL = new ArrayList<>();
-    private ArrayList<String> uhfAL;
-    private ArrayList<String> vhfAL;
+    private final ArrayList<String> uhfAL = new ArrayList<>();
+    private final ArrayList<String> vhfAL = new ArrayList<>();
     
     private final Map<String, Integer> testCommandToIndex = new HashMap<>();
 
@@ -194,11 +187,6 @@ public class GUI extends javax.swing.JFrame {
     // Declare variables used for storing parameters
     private String mode = "";
     private long frequency;
-    private String scramblingType1 = "";
-    private String scramblingKey1 = "";
-    private String scramblingType2 = "";
-    private String scramblingKey2 = "";
-    private int dualVC;
     private boolean sat;
     
     // Default LNB local oscillator frequency in GHz
@@ -263,9 +251,6 @@ public class GUI extends javax.swing.JFrame {
         radLocalSource = new javax.swing.JRadioButton();
         radTest = new javax.swing.JRadioButton();
         cmbTest = new javax.swing.JComboBox<>();
-        cmbTest.setPrototypeDisplayValue(
-            new TestSignalOption("", "XXXXXXXXXXXXXXX", "", false, "")
-        );
         btnTestSettings = new javax.swing.JButton();
         chkRepeat = new javax.swing.JCheckBox();
         chkTimestamp = new javax.swing.JCheckBox();
@@ -455,9 +440,6 @@ public class GUI extends javax.swing.JFrame {
         chkLocalModes = new javax.swing.JCheckBox();
         lblLookAndFeel = new javax.swing.JLabel();
         cmbLookAndFeel = new javax.swing.JComboBox<>();
-        cmbLookAndFeel.setPrototypeDisplayValue(
-            new String("XXXXXXXXXXXXXXXXXXXX")
-        );
         cmbNMSCeefaxRegion = new javax.swing.JComboBox<>();
         lblNMSCeefaxRegion = new javax.swing.JLabel();
         chkNoUpdateCheck = new javax.swing.JCheckBox();
@@ -558,6 +540,7 @@ public class GUI extends javax.swing.JFrame {
         sourceSelectPanel.add(radTest, gridBagConstraints);
 
         cmbTest.setEnabled(false);
+        cmbTest.setPrototypeDisplayValue(new TestSignalOption("", "XXXXXXXXXXXXXXX", "", false, ""));
         cmbTest.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbTestMouseWheelMoved(evt);
@@ -1574,7 +1557,6 @@ public class GUI extends javax.swing.JFrame {
 
         lblFl2kAudio.setText("Audio mode");
 
-        cmbFl2kAudio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Mono", "Stereo", "S/PDIF" }));
         cmbFl2kAudio.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbFl2kAudioMouseWheelMoved(evt);
@@ -1637,7 +1619,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(frequencyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(additionalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(148, Short.MAX_VALUE))
+                .addContainerGap(168, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Output", outputTab);
@@ -1836,7 +1818,6 @@ public class GUI extends javax.swing.JFrame {
 
         scramblingPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Scrambling options"));
 
-        cmbScramblingType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingType.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbScramblingTypeMouseWheelMoved(evt);
@@ -1848,7 +1829,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbScramblingKey1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingKey1.setEnabled(false);
         cmbScramblingKey1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -1861,16 +1841,10 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        cmbScramblingKey2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
         cmbScramblingKey2.setEnabled(false);
         cmbScramblingKey2.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbScramblingKey2MouseWheelMoved(evt);
-            }
-        });
-        cmbScramblingKey2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbScramblingKey2ActionPerformed(evt);
             }
         });
 
@@ -1957,6 +1931,7 @@ public class GUI extends javax.swing.JFrame {
         chkScrambleAudio.setEnabled(false);
 
         cmbSysterPermTable.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default", "1", "2" }));
+        cmbSysterPermTable.setSelectedIndex(-1);
         cmbSysterPermTable.setEnabled(false);
         cmbSysterPermTable.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -2140,7 +2115,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(scramblingTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scramblingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(99, Short.MAX_VALUE))
+                .addContainerGap(101, Short.MAX_VALUE))
         );
 
         tabPane.addTab("Scrambling", scramblingTab);
@@ -2278,6 +2253,7 @@ public class GUI extends javax.swing.JFrame {
 
         lblLookAndFeel.setText("Theme");
 
+        cmbLookAndFeel.setPrototypeDisplayValue(new ComboBoxOption("", "XXXXXXXXXXXXXXXXXXXX"));
         cmbLookAndFeel.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 cmbLookAndFeelMouseWheelMoved(evt);
@@ -2384,7 +2360,7 @@ public class GUI extends javax.swing.JFrame {
                 .addComponent(generalSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addComponent(resetSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addContainerGap(63, Short.MAX_VALUE))
         );
 
         tabPane.addTab("GUI settings", settingsTab);
@@ -2652,8 +2628,7 @@ public class GUI extends javax.swing.JFrame {
                     System.exit(s);
                 }
             });
-        }
-	catch (HeadlessException e) {
+        } catch (HeadlessException e) {
             // Catch this error if we find we're running on a headless JRE or an
             // OS with no GUI support (e.g. WSL or Unix without X).
             System.err.println("A fatal error occurred while attempting to "
@@ -2666,15 +2641,12 @@ public class GUI extends javax.swing.JFrame {
     public void initUI() {
         // Set application icons
         setIcons();
-        // Set look and feel
-        setLaf();
+        // Get available look and feel options
+        var laf = getLaf();
         // Initialise Swing components
         initComponents();
-        // If the IntelliJ themes are installed, limit the size of the Theme combobox
-        // This prevents the combobox from reducing the size of the console pane
-        if (lafAL.get(lafAL.size() - 1).startsWith("com.formdev.flatlaf.intellijthemes")) {
-            cmbLookAndFeel.setPreferredSize(new Dimension(166, cmbLookAndFeel.getSize().height));
-        }
+        // Populate look and feel combobox using the laf variable
+        populateLaf(laf);
     }
     
     public int postInitUI(String[] args) {
@@ -2730,6 +2702,7 @@ public class GUI extends javax.swing.JFrame {
         populateVideoModes();
         addARCorrectionOptions();
         populateWSS();
+        addFl2kAudioOptions();
         addOutputDevices();
         addCeefaxRegions();
         if (captainJack) {
@@ -2738,8 +2711,6 @@ public class GUI extends javax.swing.JFrame {
         else {
             fsphil();
         }
-        // Populate the look and feel combobox
-        populateLafList();
         // Set default values when form loads
         radLocalSource.doClick();
         if (!selectDefaultMode()) return 4;
@@ -2880,20 +2851,45 @@ public class GUI extends javax.swing.JFrame {
         };
     }
     
-    private void setLaf() {
-        lafAL = new ArrayList<>();
+    private ArrayList<ComboBoxOption> getLaf() {
+        // Get the available look and feels
+        // This runs before the UI components are defined, so it will return
+        // an ArrayList that can be used after the components are initialised.
+        int defaultIndex = -1;
+        // Define new ArrayLists for the various types
+        // Standard JRE look and feels
+        var standardLaf = new ArrayList<ComboBoxOption>();
+        // FlatLaf themes
+        var flCore = new ArrayList<String>();
+        var flCorev3 = new ArrayList<String>();
+        var flIj = new ArrayList<String>();
+        var flIjm = new ArrayList<String>();
+        // Temporary integer for default look and feel index
+        int i = 0;
+        // Boolean for GTK+ theme detection
+        boolean gtk = false;
         UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
             // Get the implementation class for the look and feel
             // Don't add the GTK+ theme on Linux, it renders very poorly and is 
             // the default on many distros.
             if (!lookAndFeel.getClassName().equals("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")){
-                lafAL.add(lookAndFeel.getClassName());
+                standardLaf.add(new ComboBoxOption(lookAndFeel.getClassName(), lookAndFeel.getName()));
+            } else {
+                gtk = true;
             }
             // Is this the system default?
-            if (UIManager.getSystemLookAndFeelClassName().equals(lafAL.get(lafAL.size() - 1))) {
-                defaultLaf = lafAL.size() - 1;
+            if (UIManager.getSystemLookAndFeelClassName().equals(lookAndFeel.getClassName())) {
+                defaultLaf = lookAndFeel.getClassName();
+                defaultIndex = i;
+            } else {
+                i++;
             }
+        }
+        if (gtk) {
+            // Use Metal as default
+            defaultLaf = "javax.swing.plaf.metal.MetalLookAndFeel";
+            defaultIndex = standardLaf.indexOf(new ComboBoxOption(defaultLaf, ""));
         }
         // Use normal fonts on Metal look and feel, rather than bold
         UIManager.put("swing.boldMetal", false);
@@ -2911,10 +2907,9 @@ public class GUI extends javax.swing.JFrame {
         }
         if (flatLaf) {
             // Load embedded flatlaf.ini
-            // Also sets FlatLaf system properties
-            boolean flConf = loadFlatLafINI(true);
-            // Add the look and feels
-            if (flConf) lafAL.addAll(parseThemesINI("core-themes", false));
+            boolean flConf = loadFlatLafINI();
+            if (!flConf) return standardLaf;
+            flCore.addAll(Arrays.asList(flIni.getKeys("core-themes")));
             // Version 3?
             boolean v3;
             try {
@@ -2924,9 +2919,9 @@ public class GUI extends javax.swing.JFrame {
             catch (ClassNotFoundException e) {
                 v3 = false;
             }
-            if (v3 && flConf) {
+            if (v3) {
                 // Add FlatLaf v3 themes
-                lafAL.addAll(parseThemesINI("core-themes-v3", false));
+                flCorev3.addAll(Arrays.asList(flIni.getKeys("core-themes-v3")));
             }
             // IntelliJ themes?
             boolean ij;
@@ -2937,58 +2932,32 @@ public class GUI extends javax.swing.JFrame {
             catch (ClassNotFoundException e) {
                 ij = false;
             }
-            if (ij && flConf) {
-                // Read the IntellJ themes from flConf
-                lafAL.addAll(parseThemesINI("intellij-themes", false));
-                lafAL.addAll(parseThemesINI("materialthemeuilite", false));
+            if (ij) {
+                // Read the IntellJ themes from flIni
+                flIj.addAll(Arrays.asList(flIni.getKeys("intellij-themes")));
+                flIjm.addAll(Arrays.asList(flIni.getKeys("materialthemeuilite")));
             }
+            standardLaf.addAll(addFlatLafThemes(flCore, "core-themes"));
+            standardLaf.addAll(addFlatLafThemes(flCorev3, "core-themes-v3"));
+            standardLaf.addAll(addFlatLafThemes(flIj, "intellij-themes"));
+            standardLaf.addAll(addFlatLafThemes(flIjm, "materialthemeuilite"));
         }
-        // Safeguard if the LookAndFeel preference is out of bounds
-        int v = PREFS.getInt("lookandfeel", defaultLaf);
-        if ((v >= (lafAL.size())) || (v < 0)) {
-            // Use default L&F and reset preference
-            System.out.println("Specified look and feel not found, reverting to default.");
-            changeLaf(defaultLaf);
-            PREFS.putInt("lookandfeel", defaultLaf);
+        // Safeguard if the lookandfeel preference is out of bounds
+        int v = PREFS.getInt("lookandfeel", defaultIndex);
+        if (v >= standardLaf.size() || v < 0) {
+            // Use default look and feel, and reset preference
+            System.err.println("Specified look and feel not found, reverting to default.");
+            PREFS.putInt("lookandfeel", defaultIndex);
+            var fr = (ComboBoxOption) standardLaf.get(defaultIndex);
+            setFirstRunLaf(fr.value());
+        } else {
+            var fr = (ComboBoxOption) standardLaf.get(PREFS.getInt("lookandfeel", defaultIndex));
+            setFirstRunLaf(fr.value());
         }
-        else {
-            // Use the value we got from preferences
-            changeLaf(v);
-        }
+        return standardLaf;
     }
     
-    private void populateLafList() {
-        var LAF = new ArrayList<String>();
-        var lookAndFeels = UIManager.getInstalledLookAndFeels();
-        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-            // Get the name of the look and feel
-            if (!lookAndFeel.getName().equals("GTK+")) {
-                LAF.add(lookAndFeel.getName());
-            }
-        }
-        // Add FlatLaf if available
-        if (lafAL.contains("com.formdev.flatlaf.FlatLightLaf")) {
-            LAF.addAll(parseThemesINI("core-themes", true));
-            if (lafAL.contains("com.formdev.flatlaf.themes.FlatMacLightLaf")) {
-                LAF.addAll(parseThemesINI("core-themes-v3", true));
-                for (String s : lafAL) {
-                    if (s.startsWith("com.formdev.flatlaf.intellijthemes")) {
-                        LAF.addAll(parseThemesINI("intellij-themes", true));
-                        LAF.addAll(parseThemesINI("materialthemeuilite", true));
-                        break;
-                    }
-                }
-            }
-        }
-        var lf = new String[LAF.size()];
-        for (int i = 0; i < LAF.size(); i++) {
-            lf[i] = LAF.get(i);
-        }
-        cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(lf));
-        cmbLookAndFeel.setSelectedIndex(PREFS.getInt("lookandfeel", defaultLaf));
-    }
-    
-    private boolean loadFlatLafINI(boolean loadProperties) {
+    private boolean loadFlatLafINI() {
         // Read the embedded flatlaf.ini file
         String r = "ie/bops/resources/flatlaf.ini";
         try {
@@ -2998,67 +2967,67 @@ public class GUI extends javax.swing.JFrame {
             System.err.println(ex);
             return false;
         }
-        if (loadProperties) {
-            // Set FlatLaf system properties
-            System.setProperty("flatlaf.useWindowDecorations",
-                    Boolean.toString(flIni.getBoolean("flatlaf", "UseWindowDecorations"))
-            );
-            System.setProperty("flatlaf.menuBarEmbedded",
-                    Boolean.toString(flIni.getBoolean("flatlaf", "MenuBarEmbedded"))
-            );
-            System.setProperty("flatlaf.useRoundedPopupBorder",
-                    Boolean.toString(flIni.getBoolean("flatlaf", "UseRoundedPopupBorder"))
-            );
-        }
+        // Set FlatLaf system properties
+        System.setProperty("flatlaf.useWindowDecorations",
+                Boolean.toString(flIni.getBoolean("flatlaf", "UseWindowDecorations"))
+        );
+        System.setProperty("flatlaf.menuBarEmbedded",
+                Boolean.toString(flIni.getBoolean("flatlaf", "MenuBarEmbedded"))
+        );
+        System.setProperty("flatlaf.useRoundedPopupBorder",
+                Boolean.toString(flIni.getBoolean("flatlaf", "UseRoundedPopupBorder"))
+        );
         return true;
     }
     
-    private ArrayList<String> parseThemesINI(String iniSection, boolean getFriendlyNames) {
-        var name = new ArrayList<String>();
-        var lafClassName = new ArrayList<String>();
-        String cn = flIni.get(iniSection, "class");
-        flIni.removeKey(iniSection, "class");
-        String[] sa = flIni.getKeys(iniSection);
-        if (sa != null && sa.length > 0) {
-            for (String cl : sa) {
-                if (!getFriendlyNames) {
-                    lafClassName.add(cn + '\u002e' + cl);
-                } else {
-                    name.add("FlatLaf (" + flIni.get(iniSection, cl) + ")");    
-                }
-            }
-            if (!getFriendlyNames) {
-                return lafClassName;
-            }
-            else {
-                return name;
-            }
+    private ArrayList<ComboBoxOption> addFlatLafThemes(ArrayList<String> input, String sectionName) {
+        var al = new ArrayList<ComboBoxOption>();
+        String className = flIni.get(sectionName, "class");
+        for (int i = 0; i < input.size(); i++) {
+            if (input.get(i).equals("class")) continue;
+            String id = className + '\u002e' + input.get(i);
+            String fn = "FlatLaf (" + flIni.get(sectionName, input.get(i)) + ")";
+            al.add(new ComboBoxOption(id, fn));
         }
-        else {
-            return null;
+        return al;
+    }
+    
+    private void setFirstRunLaf(String lafClassName) {
+        // Sets the look and feel when the application is first run
+        try {
+            UIManager.setLookAndFeel(lafClassName);
+        }
+        catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+            System.err.println("Error loading look and feel: " + e);
         }
     }
     
-    private void changeLaf(int i) {
-        String l = lafAL.get(i);
+    private void populateLaf(ArrayList<ComboBoxOption> laf) {
+        // Populate the combobox
+        cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(laf.toArray(ComboBoxOption[]::new)));
+        cmbLookAndFeel.setSelectedItem(new ComboBoxOption(UIManager.getLookAndFeel().getClass().getName(), ""));
+    }
+    
+    private void changeLaf() {
+        // Changes the look and feel on the fly
+        var m = (ComboBoxOption) cmbLookAndFeel.getSelectedItem();
+        String l = m.value();
         // Only change L&F if different to the current one
         if (!l.equals(UIManager.getLookAndFeel().getClass().getName())) {
             try {
                 UIManager.setLookAndFeel(l);
                 SwingUtilities.updateComponentTreeUI(this);
-                this.pack();
                 // Colour of JList resets on L&F change so reset it
                 if (this.isVisible() && (playlistAL.isEmpty())) {
                     // Set the background colour of the JList to disabledBackground
                     lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
-                }
-                else if (this.isVisible()) {
+                } else if (this.isVisible()) {
                     // Set tie background colour of the JList to background (enabled)
                     lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.background"));
                 }
-                PREFS.putInt("lookandfeel", i);
-            }
-            catch (ClassNotFoundException c) {
+                pack();
+                PREFS.putInt("lookandfeel", cmbLookAndFeel.getSelectedIndex());
+            } catch (ClassNotFoundException c) {
                 String err = "The requested look and feel cannot be found.\n"
                         + "The current version of FlatLaf may not support it.";
                 if (this.isVisible()) {
@@ -3067,10 +3036,10 @@ public class GUI extends javax.swing.JFrame {
                 else {
                     System.err.println();
                 }
-                changeLaf(defaultLaf);
-                PREFS.putInt("lookandfeel", defaultLaf);
-            }    
-            catch (IllegalAccessException | InstantiationException | 
+                // Reload default look and feel
+                var p = new ComboBoxOption(defaultLaf, "");
+                cmbLookAndFeel.setSelectedItem(p);
+            } catch (IllegalAccessException | InstantiationException | 
                     UnsupportedLookAndFeelException ex) {
                 System.err.println(ex);
             }            
@@ -3988,12 +3957,11 @@ public class GUI extends javax.swing.JFrame {
         // Check that the fork value matches the one we're using
         String ImportedFork = htvFile.get("hacktv-gui3", "fork", "").toLowerCase(Locale.ENGLISH);
         String WrongFork = "This file was created with a different fork of " +
-            "hacktv. We will attempt to process the file but some options " +
-            "may not be available.";
-        if ((!captainJack) && (ImportedFork.equals("captainjack"))) {
+            "hacktv. Some options may not be available.";
+        if (!captainJack && ImportedFork.equals("captainjack")) {
             messageBox(WrongFork, JOptionPane.WARNING_MESSAGE);
         }
-        else if ((captainJack) && (!ImportedFork.equals("captainjack"))) {
+        else if (captainJack && !ImportedFork.equals("captainjack")) {
             messageBox(WrongFork, JOptionPane.WARNING_MESSAGE);
         }
         // Reset all controls
@@ -4003,42 +3971,26 @@ public class GUI extends javax.swing.JFrame {
            interpreted as hackrf. Anything other than these values is handled
            as an output file.
          */
-        String ImportedOutputDevice = htvFile.get("hacktv", "output", "hackrf").toLowerCase(Locale.ENGLISH);
-        if ((ImportedOutputDevice.isEmpty()) || (ImportedOutputDevice.toLowerCase(Locale.ENGLISH).startsWith("hackrf"))) {
-            cmbOutputDevice.setSelectedIndex(0);
-            if (ImportedOutputDevice.contains(":")) {
-                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
+        String iod = htvFile.get("hacktv", "output", "hackrf").toLowerCase(Locale.ENGLISH);
+        if (iod.startsWith("hackrf") || iod.startsWith("soapysdr") || iod.startsWith("fl2k")) {
+            // Check if the imported value contains a serial number (value separated by a colon)
+            String[] od = iod.split(":");
+            // Set the combobox
+            cmbOutputDevice.setSelectedItem(new ComboBoxOption(od[0], ""));
+            // Add serial to the text field
+            if (od.length == 2) txtOutputDevice.setText(od[1]);
+            // fl2k audio
+            if (od[0].equals("fl2k")) {
+                var ap = new ComboBoxOption(htvFile.get("hacktv", "fl2k-audio", "").toLowerCase(Locale.ENGLISH), "");
+                cmbFl2kAudio.setSelectedItem(ap);
             }
-        }
-        else if (ImportedOutputDevice.toLowerCase(Locale.ENGLISH).startsWith("soapysdr")) {
-            cmbOutputDevice.setSelectedIndex(1);
-            if (ImportedOutputDevice.contains(":")) {
-                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
-            }
-        }
-        else if (ImportedOutputDevice.toLowerCase(Locale.ENGLISH).startsWith("fl2k")) {
-            cmbOutputDevice.setSelectedIndex(2);
-            if (ImportedOutputDevice.contains(":")) {
-                txtOutputDevice.setText(ImportedOutputDevice.split(":")[1]);
-            }
-            switch (htvFile.get("hacktv", "fl2k-audio", "").toLowerCase(Locale.ENGLISH)) {
-                case "mono":
-                    cmbFl2kAudio.setSelectedIndex(1);
-                    break;
-                case "stereo":
-                    cmbFl2kAudio.setSelectedIndex(2);
-                    break;
-                case "spdif":
-                    cmbFl2kAudio.setSelectedIndex(3);
-                    break;
-                default:
-                    cmbFl2kAudio.setSelectedIndex(0);
-                    break;
-            }
-        }
-        else {
-            cmbOutputDevice.setSelectedIndex(3);
-            txtOutputDevice.setText(ImportedOutputDevice);
+        } else {
+            // File output, append as-is
+            cmbOutputDevice.setSelectedItem(new ComboBoxOption("file", ""));
+            txtOutputDevice.setText(iod);
+            // Output file type
+            String ft = htvFile.get("hacktv", "filetype", "").toLowerCase(Locale.ENGLISH);
+            cmbFileType.setSelectedItem(ft);
         }
         // Video mode
         String ImportedVideoMode = htvFile.get("hacktv", "mode", "");
@@ -4202,58 +4154,44 @@ public class GUI extends javax.swing.JFrame {
             }
             else {
                 // Try to find the channel name by trying UHF first
-                boolean ChannelFound = false;
+                boolean channelFound = false;
                 boolean bpFound = false;
-                radUHF.doClick();
                 // Check the available band plans for the one specified and set the region accordingly
+                radUHF.doClick();
                 if (uhfAL.contains(ImportedBandPlan)) {
-                    bpFound = true;
-                    for (int ub = 0; ub < uhfAL.size(); ub++) {
-                        if (uhfAL.get(ub).equals(ImportedBandPlan)) {
-                            cmbRegion.setSelectedIndex(ub);
-                            // Search for the specified channel
-                            for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
-                                if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
-                                    cmbChannel.setSelectedIndex(i);
-                                    ChannelFound = true;
-                                }
+                    var regionProbe = new ComboBoxOption(uhfAL.get(uhfAL.indexOf(ImportedBandPlan)), "");
+                    cmbRegion.setSelectedItem(regionProbe);
+                    if (regionProbe.equals(cmbRegion.getSelectedItem())) {
+                        bpFound = true;
+                        for (int i = 0; i < cmbChannel.getItemCount(); i++) {
+                            if (cmbChannel.getItemAt(i).toString().equals(ImportedChannel)) {
+                                cmbChannel.setSelectedIndex(i);
+                                channelFound = true;
+                                break;
                             }
                         }
                     }
                 }
-                // If not found, try VHF
-                else if (!ChannelFound) {
+                if (!channelFound) {
                     radVHF.doClick();
-                    // Check the available band plans for the one specified and set the region accordingly
                     if (vhfAL.contains(ImportedBandPlan)) {
-                        bpFound = true;
-                        for (int vb = 0; vb < vhfAL.size(); vb++) {
-                            if (vhfAL.get(vb).equals(ImportedBandPlan)) {
-                                cmbRegion.setSelectedIndex(vb);
-                                // Search for the specified channel
-                                for (int i = 0; i <= cmbChannel.getItemCount() - 1; i++) {
-                                    if ( (channelArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedChannel.toLowerCase(Locale.ENGLISH)) ) {
-                                        cmbChannel.setSelectedIndex(i);
-                                        ChannelFound = true;
-                                    }
+                        var regionProbe = new ComboBoxOption(vhfAL.get(vhfAL.indexOf(ImportedBandPlan)), "");
+                        cmbRegion.setSelectedItem(regionProbe);
+                        if (regionProbe.equals(cmbRegion.getSelectedItem())) {
+                            bpFound = true;
+                            for (int i = 0; i < cmbChannel.getItemCount(); i++) {
+                                if (cmbChannel.getItemAt(i).toString().equals(ImportedChannel)) {
+                                    cmbChannel.setSelectedIndex(i);
+                                    channelFound = true;
+                                    break;
                                 }
                             }
                         }
                     }
                 }
                 // If still not found, generate an error and use the frequency instead of the channel
-                if (!ChannelFound) {
+                if (!channelFound) {
                     if (!bpFound) {
-                        /* 
-                            Versions 2024-09-01 and earlier did not properly check for
-                            band plans while parsing HTV files. Save files from older 
-                            versions, from before the addition of multiple band plans,
-                            could load an incorrect band plan as a result (if more
-                            than one had a matching channel number). These files will
-                            now return an error but the fix is simple, the correct
-                            region/band/channel just needs to be selected and
-                            the file resaved.
-                        */
                         radCustom.doClick();
                         Double Freq = ImportedFrequency / 1000000;
                         txtFrequency.setText(Double.toString(Freq).replace(".0",""));
@@ -4334,26 +4272,22 @@ public class GUI extends javax.swing.JFrame {
         }
         // Logo
         if (chkLogo.isEnabled()) {
-            String ImportedLogo = htvFile.get("hacktv", "logo", "").toLowerCase(Locale.ENGLISH);
+            String importedLogo = htvFile.get("hacktv", "logo", "").toLowerCase(Locale.ENGLISH);
             // Check first if the imported string is a .png file.
             // hacktv now contains its own internal resources so external files
             // are no longer supported.
-            if (ImportedLogo.endsWith(".png")) {
+            if (importedLogo.endsWith(".png")) {
                 messageBox(
                      "hacktv no longer supports external logo files. Logo option disabled.", JOptionPane.WARNING_MESSAGE);
             }
-            else if (!ImportedLogo.isBlank()) {
-                boolean logoFound = false;
-                for (int i = 0; i <= cmbLogo.getItemCount() - 1; i++) {
-                    if ( (logoArray[i].toLowerCase(Locale.ENGLISH)).equals(ImportedLogo) ) {
-                        chkLogo.doClick();
-                        cmbLogo.setSelectedIndex(i);
-                        logoFound = true;
-                        break;
-                    }
-                }
-                if (!logoFound) {
-                    invalidConfigFileValue("logo", ImportedLogo);
+            else if (!importedLogo.isBlank()) {
+                var probe = new ComboBoxOption(importedLogo, "");
+                cmbLogo.setSelectedItem(probe);
+                if (!probe.equals(cmbLogo.getSelectedItem())) {
+                    invalidConfigFileValue("logo", importedLogo);
+                } else {
+                    cmbLogo.setEnabled(true);
+                    chkLogo.setSelected(true);
                 }
             }
         }
@@ -4380,125 +4314,76 @@ public class GUI extends javax.swing.JFrame {
         }
         // WSS
         if ((htvFile.getInt("hacktv", "wss")) != null) {
-            Integer ImportedWSS = (htvFile.getInt("hacktv", "wss"));
+            int importedWSS = htvFile.getInt("hacktv", "wss");
             // Only accept values within the range of the combobox
-            if ((ImportedWSS > 0) && (ImportedWSS <= cmbWSS.getItemCount())) {
+            if (importedWSS > 0 && importedWSS <= cmbWSS.getItemCount()) {
                 chkWSS.doClick();
                 // Since we increased the value by one when saving, decrease by one when loading
-                cmbWSS.setSelectedIndex(ImportedWSS - 1);
+                cmbWSS.setSelectedIndex(importedWSS - 1);
+            } else {
+                System.err.println("WSS value out of bounds, skipped.");
             }
         }
         /* Aspect ratio correction for 16:9 content on 4:3 displays
          * If the arcorrection value is not defined, leave the option unchecked
          * Otherwise, check the option and process it as normal
          */
-        if ((htvFile.getInt("hacktv", "arcorrection")) != null) {
-            Integer ImportedAR = (htvFile.getInt("hacktv", "arcorrection"));
-            chkARCorrection.doClick();
-            cmbARCorrection.setSelectedIndex(ImportedAR);
+        if (htvFile.getInt("hacktv", "arcorrection") != null) {
+            int importedAR = (htvFile.getInt("hacktv", "arcorrection"));
+            if (importedAR >= 0 && importedAR < cmbARCorrection.getItemCount()) {
+                chkARCorrection.doClick();
+                cmbARCorrection.setSelectedIndex(importedAR);
+            } else {
+                System.err.println("Aspect ratio value out of bounds, skipped.");
+            }
         }
         // Scrambling system
-        String ImportedScramblingSystem = htvFile.get("hacktv", "scramblingtype", "").toLowerCase(Locale.ENGLISH);
-        String ImportedKey = htvFile.get("hacktv", "scramblingkey", "").toLowerCase(Locale.ENGLISH);
-        String ImportedKey2 = htvFile.get("hacktv", "scramblingkey2", "").toLowerCase(Locale.ENGLISH);
-        if ((radPAL.isSelected()) || radSECAM.isSelected()) {
-            int i;
-            switch (ImportedScramblingSystem) {
-                case "":
-                    i = 0;
-                    break;
-                case "videocrypt":
-                    i = scramblingTypeArray.indexOf("--videocrypt");
-                    break;
-                case "videocrypt2":
-                    i = scramblingTypeArray.indexOf("--videocrypt2");
-                    break;
-                case "videocrypt1+2":
-                    if (dualVC != -1) {
-                        i = dualVC;
-                    }
-                    else {
-                        i = -1;
-                    }
-                    break;
-                case "videocrypts":
-                    i = scramblingTypeArray.indexOf("--videocrypts");
-                    break;
-                case "syster":
-                    i = scramblingTypeArray.indexOf("--syster");
-                    break;
-                case "d11":
-                    i = scramblingTypeArray.indexOf("--d11");
-                    break;
-                case "systercnr":
-                    i = scramblingTypeArray.indexOf("--systercnr");
-                    break;
-                case "systerls+cnr":
-                    i = scramblingTypeArray.indexOf("--systercnr") + 1;
-                    break;
-                default:
-                    i = -1;
-                    break;
-            }
-            if (i == -1) {
-                invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
-                ImportedScramblingSystem = "";
-            }
-            else {
-                cmbScramblingType.setSelectedIndex(i);
-            }
-        }
-        else if (radMAC.isSelected()) {
-            int i;
-            switch (ImportedScramblingSystem) {
-                case "":
-                    i = 0;
-                    break;
-                case "single-cut":
-                    i = scramblingTypeArray.indexOf("--single-cut");
-                    break;
-                case "double-cut":
-                    i = scramblingTypeArray.indexOf("--double-cut");
-                    break;
-                default:
-                    i = -1;
-                    break;
-            }
-            if (i == -1) {
-                invalidConfigFileValue("scrambling system", ImportedScramblingSystem);
-                ImportedScramblingSystem = "";
-            }
-            else {
-                cmbScramblingType.setSelectedIndex(i);
-            }
-        }            
-        // Scrambling key/viewing card type (including VC1 side of dual VC1/2 mode)
-        if ( (!ImportedScramblingSystem.isEmpty()) ) {
-            if (ImportedKey.isEmpty()) ImportedKey = ImportedKey.replace("", "blank");
-            ImportedKey = ImportedKey.replace("eurocrypt ", "");
-            int k = scramblingKeyArray.indexOf(ImportedKey);
-            if (k == -1) {
-                if (ImportedKey.equals("blank")) ImportedKey = ImportedKey.replace("blank", "");
-                if (!ImportedScramblingSystem.equals("videocrypt1+2")) {
-                    invalidConfigFileValue("access type", ImportedKey);
+        String ica = htvFile.get("hacktv", "scramblingtype", "").toLowerCase(Locale.ENGLISH);
+        String ik1 = htvFile.get("hacktv", "scramblingkey", "").toLowerCase(Locale.ENGLISH);
+        String ik2 = htvFile.get("hacktv", "scramblingkey2", "").toLowerCase(Locale.ENGLISH);
+        if (radPAL.isSelected() || radSECAM.isSelected() || radMAC.isSelected()) {
+            if (!ica.isBlank()) {
+                ComboBoxOption ca;
+                switch (ica) {
+                    case "videocrypt1+2":
+                        ca = new ComboBoxOption("vcDualMode", "");
+                        break;
+                    case "systerls+cnr":
+                        ca = new ComboBoxOption("systerDualMode", "");
+                        break;
+                    default:
+                        ca = new ComboBoxOption("--" + ica, "");
+                        break;
                 }
-                else {
-                    invalidConfigFileValue("VideoCrypt I scrambling key", ImportedKey);
+                cmbScramblingType.setSelectedItem(ca);
+                if (!ca.equals(cmbScramblingType.getSelectedItem())) {
+                    invalidConfigFileValue("scrambling system", ica);
+                    ica = "";
                 }
-            }
-            else {
-                cmbScramblingKey1.setSelectedIndex(k);
-            }
-        }
-        // VC2 side of dual VC1/2 mode
-        if (cmbScramblingType.getSelectedIndex() == 3) {
-            int k2 = scramblingKey2Array.indexOf(ImportedKey2); 
-            if (k2 == -1) {
-                invalidConfigFileValue("VideoCrypt II scrambling key", ImportedKey2);
-            }
-            else {
-                cmbScramblingKey2.setSelectedIndex(k2);
             }            
+            // Scrambling key/viewing card type (including VC1 side of dual VC1/2 mode)
+            if (!ica.isEmpty() && !ik1.isEmpty()) {
+                if (ik1.startsWith("eurocrypt")) {
+                    ik1 = ik1.replace("eurocrypt", "").trim();
+                }
+                ComboBoxOption k1 = new ComboBoxOption(ik1, "");
+                cmbScramblingKey1.setSelectedItem(k1);
+                if (!k1.equals(cmbScramblingKey1.getSelectedItem())) {
+                    if (ica.equals("videocrypt1+2")) {
+                        invalidConfigFileValue("VideoCrypt I scrambling key", ik1);
+                    } else {
+                        invalidConfigFileValue("scrambling key", ik1);
+                    }
+                }
+            }
+            // VC2 side of dual VC1/2 mode
+            if (ica.equals("videocrypt1+2")) {
+                ComboBoxOption k2 = new ComboBoxOption(ik2, "");
+                cmbScramblingKey2.setSelectedItem(k2);
+                if (!k2.equals(cmbScramblingKey2.getSelectedItem())) {
+                    invalidConfigFileValue("VideoCrypt II scrambling key", ik2);
+                }          
+            } 
         }
         // EMM
         if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
@@ -4541,7 +4426,7 @@ public class GUI extends javax.swing.JFrame {
         int ImportedPermutationTable;
         if (htvFile.getInt("hacktv", "permutationtable") != null) {
             ImportedPermutationTable = htvFile.getInt("hacktv", "permutationtable");
-            if ( (scramblingType1.equals("--syster")) || (scramblingType1.equals("--systercnr")) ) {
+            if (ica.equals("--syster") || ica.equals("--systercnr") || ica.equals("systerls+cnr")) {
                 if ( (ImportedPermutationTable >= 0 ) &&
                         (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
                 cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
@@ -4666,30 +4551,6 @@ public class GUI extends javax.swing.JFrame {
         // SoapySDR antenna name
         if (cmbOutputDevice.getSelectedIndex() == 1) {
             txtAntennaName.setText(htvFile.get("hacktv", "antennaname", "").toLowerCase(Locale.ENGLISH));
-        }
-        // Output file type
-        if (cmbOutputDevice.getSelectedIndex() == 3) {
-            switch (htvFile.get("hacktv", "filetype", "").toLowerCase(Locale.ENGLISH)) {
-                case "uint8":
-                    cmbFileType.setSelectedIndex(0);
-                    break;
-                case "int8":
-                    cmbFileType.setSelectedIndex(1);
-                    break;
-                case "uint16":
-                default:
-                    cmbFileType.setSelectedIndex(2);
-                    break;
-                case "int16":
-                    cmbFileType.setSelectedIndex(3);
-                    break;
-                case "int32":
-                    cmbFileType.setSelectedIndex(4);
-                    break;
-                case "float":
-                    cmbFileType.setSelectedIndex(5);
-                    break;
-            }
         }
         // Volume
         String ImportedVolume = htvFile.get("hacktv", "volume", "").toLowerCase(Locale.ENGLISH);
@@ -4822,8 +4683,9 @@ public class GUI extends javax.swing.JFrame {
         // New class instance to create empty file
         var newHtv = new INIFile();
         // Output device
-        switch (cmbOutputDevice.getSelectedIndex()) {
-            case 0:
+        var om = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
+        switch (om.value()) {
+            case "hackrf":
                 if (txtOutputDevice.getText().isBlank()) {
                     newHtv.set("hacktv", "output", "hackrf");
                 }
@@ -4831,41 +4693,35 @@ public class GUI extends javax.swing.JFrame {
                     newHtv.set("hacktv", "output", "hackrf:" + txtOutputDevice.getText());
                 }
                 break;
-            case 1:
+            case "soapysdr":
                 if (txtOutputDevice.getText().isBlank()) {
                     newHtv.set("hacktv", "output", "soapysdr");
                 }
                 else {
                     newHtv.set("hacktv", "output", "soapysdr:" + txtOutputDevice.getText());
                 }
+                // SoapySDR antenna name
+                if (!txtAntennaName.getText().isBlank()) newHtv.set("hacktv", "antennaname", txtAntennaName.getText());
                 break;
-            case 2:
+            case "fl2k":
                 if (txtOutputDevice.getText().isBlank()) {
                     newHtv.set("hacktv", "output", "fl2k");
                 }
                 else {
                     newHtv.set("hacktv", "output", "fl2k:" + txtOutputDevice.getText());
                 }
-                switch (cmbFl2kAudio.getSelectedIndex()) {
-                    case 1:
-                        newHtv.set("hacktv", "fl2k-audio", "mono");
-                        break;
-                    case 2:
-                        newHtv.set("hacktv", "fl2k-audio", "stereo");
-                        break;
-                    case 3:
-                        newHtv.set("hacktv", "fl2k-audio", "spdif");
-                        break;
-                    default:
-                        break;
-                }
+                // fl2k audio
+                var fam = (ComboBoxOption) cmbFl2kAudio.getSelectedItem();
+                if (!fam.value().isEmpty()) newHtv.set("hacktv", "fl2k-audio", fam.value());
                 break;
-            case 3:
+            case "file":
                 if (txtOutputDevice.getText().isBlank()) {
                     messageBox("Please select an output file or change the output device.", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
                     newHtv.set("hacktv", "output", txtOutputDevice.getText());
+                    // File type
+                    newHtv.set("hacktv", "filetype", cmbFileType.getSelectedItem().toString());
                 }                
                 break;
             default:
@@ -4988,7 +4844,10 @@ public class GUI extends javax.swing.JFrame {
         // Verbose
         if (chkVerbose.isSelected()) newHtv.setInt("hacktv", "verbose", 1);
         // Logo
-        if (chkLogo.isSelected()) newHtv.set("hacktv", "logo", logoArray[cmbLogo.getSelectedIndex()]) ;
+        if (chkLogo.isSelected()) {
+            var m = (ComboBoxOption) cmbLogo.getSelectedItem();
+            newHtv.set("hacktv", "logo", m.value());
+        }
         // Timestamp
         if (chkTimestamp.isSelected()) newHtv.setInt("hacktv", "timestamp", 1);
         // Interlace
@@ -5008,44 +4867,34 @@ public class GUI extends javax.swing.JFrame {
         // AR Correction
         if (chkARCorrection.isSelected()) newHtv.setInt("hacktv", "arcorrection", cmbARCorrection.getSelectedIndex());
         // Scrambling
-        switch (scramblingTypeArray.get(cmbScramblingType.getSelectedIndex())) {
+        var ca = (ComboBoxOption) cmbScramblingType.getSelectedItem();
+        var k1 = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        var k2 = (ComboBoxOption) cmbScramblingKey2.getSelectedItem();
+        switch (ca.value()) {
             case (""):
                 // Scrambling disabled, do nothing
                 break;
-            case ("--videocrypt"):
-                if (scramblingType2.isEmpty()) {
-                    // VideoCrypt I only
-                    newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
-                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
-                }
-                else {
-                    // VideoCrypt I+II
-                    newHtv.set("hacktv", "scramblingtype", "videocrypt1+2");
-                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
-                    newHtv.set("hacktv", "scramblingkey2", scramblingKey2);
-                }
+            case ("vcDualMode"):
+                // VideoCrypt I+II
+                newHtv.set("hacktv", "scramblingtype", "videocrypt1+2");
+                newHtv.set("hacktv", "scramblingkey", k1.value());
+                newHtv.set("hacktv", "scramblingkey2", k2.value());
                 break;
-            case ("--syster"):
-                if (scramblingType2.isEmpty()) {
-                    newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
-                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);
-                }
-                else {
-                    // Syster dual mode (line shuffling + cut-and-rotate)
-                    newHtv.set("hacktv", "scramblingtype", "systerls+cnr");
-                    newHtv.set("hacktv", "scramblingkey", scramblingKey1);   
-                }
+            case ("systerDualMode"):
+                // Syster dual mode (line shuffling + cut-and-rotate)
+                newHtv.set("hacktv", "scramblingtype", "systerls+cnr");
+                newHtv.set("hacktv", "scramblingkey", k1.value());   
                 break;
             case ("--single-cut"):
             case ("--double-cut"):
-                newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
-                if (!scramblingType2.isEmpty()) {
-                    newHtv.set("hacktv", "scramblingkey", scramblingType2.substring(2) + '\u0020' + scramblingKey2);
+                newHtv.set("hacktv", "scramblingtype", ca.value().substring(2));
+                if (!k1.value().equals("blank")) {
+                    newHtv.set("hacktv", "scramblingkey", "eurocrypt" + '\u0020' + k1.value());
                 }
                 break;
             default:
-                newHtv.set("hacktv", "scramblingtype", scramblingType1.substring(2));
-                newHtv.set("hacktv", "scramblingkey", scramblingKey1);
+                newHtv.set("hacktv", "scramblingtype", ca.value().substring(2));
+                newHtv.set("hacktv", "scramblingkey", k1.value());
                 break;
         }
         if (chkActivateCard.isSelected()) {
@@ -5136,15 +4985,6 @@ public class GUI extends javax.swing.JFrame {
         if (chkMac16k.isSelected()) newHtv.set("hacktv", "mac-audio-quality", "medium");
         if (chkMacLinear.isSelected()) newHtv.set("hacktv", "mac-audio-compression", "linear");
         if (chkMacL2.isSelected()) newHtv.set("hacktv", "mac-audio-protection", "l2");
-        // SoapySDR antenna name
-        if (cmbOutputDevice.getSelectedIndex() == 1) {
-            if (!txtAntennaName.getText().isBlank())
-            newHtv.set("hacktv", "antennaname", txtAntennaName.getText());
-        }
-        // Output file type
-        if (cmbOutputDevice.getSelectedIndex() == 3) {
-            newHtv.set("hacktv", "filetype", cmbFileType.getItemAt(cmbFileType.getSelectedIndex()));
-        }
         // Volume
         if (chkVolume.isSelected()) newHtv.set("hacktv", "volume", txtVolume.getText());
         // Downmix
@@ -5470,7 +5310,7 @@ public class GUI extends javax.swing.JFrame {
                         t.setWindowProgressValue(GUI.this, p);
                     }
                     else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-                        t.setProgressValue((short) p);
+                        t.setProgressValue(p);
                     }
                 }
                 cmbM3USource.removeAllItems();
@@ -5854,7 +5694,6 @@ public class GUI extends javax.swing.JFrame {
                         publish(b);
                         out.write(buffer, 0, b);
                     }
-                    out.close();
                 }
                 catch (IOException ex) {
                     System.err.println(ex);
@@ -6014,7 +5853,8 @@ public class GUI extends javax.swing.JFrame {
     }    
     
     private void disableScrambling() {
-        var ScramblingTypeAL = new ArrayList<String>();
+        // TODO
+        /*var ScramblingTypeAL = new ArrayList<String>();
         ScramblingTypeAL.add("No scrambling");
         scramblingTypeArray = new ArrayList<>();
         scramblingTypeArray.add("");
@@ -6025,6 +5865,7 @@ public class GUI extends javax.swing.JFrame {
             ScramblingType[i] = ScramblingTypeAL.get(i);
         } 
         cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
+        */
         cmbScramblingType.setSelectedIndex(0);
         cmbScramblingType.setEnabled(false);
         lblScramblingSystem.setEnabled(false);
@@ -6032,94 +5873,62 @@ public class GUI extends javax.swing.JFrame {
     }      
     
     private void add625ScramblingTypes() {
-        var ScramblingTypeAL = new ArrayList<String>();
-        ScramblingTypeAL.add("No scrambling");
-        scramblingTypeArray = new ArrayList<>();
-        scramblingTypeArray.add("");
-        dualVC = -2;
+        var ca = new ArrayList<ComboBoxOption>();
+        ca.add(new ComboBoxOption("", "No scrambling"));
         // Check if modes file contains a section for these scrambling systems
+        // Only add those which have keys defined
         int vc1 = modesIni.getKeys("videocrypt").length;
         int vc2 = modesIni.getKeys("videocrypt2").length;
         if (vc1 > 0) {
-            ScramblingTypeAL.add("VideoCrypt I");
-            scramblingTypeArray.add("--videocrypt");
+            ca.add(new ComboBoxOption("--videocrypt", "VideoCrypt I"));
         }
         if (vc2 > 0) {
-            ScramblingTypeAL.add("VideoCrypt II");
-            scramblingTypeArray.add("--videocrypt2");
+            ca.add(new ComboBoxOption("--videocrypt2", "VideoCrypt II"));
         }
-        if ((vc1 > 0) && (vc2 > 0)) {
-            ScramblingTypeAL.add("VideoCrypt I+II");
-            scramblingTypeArray.add("--videocrypt");
-            // Specify that both key fields should be enabled for this system
-            dualVC = scramblingTypeArray.size() - 1;
-        }
+        if (vc1 > 0 && vc2 > 0) {
+            ca.add(new ComboBoxOption("vcDualMode", "VideoCrypt I+II"));
+        }        
         if (modesIni.getKeys("videocrypts").length > 0) {
-            ScramblingTypeAL.add("VideoCrypt S");
-            scramblingTypeArray.add("--videocrypts");
+            ca.add(new ComboBoxOption("--videocrypts", "VideoCrypt S"));
         }
         if (modesIni.getKeys("syster").length > 0) {
-            ScramblingTypeAL.add("Nagravision Syster");
-            scramblingTypeArray.add("--syster");
-            ScramblingTypeAL.add("Discret 11");
-            ScramblingTypeAL.add("Nagravision Syster (cut-and-rotate mode)");
-            ScramblingTypeAL.add("Nagravision Syster (line shuffle and cut-and-rotate modes)");
-            scramblingTypeArray.add("--d11");
-            scramblingTypeArray.add("--systercnr");
-            scramblingTypeArray.add("--syster");
+            ca.add(new ComboBoxOption("--syster", "Nagravision Syster"));
+            ca.add(new ComboBoxOption("--d11", "Discret 11"));
+            ca.add(new ComboBoxOption("--systercnr", "Nagravision Syster (cut-and-rotate mode)"));
+            ca.add(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
         }
-        if (ScramblingTypeAL.size() == 1) {
-            // No systems found, disable the scrambling tab
-            disableScrambling();
-        }
-        cmbScramblingType.removeAllItems();
         // Convert to an array so we can populate
-        var ScramblingType = new String[ScramblingTypeAL.size()];
-        for (int i = 0; i < ScramblingType.length; i++) {
-            ScramblingType[i] = ScramblingTypeAL.get(i);
-        }
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
+        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
         cmbScramblingType.setSelectedIndex(0);
+        // If no systems were found, disable the scrambling tab
+        if (ca.size() == 1) disableScrambling();
     }
     
     private void addMACScramblingTypes() {
-        var ScramblingTypeAL = new ArrayList<String>();
-        scramblingTypeArray = new ArrayList<>();
-        ScramblingTypeAL.add("No scrambling");
-        scramblingTypeArray.add("");
-        dualVC = -2;
+        var ca = new ArrayList<ComboBoxOption>();
+        ca.add(new ComboBoxOption("", "No scrambling"));
+        // Check if modes file contains a section for these scrambling systems
+        // Only add those which have keys defined
         if (modesIni.getKeys("eurocrypt").length > 0) {
-            ScramblingTypeAL.add("Single cut");
-            ScramblingTypeAL.add("Double cut");
-            scramblingTypeArray.add("--single-cut");
-            scramblingTypeArray.add("--double-cut");            
+            ca.add(new ComboBoxOption("--single-cut", "Single cut"));
+            ca.add(new ComboBoxOption("--double-cut", "Double cut"));
         }
-        if (ScramblingTypeAL.size() == 1) {
-            // No systems found, disable the scrambling tab
-            disableScrambling();
-        }
-        cmbScramblingType.removeAllItems();
         // Convert to an array so we can populate
-        var ScramblingType = new String[ScramblingTypeAL.size()];
-        for(int i = 0; i < ScramblingType.length; i++) {
-            ScramblingType[i] = ScramblingTypeAL.get(i);
-        } 
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
+        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
         cmbScramblingType.setSelectedIndex(0);
+        // If no systems were found, disable the scrambling tab
+        if (ca.size() == 1) disableScrambling();
     }
     
     private void addScramblingKey() {
+        var s = (ComboBoxOption) cmbScramblingType.getSelectedItem();
         // In the clear (no scrambling)
-        if (scramblingType1.isEmpty()) {
+        if (s.value().isEmpty()) {
             scramblingOptionsPanel.setEnabled(false);
             emmPanel.setEnabled(false);
             disableScramblingKey1();
             cmbScramblingKey1.setSelectedIndex(-1);
             disableScramblingKey2();
-            scramblingType2 = "";
-            scramblingKey1 = "";
-            scramblingKey2 = "";
-            configureScramblingOptions();
             txtSampleRate.setText(defaultSampleRate);
             if (chkPixelRate.isSelected()) chkPixelRate.doClick();
             return;
@@ -6129,46 +5938,50 @@ public class GUI extends javax.swing.JFrame {
             scramblingOptionsPanel.setEnabled(true);
             emmPanel.setEnabled(true);
         }
+        boolean dualVC = false;
         // Get the scrambling system name  
-        String sconf = scramblingTypeArray.get(cmbScramblingType.getSelectedIndex()).substring(2);
+        String sconf = s.value();
         switch (sconf) {
-            case "videocrypt":
+            case "--videocrypt":
+            case "--videocrypt2":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
-                if ((!chkPixelRate.isSelected()) && !htvLoadInProgress) chkPixelRate.doClick();
+                if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
                 if (!htvLoadInProgress) txtPixelRate.setText("28");
                 disableScramblingKey2();
                 sconf = "videocrypt";
                 break;
-            case "videocrypt2":
+            case "vcDualMode":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
-                if ((!chkPixelRate.isSelected()) && !htvLoadInProgress) chkPixelRate.doClick();
+                if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
                 if (!htvLoadInProgress) txtPixelRate.setText("28");
-                disableScramblingKey2();
-                sconf = "videocrypt2";
+                enableScramblingKey2();
+                sconf = "videocrypt";
+                dualVC = true;
                 break;
-            case "videocrypts":
+            case "--videocrypts":
                 disableScramblingKey2();
                 // Set pixel rate to 17.75 MHz (more accurately 17.734475 but
                 // this is reported by hacktv as unsuitable for 625/50)
-                if ((!chkPixelRate.isSelected()) && !htvLoadInProgress) chkPixelRate.doClick();
+                if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
                 if (!htvLoadInProgress) txtPixelRate.setText("17.75");
                 sconf = "videocrypts";
                 break;
-            case "syster":
+            case "--syster":
                 // No pixel rate required for Syster
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
-            case "d11":
-            case "systercnr":
+            case "--d11":
+            case "--systercnr":
+            case "systerDualMode":
                 // Set pixel rate to 17.75 MHz
-                if ((!chkPixelRate.isSelected()) && !htvLoadInProgress) chkPixelRate.doClick();
+                if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
                 if (!htvLoadInProgress) txtPixelRate.setText("17.75");
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
-            case "single-cut":
-            case "double-cut":
+            case "--single-cut":
+            case "--double-cut":
                 disableScramblingKey2();
                 sconf = "eurocrypt";
                 break;
@@ -6180,7 +5993,6 @@ public class GUI extends javax.swing.JFrame {
         String[] slist = modesIni.getKeys(sconf);
         // If the INI section is present but no data is contained in it, stop
         if (slist.length == 0) {
-            scramblingType1 = "";
             cmbScramblingType.setSelectedIndex(0);
             addScramblingKey();
             messageBox("The scrambling key information in " + getFork() + ".ini appears to be "
@@ -6188,60 +6000,47 @@ public class GUI extends javax.swing.JFrame {
             return;
         }
         // Add commands to an ArrayList
-        scramblingKeyArray = new ArrayList<>();
-        scramblingKeyArray.addAll(Arrays.asList(slist));
-        // Extract friendly names and populate the combobox with them
-        var skn = new String[scramblingKeyArray.size()];
-        for (int i = 0; i < scramblingKeyArray.size(); i++) {
-            skn[i] = modesIni.get(sconf, scramblingKeyArray.get(i), "");
+        var scramblingKeyArray = new ArrayList<ComboBoxOption>();
+        for (String k : slist) {
+            scramblingKeyArray.add(new ComboBoxOption(k, modesIni.get(sconf, k)));
         }
-        // Populate key 1 combobox
-        cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(skn));
+        cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(scramblingKeyArray.toArray(ComboBoxOption[]::new)));
         cmbScramblingKey1.setSelectedIndex(0);
-        
         // VC1+2 dual mode
-        if (cmbScramblingType.getSelectedIndex() == dualVC) {
+        if (dualVC) {
             String sconf2 = "videocrypt2";
-            if (captainJack) {
-                enableScramblingKey1();
-                enableScramblingKey2();
-            }
-            else {
-                disableScramblingKey1();
-                disableScramblingKey2();
-            }
-            cmbScramblingKey2.removeAllItems();
-            // Extract (from modesFile) the VC2 scrambling key section
             String[] slist2 = modesIni.getKeys(sconf2);
+            // If the INI section is present but no data is contained in it, stop
             if (slist2.length == 0) {
-                scramblingType1 = "";
                 cmbScramblingType.setSelectedIndex(0);
                 addScramblingKey();
                 messageBox("The scrambling key information in " + getFork() + ".ini appears to be "
-                        + "missing or corrupt for the secondary scrambling type.", JOptionPane.WARNING_MESSAGE);
+                        + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             // Add commands to an ArrayList
-            scramblingKey2Array = new ArrayList<>();
-            scramblingKey2Array.addAll(Arrays.asList(slist2));
-            // Extract friendly names and populate the combobox with them
-            var skn2 = new String[scramblingKey2Array.size()];
-            for (int i = 0; i < scramblingKey2Array.size(); i++) {
-                skn2[i] = modesIni.get(sconf2, scramblingKey2Array.get(i), "");
+            var scramblingKey2Array = new ArrayList<ComboBoxOption>();
+            for (String k : slist2) {
+                scramblingKey2Array.add(new ComboBoxOption(k, modesIni.get(sconf2, k)));
             }
-            // Populate key 2 combobox
-            cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(skn2));
+            cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(scramblingKey2Array.toArray(ComboBoxOption[]::new)));
             cmbScramblingKey2.setSelectedIndex(0);
+            // Only enable the comboboxes on Captain Jack's fork
+            cmbScramblingKey1.setEnabled(captainJack);
+            cmbScramblingKey2.setEnabled(captainJack);
         }
     }
     
     private void configureScramblingOptions() {
         // Enable the Scramble audio option if supported
-        if ( ((scramblingType1).equals("--single-cut")) || 
-                ((scramblingType1).equals("--double-cut")) ||
-                ((scramblingType1).equals("--syster")) ||
-                ((scramblingType1).equals("--d11")) ||
-                ((scramblingType1).equals("--systercnr")) ) {
+        var ca = (ComboBoxOption) cmbScramblingType.getSelectedItem();
+        var key = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        if ( ca.value().equals("--single-cut") || 
+                ca.value().equals("--double-cut") ||
+                ca.value().equals("--syster") ||
+                ca.value().equals("--d11") ||
+                ca.value().equals("--systercnr") ||
+                ca.value().equals("systerDualMode") ) {
             chkScrambleAudio.setEnabled(true);
         }
         else {
@@ -6250,31 +6049,28 @@ public class GUI extends javax.swing.JFrame {
             }
             chkScrambleAudio.setEnabled(false);
         }
-        // Enable EuroCrypt maturity rating
-        if (scramblingType2.equals("--eurocrypt")) {
+        // Enable EuroCrypt maturity rating, PPV and "no date" options
+        if ((ca.value().equals("--single-cut") || (ca.value().equals("--double-cut"))) &&
+                !key.value().equals("blank")) {
             lblECMaturity.setEnabled(true);
             cmbECMaturity.setEnabled(true);
             cmbECMaturity.setSelectedIndex(0);
+            chkECppv.setEnabled(true);
+            chkNoDate.setEnabled(true);
         }
         else {
             lblECMaturity.setEnabled(false);
             cmbECMaturity.setEnabled(false);
             cmbECMaturity.setSelectedIndex(-1);
-        }
-        // Enable EuroCrypt PPV and "no date" options
-        if (scramblingType2.equals("--eurocrypt")) {
-            chkECppv.setEnabled(true);
-            chkNoDate.setEnabled(true);
-        }
-        else {
             if (chkECppv.isSelected()) chkECppv.doClick();
             if (chkNoDate.isSelected()) chkNoDate.doClick();
             chkECppv.setEnabled(false);
             chkNoDate.setEnabled(false);
-        }        
+        }       
         // Enable card serial option
-        if ( ((scramblingType1).equals("--videocrypt")) || 
-                ((scramblingType1).equals("--videocrypt2")) ) {
+        if ( (ca.value()).equals("--videocrypt") || 
+                (ca.value()).equals("--videocrypt2") ||
+                (ca.value()).equals("vcDualMode") ) {
             if (captainJack) chkShowCardSerial.setEnabled(true);
         }
         else {
@@ -6285,8 +6081,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Enable EMM options on supported modes
         boolean emmSupported;
-        if (scramblingType1.equals("--videocrypt")) {
-            switch (scramblingKey1) {
+        if (ca.value().equals("--videocrypt")) {
+            switch (key.value()) {
                 case "sky06":
                 case "sky07":
                 case "sky09":
@@ -6299,7 +6095,7 @@ public class GUI extends javax.swing.JFrame {
                     break;
             }
         }
-        else emmSupported = (scramblingType1.equals("--videocrypt2")) && scramblingKey1.equals("conditional");
+        else emmSupported = ca.value().equals("--videocrypt2") && key.value().equals("conditional");
         if (emmSupported) {
             chkActivateCard.setEnabled(true);
             chkDeactivateCard.setEnabled(true);
@@ -6311,15 +6107,17 @@ public class GUI extends javax.swing.JFrame {
             chkDeactivateCard.setEnabled(false);
         }
         // Enable PPV findkey option
-        if ( (scramblingKey1.equals("ppv")) ) {
+        if (key.value().equals("ppv")) {
             chkFindKeys.setEnabled(true);
         }
         else {
-            if ( chkFindKeys.isSelected()) chkFindKeys.doClick();
+            if (chkFindKeys.isSelected()) chkFindKeys.doClick();
             chkFindKeys.setEnabled(false);
         }
         // Enable permutation table options (Syster-based modes)
-        if ( ((scramblingType1).equals("--syster")) || (scramblingType1).equals("--systercnr")) {
+        if (ca.value().equals("--syster") ||
+                ca.value().equals("--systercnr") ||
+                ca.value().equals("systerDualMode") ) {
             lblSysterPermTable.setEnabled(true);
             cmbSysterPermTable.setEnabled(true);
             cmbSysterPermTable.setSelectedIndex(0);
@@ -6370,6 +6168,75 @@ public class GUI extends javax.swing.JFrame {
         lblVC2ScramblingKey.setEnabled(false);
     }
     
+    private ArrayList<String> checkScrambling() {
+        var al = new ArrayList<String>();
+        var ca = (ComboBoxOption) cmbScramblingType.getSelectedItem();
+        var k1 = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        var k2 = (ComboBoxOption) cmbScramblingKey2.getSelectedItem();
+        if (ca.value().isEmpty()) return al;
+        switch (ca.value()) {
+            case "vcDualMode":
+                al.add("--videocrypt");
+                al.add(k1.value());
+                al.add("--videocrypt2");
+                al.add(k2.value());
+                break;
+            case "systerDualMode":
+                // Duplicate the scrambling key to the CNR mode - you can't use
+                // different access keys simultaneously.
+                al.add("--syster");
+                al.add(k1.value());
+                al.add("--systercnr");
+                al.add(k1.value());
+                break;
+            case "--single-cut":
+            case "--double-cut":
+                al.add(ca.value());
+                if (!k1.value().equals("blank")) {
+                    al.add("--eurocrypt");
+                    al.add(k1.value());
+                }
+                break;
+            default:
+                al.add(ca.value());
+                al.add(k1.value());
+                break;
+        }
+        if (cmbECMaturity.getSelectedIndex() > 0) {
+            al.add("--ec-mat-rating");
+            al.add(Integer.toString(cmbECMaturity.getSelectedIndex()));
+        }
+        if (chkECppv.isSelected()) {
+            al.add("--ec-ppv");
+            String n = txtECprognum.getText();
+            String c = txtECprogcost.getText();
+            if (n.isEmpty()) n = "0";
+            if (c.isEmpty()) c = "0";
+            al.add(n + "," + c);
+        }
+        if (chkNoDate.isSelected()) al.add("--nodate");
+        if (chkScrambleAudio.isSelected()) {
+            if (k1.value().equals("--single-cut") ||
+                (k1.value().equals("--double-cut")) ) {
+                al.add("--scramble-audio");
+            }
+            else {
+                al.add("--systeraudio");
+            }
+        }
+        switch (cmbSysterPermTable.getSelectedIndex()) {
+            case 1:
+                al.add("--key-table-1");
+                break;
+            case 2:
+                al.add("--key-table-2");
+                break;
+            default:
+                break;
+        }
+        return al;
+    }
+    
     private void enableWSS() {
         chkWSS.setEnabled(true);
     }
@@ -6407,80 +6274,51 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addARCorrectionOptions() {
-        var ARModesAL = new ArrayList<String>();
+        ComboBoxOption[] arModes;
         if (!captainJack) {
-            ARModesAL.add("Stretched");
-            ARModesAL.add("Fit");
-            ARModesAL.add("Fill");
-            ARModesAL.add("None");
+            arModes = new ComboBoxOption[] {
+                new ComboBoxOption("", "Stretched"),
+                new ComboBoxOption("fit", "Fit"),
+                new ComboBoxOption("fill", "Fill"),
+                new ComboBoxOption("none", "None")
+            };
+        } else {
+            arModes = new ComboBoxOption[] {
+                new ComboBoxOption("", "Stretched"),
+                new ComboBoxOption("--letterbox", "Letterboxed"),
+                new ComboBoxOption("--pillarbox", "Cropped")
+            };
         }
-        else {
-            ARModesAL.add("Stretched");
-            ARModesAL.add("Letterboxed");
-            ARModesAL.add("Cropped");
-        }
-        // Convert to an array so we can populate
-        var ARCorrectionMode = new String[ARModesAL.size()];
-        for(int i = 0; i < ARCorrectionMode.length; i++) {
-            ARCorrectionMode[i] = ARModesAL.get(i);
-        } 
-        cmbARCorrection.removeAllItems();
-        cmbARCorrection.setModel(new DefaultComboBoxModel<>(ARCorrectionMode));
+        cmbARCorrection.setModel(new DefaultComboBoxModel<>(arModes));
         cmbARCorrection.setSelectedIndex(0);
     }
     
     private ArrayList<String> checkARCorrectionOptions() {
         var al = new ArrayList<String>();
         if (chkARCorrection.isSelected()) {
-            if (!captainJack) {
-                switch (cmbARCorrection.getSelectedIndex()) {
-                    case 1:
-                        al.add("--fit");
-                        al.add("fit");
-                        break;
-                    case 2:
-                        al.add("--fit");
-                        al.add("fill");
-                        break;
-                    case 3:
-                        al.add("--fit");
-                        al.add("none");
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                switch (cmbARCorrection.getSelectedIndex()) {
-                    case 1:
-                        al.add("--letterbox");
-                        break;
-                    case 2:
-                        al.add("--pillarbox");
-                        break;
-                    default:
-                        break;
-                }
-            }
+            var m = (ComboBoxOption) cmbARCorrection.getSelectedItem();
+            if (m.value().isEmpty()) return al;
+            if (!captainJack) al.add("--fit");
+            al.add(m.value());
         }
         return al;
     }
     
     private void addLogoOptions() {
         // Extract the list of logos from the INI file
-        logoArray = modesIni.getKeys("logos");
-        if (logoArray.length == 0) {
+        var keys = modesIni.getKeys("logos");
+        if (keys.length == 0) {
             // If nothing was found, disable the logo options and stop
             if (chkLogo.isSelected()) chkLogo.doClick();
             chkLogo.setEnabled(false);
             return;
         }
-        // Populate LogoNames using what we added to logoArray.
-        var LogoNames = new String[logoArray.length];
-        for (int i = 0; i < logoArray.length; i++) {
-            LogoNames[i] = (modesIni.get("logos", logoArray[i], ""));
+        var logoOptions = new ComboBoxOption[keys.length];
+        for (int i = 0; i < keys.length; i++) {
+            logoOptions[i] = new ComboBoxOption(keys[i], modesIni.get("logos", keys[i]));
         }
-        cmbLogo.removeAllItems();
-        cmbLogo.setModel(new DefaultComboBoxModel<>(LogoNames));
+        cmbLogo.setModel(new DefaultComboBoxModel<>(logoOptions));
+        cmbLogo.setSelectedIndex(0);
         if (!chkLogo.isSelected()) cmbLogo.setSelectedIndex(-1);
     }
     
@@ -6488,25 +6326,25 @@ public class GUI extends javax.swing.JFrame {
         var al = new ArrayList<String>();
         // Populate logo parameters if enabled
         if (chkLogo.isSelected()) {
+            var m = (ComboBoxOption) cmbLogo.getSelectedItem();
             al.add("--logo");
-            al.add(logoArray[cmbLogo.getSelectedIndex()]);
+            al.add(m.value());
         }
         return al;
     }
     
     private TestSignalOption parseTestCard(String command, String value) {
+        // Parses the INI value returned from a [testcards] section
         return new TestSignalOption(command, value.trim(), "", false, "");
     }
     
     private TestSignalOption parseTestSignal(String command, String value) {
         // Parses the INI value returned from a [testsignals_*_*] section
         String[] parts = value.split("\\s*,\\s*", -1);
-
         String name = parts.length > 0 ? parts[0].trim() : "";
         String file = parts.length > 1 ? parts[1].trim() : "";
         boolean text = parts.length > 2 && "1".equals(parts[2].trim());
         String rate = parts.length > 3 ? parts[3].trim() : "";
-
         return new TestSignalOption(command, name, file, text, rate);
     }
     
@@ -6545,7 +6383,6 @@ public class GUI extends javax.swing.JFrame {
             for (String key : tcKeys) {
                 String value = modesIni.get(tcSection, key, "");
                 if (value.isBlank()) continue;
-
                 TestSignalOption opt;
                 if (tcSection.equals("testcards")) {
                     opt = parseTestCard(key, value);
@@ -6700,15 +6537,25 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addOutputDevices() {
-        String[] od = {
-            "HackRF",
-            "SoapySDR",
-            "FL2000",
-            "File"
+        var outputDevices = new ComboBoxOption[] {
+            new ComboBoxOption("hackrf", "HackRF"),
+            new ComboBoxOption("soapysdr", "SoapySDR"),
+            new ComboBoxOption("fl2k", "FL2000"),
+            new ComboBoxOption("file", "File")
         };
-        cmbOutputDevice.removeAllItems();
-        cmbOutputDevice.setModel(new DefaultComboBoxModel<>(od));
+        cmbOutputDevice.setModel(new DefaultComboBoxModel<>(outputDevices));
         cmbOutputDevice.setSelectedIndex(0);
+    }
+    
+    private void addFl2kAudioOptions() {
+        var audio = new ComboBoxOption[] {
+            new ComboBoxOption("", "None"),
+            new ComboBoxOption("mono", "Mono"),
+            new ComboBoxOption("stereo", "Stereo"),
+            new ComboBoxOption("spdif", "S/PDIF")
+        };
+        cmbFl2kAudio.setModel(new DefaultComboBoxModel<>(audio));
+        cmbFl2kAudio.setSelectedIndex(0);
     }
     
     private void enableRFOptions() {
@@ -6742,8 +6589,6 @@ public class GUI extends javax.swing.JFrame {
         txtFrequency.setEditable(false);
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
-        // Add a blank item to prevent the combobox from enlarging on some L&Fs
-        cmbRegion.addItem("");
         if (chkAmp.isSelected()) chkAmp.doClick();
         chkAmp.setEnabled(false);
         lblAntennaName.setEnabled(false);
@@ -6987,71 +6832,18 @@ public class GUI extends javax.swing.JFrame {
         }
         // Save the current colour system to prevColour so we can recall this later
         prevColour = getSelectedColourSystem();
-        // Check for UHF and VHF band plans
-        // We now support up to five band plans per band. uhf and vhf are the
-        // default and these names are retained for backwards compatibility.
-        // Additional band plans can be added from uhf2 to uhf5, or vhf2 to vhf5.
-        uhfAL = new ArrayList<>();
-        vhfAL = new ArrayList<>();
-        for (int i = 0; i <= 5; i++) {
-            // The string below is merged below to find uhf2-5
-            String s;
-            switch (i) {
-                case 0:
-                    // There's no uhf0 setting so pass an empty string
-                    s = "";
-                    break;
-                case 1:
-                    // There's no uhf1 setting so skip this
-                    continue;
-                default:
-                    s = Integer.toString(i);
-                    break;
-            }
-            String u = modesIni.get(mode, "uhf" + s, "0");
-            if (!u.equalsIgnoreCase("0")) {
-                // If the UHF radio button label was renamed, set it back
-                if (radUHF.getText().equals("Satellite")) radUHF.setText("UHF");
-                sat = false;
-                uhfAL.add(u);
-            }
-            else {
-                // Check if any satellite band plans are defined
-                u = modesIni.get(mode, "sat" + s, "0");
-                if (!u.equalsIgnoreCase("0")) {
-                    // Rename the UHF radio button label to Satellite instead
-                    radUHF.setText("Satellite");
-                    sat = true;
-                    uhfAL.add(u);
-                }
-                else {
-                    break;
-                }
-            }
+        // Check for and set UHF and VHF band plans (regions)
+        populateBandPlanIDs("uhf", uhfAL);
+        if (uhfAL.isEmpty()) {
+            // See if there are any satellite band plans instead
+            populateBandPlanIDs("sat", uhfAL);
+            sat = (!uhfAL.isEmpty());
+            if (sat) radUHF.setText("Satellite");
+        } else {
+            if (radUHF.getText().equals("Satellite")) radUHF.setText("UHF");
+            sat = false;
         }
-        for (int j = 0; j <= 5; j++) {
-            // The string below is merged below to find vhf2-vhf5
-            String t;
-            switch (j) {
-                case 0:
-                    // There's no vhf0 setting, so pass an empty string
-                    t = "";
-                    break;
-                case 1:
-                    // There's no vhf1 setting, so skip this
-                    continue;
-                default:
-                    t = Integer.toString(j);
-                    break;
-            }
-            String v = modesIni.get(mode, "vhf" + t, "0");
-            if (!v.equalsIgnoreCase("0")) {
-                vhfAL.add(v);
-            }
-            else {
-                break;
-            }
-        }
+        populateBandPlanIDs("vhf", vhfAL);
         if (uhfAL.isEmpty()) {
             disableUHF();
         }
@@ -7075,7 +6867,62 @@ public class GUI extends javax.swing.JFrame {
         else {
             radCustom.doClick();
         }
-}
+    }
+    
+    private void populateBandPlanIDs(String band, ArrayList<String> al) {
+        // Queries (for example) uhf, uhf2, uhf3, uhf4, uhf5 for band plan IDs
+        al.clear();
+        for (int i = 0; i < 5; i++) {
+            String key = (i == 0) ? band : band + (i + 1);
+            String value = modesIni.get(mode, key, "0");
+            // The above returns 0 if no match found, skip if this is the case
+            if (value.equals("0")) continue;
+            al.add(value);
+        }
+    }
+    
+    private void populateBandPlan() {
+        // Read region ID from combobox
+        var m = (ComboBoxOption) cmbRegion.getSelectedItem();
+        if (m == null) return;
+        if (m.value().isEmpty()) return;
+        var bpname = m.value();
+        txtFrequency.setEditable(false);
+        try {
+            // Extract (from bpFile) the band plan section that we need
+            String[] bp = bpIni.getKeys(bpname);
+            if (bp.length == 0) {
+                 messageBox(bpname + " was not found in bandplans.ini", JOptionPane.ERROR_MESSAGE);
+                 return;
+            }
+            var options = new ArrayList<ComboBoxOptionLong>();
+            for (String key : bp) {
+                Long value = bpIni.getLong(bpname, key);
+                // Skip region ID, chid and local oscillator keys if they exist.
+                // These should not be processed here.
+                if (key.equals("region")) continue;
+                if (key.equals("chid")) continue;
+                if (key.equals("lo")) continue;
+                if (value == null) continue;
+                // Add all other key/value pairs
+                var opt = new ComboBoxOptionLong(value, key);
+                options.add(opt);
+            }
+            // Enable cmbChannel and populate it with the contents of options
+            cmbChannel.setEnabled(true);       
+            cmbChannel.setModel(new DefaultComboBoxModel<>(options.toArray(ComboBoxOptionLong[]::new)));
+            cmbChannel.setSelectedIndex(0);
+        }
+        catch (IllegalArgumentException ex) {
+            System.err.println(ex);
+            messageBox("The band plan data in bandplans.ini appears to be "
+                    + "missing or corrupt for the selected band.", JOptionPane.WARNING_MESSAGE);
+            radCustom.doClick();
+            // Disable the band that failed
+            if (radUHF.isSelected()) radUHF.setEnabled(false);
+            if (radVHF.isSelected()) radVHF.setEnabled(false);
+        }
+    }
     
     private void enableAudioOption() {
         chkAudio.setEnabled(true);
@@ -7345,63 +7192,7 @@ public class GUI extends javax.swing.JFrame {
         // Revert Filter checkbox name to VSB-AM
         chkVideoFilter.setText("VSB-AM filter");
     }
-    
-    private void populateBandPlan(String band) {
-        // If a satellite band plan has been specified, change the band
-        if ((band).contains("uhf") && (sat)) band = band.replace("uhf", "sat");
-        txtFrequency.setEditable(false);
-        try {
-            // Get the band plan list from the requested video mode and band
-            String bpname = modesIni.get(mode, band, "").toLowerCase(Locale.ENGLISH);
-            // Extract (from bpFile) the band plan section that we need
-            String[] bp = bpIni.getKeys(bpname);
-            if (bp.length == 0) {
-                 messageBox(band + " was not found in bandplans.ini", JOptionPane.ERROR_MESSAGE);
-                 return;
-            }
-            var trimmed = new ArrayList<String>();
-            for (String s : bp) {
-                // Remove region identifier, chid and local oscillator lines if they exist.
-                // These should not be processed here.
-                if (!s.equals("region") && !s.equals("chid") && !s.equals("lo")) {
-                    trimmed.add(s);
-                }
-            }
-            channelArray = trimmed.toArray(String[]::new);
-            // Populate frequencyArray by reading modesFile using what we added
-            // to channelArray.
-            frequencyArray = new long[channelArray.length];
-            for (int i = 0; i < channelArray.length; i++) {
-                if (bpIni.getLong(bpname, channelArray[i]) != null) {
-                    frequencyArray[i] = bpIni.getLong(bpname, channelArray[i]);
-                }
-                else {
-                     messageBox("Invalid data returned from bandplans.ini, section name: "
-                             + bpname, JOptionPane.ERROR_MESSAGE);
-                     return;
-                }
-            }        
-            // Enable cmbChannel and populate it with the contents of channelArray
-            cmbChannel.setEnabled(true);       
-            cmbChannel.removeAllItems();
-            cmbChannel.setModel(new DefaultComboBoxModel<>(channelArray));
-            cmbChannel.setSelectedIndex(0);  
-        }
-        catch (IllegalArgumentException ex) {
-            System.err.println(ex);
-            messageBox("The band plan data in bandplans.ini appears to be "
-                    + "missing or corrupt for the selected band.", JOptionPane.WARNING_MESSAGE);
-            radCustom.doClick();
-            // Disable the band that failed
-            if (band.startsWith("uhf")) {
-                radUHF.setEnabled(false);
-            }
-            else if (band.startsWith("vhf")) {
-                radVHF.setEnabled(false);
-            }
-        }
-    }
-    
+        
     private void youtubedl(String input) {
         // yt-dlp frontend. Pass the download URL as a string.
         // youtube-dl is no longer supported
@@ -7699,8 +7490,8 @@ public class GUI extends javax.swing.JFrame {
         if (!sat) return 0;
         // If "Apply these settings to custom frequencies" is disabled, and
         // the Custom radio button is selected, return zero.
-        if ( ((PREFS.get("applyloforcustomfreq", "0")).equals("0")) &&
-                (radCustom.isSelected()) ) return 0;
+        if ( PREFS.get("applyloforcustomfreq", "0").equals("0") &&
+                radCustom.isSelected() ) return 0;
         // Check first if there's a hardcoded LO in the band plan.
         // This will override any user-defined LO.
         // Retrieve the band plan by checking the region combobox index.
@@ -7862,7 +7653,8 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private String checkCardNumber(String cardNumber) {
-        switch (scramblingType1) {
+        var k = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        switch (k.value()) {
             case "--videocrypt":
                 return checkVC1CardNumber(cardNumber);
             case "--videocrypt2":
@@ -7885,7 +7677,8 @@ public class GUI extends javax.swing.JFrame {
         int keyEnd = -1;
         String length = "";
         boolean qs = false;
-        switch (scramblingKey1) {
+        var k = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        switch (k.value()) {
             case "sky06":
                 // 13-digit (standard) or 9-digit (Quick Start) cards
                 length = "9 or 13";
@@ -7906,8 +7699,8 @@ public class GUI extends javax.swing.JFrame {
                         // Luhn check failed
                         return null;
                     }
-                    break;
                 }
+                break;
             case "sky07":
                 // 13-digit (standard) or 9-digit cards
                 length = "9 or 13";
@@ -8009,7 +7802,8 @@ public class GUI extends javax.swing.JFrame {
         // If you have a legitimate card that fails this check, let me know.
         String WrongCardType = "The card number you entered appears to be for a different issue.\n"
                 + "Using EMMs on the wrong card type may irreparably damage the card.";
-        switch (scramblingKey1) {
+        var k = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        switch (k.value()) {
             case "sky06":
                 String s6 = cardNumber.substring(0,2);
                 // Carry out a basic card number check, ensure it starts with 06.
@@ -8116,8 +7910,9 @@ public class GUI extends javax.swing.JFrame {
     
     private ArrayList<String> checkOutputDevice() {
         var al = new ArrayList<String>();
-        switch (cmbOutputDevice.getSelectedIndex()) {
-            case 3:
+        var m = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
+        switch (m.value()) {
+            case "file":
                 // If File is selected, check if the path is blank
                 if (txtOutputDevice.getText().isBlank()) {
                      messageBox("Please select an output file or change the output device.",
@@ -8148,7 +7943,7 @@ public class GUI extends javax.swing.JFrame {
                     }
                 }
                 break;
-            case 2:
+            case "fl2k":
                 // fl2k
                 al.add("-o");
                 if (!txtOutputDevice.getText().isBlank()) {
@@ -8157,29 +7952,14 @@ public class GUI extends javax.swing.JFrame {
                 else {
                     al.add("fl2k");
                 }
-                switch (cmbFl2kAudio.getSelectedIndex()) {
-                    case 0:
-                    default:
-                        // No audio
-                        break;
-                    case 1:
-                        // Mono
-                        al.add("--fl2k-audio");
-                        al.add("mono");
-                        break;
-                    case 2:
-                        // Stereo
-                        al.add("--fl2k-audio");
-                        al.add("stereo");
-                        break;
-                    case 3:
-                        // S/PDIF
-                        al.add("--fl2k-audio");
-                        al.add("spdif");
-                        break;
+                // fl2k audio
+                var fa = (ComboBoxOption) cmbFl2kAudio.getSelectedItem();
+                if (!fa.value().isEmpty()) {
+                    al.add("--fl2k-audio");
+                    al.add(fa.value());
                 }
                 break;
-            case 1:
+            case "soapysdr":
                 // SoapySDR
                 al.add("-o");
                 if (!txtOutputDevice.getText().isBlank()) {
@@ -8193,7 +7973,7 @@ public class GUI extends javax.swing.JFrame {
                     al.add(txtAntennaName.getText());
                 }
                 break;
-            case 0:
+            case "hackrf":
                 // HackRF
                 if (!txtOutputDevice.getText().isBlank()) {
                     al.add("-o");
@@ -8442,42 +8222,7 @@ public class GUI extends javax.swing.JFrame {
         }
         if (chkACP.isSelected()) allArgs.add("--acp");
         if (chkRepeat.isSelected()) allArgs.add("--repeat");
-        if (!scramblingType1.isEmpty()) allArgs.add(scramblingType1);
-        if (!scramblingKey1.isEmpty()) allArgs.add(scramblingKey1);
-        if (!scramblingType2.isEmpty()) allArgs.add(scramblingType2);
-        if (!scramblingKey2.isEmpty()) allArgs.add(scramblingKey2);
-        if (cmbECMaturity.getSelectedIndex() > 0) {
-            allArgs.add("--ec-mat-rating");
-            allArgs.add(Integer.toString(cmbECMaturity.getSelectedIndex()));
-        }
-        if (chkECppv.isSelected()) {
-            allArgs.add("--ec-ppv");
-            String n = txtECprognum.getText();
-            String c = txtECprogcost.getText();
-            if (n.isEmpty()) n = "0";
-            if (c.isEmpty()) c = "0";
-            allArgs.add(n + "," + c);
-        }
-        if (chkNoDate.isSelected()) allArgs.add("--nodate");
-        if (chkScrambleAudio.isSelected()) {
-            if (scramblingType1.equals("--single-cut") ||
-                (scramblingType1.equals("--double-cut")) ) {
-                allArgs.add("--scramble-audio");
-            }
-            else {
-                allArgs.add("--systeraudio");
-            }
-        }
-        switch (cmbSysterPermTable.getSelectedIndex()) {
-            case 1:
-                allArgs.add("--key-table-1");
-                break;
-            case 2:
-                allArgs.add("--key-table-2");
-                break;
-            default:
-                break;
-        }
+        allArgs.addAll(checkScrambling());
         // The functions below can return null as an error code, so check for
         // this and stop if necessary.
         if (checkFMDeviation() != null) {
@@ -8812,9 +8557,9 @@ public class GUI extends javax.swing.JFrame {
                     // stdOut of yt-dlp to stdIn of hacktv
                     List<Process> p = ProcessBuilder.startPipeline(pb);
                     // Get the yt-dlp process
-                    Process y = (Process) p.get(0);
+                    Process y = p.get(0);
                     // Get the hacktv process
-                    Process h = (Process) p.get(1);
+                    Process h = p.get(1);
                     // Get the PID of hacktv
                     hpid = h.pid();
                     // Capture the output of hacktv
@@ -9069,7 +8814,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_menuExitActionPerformed
       
     private void txtCardNumberKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCardNumberKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
         else if (txtCardNumber.getText().length() >= 13) {
@@ -9113,64 +8858,14 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_chkActivateCardActionPerformed
 
-    private void cmbScramblingKey2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScramblingKey2ActionPerformed
-        /* This combobox is only currently used for dual VideoCrypt I/II mode.
-        So, we check that this mode is selected, and that the combobox is
-        not blank.
-        */
-        if ( (cmbScramblingKey2.getSelectedIndex() != -1) &&
-            (cmbScramblingType.getSelectedIndex() == 3) ) {
-            scramblingType2 = "--videocrypt2";
-            scramblingKey2 = scramblingKey2Array.get(cmbScramblingKey2.getSelectedIndex());
-        }
-    }//GEN-LAST:event_cmbScramblingKey2ActionPerformed
-
     private void cmbScramblingKey1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScramblingKey1ActionPerformed
         if (cmbScramblingKey1.getSelectedIndex() != -1) {
-            if (scramblingType1.equals("--single-cut") ||
-                (scramblingType1.equals("--double-cut")) ) {
-                scramblingKey1 = "";
-                scramblingKey2 = scramblingKeyArray.get(cmbScramblingKey1.getSelectedIndex());
-                /* Free access mode doesn't use the --eurocrypt option, so
-                check before adding.
-                */
-                if (!scramblingKey2.contains("blank")) {
-                    scramblingType2 = "--eurocrypt";
-                }
-                else {
-                    scramblingType2 = "";
-                    scramblingKey2 = "";
-                }
-            }
-            else {
-                scramblingKey1 = scramblingKeyArray.get(cmbScramblingKey1.getSelectedIndex());
-                if (!cmbScramblingKey2.isEnabled()) {
-                    scramblingType2 = "";
-                    scramblingKey2 = "";
-                }
-                /* If Syster dual mode (line shuffle+cut-and-rotate) is enabled,
-                 * set up CNR as a secondary scrambling type and duplicate the 
-                 * scrambling key to the CNR mode - you can't use different
-                 * access keys simultaneously.
-                 */
-                if ( (scramblingType1.equals("--syster")) && (cmbScramblingType.getSelectedIndex() == 8) ) {
-                    scramblingType2 = "--systercnr";
-                    scramblingKey2 = scramblingKey1;    
-                }
-                // Delete the "blank" parameter if specified
-                // This is used as a placeholder for modes which don't use
-                // an additional parameter
-                if (scramblingKey1.equals("blank")) {
-                    scramblingKey1 = "";
-                }
-            }
             configureScramblingOptions();
         }
     }//GEN-LAST:event_cmbScramblingKey1ActionPerformed
 
     private void cmbScramblingTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScramblingTypeActionPerformed
         if (cmbScramblingType.getSelectedIndex() != -1) {
-            scramblingType1 = scramblingTypeArray.get(cmbScramblingType.getSelectedIndex());
             addScramblingKey();
         }
     }//GEN-LAST:event_cmbScramblingTypeActionPerformed
@@ -9311,7 +9006,8 @@ public class GUI extends javax.swing.JFrame {
 
     private void chkVideoFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVideoFilterActionPerformed
         if (!chkVideoFilter.isSelected()) {
-            if ( scramblingType1.equals("--videocrypt") || scramblingType1.equals("--videocrypt2") ) {
+            var ca = (ComboBoxOption) cmbScramblingType.getSelectedItem();
+            if ( ca.value().equals("--videocrypt") || ca.value().equals("--videocrypt2") ) {
                 if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
                 txtPixelRate.setText("14");
             }
@@ -9339,7 +9035,7 @@ public class GUI extends javax.swing.JFrame {
             evt.consume();
         }
         else {
-            String c = String.valueOf((char)evt.getKeyChar());
+            String c = String.valueOf(evt.getKeyChar());
             if (SharedInst.isHex(c)) {
                 evt.setKeyChar(c.toUpperCase(Locale.ENGLISH).toCharArray()[0]);
             }
@@ -9569,7 +9265,8 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbChannelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbChannelActionPerformed
         if ( cmbChannel.getSelectedIndex() != -1) {
-            frequency = frequencyArray[cmbChannel.getSelectedIndex()];
+            var ch = (ComboBoxOptionLong) cmbChannel.getSelectedItem();
+            frequency = ch.value();
             // Convert the imported value so we can display it in MHz on-screen
             var df = new DecimalFormat("0.00");
             double input;
@@ -9600,7 +9297,7 @@ public class GUI extends javax.swing.JFrame {
                 String c = bpIni.get(bp, "chid", "").toLowerCase(Locale.ENGLISH);
                 // Retrieve ID using the channel name from the ID list
                 // This name must be identical to the name specified in the band plan
-                String id = bpIni.get(c, channelArray[cmbChannel.getSelectedIndex()], "").toUpperCase(Locale.ENGLISH);
+                String id = bpIni.get(c, cmbChannel.getSelectedItem().toString(), "").toUpperCase(Locale.ENGLISH);
                 if (id.isBlank()) {
                     // Nothing found, deselect the channel ID checkbox
                     if (chkMacChId.isSelected()) chkMacChId.doClick();
@@ -9622,64 +9319,48 @@ public class GUI extends javax.swing.JFrame {
 
     private void radUHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUHFActionPerformed
         // Get the name of the currently selected VHF region and look it up
+        // This is used to select the same region if there's a UHF equivalent
         String sv = "";
-        if (cmbRegion.getSelectedIndex() > 0) sv = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
-        // Set region and alternate plans for UHF
-        cmbRegion.setEnabled(false);
-        cmbRegion.removeAllItems();
-        for (int i = 0; i < uhfAL.size(); i++) {
-            cmbRegion.addItem(bpIni.get(uhfAL.get(i), "region", uhfAL.get(i)));
+        int svi = -1;
+        var m = (ComboBoxOption) cmbRegion.getSelectedItem();
+        if (cmbRegion.getSelectedIndex() > 0) sv = m.label();
+        // Add regions/band plans for UHF
+        var regions = new ComboBoxOption[uhfAL.size()];
+        for (int i = 0; i < regions.length; i++) {
+            var rn = bpIni.get(uhfAL.get(i), "region", uhfAL.get(i));
+            regions[i] = new ComboBoxOption(uhfAL.get(i), rn);
+            // If the region name matches the VHF name we got earlier, record it
+            if (rn.equals(sv)) svi = i;
         }
+        cmbRegion.setModel(new DefaultComboBoxModel<>(regions));
         // Enable the region combobox if multiple options are available.
-        if (cmbRegion.getItemCount() > 1) {
-            cmbRegion.setEnabled(true);
-            if (!sat) {
-                populateBandPlan("uhf");
-            }
-            else {
-                // Populate satellite band plans instead of UHF ones
-                populateBandPlan("sat");
-            }
-        }
-        // If multiple regions are available, see if there's a UHF region with the
-        // same name as the previously selected VHF one. If so, select it.
-        if ( (uhfAL.size() > 1) && (vhfAL.size() > 1) ) {
-            for (int r = 0; r < cmbRegion.getItemCount(); r++) {
-                String su = cmbRegion.getItemAt(r);
-                if (sv.equals(su)) {
-                    cmbRegion.setSelectedIndex(r);
-                    break;
-                }
-            }        
-        }
+        cmbRegion.setEnabled(cmbRegion.getItemCount() > 1);
+        populateBandPlan();
+        // If we found a region name match, select it
+        if (svi != -1) cmbRegion.setSelectedIndex(svi);
     }//GEN-LAST:event_radUHFActionPerformed
 
     private void radVHFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVHFActionPerformed
         // Get the name of the currently selected UHF band plan and look it up
+        // This is used to select the same region if there's a VHF equivalent
         String su = "";
-        if (cmbRegion.getSelectedIndex() > 0) su = cmbRegion.getItemAt(cmbRegion.getSelectedIndex());
-        // Set region and alternate plans for VHF
-        cmbRegion.setEnabled(false);
-        cmbRegion.removeAllItems();
-        for (int i = 0; i < vhfAL.size(); i++) {
-            cmbRegion.addItem(bpIni.get(vhfAL.get(i), "region", vhfAL.get(i)));
+        int sui = -1;
+        var m = (ComboBoxOption) cmbRegion.getSelectedItem();
+        if (cmbRegion.getSelectedIndex() > 0) su = m.label();
+        // Add regions/band plans for VHF
+        var regions = new ComboBoxOption[vhfAL.size()];
+        for (int i = 0; i < regions.length; i++) {
+            var rn = bpIni.get(vhfAL.get(i), "region", vhfAL.get(i));
+            regions[i] = new ComboBoxOption(vhfAL.get(i), rn);
+            // If the region name matches the UHF name we got earlier, record it
+            if (rn.equals(su)) sui = i;
         }
+        cmbRegion.setModel(new DefaultComboBoxModel<>(regions));
         // Enable the region combobox if multiple options are available.
-        if (cmbRegion.getItemCount() > 1) {
-            cmbRegion.setEnabled(true);
-            populateBandPlan("vhf");
-        }
-        // If multiple regions are available, see if there's a VHF region with the
-        // same name as the previously selected UHF one. If so, select it.
-        if ( (uhfAL.size() > 1) && (vhfAL.size() > 1) ) {
-            for (int r = 0; r < cmbRegion.getItemCount(); r++) {
-                String sv = cmbRegion.getItemAt(r);
-                if (su.equals(sv)) {
-                    cmbRegion.setSelectedIndex(r);
-                    break;
-                }
-            }            
-        }
+        cmbRegion.setEnabled(cmbRegion.getItemCount() > 1);
+        populateBandPlan();
+        // If we found a region name match, select it
+        if (sui != -1) cmbRegion.setSelectedIndex(sui);
     }//GEN-LAST:event_radVHFActionPerformed
 
     private void radCustomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCustomActionPerformed
@@ -9689,7 +9370,7 @@ public class GUI extends javax.swing.JFrame {
         cmbRegion.setEnabled(false);
         cmbRegion.removeAllItems();
         // Add a blank item to prevent the combobox from enlarging on some L&Fs
-        cmbRegion.addItem("");
+        cmbRegion.addItem(new ComboBoxOption("", ""));
     }//GEN-LAST:event_radCustomActionPerformed
 
     private void menuNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNewActionPerformed
@@ -10351,7 +10032,7 @@ public class GUI extends javax.swing.JFrame {
     private void cmbLookAndFeelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLookAndFeelActionPerformed
         if (this.isVisible()) {
             SwingUtilities.invokeLater(() -> {
-                changeLaf(cmbLookAndFeel.getSelectedIndex());    
+                changeLaf();
             });
         }
     }//GEN-LAST:event_cmbLookAndFeelActionPerformed
@@ -10383,7 +10064,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtGammaKeyTyped
@@ -10394,7 +10075,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtOutputLevelKeyTyped
@@ -10405,7 +10086,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtVolumeKeyTyped
@@ -10416,7 +10097,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtSampleRateKeyTyped
@@ -10427,7 +10108,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtPixelRateKeyTyped
@@ -10438,43 +10119,43 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtFMDevKeyTyped
 
     private void txtGainKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtGainKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtGainKeyTyped
 
     private void txtSubtitleIndexKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSubtitleIndexKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtSubtitleIndexKeyTyped
 
     private void txtPositionKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPositionKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtPositionKeyTyped
 
     private void txtTextSubtitleIndexKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTextSubtitleIndexKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtTextSubtitleIndexKeyTyped
 
     private void txtECprognumKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtECprognumKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtECprognumKeyTyped
 
     private void txtECprogcostKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtECprogcostKeyTyped
-        if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtECprogcostKeyTyped
@@ -10542,16 +10223,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cmbNMSCeefaxRegionMouseWheelMoved
 
     private void cmbRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRegionActionPerformed
-        int i = cmbRegion.getSelectedIndex();
-        if (i == -1) return;
-        if (i == 0) {
-            if (radUHF.isSelected()) populateBandPlan("uhf");
-            if (radVHF.isSelected()) populateBandPlan("vhf");
-        }
-        else {
-            if (radUHF.isSelected()) populateBandPlan("uhf" + (i + 1));
-            if (radVHF.isSelected()) populateBandPlan("vhf" + (i + 1));
-        }
+        populateBandPlan();
     }//GEN-LAST:event_cmbRegionActionPerformed
 
     private void cmbRegionMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRegionMouseWheelMoved
@@ -10606,7 +10278,7 @@ public class GUI extends javax.swing.JFrame {
                 evt.consume();
             }
         }
-        else if (!SharedInst.isNumeric(String.valueOf((char)evt.getKeyChar()))) {
+        else if (!SharedInst.isNumeric(String.valueOf(evt.getKeyChar()))) {
             evt.consume();
         }
     }//GEN-LAST:event_txtOffsetKeyTyped
@@ -10643,7 +10315,7 @@ public class GUI extends javax.swing.JFrame {
                 resetAllControls();
                 return;
             }
-            if ( (uhfAL.get(0).equals("bsb")) && channelArray.length >= 5) {
+            if ( (uhfAL.get(0).equals("bsb")) && cmbChannel.getItemCount() >= 5) {
                 cmbChannel.setSelectedIndex(2);
             }
             else {
@@ -10695,18 +10367,15 @@ public class GUI extends javax.swing.JFrame {
                 resetAllControls();
                 return;
             }
-            boolean f = false;
-            for (int i = 0 ; i < frequencyArray.length; i++) {
-                if (frequencyArray[i] == 10993750000L) {
-                    cmbChannel.setSelectedIndex(i);
-                    f = true;
-                    break;
-                }
-            }
-            if (!f) {
-                messageBox("Unable to find the Astra band plan, which is required for this template.", JOptionPane.ERROR_MESSAGE);
-                resetAllControls();
-                return;                
+            // Set correct transponder
+            long freq = 10993750000L; // Transponder 35
+            var probe = new ComboBoxOptionLong(freq, "");
+            cmbChannel.setSelectedItem(probe);
+            if (!probe.equals(cmbChannel.getSelectedItem())) {
+                // Use a custom frequency instead
+                radCustom.doClick();
+                var df2 = new DecimalFormat("0.00");
+                txtFrequency.setText(df2.format((double) freq / 1000000));
             }
             // Enable pre-emphasis filter and enable FM deviation option
             chkVideoFilter.doClick();
@@ -10727,12 +10396,10 @@ public class GUI extends javax.swing.JFrame {
                     txtFMDev.setText("4");
                     break;
             }
-            var df = new DecimalFormat("0.00000");
-            double input = frequency;
-            String s = df.format(input / 1000000000);
+            var df5 = new DecimalFormat("0.00000");
+            String s = df5.format((double) freq / 1000000000);
             messageBox("Template values have been loaded. Tune your receiver to "
                     + s + " GHz and run hacktv.", JOptionPane.INFORMATION_MESSAGE);
-            
         }
     }//GEN-LAST:event_menuAstraTemplateActionPerformed
 
@@ -10825,7 +10492,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbLookAndFeelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cmbLookAndFeelMouseEntered
         // Show tooltip as the friendly name may be longer than the combobox
-        cmbLookAndFeel.setToolTipText(cmbLookAndFeel.getItemAt(cmbLookAndFeel.getSelectedIndex()));
+        cmbLookAndFeel.setToolTipText(cmbLookAndFeel.getSelectedItem().toString());
     }//GEN-LAST:event_cmbLookAndFeelMouseEntered
 
     private void cmbFl2kAudioMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbFl2kAudioMouseWheelMoved
@@ -10903,21 +10570,21 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox chkVideoFilter;
     private javax.swing.JCheckBox chkVolume;
     private javax.swing.JCheckBox chkWSS;
-    private javax.swing.JComboBox<String> cmbARCorrection;
-    private javax.swing.JComboBox<String> cmbChannel;
+    private javax.swing.JComboBox<ComboBoxOption> cmbARCorrection;
+    private javax.swing.JComboBox<ComboBoxOptionLong> cmbChannel;
     private javax.swing.JComboBox<String> cmbECMaturity;
     private javax.swing.JComboBox<String> cmbFileType;
-    private javax.swing.JComboBox<String> cmbFl2kAudio;
-    private javax.swing.JComboBox<String> cmbLogo;
-    private javax.swing.JComboBox<String> cmbLookAndFeel;
+    private javax.swing.JComboBox<ComboBoxOption> cmbFl2kAudio;
+    private javax.swing.JComboBox<ComboBoxOption> cmbLogo;
+    private javax.swing.JComboBox<ComboBoxOption> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
     private javax.swing.JComboBox<String> cmbMode;
     private javax.swing.JComboBox<String> cmbNMSCeefaxRegion;
-    private javax.swing.JComboBox<String> cmbOutputDevice;
-    private javax.swing.JComboBox<String> cmbRegion;
-    private javax.swing.JComboBox<String> cmbScramblingKey1;
-    private javax.swing.JComboBox<String> cmbScramblingKey2;
-    private javax.swing.JComboBox<String> cmbScramblingType;
+    private javax.swing.JComboBox<ComboBoxOption> cmbOutputDevice;
+    private javax.swing.JComboBox<ComboBoxOption> cmbRegion;
+    private javax.swing.JComboBox<ComboBoxOption> cmbScramblingKey1;
+    private javax.swing.JComboBox<ComboBoxOption> cmbScramblingKey2;
+    private javax.swing.JComboBox<ComboBoxOption> cmbScramblingType;
     private javax.swing.JComboBox<String> cmbSecamIdLines;
     private javax.swing.JComboBox<String> cmbSysterPermTable;
     private javax.swing.JComboBox<TestSignalOption> cmbTest;

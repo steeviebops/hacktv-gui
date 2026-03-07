@@ -584,13 +584,15 @@
                               <StringArray count="0"/>
                             </Property>
                             <Property name="enabled" type="boolean" value="false"/>
+                            <Property name="prototypeDisplayValue" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                              <Connection code="new TestSignalOption(&quot;&quot;, &quot;XXXXXXXXXXXXXXX&quot;, &quot;&quot;, false, &quot;&quot;)" type="code"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbTestMouseWheelMoved"/>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbTestActionPerformed"/>
                           </Events>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="Dimension pref = cmbTest.getPreferredSize();&#xd;&#xa;cmbTest.setPrototypeDisplayValue(&#xd;&#xa;    new TestSignalOption(&quot;&quot;, &quot;XXXXXXXXXXXXXXX&quot;, &quot;&quot;, false, &quot;&quot;)&#xd;&#xa;);"/>
                             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;TestSignalOption&gt;"/>
                           </AuxValues>
                           <Constraints>
@@ -667,18 +669,13 @@
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbLogo">
                       <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="1">
-                            <StringItem index="0" value=""/>
-                          </StringArray>
-                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbLogoMouseWheelMoved"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtSubtitleIndex">
@@ -709,18 +706,13 @@
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbARCorrection">
                       <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="1">
-                            <StringItem index="0" value=""/>
-                          </StringArray>
-                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbARCorrectionMouseWheelMoved"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Container class="javax.swing.JScrollPane" name="playlistScrollPane">
@@ -1484,7 +1476,7 @@
                           <Component id="frequencyPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="additionalOptionsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="148" max="32767" attributes="0"/>
+                          <EmptySpace pref="168" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1690,17 +1682,12 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbOutputDevice">
-                      <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
-                      </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbOutputDeviceMouseWheelMoved"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbOutputDeviceActionPerformed"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Container class="javax.swing.JPanel" name="rfPanel">
@@ -1884,7 +1871,7 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbChannelActionPerformed"/>
                           </Events>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOptionLong&gt;"/>
                           </AuxValues>
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkAmp">
@@ -1940,7 +1927,7 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbRegionActionPerformed"/>
                           </Events>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                           </AuxValues>
                         </Component>
                       </SubComponents>
@@ -1971,19 +1958,14 @@
                     <Component class="javax.swing.JComboBox" name="cmbFl2kAudio">
                       <Properties>
                         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="4">
-                            <StringItem index="0" value="None"/>
-                            <StringItem index="1" value="Mono"/>
-                            <StringItem index="2" value="Stereo"/>
-                            <StringItem index="3" value="S/PDIF"/>
-                          </StringArray>
+                          <StringArray count="0"/>
                         </Property>
                       </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbFl2kAudioMouseWheelMoved"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                   </SubComponents>
@@ -2293,7 +2275,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="scramblingPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="99" max="32767" attributes="0"/>
+                          <EmptySpace pref="101" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2375,28 +2357,16 @@
                   </Layout>
                   <SubComponents>
                     <Component class="javax.swing.JComboBox" name="cmbScramblingType">
-                      <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="1">
-                            <StringItem index="0" value=""/>
-                          </StringArray>
-                        </Property>
-                      </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbScramblingTypeMouseWheelMoved"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbScramblingTypeActionPerformed"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbScramblingKey1">
                       <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="1">
-                            <StringItem index="0" value=""/>
-                          </StringArray>
-                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -2404,24 +2374,18 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbScramblingKey1ActionPerformed"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbScramblingKey2">
                       <Properties>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="1">
-                            <StringItem index="0" value=""/>
-                          </StringArray>
-                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbScramblingKey2MouseWheelMoved"/>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbScramblingKey2ActionPerformed"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Component class="javax.swing.JLabel" name="lblScramblingSystem">
@@ -2638,6 +2602,7 @@
                                 <StringItem index="2" value="2"/>
                               </StringArray>
                             </Property>
+                            <Property name="selectedIndex" type="int" value="-1"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -2780,7 +2745,7 @@
                           <Component id="generalSettingsPanel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
                           <Component id="resetSettingsPanel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="54" max="32767" attributes="0"/>
+                          <EmptySpace pref="63" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -3046,13 +3011,18 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbLookAndFeel">
+                      <Properties>
+                        <Property name="prototypeDisplayValue" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                          <Connection code="new ComboBoxOption(&quot;&quot;, &quot;XXXXXXXXXXXXXXXXXXXX&quot;)" type="code"/>
+                        </Property>
+                      </Properties>
                       <Events>
                         <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="cmbLookAndFeelMouseWheelMoved"/>
                         <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="cmbLookAndFeelMouseEntered"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbLookAndFeelActionPerformed"/>
                       </Events>
                       <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ComboBoxOption&gt;"/>
                       </AuxValues>
                     </Component>
                     <Component class="javax.swing.JComboBox" name="cmbNMSCeefaxRegion">
