@@ -118,8 +118,6 @@ public class GUI extends javax.swing.JFrame {
     private boolean supportsPhilipsTestSignal;
 
     // Declare Teletext-related variables that are reused across multiple subs
-    private String htmlTempFile;
-    private String htmlFile;
     private File selectedFile;
     private Path tempDir;
     private String teletextPath;
@@ -193,12 +191,12 @@ public class GUI extends javax.swing.JFrame {
     public static final double DEFAULT_LO = 9.75;
     
     // Shared class instance
-    final Shared SharedInst = new Shared();
+    private final Shared SharedInst = new Shared();
     
     // INI class instances (one for each file)
-    final INIFile modesIni = new INIFile();
-    final INIFile bpIni = new INIFile();
-    final INIFile flIni = new INIFile();
+    private final INIFile modesIni = new INIFile();
+    private final INIFile bpIni = new INIFile();
+    private final INIFile flIni = new INIFile();
     
     // Drag anchor for playlist box
     private int dragAnchor = -1;
@@ -2646,7 +2644,7 @@ public class GUI extends javax.swing.JFrame {
         // Initialise Swing components
         initComponents();
         // Populate look and feel combobox using the laf variable
-        populateLaf(laf);
+        populateLafComboBox(laf);
     }
     
     public int postInitUI(String[] args) {
@@ -2903,7 +2901,7 @@ public class GUI extends javax.swing.JFrame {
             flatLaf = true;
         }
         catch (ClassNotFoundException e) {
-           flatLaf = false;
+            flatLaf = false;
         }
         if (flatLaf) {
             // Load embedded flatlaf.ini
@@ -2994,16 +2992,16 @@ public class GUI extends javax.swing.JFrame {
     
     private void setFirstRunLaf(String lafClassName) {
         // Sets the look and feel when the application is first run
+        // This is run before any UI elements are intialised
         try {
             UIManager.setLookAndFeel(lafClassName);
-        }
-        catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
             System.err.println("Error loading look and feel: " + e);
         }
     }
     
-    private void populateLaf(ArrayList<ComboBoxOption> laf) {
-        // Populate the combobox
+    private void populateLafComboBox(ArrayList<ComboBoxOption> laf) {
+        // Populate the combobox using the ArrayList we got from getLaf()
         cmbLookAndFeel.setModel(new DefaultComboBoxModel<>(laf.toArray(ComboBoxOption[]::new)));
         cmbLookAndFeel.setSelectedItem(new ComboBoxOption(UIManager.getLookAndFeel().getClass().getName(), ""));
     }
@@ -3012,7 +3010,7 @@ public class GUI extends javax.swing.JFrame {
         // Changes the look and feel on the fly
         var m = (ComboBoxOption) cmbLookAndFeel.getSelectedItem();
         String l = m.value();
-        // Only change L&F if different to the current one
+        // Only change look and feel if different to the current one
         if (!l.equals(UIManager.getLookAndFeel().getClass().getName())) {
             try {
                 UIManager.setLookAndFeel(l);
@@ -3032,8 +3030,7 @@ public class GUI extends javax.swing.JFrame {
                         + "The current version of FlatLaf may not support it.";
                 if (this.isVisible()) {
                     messageBox(err, JOptionPane.ERROR_MESSAGE);
-                }
-                else {
+                } else {
                     System.err.println();
                 }
                 // Reload default look and feel
@@ -3046,7 +3043,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void checkForUpdates(boolean Silent) {
+    private void checkForUpdates(boolean silent) {
         // Queries the Github API for the latest release
         var updateWorker = new SwingWorker<Integer, Void>() {
             @Override
@@ -3082,7 +3079,7 @@ public class GUI extends javax.swing.JFrame {
             }
             @Override
             protected void done() {
-                Integer status;
+                int status;
                 try {
                     status = get();
                 }
@@ -3098,7 +3095,7 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     case 0:
                         // Update available
-                        if (Silent) {
+                        if (silent) {
                             updateMenu.setVisible(true);
                             return;
                         }
@@ -3108,19 +3105,19 @@ public class GUI extends javax.swing.JFrame {
                         break;
                     case 1:
                         // No update available
-                        if (Silent) return;
+                        if (silent) return;
                         messageBox("No updates are available at this time.", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     case 2:
                         // Connection error
-                        if (Silent) return;
+                        if (silent) return;
                         messageBox("An error occurred while attempting to contact the Github server\n"
                            + "Please check your internet connection and try again.", JOptionPane.ERROR_MESSAGE);
                         break;
                     default:
                         // Unknown error
                         System.err.println("Error code: " + status);
-                        if (Silent) return;
+                        if (silent) return;
                         messageBox("An unknown error occurred while attempting to contact the Github server.", JOptionPane.ERROR_MESSAGE);
                         break;
                 }
@@ -3203,7 +3200,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // If no, and "UseLocalModesFile" is 0, download
-        else if ((PREFS.getInt("uselocalmodesfile", 0)) == 0) {
+        else if (PREFS.getInt("uselocalmodesfile", 0) == 0) {
             q = JOptionPane.NO_OPTION;
         }
         // If no, and UseLocalModesFile is 1, use embedded file
@@ -3324,7 +3321,7 @@ public class GUI extends javax.swing.JFrame {
     
     private boolean openBandPlanFile() {
         String m = modesFileVersion.replace("c","");
-        if ( (SharedInst.isNumeric(m)) && (Double.parseDouble(m) < 5.00) ) {
+        if (SharedInst.isNumeric(m) && Double.parseDouble(m) < 5.00) {
             // This is a v4 or older Modes.ini file
             // The main difference between v5 and the earlier formats is that
             // v5 split out the band plans into a separate file.
@@ -3335,7 +3332,7 @@ public class GUI extends javax.swing.JFrame {
             bpFileLocation = "legacy";
             bpFileVersion = modesFileVersion;
         }
-        else if ( (bpFilePath.isEmpty()) && (bpFile != null) ) {
+        else if (bpFilePath.isEmpty() && bpFile != null) {
             bpFileLocation = "online";
         }
         else if (bpFilePath.startsWith("ie/bops/resources/")) {
@@ -3350,14 +3347,12 @@ public class GUI extends javax.swing.JFrame {
                 System.err.println(ex);
                 return false;
             }
-        }
-        else {
+        } else {
             // Read the bandplans.ini we specified previously
             try {
                 bpIni.loadFromDisk(Path.of(bpFilePath));
                 bpFileLocation = "external";
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the band plans file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
@@ -3910,8 +3905,7 @@ public class GUI extends javax.swing.JFrame {
                 // Remove any Windows-style line breaks
                 iniFile = iniFile.replaceAll("\r\n", "\n");
                 htvFile.load(new StringReader(iniFile));
-            }
-            else {
+            } else {
                 messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
                 System.err.println("File too large (> 1MB)");
                 return;
@@ -3936,8 +3930,7 @@ public class GUI extends javax.swing.JFrame {
                     updateMRUList(SourceFile.toString());    
                 }
                 htvLoadInProgress = false;
-            }
-            else {
+            } else {
                 // No idea what we've read here, abort
                 messageBox("Invalid configuration file.", JOptionPane.WARNING_MESSAGE);
                 System.err.println("[hacktv] section not found");
@@ -4087,7 +4080,7 @@ public class GUI extends javax.swing.JFrame {
            return false;
         }
         // Is this a baseband mode?
-        boolean bb = htvFile.get(ImportedVideoMode, "modulation", "").equals("baseband");
+        boolean bb = modesIni.get(ImportedVideoMode, "modulation", "").equals("baseband");
         // Input source or test card
         String ImportedSource = htvFile.get("hacktv", "input", "");
         String M3USource = (htvFile.get("hacktv-gui3", "m3usource", ""));
@@ -4130,7 +4123,8 @@ public class GUI extends javax.swing.JFrame {
             if ( !ImportedSource.endsWith(".m3u") && !ImportedSource.endsWith(".m3u8") ) txtSource.setText(ImportedSource);
         }
         // Frequency or channel number
-        if ( ((cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1)) && (!bb) ) {
+        var o = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
+        if ( (o.value().equals("hackrf") || o.value().equals("soapysdr")) && (!bb) ) {
             String NoFrequencyOrChannel = "No frequency or valid channel number was found in the configuration file. Load aborted.";
             String ImportedChannel = htvFile.get("hacktv-gui3", "channel", "");
             String ImportedBandPlan = htvFile.get("hacktv-gui3", "bandplan", "").toLowerCase(Locale.ENGLISH);
@@ -4232,14 +4226,14 @@ public class GUI extends javax.swing.JFrame {
             txtGain.setText(htvFile.getInt("hacktv", "gain").toString());
         }
         // If value is null and output device is hackrf or soapysdr, set gain to zero
-        else if ( (cmbOutputDevice.getSelectedIndex() == 0) || (cmbOutputDevice.getSelectedIndex() == 1) ) {
+        else if (o.value().equals("hackrf") || o.value().equals("soapysdr")) {
             if (!bb) txtGain.setText("0");
         }
         // Amp
         if (cmbOutputDevice.getSelectedIndex() == 0) {
             if (htvFile.getBoolean("hacktv", "amp")) {
                 chkAmp.doClick();
-            }            
+            }
         }
         // FM deviation
         if ((chkFMDev.isEnabled()) && (htvFile.getDouble("hacktv", "deviation") != null)) {
@@ -4313,29 +4307,25 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         // WSS
-        if ((htvFile.getInt("hacktv", "wss")) != null) {
-            int importedWSS = htvFile.getInt("hacktv", "wss");
-            // Only accept values within the range of the combobox
-            if (importedWSS > 0 && importedWSS <= cmbWSS.getItemCount()) {
-                chkWSS.doClick();
-                // Since we increased the value by one when saving, decrease by one when loading
-                cmbWSS.setSelectedIndex(importedWSS - 1);
-            } else {
-                System.err.println("WSS value out of bounds, skipped.");
-            }
+        Integer importedWSS = htvFile.getInt("hacktv", "wss");
+        // Only accept values within the range of the combobox
+        if (importedWSS != null && (importedWSS > 0 && importedWSS <= cmbWSS.getItemCount())) {
+            chkWSS.doClick();
+            // Since we increased the value by one when saving, decrease by one when loading
+            cmbWSS.setSelectedIndex(importedWSS - 1);
+        } else {
+            System.err.println("WSS value was out of bounds, skipped.");
         }
         /* Aspect ratio correction for 16:9 content on 4:3 displays
          * If the arcorrection value is not defined, leave the option unchecked
          * Otherwise, check the option and process it as normal
          */
-        if (htvFile.getInt("hacktv", "arcorrection") != null) {
-            int importedAR = (htvFile.getInt("hacktv", "arcorrection"));
-            if (importedAR >= 0 && importedAR < cmbARCorrection.getItemCount()) {
-                chkARCorrection.doClick();
-                cmbARCorrection.setSelectedIndex(importedAR);
-            } else {
-                System.err.println("Aspect ratio value out of bounds, skipped.");
-            }
+        Integer importedAR = (htvFile.getInt("hacktv", "arcorrection"));
+        if (importedAR != null && (importedAR >= 0 && importedAR < cmbARCorrection.getItemCount())) {
+            chkARCorrection.doClick();
+            cmbARCorrection.setSelectedIndex(importedAR);
+        } else {
+            System.err.println("Aspect ratio value out of bounds, skipped.");
         }
         // Scrambling system
         String ica = htvFile.get("hacktv", "scramblingtype", "").toLowerCase(Locale.ENGLISH);
@@ -4386,27 +4376,25 @@ public class GUI extends javax.swing.JFrame {
             } 
         }
         // EMM
-        if ( (chkActivateCard.isEnabled()) && (chkDeactivateCard.isEnabled()) ) {
-            if ((htvFile.getInt("hacktv", "emm")) != null) {
-                Integer ImportedEMM = (htvFile.getInt("hacktv", "emm"));
-                String ImportedCardNumber;
-                String Imported13Prefix;
-                if ( (ImportedEMM.equals(1)) || (ImportedEMM.equals(2)) ){
-                    if (ImportedEMM.equals(1)) chkActivateCard.doClick();
-                    if (ImportedEMM.equals(2)) chkDeactivateCard.doClick();
-                    ImportedCardNumber = htvFile.get("hacktv", "cardnumber", "").toLowerCase(Locale.ENGLISH);
-                    // Handling of legacy files
-                    if (ImportedCardNumber.length() == 8) {
-                        Imported13Prefix = htvFile.get("hacktv-gui3", "13digitprefix", "").toLowerCase(Locale.ENGLISH);
-                        // The ImportedCardNumber value only contains 8 digits of the card number
-                        // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
-                        if (SharedInst.isNumeric(Imported13Prefix + ImportedCardNumber)) txtCardNumber.setText(Imported13Prefix + 
-                        ImportedCardNumber + SharedInst.calculateLuhnCheckDigit(Long.parseLong(ImportedCardNumber)));
-                    }
-                    else {
-                        // Pass the full card number through
-                        if (SharedInst.isNumeric(ImportedCardNumber)) txtCardNumber.setText(ImportedCardNumber);
-                    }
+        if (chkActivateCard.isEnabled() && chkDeactivateCard.isEnabled()) {
+            Integer importedEMM = htvFile.getInt("hacktv", "emm");
+            String importedCardNumber;
+            String imported13Prefix;
+            if (importedEMM != null && (importedEMM == 1 || importedEMM == 2)){
+                if (importedEMM == 1) chkActivateCard.doClick();
+                if (importedEMM == 2) chkDeactivateCard.doClick();
+                importedCardNumber = htvFile.get("hacktv", "cardnumber", "").toLowerCase(Locale.ENGLISH);
+                // Handling of legacy files
+                if (importedCardNumber.length() == 8) {
+                    imported13Prefix = htvFile.get("hacktv-gui3", "13digitprefix", "").toLowerCase(Locale.ENGLISH);
+                    // The importedCardNumber value only contains 8 digits of the card number
+                    // To find the check digit, we run the CalculateLuhnCheckDigit method and append the result
+                    if (SharedInst.isNumeric(imported13Prefix + importedCardNumber)) txtCardNumber.setText(imported13Prefix + 
+                    importedCardNumber + SharedInst.calculateLuhnCheckDigit(Long.parseLong(importedCardNumber)));
+                }
+                else {
+                    // Pass the full card number through
+                    if (SharedInst.isNumeric(importedCardNumber)) txtCardNumber.setText(importedCardNumber);
                 }
             }
         }
@@ -4423,42 +4411,29 @@ public class GUI extends javax.swing.JFrame {
             chkScrambleAudio.doClick();
         }
         // Syster permutation table
-        int ImportedPermutationTable;
         if (htvFile.getInt("hacktv", "permutationtable") != null) {
-            ImportedPermutationTable = htvFile.getInt("hacktv", "permutationtable");
+            Integer importedPermutationTable = htvFile.getInt("hacktv", "permutationtable");
             if (ica.equals("--syster") || ica.equals("--systercnr") || ica.equals("systerls+cnr")) {
-                if ( (ImportedPermutationTable >= 0 ) &&
-                        (ImportedPermutationTable < cmbSysterPermTable.getItemCount()) ) 
-                cmbSysterPermTable.setSelectedIndex(ImportedPermutationTable);
-            }
-        }    
-        // EuroCrypt maturity rating
-        int ImportedMaturityRating;
-        if (htvFile.getInt("hacktv", "ec-mat-rating") != null) {
-            ImportedMaturityRating = htvFile.getInt("hacktv", "ec-mat-rating");
-            if ( (cmbECMaturity.isEnabled()) && (ImportedMaturityRating >= 0) && (ImportedMaturityRating <= 15) ) {
-                cmbECMaturity.setSelectedIndex(ImportedMaturityRating);
+                if (importedPermutationTable != null && ((importedPermutationTable >= 0) &&
+                        (importedPermutationTable < cmbSysterPermTable.getItemCount()))) 
+                cmbSysterPermTable.setSelectedIndex(importedPermutationTable);
             }
         }
+        // EuroCrypt maturity rating
+        Integer importedMaturityRating = htvFile.getInt("hacktv", "ec-mat-rating");
+        if (importedMaturityRating != null &&
+                ((cmbECMaturity.isEnabled()) && (importedMaturityRating >= 0) && (importedMaturityRating <= 15))) {
+            cmbECMaturity.setSelectedIndex(importedMaturityRating);
+        }
         // EuroCrypt PPV
-        int ImportedProgNumber;
-        int ImportedProgCost;
         if ( (chkECppv.isEnabled()) && (htvFile.getBoolean("hacktv", "ec-ppv")) ) {
+            Integer importedProgNumber = htvFile.getInt("hacktv", "ec-ppv-num");
+            Integer importedProgCost = htvFile.getInt("hacktv", "ec-ppv-cost");
             chkECppv.doClick();
-            if (htvFile.getInt("hacktv", "ec-ppv-num") != null) {
-                ImportedProgNumber = htvFile.getInt("hacktv", "ec-ppv-num");
-            }
-            else {
-                ImportedProgNumber = 0;
-            }
-            if (htvFile.getInt("hacktv", "ec-ppv-cost") != null) {
-                ImportedProgCost = htvFile.getInt("hacktv", "ec-ppv-cost");
-            }
-            else {
-                ImportedProgCost = 0;
-            }
-            txtECprognum.setText(String.valueOf(ImportedProgNumber));
-            txtECprogcost.setText(String.valueOf(ImportedProgCost));
+            if (importedProgNumber == null) importedProgNumber = 0;
+            if (importedProgCost == null) importedProgCost = 0;
+            txtECprognum.setText(String.valueOf(importedProgNumber));
+            txtECprogcost.setText(String.valueOf(importedProgCost));
         }
         // EuroCrypt "No Date" setting
         if (htvFile.getBoolean("hacktv", "ec-nodate")) {
@@ -4592,15 +4567,14 @@ public class GUI extends javax.swing.JFrame {
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
-        Double ImportedSampleRate;
-        if ((htvFile.getDouble("hacktv", "samplerate")) != null) {
-            ImportedSampleRate = (htvFile.getDouble("hacktv", "samplerate") / 1000000);
-        }
-        else {
-            ImportedSampleRate = Double.valueOf("16");
+        Double importedSampleRate = htvFile.getDouble("hacktv", "samplerate");
+        if (importedSampleRate != null) {
+            importedSampleRate = importedSampleRate / 1000000;
+        } else {
+            importedSampleRate = Double.valueOf("16");
             messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
         }
-        txtSampleRate.setText(ImportedSampleRate.toString().replace(".0",""));
+        txtSampleRate.setText(importedSampleRate.toString().replace(".0",""));
         // Philips test signal
         String importedTS = htvFile.get("hacktv", "testsignal", "");
         if (supportsPhilipsTestSignal) {
@@ -4622,8 +4596,7 @@ public class GUI extends javax.swing.JFrame {
                     invalidConfigFileValue("test signal", importedTS);
                 }
             }
-        }
-        else if (!importedTS.isBlank()) {
+        } else if (!importedTS.isBlank()) {
             messageBox("The selected build of hacktv does not support the " +
                     importedTS + " test signal.\n" +
                     "The setting will be skipped.", JOptionPane.WARNING_MESSAGE);
@@ -4654,7 +4627,7 @@ public class GUI extends javax.swing.JFrame {
     
     private void invalidConfigFileValue (String settingName, String value) {
         /*
-        * This method is just used to generate an error when an invalid value is found in a config file
+        * This method is used to generate an error when an invalid value is found in a config file
         * Saves us writing out the same error message multiple times
         * To use it, just feed two values or variables into it and they will be added to the message below 
         */
@@ -5399,21 +5372,20 @@ public class GUI extends javax.swing.JFrame {
     
     private void addCeefaxRegions() {
         // Populate the Ceefax regions to the combobox in GUI settings
-        String[] CeefaxRegions = {
-            "East",
-            "East Midlands",
-            "London",
-            "Northern Ireland",
-            "Scotland",
-            "South",
-            "South West",
-            "Wales",
-            "West",
-            "Worldwide",
-            "Yorkshire & Lincolnshire"
+        var ceefaxRegions = new ComboBoxOption[] {
+            new ComboBoxOption("East", "East"),
+            new ComboBoxOption("EastMidlands", "East Midlands"),
+            new ComboBoxOption("London", "London"),
+            new ComboBoxOption("NorthernIreland", "Northern Ireland"),
+            new ComboBoxOption("Scotland", "Scotland"),
+            new ComboBoxOption("South", "South"),
+            new ComboBoxOption("SouthWest", "South West"),
+            new ComboBoxOption("Wales", "Wales"),
+            new ComboBoxOption("West", "West"),
+            new ComboBoxOption("Worldwide", "Worldwide"),
+            new ComboBoxOption("Yorks&Lincs", "Yorkshire & Lincolnshire")
         };
-        cmbNMSCeefaxRegion.removeAllItems();
-        cmbNMSCeefaxRegion.setModel(new DefaultComboBoxModel<>(CeefaxRegions));
+        cmbNMSCeefaxRegion.setModel(new DefaultComboBoxModel<>(ceefaxRegions));
         // Read a previously saved region from the prefs store.
         // If not found or invalid, default to Worldwide.
         int i = PREFS.getInt("ceefaxregion", 9);
@@ -5455,8 +5427,9 @@ public class GUI extends javax.swing.JFrame {
             @Override
             protected Integer doInBackground() throws Exception {
                 File f;
-                Path fd = Paths.get(tempDir + File.separator + htmlTempFile);
+                Path fd = Paths.get(tempDir + File.separator + destinationFile);
                 String dUrl = url;
+                String htmlFile = "";
                 // Try to read the downloaded index file to a string
                 try {
                     htmlFile = Files.readString(fd);
@@ -8891,9 +8864,8 @@ public class GUI extends javax.swing.JFrame {
             // Set variables
             String dUrl = "https://api.github.com/repos/spark-teletext/spark-teletext/contents/";
             String regex = ".*?name\"\\s?:\\s?\"([\\w\\s\\.]+)";
-            htmlTempFile = "spark.json";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, regex);
+            downloadTeletext(dUrl, "spark.json", regex);
         }
     }//GEN-LAST:event_btnSparkActionPerformed
 
@@ -8918,9 +8890,8 @@ public class GUI extends javax.swing.JFrame {
             // Set variables
             String dUrl = "http://teastop.plus.com/svn/teletext/";
             String regex = "\">(.*?)</a>";
-            htmlTempFile = "teefax.html";
             // Download index page
-            downloadTeletext(dUrl, htmlTempFile, regex);
+            downloadTeletext(dUrl, "teefax.html", regex);
         }
     }//GEN-LAST:event_btnTeefaxActionPerformed
 
@@ -10193,24 +10164,11 @@ public class GUI extends javax.swing.JFrame {
             // Disable hacktv download button so it doesn't interfere
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
-            var CeefaxRegionArray = new String[] {
-                "East",
-                "EastMidlands",
-                "London",
-                "NorthernIreland",
-                "Scotland",
-                "South",
-                "SouthWest",
-                "Wales",
-                "West",
-                "Worldwide",
-                "Yorks&Lincs"
-            };
-            htmlTempFile = "ceefax.xml";
+            var region = (ComboBoxOption) cmbNMSCeefaxRegion.getSelectedItem();
             String regex = "name=\"(.*?)\"";
             // Download index page
             downloadTeletext("https://internal.nathanmediaservices.co.uk/svn/ceefax/"
-                                    + CeefaxRegionArray[cmbNMSCeefaxRegion.getSelectedIndex()] + "/", htmlTempFile, regex);
+                                    + region.value() + "/", "ceefax.xml", regex);
         }
     }//GEN-LAST:event_btnNMSCeefaxActionPerformed
 
@@ -10579,7 +10537,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<ComboBoxOption> cmbLookAndFeel;
     private javax.swing.JComboBox<String> cmbM3USource;
     private javax.swing.JComboBox<String> cmbMode;
-    private javax.swing.JComboBox<String> cmbNMSCeefaxRegion;
+    private javax.swing.JComboBox<ComboBoxOption> cmbNMSCeefaxRegion;
     private javax.swing.JComboBox<ComboBoxOption> cmbOutputDevice;
     private javax.swing.JComboBox<ComboBoxOption> cmbRegion;
     private javax.swing.JComboBox<ComboBoxOption> cmbScramblingKey1;
