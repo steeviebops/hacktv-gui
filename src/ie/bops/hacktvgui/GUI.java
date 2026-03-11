@@ -36,7 +36,6 @@ import java.nio.file.Paths;
 import javax.swing.JCheckBox;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.LineNumberReader;
 import javax.swing.filechooser.FileFilter;
 import java.awt.Cursor;
 import java.awt.Desktop;
@@ -56,7 +55,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -132,10 +130,6 @@ public class GUI extends javax.swing.JFrame {
     // Declare variable for the title bar display
     private String titleBar;
     private boolean titleBarChanged = false;
-
-    // Array used for M3U files
-    private final ArrayList<String> playlistURLsAL = new ArrayList<>();
-    private String[] playlistNames;
 
     // Declare a variable for storing the default sample rate for the selected video mode
     // This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
@@ -2732,7 +2726,7 @@ public class GUI extends javax.swing.JFrame {
             }
             else if (args[0].toLowerCase(Locale.ENGLISH).endsWith(".m3u")) {
                 txtSource.setText(args[0]);
-                m3uHandler(args[0],0);
+                m3uHandler(args[0]);
             }
             else {
                 // Otherwise, assume it's a source file and populate the source
@@ -4034,7 +4028,6 @@ public class GUI extends javax.swing.JFrame {
         // Input source or test card
         String ImportedSource = htvFile.get("hacktv", "input", "");
         String M3USource = (htvFile.get("hacktv-gui3", "m3usource", ""));
-        Integer M3UIndex = htvFile.getInt("hacktv-gui3", "m3uindex");
         if (ImportedSource.toLowerCase(Locale.ENGLISH).startsWith("test:")) {
             radTest.doClick();
             if (captainJack) {
@@ -4051,8 +4044,8 @@ public class GUI extends javax.swing.JFrame {
             var M3UFile = new File(M3USource);
             // If the source is an M3U file...
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            // Spawn M3UHandler using the index value we got above.
-            m3uHandler(M3UFile.getAbsolutePath(), M3UIndex);
+            // Spawn M3UHandler using the source value we got above.
+            m3uHandler(M3UFile.getAbsolutePath(), ImportedSource);
             txtSource.setText(M3USource);
         }
         else if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
@@ -4677,10 +4670,11 @@ public class GUI extends javax.swing.JFrame {
                 // Check if the M3U exists
                 if (Files.exists(Path.of(txtSource.getText()))) {
                     // Save the selected item from the Extended M3U file
-                    int M3UIndex = cmbM3USource.getSelectedIndex();
+                    var m3uSource = (ComboBoxOption) cmbM3USource.getSelectedItem();
                     newHtv.set("hacktv-gui3", "m3usource", txtSource.getText());
-                    newHtv.setInt("hacktv-gui3", "m3uindex", M3UIndex);
-                    newHtv.set("hacktv", "input", playlistURLsAL.get(M3UIndex));    
+                    newHtv.set("hacktv", "input", m3uSource.value());
+                    // No longer required but saved for backwards compatibility
+                    newHtv.setInt("hacktv-gui3", "m3uindex", cmbM3USource.getSelectedIndex());
                 }
                 else {
                     // Save path as-is. This may or may not be valid but will be caught when re-opened.
@@ -4932,7 +4926,7 @@ public class GUI extends javax.swing.JFrame {
         if (!playlistAL.isEmpty()) {
             var sb = new StringBuilder();
             sb.append(newHtv.toString());
-            sb.append("[playlist]\n");
+            sb.append("\n[playlist]\n");
             for (int i = 1; i <= playlistAL.size(); i++) {
                 sb.append(playlistAL.get(i - 1)).append("\n");
             }
@@ -4960,47 +4954,36 @@ public class GUI extends javax.swing.JFrame {
         menuSave.setText("Save");
         updateMRUList(DestinationFile);
     }
-         
-    private void m3uHandler(String SourceFile, int M3UIndex) {
-        /** Basic M3U file parser.
-        *   The M3UIndex variable is an integer value which specifies the index
-        *   number to select in the combobox.
-        */
+    
+    private void m3uHandler(String sourceFile) {
+        m3uHandler(sourceFile, null);
+    }
+    
+    private void m3uHandler(String SourceFile, String selectedItem) {
         File f = new File(SourceFile);
-        // Prompt if the file is larger than 5 MB as it could take a while...
-        if (f.length() > 5242880) {
-            if (JOptionPane.showConfirmDialog(null,
-                    "The selected file is quite large and may take a long time to open.\n" +
-                    "Do you want to continue anyway?",
-                    APP_NAME, JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
-                txtSource.setText("");
-                return;
-            }
-        }
-        String fileHeader;
-        try (var br2 = new BufferedReader(new FileReader(f, StandardCharsets.UTF_8))) {
-            try (var lnr2 = new LineNumberReader(br2)) {
-                fileHeader = lnr2.readLine();
-            }
-        }
-        catch (MalformedInputException mie) {
-            // Retry using ISO-8859-1
-            try (var br3 = new BufferedReader(new FileReader(f, StandardCharsets.ISO_8859_1))) {
-                try (var lnr3 = new LineNumberReader(br3)) {
-                    fileHeader = lnr3.readLine();
+        String fileHeader = null;
+        var filesRemoved = new StringBuilder();
+        try (BufferedReader reader = Files.newBufferedReader(f.toPath())) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (fileHeader == null) fileHeader = line;
+                if (!fileHeader.contains("#EXTM3U")) {
+                    // Skip if this is a URL or test card
+                    if ( (!line.startsWith("http:")) &&
+                            (!line.startsWith("test:")) ) {
+                        if (Files.exists(Path.of(line))) {
+                            playlistAL.add(line);
+                        } else {
+                            filesRemoved.append(line).append("\n");
+                        }
+                    }
+                } else {
+                    // Call the M3U8 (extended M3U) handler
+                    extM3UHandler(f, selectedItem);
+                    return;
                 }
             }
-            catch (IOException ioe) {
-                // File is inaccessible or unreadable, so stop
-                System.err.println(ioe);
-                messageBox("The specified file could not be opened.\n"
-                        + "It may have been removed, or you may not have the correct permissions to access it.", JOptionPane.ERROR_MESSAGE); 
-                resetM3UItems(false);
-                return;
-            }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             // File is inaccessible, so stop
             System.err.println(ex);
             messageBox("The specified file could not be opened.\n"
@@ -5008,104 +4991,26 @@ public class GUI extends javax.swing.JFrame {
             resetM3UItems(false);
             return;       
         }
-        if ( (fileHeader == null)) {
+        if (fileHeader == null) {
             messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
             resetM3UItems(false);
             return;
         }
-        // Check that the file is in the correct format by loading its first line
-        // We use 'contains' rather than 'startsWith' to avoid problems caused by Unicode BOMs
-        else if (!fileHeader.contains("#EXTM3U") ) {
-            boolean utf8;
-            // Treat the file as a standard text-only playlist
-            List<String> pls;
-            try {
-                pls = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
-                utf8 = true;
-            }
-            catch (MalformedInputException mie){
-                // Retry using ISO-8859-1
-                try {
-                    pls = Files.readAllLines(f.toPath(), StandardCharsets.ISO_8859_1);
-                    utf8 = false;
-                }
-                catch (IOException ioe) {
-                    // File is unreadable, so stop
-                    System.err.println(ioe);
-                    messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
-                    resetM3UItems(false);
-                    return;
-                }
-            }
-            catch (IOException ex) {
-                // File is unreadable, so stop
-                System.err.println(ex);
-                messageBox("Invalid file format.", JOptionPane.ERROR_MESSAGE);
-                resetM3UItems(false);
-                return;
-            }
-            // Define an ArrayList and a string to include missing paths
-            var toRemove = new ArrayList<String>();
-            String removed = "";
-            // Run through the imported playlist to check if the paths exist
-            int i = 0;
-            for (String file : pls) {
-                // Skip if this is a URL or test card
-                if ( (!file.startsWith("http:")) &&
-                        (!file.startsWith("https:")) &&
-                        (!file.startsWith("test:")) ) {
-                    if (!Files.exists(Path.of(file))) {
-                        if ( (!utf8) && (runningOnWindows)) {
-                            // We may have encountered an encoding bug so retry
-                            // by converting the files string to MS-DOS CP 850
-                            try {
-                                var f850 = new String(file.getBytes("ISO-8859-1"), "CP850");
-                                if (Files.exists(Path.of(f850))) {
-                                    // Worked! Change the item in pls.
-                                    var f8 = new String(f850.getBytes("UTF-8"), "UTF-8");
-                                    pls.set(i, f8);
-                                }
-                                else {
-                                    // Add the item to the "to remove" list
-                                    // Also add it to the removed string so we can present it to the user
-                                    toRemove.add(file);
-                                    removed = removed + file + "\n";
-                                }
-                            }
-                            catch (InvalidPathException | UnsupportedEncodingException e) {
-                                // Add the item to the "to remove" list
-                                // Also add it to the removed string so we can present it to the user
-                                toRemove.add(file);
-                                removed = removed + file + "\n";
-                            }
-                        }
-                        else {
-                            // Add the item to the "to remove" list
-                            // Also add it to the removed string so we can present it to the user
-                            toRemove.add(file);
-                            removed = removed + file + "\n";
-                        }
-                    }
-                }
-                i++;
-            }
-            // Did we add any files to be removed? If so, remove them and alert.
-            if (!toRemove.isEmpty()) {
-                pls.removeAll(toRemove);
-                messageBox("Some files could not be found and have been removed from the playlist.\n" +
-                        removed, JOptionPane.WARNING_MESSAGE);
-            }
-            // Add the imported playlist to playlistAL and populate
-            playlistAL.addAll(pls);
-            populatePlaylist();
-            resetM3UItems(false);
-            return;
+        // Did we add any files to be removed? If so, remove them and alert.
+        if (!filesRemoved.toString().isBlank()) {
+            messageBox("Some files could not be found and have been removed from the playlist.\n" + 
+                    filesRemoved.toString(),
+                    JOptionPane.WARNING_MESSAGE);
         }
+        // Add the imported playlist to playlistAL and populate
+        populatePlaylist();
+        resetM3UItems(false);
+    }
+    
+    private void extM3UHandler(File f, String selectedItem) {
         // Handler for Extended M3U files (with #EXTM3U header)
         // Set mouse cursor to busy
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        // Clear playlistURLsAL if it's not empty
-        if (!playlistURLsAL.isEmpty()) playlistURLsAL.clear();
         // Temporarily disable the radio buttons, Browse and Run buttons, and menus
         btnSourceBrowse.setEnabled(false);
         radLocalSource.setEnabled(false);
@@ -5119,128 +5024,98 @@ public class GUI extends javax.swing.JFrame {
         fileMenu.setEnabled(false);
         templatesMenu.setEnabled(false);
         // Prevent the comobobox from auto-resizing
-        var d = new Dimension(360,22);
+        var d = new Dimension(cmbM3USource.getPreferredSize());
         cmbM3USource.setPreferredSize(d);
         // Remove any existing items from the combobox
         cmbM3USource.removeAllItems();
-        cmbM3USource.addItem("Loading playlist file, please wait...");
+        cmbM3USource.addItem(new ComboBoxOption("", "Loading playlist file, please wait..."));
         // Create a SwingWorker to do the disruptive stuff
-        var m3uWorker = new SwingWorker<Boolean, Double>() {
+        var m3uWorker = new SwingWorker<ArrayList<ComboBoxOption>, Double>() {
             @Override
-            protected Boolean doInBackground() throws Exception {
-                String M3UNames = "";
-                var playlistNamesAL = new ArrayList<String>();
-                try {
-                    // Read source file to a list.
-                    List<String> fl = Files.readAllLines(f.toPath());
-                    // Remove the first line as this contains the #EXTM3U header
-                    // We don't need it and if there's a BOM in front, it'll
-                    // just mess things up.
-                    fl.remove(0);
-                    // Loop over the list, only adding lines that either start
-                    // with #EXTINF, are not blank, and do not start with #
-                    int ln = 0;
-                    for (String l : fl) {
+            protected ArrayList<ComboBoxOption> doInBackground() throws Exception {
+                var pls = new ArrayList<ComboBoxOption>();
+                try (BufferedReader reader = Files.newBufferedReader(f.toPath())) {
+                    String line;
+                    String n = "";
+                    String url = "";
+                    int l = 1;
+                    long lineCount = Files.lines(f.toPath()).count();
+                    while ((line = reader.readLine()) != null) {
                         // Publish a decimal value for the percentage indicator
-                        publish((double) ln / fl.size());
-                        if (l.startsWith("#EXTINF:")) {
-                            // Read names to M3UNames so we can parse them
-                            M3UNames = M3UNames + l + System.lineSeparator();
-                        }
-                        else if ((!l.startsWith("#")) && (!l.isBlank())) {
+                        publish((double) l / lineCount);
+                        if (line.startsWith("#EXTINF:")) {
+                            // Read names
+                            n = line.substring(line.lastIndexOf(",") + 1).trim();
+                        } else if (!line.startsWith("#")) {
                             // Read URLs directly to the arraylist
-                            playlistURLsAL.add(l);
+                            url = line;
                         }
-                        ln++;
+                        if (!url.isBlank() && !n.isBlank()) {
+                            pls.add(new ComboBoxOption(url, n));
+                            url = "";
+                            n = "";  
+                        }
+                        l++;
                     }
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     System.err.println(ex);
-                    return false;
+                    return null;
                 }
                 // Done, publish 100%
                 publish(1.0);
-                // Use a regex to retrieve the contents of each line after the
-                // last comma. This contains the channel name.
-                Pattern p = Pattern.compile(".*,\\s*(.*)");
-                Matcher m = p.matcher(M3UNames);
-                while (m.find()) {
-                    playlistNamesAL.add(m.group(1));
-                }
                 // Check that we got something, if not then stop.
-                if (playlistNamesAL.isEmpty()) {
-                    return false;
-                }
-                else {
-                    // Check for duplicate entries in the ArrayList because
-                    // Swing doesn't handle them too well.
-                    // We append the index number as a workaround.
-                    // This could probably be done better.
-                    for (int i = 0, j = 0; i < playlistNamesAL.size(); i++) {
-                        if (i != j) {
-                            if ( playlistNamesAL.get(j).equals(playlistNamesAL.get(i)) ) {
-                                playlistNamesAL.set(i, playlistNamesAL.get(i) + " #" + i);
-                            }
-                        }
-                        if (i == playlistNamesAL.size() -1) {
-                            j++;
-                            if ( j == playlistNamesAL.size() ) break;
-                            i = 0;
-                        }
-                    }
-                    // Convert ArrayList to an array so we can populate the combobox
-                    playlistNames = playlistNamesAL.toArray(String[]::new);
-                    return true;
-                }
+                if (!pls.isEmpty()) return pls;
+                return null;
             } // End doInBackground()
-
             @Override
             protected void done() {
                 // Retrieve the return value of doInBackground.
-                boolean status;
                 try {
-                    status = get();
-                }
-                catch (InterruptedException | ExecutionException ex) {
-                    status = false;   
-                }
-                if (status) {
+                    var result = get();
+                    if (result == null) throw new IllegalStateException("Playlist array was null");
                     // Enable and populate the combobox
                     cmbM3USource.setEnabled(true);
-                    cmbM3USource.setModel(new DefaultComboBoxModel <> (playlistNames));
-                    cmbM3USource.setSelectedIndex(M3UIndex);
+                    cmbM3USource.setModel(new DefaultComboBoxModel<>(result.toArray(ComboBoxOption[]::new)));
+                    if (selectedItem != null) {
+                        // Try to select the item we received
+                        var s = new ComboBoxOption(selectedItem, "");
+                        cmbM3USource.setSelectedItem(s);
+                        if (!s.equals(cmbM3USource.getSelectedItem())) {
+                            messageBox(
+                            "Could not restore the saved playlist entry. The referenced item was not found in the playlist.",
+                                    JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
                     // Repaint the combobox (resolves an issue with it not showing the
                     // correct entry on the Metal L&F after loading an M3U file).
                     cmbM3USource.repaint();
                     // Reset cursor and re-enable the radio buttons that we disabled
                     resetM3UItems(true);
-                }
-                else {
+                } catch (InterruptedException | ExecutionException | IllegalStateException ex) {
+                    System.err.println(ex);
                     messageBox(
                             "An error occurred while processing this file. "
                                     + "It may be invalid or corrupted.", JOptionPane.ERROR_MESSAGE);
-                    resetM3UItems(false); 
+                    resetM3UItems(false);   
                 }
             } // End done()
-
             @Override
             protected void process(List<Double> chunks) {
-                short p = (short) (chunks.get(chunks.size()-1) * 100);
+                int p = (int) (chunks.get(chunks.size()-1) * 100);
                 // Taskbar/dock progress if supported
                 if (Taskbar.isTaskbarSupported()) {
                     var t = Taskbar.getTaskbar();
                     if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
                         t.setWindowProgressValue(GUI.this, p);
-                    }
-                    else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
+                    } else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
                         t.setProgressValue(p);
                     }
                 }
                 cmbM3USource.removeAllItems();
-                cmbM3USource.addItem("Loading playlist file, please wait... " + p + "%");
+                cmbM3USource.addItem(new ComboBoxOption("", "Loading playlist file, please wait... " + p + "%"));
             }
           }; // End SwingWorker
-        m3uWorker.execute();       
+        m3uWorker.execute();
     }
     
     private void resetM3UItems(boolean LoadSuccessful) {
@@ -5527,15 +5402,15 @@ public class GUI extends javax.swing.JFrame {
                 double pc = (double) i / TeletextLinks.size() * 100;
                 txtStatus.setText("Downloading page " + TeletextLinks.get(i -1)
                         +  '\u0020' + "(" + i + " of " + TeletextLinks.size() + ")"
-                        +  '\u0020' + (short) pc + "%");
+                        +  '\u0020' + (int) pc + "%");
                 // Taskbar/dock progress if supported
                 if (Taskbar.isTaskbarSupported()) {
                     var t = Taskbar.getTaskbar();
                     if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                        t.setWindowProgressValue(GUI.this, (short) pc);
+                        t.setWindowProgressValue(GUI.this, (int) pc);
                     }
                     else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-                        t.setProgressValue((short) pc);
+                        t.setProgressValue((int) pc);
                     }
                 }
                 // Increment progress bar by one
@@ -5682,10 +5557,10 @@ public class GUI extends javax.swing.JFrame {
                     if (Taskbar.isTaskbarSupported()) {
                         var t = Taskbar.getTaskbar();
                         if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                            t.setWindowProgressValue(GUI.this, (short) d);
+                            t.setWindowProgressValue(GUI.this, (int) d);
                         }
                         else if (t.isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-                            t.setProgressValue((short) d);
+                            t.setProgressValue((int) d);
                         }
                     } 
                 }
@@ -7211,7 +7086,7 @@ public class GUI extends javax.swing.JFrame {
         if (!playlistAL.isEmpty()) return "";
         if ( (radLocalSource.isSelected()) || (isPhilipsTestSignal())) {
             if (cmbM3USource.isVisible()) {
-                return playlistURLsAL.get(cmbM3USource.getSelectedIndex());
+                return ((ComboBoxOption) cmbM3USource.getSelectedItem()).value();
             }
             else if ( (txtSource.getText().contains("://youtube.com/")) ||
                       (txtSource.getText().contains("://www.youtube.com/")) ||
@@ -7577,7 +7452,7 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private String checkCardNumber(String cardNumber) {
-        var k = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        var k = (ComboBoxOption) cmbScramblingType.getSelectedItem();
         switch (k.value()) {
             case "--videocrypt":
                 return checkVC1CardNumber(cardNumber);
@@ -7724,7 +7599,7 @@ public class GUI extends javax.swing.JFrame {
         // Used info from settopbox.org to get a rough idea of the range and
         // make an educated guess based on that information.
         // If you have a legitimate card that fails this check, let me know.
-        String WrongCardType = "The card number you entered appears to be for a different issue.\n"
+        String WrongCardType = "This card number appears to be for a different issue.\n"
                 + "Using EMMs on the wrong card type may irreparably damage the card.";
         var k = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
         switch (k.value()) {
@@ -7741,23 +7616,23 @@ public class GUI extends javax.swing.JFrame {
             case "sky07":
                 // Only digits 4-13 of a 13-digit card numbers are checked on 07.
                 // We need to strip out the first four digits.
-                short s7;
+                int s7;
                 switch(txtCardNumber.getText().length()) {
                     case 13:
                         if (!txtCardNumber.getText().substring(0,2).equals("07")) {
                             messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                             return false;
                         }
-                        s7 = Short.parseShort(txtCardNumber.getText().substring(4,7));
+                        s7 = Integer.parseInt(txtCardNumber.getText().substring(4,7));
                         break;
                     case 9:
-                        s7 = Short.parseShort(cardNumber.substring(0,3));
+                        s7 = Integer.parseInt(cardNumber.substring(0,3));
                         break;
                     default:
                         messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                         return false;
                 }              
-                if ((s7 > 30) && (s7 < 800)) {
+                if (s7 > 30 && s7 < 800) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -7765,8 +7640,8 @@ public class GUI extends javax.swing.JFrame {
                     return true;
                 }
             case "sky09":
-                short s9 = Short.parseShort(cardNumber.substring(0,3));
-                if ((cardNumber.length() != 9) || ((s9 < 190) || (s9 > 250))) {
+                int s9 = Integer.parseInt(cardNumber.substring(0,3));
+                if (cardNumber.length() != 9 || (s9 < 190 || s9 > 250)) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -7774,9 +7649,9 @@ public class GUI extends javax.swing.JFrame {
                     return true;
                 }
             case "skynz01":
-                short snz1 = Short.parseShort(cardNumber.substring(0,2));
+                int snz1 = Integer.parseInt(cardNumber.substring(0,2));
                 // Carry out a basic card number check, ensure it starts with 01.
-                if ((cardNumber.length() != 11) || (snz1 != 1)) {
+                if (cardNumber.length() != 11 || snz1 != 1) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -7784,9 +7659,9 @@ public class GUI extends javax.swing.JFrame {
                     return true;
                 }
             case "skynz02":
-                short snz2 = Short.parseShort(cardNumber.substring(0,2));
+                int snz2 = Integer.parseInt(cardNumber.substring(0,2));
                 // Carry out a basic card number check, ensure it starts with 02.
-                if ((cardNumber.length() != 11) || (snz2 != 2)) {
+                if (cardNumber.length() != 11 || snz2 != 2) {
                     messageBox(WrongCardType, JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -9118,7 +8993,7 @@ public class GUI extends javax.swing.JFrame {
                       || (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u8")) ) {
                     // If the source is an M3U file, pass it to the M3U handler
                     txtSource.setText(file.getAbsolutePath());
-                    m3uHandler(file.getAbsolutePath(),0);
+                    m3uHandler(file.getAbsolutePath());
                 }
                 else if (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".htv")) {
                     // Don't try to process a file with a .HTV extension
@@ -9655,7 +9530,7 @@ public class GUI extends javax.swing.JFrame {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if (cmbM3USource.isVisible()) {
             // Add the URL from the selected M3U item to the playlist
-            playlistAL.add(playlistURLsAL.get(cmbM3USource.getSelectedIndex()));
+            playlistAL.add(((ComboBoxOption) (cmbM3USource.getSelectedItem())).value());
         }
         // Don't add YouTube or other yt-dlp compatible URLs to the playlist
         else if ( (txtSource.getText().contains("://youtube.com/")) ||
@@ -10473,7 +10348,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<ComboBoxOption> cmbFl2kAudio;
     private javax.swing.JComboBox<ComboBoxOption> cmbLogo;
     private javax.swing.JComboBox<ComboBoxOption> cmbLookAndFeel;
-    private javax.swing.JComboBox<String> cmbM3USource;
+    private javax.swing.JComboBox<ComboBoxOption> cmbM3USource;
     private javax.swing.JComboBox<String> cmbMode;
     private javax.swing.JComboBox<ComboBoxOption> cmbNMSCeefaxRegion;
     private javax.swing.JComboBox<ComboBoxOption> cmbOutputDevice;
