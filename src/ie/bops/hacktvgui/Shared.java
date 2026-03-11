@@ -39,8 +39,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -49,6 +47,7 @@ import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 
 public class Shared implements Serializable {
@@ -306,6 +305,11 @@ public class Shared implements Serializable {
                 if (evt + jcb.getSelectedIndex() < jcb.getItemCount()) jcb.setSelectedIndex(jcb.getSelectedIndex() + evt);
             }
         }
+    }
+    
+    public void toggleCheckBox(JCheckBox jcb, boolean status) {
+        if (!status && jcb.isSelected()) jcb.doClick();
+        jcb.setEnabled(status);
     }
     
 }

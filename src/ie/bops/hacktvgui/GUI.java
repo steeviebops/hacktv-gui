@@ -109,7 +109,6 @@ public class GUI extends javax.swing.JFrame {
     // Declare variables for supported features
     private boolean nicamSupported = false;
     private boolean a2Supported = false;
-    private boolean acpSupported = false;
 
     // Declare a variable to determine the selected fork
     private boolean captainJack;
@@ -5651,19 +5650,6 @@ public class GUI extends javax.swing.JFrame {
     }    
     
     private void disableScrambling() {
-        // TODO
-        /*var ScramblingTypeAL = new ArrayList<String>();
-        ScramblingTypeAL.add("No scrambling");
-        scramblingTypeArray = new ArrayList<>();
-        scramblingTypeArray.add("");
-        cmbScramblingType.removeAllItems();
-        // Convert to an array so we can populate
-        var ScramblingType = new String[ScramblingTypeAL.size()];
-        for(int i = 0; i < ScramblingType.length; i++) {
-            ScramblingType[i] = ScramblingTypeAL.get(i);
-        } 
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ScramblingType));
-        */
         cmbScramblingType.setSelectedIndex(0);
         cmbScramblingType.setEnabled(false);
         lblScramblingSystem.setEnabled(false);
@@ -5727,6 +5713,7 @@ public class GUI extends javax.swing.JFrame {
             disableScramblingKey1();
             cmbScramblingKey1.setSelectedIndex(-1);
             disableScramblingKey2();
+            configureScramblingOptions();
             txtSampleRate.setText(defaultSampleRate);
             if (chkPixelRate.isSelected()) chkPixelRate.doClick();
             return;
@@ -5741,12 +5728,18 @@ public class GUI extends javax.swing.JFrame {
         String sconf = s.value();
         switch (sconf) {
             case "--videocrypt":
-            case "--videocrypt2":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
                 if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
                 if (!htvLoadInProgress) txtPixelRate.setText("28");
                 disableScramblingKey2();
                 sconf = "videocrypt";
+                break;
+            case "--videocrypt2":
+                // Set pixel rate to 28 MHz (multiples of 14 are OK)
+                if (!chkPixelRate.isSelected() && !htvLoadInProgress) chkPixelRate.doClick();
+                if (!htvLoadInProgress) txtPixelRate.setText("28");
+                disableScramblingKey2();
+                sconf = "videocrypt2";
                 break;
             case "vcDualMode":
                 // Set pixel rate to 28 MHz (multiples of 14 are OK)
@@ -5830,121 +5823,84 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void configureScramblingOptions() {
-        // Enable the Scramble audio option if supported
+        boolean videocrypt = false;
+        boolean ecm = false;
+        boolean syster = false;
+        boolean eurocrypt = false;
+        boolean scrambleAudio = false;
         var ca = (ComboBoxOption) cmbScramblingType.getSelectedItem();
         var key = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
-        if ( ca.value().equals("--single-cut") || 
-                ca.value().equals("--double-cut") ||
-                ca.value().equals("--syster") ||
-                ca.value().equals("--d11") ||
-                ca.value().equals("--systercnr") ||
-                ca.value().equals("systerDualMode") ) {
-            chkScrambleAudio.setEnabled(true);
+        if (key == null) key = new ComboBoxOption("", "");
+        var caValue = ca.value();
+        var keyValue = key.value();
+        switch (caValue) {
+            default:
+                break;
+            case "--videocrypt":
+            case "--videocrypt2":
+            case "vcDualMode":
+                videocrypt = true;
+                ecm = !keyValue.equals("free");
+                break;
+            case "--syster":
+            case "--d11":
+            case "--systercnr":
+            case "systerDualMode":
+                syster = true;
+                ecm = true;
+                scrambleAudio = true;
+                break;
+            case "--single-cut":
+            case "--double-cut":
+                ecm = !keyValue.equals("blank");
+                eurocrypt = !keyValue.equals("blank");
+                scrambleAudio = true;
+                break;
         }
-        else {
-            if (chkScrambleAudio.isSelected()) {
-                chkScrambleAudio.doClick();
-            }
-            chkScrambleAudio.setEnabled(false);
-        }
-        // Enable EuroCrypt maturity rating, PPV and "no date" options
-        if ((ca.value().equals("--single-cut") || (ca.value().equals("--double-cut"))) &&
-                !key.value().equals("blank")) {
-            lblECMaturity.setEnabled(true);
-            cmbECMaturity.setEnabled(true);
-            cmbECMaturity.setSelectedIndex(0);
-            chkECppv.setEnabled(true);
-            chkNoDate.setEnabled(true);
-        }
-        else {
-            lblECMaturity.setEnabled(false);
-            cmbECMaturity.setEnabled(false);
-            cmbECMaturity.setSelectedIndex(-1);
-            if (chkECppv.isSelected()) chkECppv.doClick();
-            if (chkNoDate.isSelected()) chkNoDate.doClick();
-            chkECppv.setEnabled(false);
-            chkNoDate.setEnabled(false);
-        }       
-        // Enable card serial option
-        if ( (ca.value()).equals("--videocrypt") || 
-                (ca.value()).equals("--videocrypt2") ||
-                (ca.value()).equals("vcDualMode") ) {
-            if (captainJack) chkShowCardSerial.setEnabled(true);
-        }
-        else {
-            if (chkShowCardSerial.isSelected()) {
-                chkShowCardSerial.doClick();
-            }
-            chkShowCardSerial.setEnabled(false);
-        }
+                
+        // Enable/disable ACP
+        boolean acp = caValue.isEmpty() && modesIni.getBoolean(mode, "acp");
+        SharedInst.toggleCheckBox(chkACP, acp);
+        
+        // Scramble audio option
+        SharedInst.toggleCheckBox(chkScrambleAudio, scrambleAudio);
+        
+        // EuroCrypt maturity rating, PPV and "no date" options
+        lblECMaturity.setEnabled(eurocrypt);
+        cmbECMaturity.setEnabled(eurocrypt);
+        cmbECMaturity.setSelectedIndex(eurocrypt ? 0 : -1);
+        SharedInst.toggleCheckBox(chkECppv, eurocrypt);
+        SharedInst.toggleCheckBox(chkNoDate, eurocrypt);
+        
+        // VideoCrypt card serial
+        SharedInst.toggleCheckBox(chkShowCardSerial, videocrypt && captainJack);
+        
+        // PPV findkey option
+        SharedInst.toggleCheckBox(chkFindKeys, videocrypt && keyValue.equals("ppv"));
+        
         // Enable EMM options on supported modes
-        boolean emmSupported;
-        if (ca.value().equals("--videocrypt")) {
-            switch (key.value()) {
-                case "sky06":
-                case "sky07":
-                case "sky09":
-                case "skynz01":
-                case "skynz02":
-                    emmSupported = true;
-                    break;
-                default:
-                    emmSupported = false;
-                    break;
-            }
-        }
-        else emmSupported = ca.value().equals("--videocrypt2") && key.value().equals("conditional");
-        if (emmSupported) {
-            chkActivateCard.setEnabled(true);
-            chkDeactivateCard.setEnabled(true);
-        }
-        else {
-            if (chkActivateCard.isSelected()) chkActivateCard.doClick();
-            if (chkDeactivateCard.isSelected()) chkDeactivateCard.doClick();
-            chkActivateCard.setEnabled(false);
-            chkDeactivateCard.setEnabled(false);
-        }
-        // Enable PPV findkey option
-        if (key.value().equals("ppv")) {
-            chkFindKeys.setEnabled(true);
-        }
-        else {
-            if (chkFindKeys.isSelected()) chkFindKeys.doClick();
-            chkFindKeys.setEnabled(false);
-        }
-        // Enable permutation table options (Syster-based modes)
-        if (ca.value().equals("--syster") ||
-                ca.value().equals("--systercnr") ||
-                ca.value().equals("systerDualMode") ) {
-            lblSysterPermTable.setEnabled(true);
-            cmbSysterPermTable.setEnabled(true);
-            cmbSysterPermTable.setSelectedIndex(0);
-        }
-        else {
-            lblSysterPermTable.setEnabled(false);
-            cmbSysterPermTable.setEnabled(false);
-            cmbSysterPermTable.setSelectedIndex(-1);
-        }
-        // Enable ECM option and disable ACP if not supported
-        if (cmbScramblingType.getSelectedIndex() == 0) {
-            if ( chkShowECM.isSelected() ) chkShowECM.doClick();
-            chkShowECM.setEnabled(false);
-            if (acpSupported) {
-                enableACP();
-            }
-            else {
-                disableACP();
-            }
-        }
-        else if (radMAC.isSelected()) {
-            chkShowECM.setEnabled(true);
-        }
-        else if (captainJack) {
-            chkShowECM.setEnabled(true);
-            disableACP();
-        }
+        boolean emm =
+                (caValue.equals("--videocrypt") &&
+                    (keyValue.equals("sky06") ||
+                     keyValue.equals("sky07") ||
+                     keyValue.equals("sky09") ||
+                     keyValue.equals("skynz01") ||
+                     keyValue.equals("skynz02")))
+                ||
+                (caValue.equals("--videocrypt2") && keyValue.equals("conditional"));
+        SharedInst.toggleCheckBox(chkActivateCard, emm);
+        SharedInst.toggleCheckBox(chkDeactivateCard, emm);
+      
+        // Show ECM
+        SharedInst.toggleCheckBox(chkShowECM, ecm && (captainJack || radMAC.isSelected()));
+        
+        // Syster permutation table
+        lblSysterPermTable.setEnabled(syster);
+        cmbSysterPermTable.setEnabled(syster);
+        cmbSysterPermTable.setSelectedIndex(syster ? 0 : -1);
+        
     }
-    
+        
     private void enableScramblingKey1() {
         lblScramblingKey.setEnabled(true);
         cmbScramblingKey1.setEnabled(true);
@@ -6571,14 +6527,8 @@ public class GUI extends javax.swing.JFrame {
             if (chkVITC.isSelected()) chkVITC.doClick();
             chkVITC.setEnabled(false);
         }
-        if (modesIni.getBoolean(mode, "acp")) {
-            acpSupported = true;
-            enableACP();
-        }
-        else {
-            acpSupported = false;
-            disableACP();
-        }
+        boolean acpSupported = modesIni.getBoolean(mode, "acp");
+        SharedInst.toggleCheckBox(chkACP, acpSupported);
         if (modesIni.getBoolean(mode, "scrambling")) {
             enableScrambling();
             if ((radPAL.isSelected()) || radSECAM.isSelected() ) {
@@ -6816,17 +6766,6 @@ public class GUI extends javax.swing.JFrame {
     private void disableVHF() {
         radVHF.setEnabled(false);
     }
-    
-    private void enableACP() {
-        chkACP.setEnabled(true);
-    }
-    
-    private void disableACP() {
-        if (chkACP.isSelected()) {
-            chkACP.doClick();
-        }
-        chkACP.setEnabled(false);
-    }    
     
     private void enableVITS() {
         chkVITS.setEnabled(true);
