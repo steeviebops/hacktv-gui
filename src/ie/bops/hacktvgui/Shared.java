@@ -307,37 +307,5 @@ public class Shared implements Serializable {
             }
         }
     }
-
-    public String sha256Calc(Path path) throws IOException {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            // Practically impossible on a normal JVM
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
-
-        try (InputStream in = Files.newInputStream(path)) {
-            byte[] buf = new byte[8192];
-            int read;
-            while ((read = in.read(buf)) != -1) {
-                md.update(buf, 0, read);
-            }
-        }
-
-        byte[] digest = md.digest();
-        return toHex(digest);
-    }
-
-    private String toHex(byte[] bytes) {
-        char[] hex = new char[bytes.length * 2];
-        final char[] digits = "0123456789abcdef".toCharArray();
-        for (int i = 0; i < bytes.length; i++) {
-            int v = bytes[i] & 0xFF;
-            hex[i * 2] = digits[v >>> 4];
-            hex[i * 2 + 1] = digits[v & 0x0F];
-        }
-        return new String(hex);
-    }
     
 }
