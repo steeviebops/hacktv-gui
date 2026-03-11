@@ -2693,7 +2693,7 @@ public class GUI extends javax.swing.JFrame {
         populateCheckboxArray();
         migratePreferences();
         loadPreferences();
-        lblFork.setText(setForkLabel(getFork()));
+        detectFork();
         selectModesFile();
         if (!openModesFile()) return 2;
         if (!openBandPlanFile()) return 3;
@@ -3283,10 +3283,21 @@ public class GUI extends javax.swing.JFrame {
     
     private boolean openModesFile() {
         if (modesFilePath.isEmpty() && modesFile != null) {
-            modesFileLocation = "online";
+            // Read the downloaded modes file to the INI handler
+            try {
+                modesIni.load(new StringReader(modesFile));
+                modesFileLocation = "online";
+            } catch (IOException ioe) {
+                // Load failed, retry with the embedded file
+                messageBox("Unable to read the downloaded modes file.\n"
+                        + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
+                modesFilePath = "ie/bops/resources/" + getFork() + getFork() + ".ini";
+                modesFileLocation = "embedded";
+                openModesFile();
+            }
         }
         else if (modesFilePath.startsWith("ie/bops/resources/")) {
-            // Read the embedded videomodes.ini to the modesFile string
+            // Read the embedded videomodes.ini to the INI handler
             try {
                 modesIni.loadFromResource(modesFilePath);
                 modesFileLocation = "embedded";
@@ -3301,7 +3312,6 @@ public class GUI extends javax.swing.JFrame {
         else {
             // Read the videomodes.ini we specified previously
             try {
-                //modesFile = Files.readString(f.toPath(), StandardCharsets.UTF_8);
                 modesIni.loadFromDisk(Path.of(modesFilePath));
                 modesFileLocation = "external";
             }
@@ -3333,9 +3343,18 @@ public class GUI extends javax.swing.JFrame {
             bpFileVersion = modesFileVersion;
         }
         else if (bpFilePath.isEmpty() && bpFile != null) {
-            bpFileLocation = "online";
-        }
-        else if (bpFilePath.startsWith("ie/bops/resources/")) {
+            try {
+                bpIni.load(new StringReader(bpFile));
+                bpFileLocation = "online";
+            } catch (IOException ioe) {
+                // Load failed, retry with the embedded file
+                messageBox("Unable to read the downloaded band plans file.\n"
+                        + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
+                bpFilePath = "ie/bops/resources/bandplans.ini";
+                bpFileLocation = "embedded";
+                openBandPlanFile();
+            }
+        } else if (bpFilePath.startsWith("ie/bops/resources/")) {
             // Read the embedded bandplans.ini to the bpFile string
             try {
                 bpIni.loadFromResource(bpFilePath);
@@ -3506,45 +3525,19 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private boolean getHackTVHash() {
-        try {
-            String fileHash = SharedInst.sha256Calc(Path.of(hackTVPath));
-            if (fileHash.equals(PREFS.get("hash", ""))) {
-                // Hash is the same, all good
-                return true;
-            } else {
-                String msg = "The current hacktv file is different from the file previously detected.\n"
-                        + "If you weren’t expecting a change, please verify the file before continuing.\n"
-                        + "Do you want to continue?";
-                int q = JOptionPane.showConfirmDialog(null, msg, APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (q == JOptionPane.YES_OPTION) {
-                    // Redetect the selected file
-                    detectFork();
-                    return true;
-                }
-                // Stop execution
-                return false;
-            }
-        } catch (IOException ioe) {
-            System.err.println("File hash verification failed.\n" + ioe);
-            return false;
-        }
-    }
-    
-    private String detectFork() {
-        Path hp = Path.of(hackTVPath);
+    private void detectFork() {
+        // Sane defaults
+        captainJack = false;
+        supportsPhilipsTestSignal = false;        
         // Check if the specified path does not exist or is a directory
-        if (!Files.exists(hp)) {
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return "Not found";
+        if (!Files.exists(Path.of(hackTVPath))) {
+            lblFork.setText("Not found");
+            return;
         }
-        else if (Files.isDirectory(hp)) {
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return "Invalid path";    
+        else if (Files.isDirectory(Path.of(hackTVPath))) {
+            lblFork.setText("Invalid path");
+            return;    
         }
-        String out;
         try {
             // Get the output of hacktv --help
             var pb = new ProcessBuilder(hackTVPath, "--help");
@@ -3556,38 +3549,38 @@ public class GUI extends javax.swing.JFrame {
                 String s;
                 while ((s = br.readLine()) != null) sb.append(s).append("\n");
             }
+            String invalidFile = "Invalid file (not hacktv?)";
             if (!sb.toString().isBlank()) {
                 String output = sb.toString();
-                if (output.contains("--enableemm")) {
-                    PREFS.remove("testsignals");
-                    PREFS.put("fork", "captainjack");
-                    out = "captainjack";
-                } else if (output.contains("--testsignal")) {
-                    PREFS.put("testsignals", "1");
-                    PREFS.remove("fork");
-                    out = "fsphil";
+                captainJack = output.contains("--enableemm");
+                supportsPhilipsTestSignal = output.contains("--testsignal");
+                if (captainJack) {
+                    lblFork.setText("Captain Jack");
+                } else if (supportsPhilipsTestSignal) {
+                    lblFork.setText("Matt's TV Barn");
                 } else if (output.contains("Usage: hacktv [options] input [input...]")) {
-                    PREFS.remove("testsignals");
-                    PREFS.remove("fork");
-                    out = "fsphil";
+                    lblFork.setText("fsphil");
                 } else {
-                    return "Invalid file (not hacktv?)";
+                    lblFork.setText(invalidFile);
+                    return;
                 }
-                // Save SHA-256 hash to preferences. Use this to verify that the
-                // hacktv binary hasn't been modified since the last run.
-                PREFS.put("hash", SharedInst.sha256Calc(hp));
-                getHackTVVersion();
-                return out;
             } else {
-                return "File access error";
+                lblFork.setText(invalidFile);
+                return;
+            }
+            // Get the hacktv version if supported, by running hacktv --version
+            String v = getHackTVVersion();
+            if (v != null && !v.isBlank()) {
+                lblFork.setText(lblFork.getText() + " (" + v.substring(v.indexOf(" ") + 1) + ")");
             }
         }
-        catch (IOException ex) {
-            return "File access error";
+        catch (IOException  ex) {
+            lblFork.setText("File access error");
+            System.err.println(ex);
         }
     }
     
-    private void getHackTVVersion() {
+    private String getHackTVVersion() {
         // Get the hacktv version if supported, by running hacktv --version
         try {
             var pb = new ProcessBuilder(hackTVPath, "--version");
@@ -3599,66 +3592,23 @@ public class GUI extends javax.swing.JFrame {
             }
             if ((v != null) && (!v.isBlank())) {
                 v = v.substring(v.indexOf(" ") + 1);
-                PREFS.put("hacktvversion", v);
-                return;
+                return v;
             }
         } catch (IOException ioe) {
             System.err.println(ioe);
         }
-        PREFS.remove("hacktvversion");
+        return null;
     }
 
     private String getFork() {
-        if (PREFS.get("fork", "fsphil").equals("captainjack")) {
-            captainJack = true;
-            supportsPhilipsTestSignal = false;
+        if (captainJack) {
             return "captainjack";
-        } else {
-            captainJack = false;
-            supportsPhilipsTestSignal = PREFS.get("testsignals", "0").equals("1");
+        }
+        else {
             return "fsphil";
         }
     }
     
-    private String setForkLabel(String fork) {
-        String version = PREFS.get("hacktvversion", "");
-        if (!version.isBlank()) version = " (" + version + ")";
-        Path hp = Path.of(hackTVPath);
-        // Check if the specified path does not exist or is a directory
-        if (!Files.exists(hp)) {
-            PREFS.remove("fork");
-            PREFS.remove("hash");
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return "Not found";
-        }
-        else if (Files.isDirectory(hp)) {
-            PREFS.remove("fork");
-            PREFS.remove("hash");
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return "Invalid path";    
-        }
-        if (fork.startsWith("captainjack")) {
-            return "Captain Jack" + version;
-        } else if (fork.startsWith("fsphil")) {
-            if (PREFS.get("testsignals", "0").equals("1")) {
-                captainJack = false;
-                supportsPhilipsTestSignal = true;
-                return "Matt's TV Barn" + version;
-            }
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return "fsphil" + version;
-        } else {
-            PREFS.remove("testsignals");
-            PREFS.remove("fork");
-            captainJack = false;
-            supportsPhilipsTestSignal = false;
-            return fork;
-        }
-    }
-
     private void fsphil() {
         // Enable test signal settings button
         btnTestSettings.setVisible(supportsPhilipsTestSignal);
@@ -4313,7 +4263,7 @@ public class GUI extends javax.swing.JFrame {
             chkWSS.doClick();
             // Since we increased the value by one when saving, decrease by one when loading
             cmbWSS.setSelectedIndex(importedWSS - 1);
-        } else {
+        } else if (importedWSS != null ) {
             System.err.println("WSS value was out of bounds, skipped.");
         }
         /* Aspect ratio correction for 16:9 content on 4:3 displays
@@ -4324,7 +4274,7 @@ public class GUI extends javax.swing.JFrame {
         if (importedAR != null && (importedAR >= 0 && importedAR < cmbARCorrection.getItemCount())) {
             chkARCorrection.doClick();
             cmbARCorrection.setSelectedIndex(importedAR);
-        } else {
+        } else if (importedAR != null ) {
             System.err.println("Aspect ratio value out of bounds, skipped.");
         }
         // Scrambling system
@@ -5802,7 +5752,7 @@ public class GUI extends javax.swing.JFrame {
                         // and get its parent directory path
                         hackTVDirectory = new File(hackTVPath).getParent();    
                         // Detect what were provided with
-                        lblFork.setText(setForkLabel(detectFork()));
+                        detectFork();
                         selectModesFile();
                         if (captainJack) {
                             captainJack();
@@ -6490,6 +6440,7 @@ public class GUI extends javax.swing.JFrame {
         if (!supportsPhilipsTestSignal) return false;
         if (cmbTest.getSelectedIndex() == -1) return false;
         var ts = (TestSignalOption) cmbTest.getSelectedItem();
+        if (ts.patternFilename().isEmpty()) return false;
         String d = PREFS.get("testdir", hackTVDirectory);
         if (!Files.exists(Paths.get(d, "pm8546g.bin"))) return false;
         return Files.exists(Paths.get(d, ts.patternFilename()));
@@ -8745,12 +8696,10 @@ public class GUI extends javax.swing.JFrame {
             if (downloadInProgress) {
                 downloadCancelled = true;
                 btnRun.setEnabled(false);
-            }
-            else if ( !chkSyntaxOnly.isSelected() && !Files.exists(Path.of(hackTVPath)) || hackTVPath.isBlank() ) {
+            } else if ( !chkSyntaxOnly.isSelected() && !Files.exists(Path.of(hackTVPath)) || hackTVPath.isBlank() ) {
                 messageBox("Unable to find hacktv. Please go to the GUI settings tab to add its location.", JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                if (getHackTVHash()) populateArguments("");
+            } else {
+                populateArguments("");
             }
         }
         else {
@@ -9356,17 +9305,6 @@ public class GUI extends javax.swing.JFrame {
         hacktvFileChooser.setAcceptAllFileFilterUsed(true);
         int returnVal = hacktvFileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            String msg = "Selected file:\n"
-                    + hacktvFileChooser.getSelectedFile().toString()
-                    + "\nThis file will be executed to detect supported features."
-                    + "\nOnly continue if you trust this file."
-                    + "\n\nDo you want to continue?";
-            int q = JOptionPane.showConfirmDialog(null, msg, APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (q == JOptionPane.NO_OPTION) {
-                PREFS.remove("lasthtvdir");
-                PREFS.remove("hacktvpath");
-                return;
-            }
             // Save the chosen directory to prefs
             PREFS.put("lasthtvdir", hacktvFileChooser.getCurrentDirectory().toString());
             File file = hacktvFileChooser.getSelectedFile();
@@ -9378,7 +9316,7 @@ public class GUI extends javax.swing.JFrame {
             // and get its parent directory path
             hackTVDirectory = new File(hackTVPath).getParent();
             // Detect what were provided with
-            lblFork.setText(setForkLabel(detectFork()));
+            detectFork();
             selectModesFile();
             addTestCardOptions();
             addARCorrectionOptions();
