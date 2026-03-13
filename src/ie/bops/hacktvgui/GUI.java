@@ -4969,6 +4969,7 @@ public class GUI extends javax.swing.JFrame {
                 if (!fileHeader.contains("#EXTM3U")) {
                     // Skip if this is a URL or test card
                     if ( (!line.startsWith("http:")) &&
+                            (!line.startsWith("https:")) &&
                             (!line.startsWith("test:")) ) {
                         if (Files.exists(Path.of(line))) {
                             playlistAL.add(line);
