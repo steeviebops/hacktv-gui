@@ -4808,6 +4808,9 @@ public class GUI extends javax.swing.JFrame {
                     newHtv.set("hacktv", "scramblingkey", "eurocrypt" + '\u0020' + k1.value());
                 }
                 break;
+            case ("--d14"):
+                newHtv.set("hacktv", "scramblingtype", ca.value().substring(2));
+                break;
             default:
                 newHtv.set("hacktv", "scramblingtype", ca.value().substring(2));
                 newHtv.set("hacktv", "scramblingkey", k1.value());
@@ -4978,7 +4981,7 @@ public class GUI extends javax.swing.JFrame {
                         }
                     }
                 } else {
-                    // Call the M3U8 (extended M3U) handler
+                    // Call the extended M3U handler
                     extM3UHandler(f, selectedItem);
                     return;
                 }
@@ -4996,7 +4999,7 @@ public class GUI extends javax.swing.JFrame {
             resetM3UItems(false);
             return;
         }
-        // Did we add any files to be removed? If so, remove them and alert.
+        // Did we remove any files? If so, alert.
         if (!filesRemoved.toString().isBlank()) {
             messageBox("Some files could not be found and have been removed from the playlist.\n" + 
                     filesRemoved.toString(),
@@ -5682,6 +5685,7 @@ public class GUI extends javax.swing.JFrame {
             ca.add(new ComboBoxOption("--systercnr", "Nagravision Syster (cut-and-rotate mode)"));
             ca.add(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
         }
+        if (captainJack) ca.add(new ComboBoxOption("--d14", "Discret 14"));
         // Convert to an array so we can populate
         cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
         cmbScramblingType.setSelectedIndex(0);
@@ -5777,6 +5781,14 @@ public class GUI extends javax.swing.JFrame {
                 disableScramblingKey2();
                 sconf = "eurocrypt";
                 break;
+            case "--d14":
+                // Discret 14 has no keys
+                cmbScramblingKey1.setEnabled(false);
+                cmbScramblingKey1.removeAllItems();
+                cmbScramblingKey2.setEnabled(false);
+                cmbScramblingKey2.removeAllItems();
+                configureScramblingOptions();
+                return;
             default:
                 // This should never run
                 break;
@@ -5844,10 +5856,13 @@ public class GUI extends javax.swing.JFrame {
                 ecm = !keyValue.equals("free");
                 break;
             case "--syster":
-            case "--d11":
             case "--systercnr":
             case "systerDualMode":
                 syster = true;
+                ecm = true;
+                scrambleAudio = true;
+                break;
+            case "--d11":
                 ecm = true;
                 scrambleAudio = true;
                 break;
@@ -5951,6 +5966,9 @@ public class GUI extends javax.swing.JFrame {
                     al.add("--eurocrypt");
                     al.add(k1.value());
                 }
+                break;
+            case "--d14":
+                al.add(ca.value());
                 break;
             default:
                 al.add(ca.value());
@@ -6916,6 +6934,8 @@ public class GUI extends javax.swing.JFrame {
         // pre-emphasis filtering on FM, so change the Filter checkbox
         // description to suit  
         chkVideoFilter.setText("FM video pre-emphasis filter");
+        // Change size of label to match the new text string
+        chkVideoFilter.setSize(chkVideoFilter.getPreferredSize());
     }
     
     private void disableFMDeviation() {
@@ -6930,6 +6950,8 @@ public class GUI extends javax.swing.JFrame {
         }
         // Revert Filter checkbox name to VSB-AM
         chkVideoFilter.setText("VSB-AM filter");
+        // Change size of label to match the new text string
+        chkVideoFilter.setSize(chkVideoFilter.getPreferredSize());
     }
         
     private void youtubedl(String input) {
@@ -7132,149 +7154,101 @@ public class GUI extends javax.swing.JFrame {
         // Calculates the intermediate frequency (IF) or harmonic frequency to
         // be sent to hacktv, based on the specified LNB local oscillator or 
         // harmonic settings.
-        String err = "The current configuration is not supported by the HackRF device.\n"
-            + "Please try a different frequency.";
+        if (!sat) return inputFreq;
         // This is the value we'll return if an error is found
         long errValue = Long.MIN_VALUE + 256;
-        int rxd = PREFS.getInt("rxdevice", 0);
-        if ((sat) && (rxd == 1)) {
-            // Direct reception from a Ku band LNB
-            // Divide Ku frequency by the chosen harmonic
-            long f = inputFreq / getHarmonic();
-            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
-                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
-                messageBox(err, JOptionPane.WARNING_MESSAGE);
-                return errValue;
-            }
-            else {
-                return(f);
-            }
-        }
-        else if ((sat) && (rxd == 2)) {
-            // Direct reception from a standard Ku band LNB using a BSB receiver
-            // Recalculate the transmission frequency based on the IF
-            long bsbLO = 10769180000L; // Standard LO of BSB Squarials/LNBs
-            long vlo = (long) (PREFS.getDouble("localoscillator", DEFAULT_LO) * 1000000000);
-            long f = (inputFreq - bsbLO + vlo) / getHarmonic();
-            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
-                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
-                messageBox(err, JOptionPane.WARNING_MESSAGE);
-                return errValue;
-            }
-            else {
-                return(f);
-            }
-        }
-        else if ((sat) && (rxd == 3)) {
-            /* Saorsat Ka band LNB mode
-               These LNBs aren't fully supported on the receivers that we're
-               targeting, you can't enter a 21.2 GHz LO. So we do some trickery
-               to calculate the first harmonic. Negate the Ku-band frequency 
-               from the band plan and add it to the Ka LO and the Ku LO.
-               As the Ka LO is higher than the input frequency, the resulting
-               IF is inverted. You should use the "Invert video" option to
-               cancel this out.
-               
-               An example of this LNB can be found at:
-               https://www.inverto.tv/lnb/130/twin-ka-circular-dual-polarity-lnb23mm-197-202ghz-lo212o-ghz
-            */
-            long kaLO = 21200000000L;
-            long f = (-inputFreq + kaLO + getLO()) / getHarmonic();
-            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
-                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
-                messageBox(err, JOptionPane.WARNING_MESSAGE);
-                return errValue;
-            }
-            else {
-                return(f);
-            }
-        }
-        else {
-            long f = (inputFreq - getLO()) / getHarmonic();
-            // Convoluted if statement here...
-            if (
-              // Satellite mode enabled
-              (sat) &&
-              // And we're not in silent mode
-              (!silent) &&
-              // And we're using the first harmonic
-              (PREFS.getInt("harmonic", 1) == 1) &&
-              // And if a custom frequency is selected and "apply LO to custom frequencies" is enabled,
-              // or if a custom frequency is not selected
-              ( ((radCustom.isSelected()) && (PREFS.get("applyloforcustomfreq", "0").equals("1"))) ||
-                  (!radCustom.isSelected()) ) &&
-              // And frequency is not between 950 and 2150 MHz
-              ((f < 950000000L) || (f > 2150000000L)) 
-            ) {
-                int q = JOptionPane.showConfirmDialog(null, 
-                        "This frequency may be outside of your receiver's tuning range.\n" +
-                        "Would you like to continue anyway?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (q == JOptionPane.NO_OPTION) {
-                    return errValue;
+        int lnbType = PREFS.getInt("rxdevice", 0);
+        long f;
+        switch (lnbType) {
+            case 1:
+                // Reception from a Ku band LNB
+                // Divide Ku frequency by the chosen harmonic
+                f = inputFreq / getHarmonic();
+                break;
+            case 2:
+                // Reception from a standard Ku band LNB using a BSB receiver
+                // Recalculate the transmission frequency based on the IF
+                long bsbLO = 10_769_180_000L; // Standard LO of BSB Squarials/LNBs
+                long vlo = (long) (PREFS.getDouble("localoscillator", DEFAULT_LO) * 1_000_000_000);
+                f = (inputFreq - bsbLO + vlo) / getHarmonic();
+                break;
+            case 3:
+                /* Saorsat Ka band LNB mode
+                These LNBs aren't fully supported on the receivers that we're
+                targeting, you can't enter a 21.2 GHz LO. So we do some trickery
+                to calculate the first harmonic. Negate the Ku-band frequency
+                and add it to the Ka LO and the Ku LO.
+                As the Ka LO is higher than the input frequency, the resulting
+                IF is inverted. You should use the "Invert video" option to
+                cancel this out.
+                
+                An example of this LNB can be found at:
+                https://www.inverto.tv/lnb/130/twin-ka-circular-dual-polarity-lnb23mm-197-202ghz-lo212o-ghz
+                */
+                long kaLO = 21_200_000_000L;
+                f = (-inputFreq + kaLO + getLO()) / getHarmonic();
+                break;
+            default:
+                // Direct reception from the HackRF, no LNB
+                f = (inputFreq - getLO()) / getHarmonic();
+                // Is this the first harmonic?
+                boolean firstHarmonic = getHarmonic() == 1;
+                // Is "apply LO to custom frequencies" enabled?
+                boolean applyLO = PREFS.getInt("applyloforcustomfreq", 0) == 1;
+                // Is the frequency not between 950 and 2150 MHz
+                boolean outOfRange = f < 950_000_000L || f > 2_150_000_000L;
+                if (!silent && firstHarmonic && (!radCustom.isSelected() || applyLO) && outOfRange) {
+                    int q = JOptionPane.showConfirmDialog(null,
+                            "This frequency may be outside of your receiver's tuning range.\n" +
+                                    "Would you like to continue anyway?", APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (q == JOptionPane.NO_OPTION) return errValue;
                 }
-            }
-            if ( (!silent) && ((f > 7250000000L) || (f < 1000000)) ) {
-                System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
-                messageBox(err, JOptionPane.WARNING_MESSAGE);
-                return errValue;
-            }
-            else {
-                return(f);
-            }
+                break;
         }
-    }    
+        if (f > 7_250_000_000L || f < 1_000_000) {
+            System.err.println("Frequency of first harmonic (" + f + ") is invalid.");
+            if (!silent) messageBox("The current configuration is not supported by the HackRF device.\n"
+                            + "Please try a different frequency.", JOptionPane.WARNING_MESSAGE);
+            return errValue;
+        }
+        return f;
+    }
+    
     private long getLO() {
         // Returns the local oscillator frequency to be used in calculating
         // the IF or harmonic frequency. Only run on satellite modes.
         if (!sat) return 0;
         // If "Apply these settings to custom frequencies" is disabled, and
         // the Custom radio button is selected, return zero.
-        if ( PREFS.get("applyloforcustomfreq", "0").equals("0") &&
+        if ( PREFS.getInt("applyloforcustomfreq", 0) == 0 &&
                 radCustom.isSelected() ) return 0;
         // Check first if there's a hardcoded LO in the band plan.
         // This will override any user-defined LO.
-        // Retrieve the band plan by checking the region combobox index.
-        int i = cmbRegion.getSelectedIndex();
-        String b;
-        if (i > 0) {
-            b = "sat" + String.valueOf(i + 1);
+        if (cmbRegion.isEnabled()) {
+            var bp = (ComboBoxOption) cmbRegion.getSelectedItem();
+            Long lo = bpIni.getLong(bp.value(), "lo");
+            if (lo != null) return lo;
         }
-        else {
-            b = "sat";
-        }
-        String bp = modesIni.get(mode, b, "").toLowerCase(Locale.ENGLISH);
-        if ((bpIni.getLong(bp, "lo")) != null) {
-            long lo = bpIni.getLong(bp, "lo");
-            return lo;
-        }
-        else {
-            Double ulo = PREFS.getDouble("localoscillator", DEFAULT_LO);
-            // Convert imported LO from GHz to Hz.
-            return (long) (ulo * 1000000000);
-        }
+        // Import from preferences
+        Double plo = PREFS.getDouble("localoscillator", DEFAULT_LO);
+        // Convert imported LO from GHz to Hz.
+        return (long) (plo * 1000000000);
     }
     
     private int getHarmonic() {
         // Only run on satellite modes
-        if (!sat) return 1;
+        final int defaultValue = 1;
+        if (!sat) return defaultValue;
         // Get harmonic setting
-        switch (PREFS.get("harmonic", "1")) {
-            case "1":
-            default:
-                return 1;
-            case "2":
-                return 2;
-            case "3":
-                return 3;
-            case "4":
-                return 4;
-        }
+        int h = PREFS.getInt("harmonic", defaultValue);
+        if (h >= 1 && h <= 4) return h;
+        return defaultValue;
     }
     
     private boolean checkCustomFrequency(){
         if (radCustom.isSelected()) {
             boolean s = false;
-            if ((sat) && (PREFS.get("applyloforcustomfreq", "0").equals("1"))) {
+            if (sat && PREFS.get("applyloforcustomfreq", "0").equals("1")) {
                 s = true;
             }
             BigDecimal CustomFreq;
