@@ -7224,7 +7224,7 @@ public class GUI extends javax.swing.JFrame {
                 radCustom.isSelected() ) return 0;
         // Check first if there's a hardcoded LO in the band plan.
         // This will override any user-defined LO.
-        if (cmbRegion.isEnabled()) {
+        if (cmbRegion.getItemCount() > 0) {
             var bp = (ComboBoxOption) cmbRegion.getSelectedItem();
             Long lo = bpIni.getLong(bp.value(), "lo");
             if (lo != null) return lo;
