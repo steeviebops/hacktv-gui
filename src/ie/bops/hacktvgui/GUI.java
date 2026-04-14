@@ -18,6 +18,7 @@
 
 package ie.bops.hacktvgui;
 
+import java.awt.Component;
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
@@ -41,6 +42,7 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Taskbar;
@@ -78,6 +80,10 @@ import java.util.Random;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.ComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.KeyStroke;
 
 public class GUI extends javax.swing.JFrame {    
@@ -141,7 +147,6 @@ public class GUI extends javax.swing.JFrame {
     private String[] secamModeArray;
     private String[] otherModeArray;
     private String[] macModeArray;
-    private final ArrayList<String> playlistAL = new ArrayList<>();
     private final ArrayList<String> uhfAL = new ArrayList<>();
     private final ArrayList<String> vhfAL = new ArrayList<>();
     
@@ -171,6 +176,9 @@ public class GUI extends javax.swing.JFrame {
     
     // Allows us to recall the previously selected colour system
     private String prevColour = "";
+    
+    // Playlist model, used for storing items from the JList
+    private final DefaultListModel<String> playlistModel = new DefaultListModel<>();
     
     // Start point in playlist
     private int startPoint = -1;
@@ -281,6 +289,62 @@ public class GUI extends javax.swing.JFrame {
             @Override
             public void mouseReleased(MouseEvent e) {
                 dragAnchor = -1;
+            }
+        });
+
+        lstPlaylist.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                    list, value, index, isSelected, cellHasFocus);
+
+                DefaultListModel<?> model = (DefaultListModel<?>) list.getModel();
+
+                // Reset defaults first
+                label.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
+                label.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                label.setFont(label.getFont().deriveFont(Font.PLAIN));
+
+                // Appear disabled when empty
+                if (model.isEmpty() && !isSelected) {
+                    label.setForeground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
+                }
+
+                return label;
+            }
+        });
+
+        playlistModel.addListDataListener(new javax.swing.event.ListDataListener() {
+            @Override
+            public void intervalAdded(javax.swing.event.ListDataEvent e) {
+                updateState();
+            }
+
+            @Override
+            public void intervalRemoved(javax.swing.event.ListDataEvent e) {
+                updateState();
+            }
+
+            @Override
+            public void contentsChanged(javax.swing.event.ListDataEvent e) {
+                updateState();
+            }
+
+            private void updateState() {
+                lstPlaylist.setBackground(playlistModel.isEmpty() ? 
+                    javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"):
+                    javax.swing.UIManager.getDefaults().getColor("TextArea.background")
+                );
+                // Enable or disable random option
+                if (playlistModel.size() > 1) {
+                    chkRandom.setEnabled(true);
+                } else {
+                    if (chkRandom.isSelected()) chkRandom.doClick();
+                    chkRandom.setEnabled(false);
+                }
             }
         });
         btnAdd = new javax.swing.JButton();
@@ -633,6 +697,27 @@ public class GUI extends javax.swing.JFrame {
         });
 
         lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
+        lstPlaylist.setModel(playlistModel);
+        lstPlaylist.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                    list, value, index, isSelected, cellHasFocus);
+
+                // Reset to normal font first
+                label.setFont(label.getFont().deriveFont(Font.PLAIN));
+
+                // Apply italic if this is the start point
+                if (index == startPoint) {
+                    label.setFont(label.getFont().deriveFont(Font.ITALIC));
+                }
+
+                return label;
+            }
+        });
         lstPlaylist.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 lstPlaylistKeyPressed(evt);
@@ -2589,7 +2674,7 @@ public class GUI extends javax.swing.JFrame {
                 case "/reset":
                 // Reset all preferences and exit
                 Shared.resetPreferences();
-                return;                    
+                return;
             }
         }
         // Pre-initialisation macOS tasks
@@ -2746,9 +2831,8 @@ public class GUI extends javax.swing.JFrame {
                     return true;
                 // but only files with specific name
                 if (!System.getProperty("os.name").contains("Windows")) {
-                  return file.getName().equals("hacktv");
-                }
-                else {
+                    return file.getName().equals("hacktv");
+                } else {
                     return file.getName().equals("hacktv.exe");
                 }
             }
@@ -2756,8 +2840,7 @@ public class GUI extends javax.swing.JFrame {
             public String getDescription() {
                 if (!System.getProperty("os.name").contains("Windows")) {
                     return "hacktv binaries (hacktv)";
-                }
-                else {
+                } else {
                     return "hacktv binaries (hacktv.exe)";
                 }
             }
@@ -3009,7 +3092,7 @@ public class GUI extends javax.swing.JFrame {
                 UIManager.setLookAndFeel(l);
                 SwingUtilities.updateComponentTreeUI(this);
                 // Colour of JList resets on L&F change so reset it
-                if (this.isVisible() && (playlistAL.isEmpty())) {
+                if (this.isVisible() && (playlistModel.isEmpty())) {
                     // Set the background colour of the JList to disabledBackground
                     lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
                 } else if (this.isVisible()) {
@@ -3654,39 +3737,6 @@ public class GUI extends javax.swing.JFrame {
         }
     }
     
-    private void populatePlaylist() {
-        if (playlistAL.isEmpty()) {
-            // Set the background colour of the JList to disabledBackground
-            lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.disabledBackground"));
-        }
-        else {
-            // Set tie background colour of the JList to background (enabled)
-            lstPlaylist.setBackground(javax.swing.UIManager.getDefaults().getColor("TextArea.background"));
-        }
-        // Convert playlistAL to an array so we can populate lstPlaylist with it
-        var pl = new String[playlistAL.size()];
-        for(int i = 0; i < pl.length; i++) {
-            if ((startPoint == i) && (startPoint != -1)) {
-                // Add an asterisk to the start of the string to designate it
-                // as the start point of the playlist
-                pl[i] = "* " + playlistAL.get(i);
-            }
-            else {
-                pl[i] = playlistAL.get(i);
-            }
-        }
-        // Populate lstPlaylist using the contents of pl[]
-        lstPlaylist.setListData(pl);
-        // Enable or disable random option
-        if (playlistAL.size() > 1) {
-            chkRandom.setEnabled(true);
-        }
-        else {
-            if (chkRandom.isSelected()) chkRandom.doClick();
-            chkRandom.setEnabled(false);
-        }
-    }
-    
     private void checkMRUList() {
         // Get MRU values and display in the File menu
         String ConfigFile1 = PREFS.get("file1", "");
@@ -4051,14 +4101,13 @@ public class GUI extends javax.swing.JFrame {
             // Use the playlist we got from checkSelectedFile();
             if (playlist != null) {
                 String[] pl = playlist.split("\n");
-                playlistAL.addAll(Arrays.asList(pl));
+                playlistModel.addAll(Arrays.asList(pl));
                 if (htvFile.getInt("hacktv-gui3", "playliststart") != null) {
                     startPoint = htvFile.getInt("hacktv-gui3", "playliststart") - 1;
                     // Don't accept values lower than one
                     if (startPoint < 1) startPoint = -1;
                 }
                 chkRandom.setSelected(htvFile.getBoolean("hacktv-gui3", "random"));
-                populatePlaylist();
             }
         }
         else {
@@ -4645,7 +4694,7 @@ public class GUI extends javax.swing.JFrame {
         // Save current fork if applicable
         if (captainJack) newHtv.set("hacktv-gui3", "fork", "CaptainJack");
         // Input source or test card
-        if (!playlistAL.isEmpty()) {
+        if (!playlistModel.isEmpty()) {
             // We'll populate the playlist section later
             newHtv.setInt("hacktv-gui3", "playlist", 1);
             // Set start point of playlist
@@ -4925,12 +4974,12 @@ public class GUI extends javax.swing.JFrame {
         String newFile;
         // The playlist doesn't follow a standard INI format. We just dump the
         // playlist array into the file as-is.
-        if (!playlistAL.isEmpty()) {
+        if (!playlistModel.isEmpty()) {
             var sb = new StringBuilder();
             sb.append(newHtv.toString());
             sb.append("\n[playlist]\n");
-            for (int i = 1; i <= playlistAL.size(); i++) {
-                sb.append(playlistAL.get(i - 1)).append("\n");
+            for (int i = 1; i <= playlistModel.size(); i++) {
+                sb.append(playlistModel.get(i - 1)).append("\n");
             }
             newFile = sb.toString();
         } else {
@@ -4975,7 +5024,7 @@ public class GUI extends javax.swing.JFrame {
                             (!line.startsWith("https:")) &&
                             (!line.startsWith("test:")) ) {
                         if (Files.exists(Path.of(line))) {
-                            playlistAL.add(line);
+                            playlistModel.addElement(line);
                         } else {
                             filesRemoved.append(line).append("\n");
                         }
@@ -5005,8 +5054,6 @@ public class GUI extends javax.swing.JFrame {
                     filesRemoved.toString(),
                     JOptionPane.WARNING_MESSAGE);
         }
-        // Add the imported playlist to playlistAL and populate
-        populatePlaylist();
         resetM3UItems(false);
     }
     
@@ -5026,7 +5073,7 @@ public class GUI extends javax.swing.JFrame {
         cmbM3USource.setEnabled(false);
         fileMenu.setEnabled(false);
         templatesMenu.setEnabled(false);
-        // Prevent the comobobox from auto-resizing
+        // Prevent the combobox from auto-resizing
         var d = new Dimension(cmbM3USource.getPreferredSize());
         cmbM3USource.setPreferredSize(d);
         // Remove any existing items from the combobox
@@ -5190,8 +5237,7 @@ public class GUI extends javax.swing.JFrame {
         btnRemove.setEnabled(false);
         btnPlaylistUp.setEnabled(false);
         btnPlaylistDown.setEnabled(false);
-        playlistAL.clear();
-        populatePlaylist();
+        playlistModel.clear();
         // Restore title bar to default
         if (titleBarChanged) this.setTitle(titleBar);
         // Restore ellipsis to Save option
@@ -5681,9 +5727,9 @@ public class GUI extends javax.swing.JFrame {
         }
         if (modesIni.getKeys("syster").length > 0) {
             ca.add(new ComboBoxOption("--syster", "Nagravision Syster"));
-            ca.add(new ComboBoxOption("--d11", "Discret 11"));
             ca.add(new ComboBoxOption("--systercnr", "Nagravision Syster (cut-and-rotate mode)"));
             ca.add(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
+            ca.add(new ComboBoxOption("--d11", "Discret 11"));
         }
         if (captainJack) ca.add(new ComboBoxOption("--d14", "Discret 14"));
         // Convert to an array so we can populate
@@ -5783,9 +5829,9 @@ public class GUI extends javax.swing.JFrame {
                 break;
             case "--d14":
                 // Discret 14 has no keys
-                cmbScramblingKey1.setEnabled(false);
+                disableScramblingKey1();
+                disableScramblingKey2();
                 cmbScramblingKey1.removeAllItems();
-                cmbScramblingKey2.setEnabled(false);
                 cmbScramblingKey2.removeAllItems();
                 configureScramblingOptions();
                 return;
@@ -6281,7 +6327,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         else if (radTest.isSelected()) {
-            if (!playlistAL.contains("test:colourbars")) al.add("test:colourbars");
+            if (!playlistModel.contains("test:colourbars")) al.add("test:colourbars");
         }
         return al;
     }
@@ -7045,7 +7091,7 @@ public class GUI extends javax.swing.JFrame {
 
     private String checkInput() {
         // Skip this method if the playlist is populated
-        if (!playlistAL.isEmpty()) return "";
+        if (!playlistModel.isEmpty()) return "";
         if ( (radLocalSource.isSelected()) || (isPhilipsTestSignal())) {
             if (cmbM3USource.isVisible()) {
                 return ((ComboBoxOption) cmbM3USource.getSelectedItem()).value();
@@ -8011,7 +8057,7 @@ public class GUI extends javax.swing.JFrame {
             String InputSource = checkInput();
             if (InputSource == null) return;
             // Add test card options if defined
-            if (playlistAL.isEmpty() && radTest.isSelected()) {
+            if (playlistModel.isEmpty() && radTest.isSelected()) {
                 if (checkTestCard() != null) {
                     allArgs.addAll(checkTestCard());
                 }
@@ -8019,55 +8065,55 @@ public class GUI extends javax.swing.JFrame {
                     return;
                 }
             }
-            if (!playlistAL.isEmpty()) {
+            if (!playlistModel.isEmpty()) {
                 if (chkRandom.isSelected()) {
                     // Set the start point as the first item
                     if (startPoint != -1) {
-                        if ( (runningOnWindows) && (playlistAL.get(startPoint).contains(" "))) {
-                            allArgs.add('\u0022' + playlistAL.get(startPoint) + '\u0022');
+                        if ( (runningOnWindows) && (playlistModel.get(startPoint).contains(" "))) {
+                            allArgs.add('\u0022' + playlistModel.get(startPoint) + '\u0022');
                         }
                         else {
-                            allArgs.add(playlistAL.get(startPoint));
+                            allArgs.add(playlistModel.get(startPoint));
                         }
                     }
-                    RND.ints(0, playlistAL.size())
+                    RND.ints(0, playlistModel.size())
                         .distinct()
-                        .limit(playlistAL.size())
+                        .limit(playlistModel.size())
                         .forEach(
                             r -> {
                                 // Add the rest. except for the start point or test cards
-                                if ( (!playlistAL.get(r).startsWith("test:")) && (r != startPoint) ) {
-                                    if ( (runningOnWindows) && (playlistAL.get(r).contains(" "))) {
-                                        allArgs.add('\u0022' + playlistAL.get(r) + '\u0022');
+                                if ( (!playlistModel.get(r).startsWith("test:")) && (r != startPoint) ) {
+                                    if ( (runningOnWindows) && (playlistModel.get(r).contains(" "))) {
+                                        allArgs.add('\u0022' + playlistModel.get(r) + '\u0022');
                                     }
                                     else {
-                                       allArgs.add(playlistAL.get(r));
+                                       allArgs.add(playlistModel.get(r));
                                     }
                                 }
                             }
                         );
                 }
                 else {
-                    // Move through playlistAL, starting at the value defined by startPoint.
+                    // Move through playlistModel, starting at the value defined by startPoint.
                     // When we reach the end of the array, start again at zero until we
-                    // reach playlistAL.size() minus one.
+                    // reach playlistModel.size() minus one.
                     int i = startPoint;
                     int j = 0;
                     if (i == -1) i++;
-                    while (j < playlistAL.size()) {
-                        if ( (i == playlistAL.size()) && (startPoint != 0) ) {
+                    while (j < playlistModel.size()) {
+                        if ( (i == playlistModel.size()) && (startPoint != 0) ) {
                             i = 0;
                         }
-                        if ( (playlistAL.get(i).startsWith("test:")) ||
-                            (playlistAL.get(i).startsWith("http")) ) {
-                            allArgs.add(playlistAL.get(i));
+                        if ( (playlistModel.get(i).startsWith("test:")) ||
+                            (playlistModel.get(i).startsWith("http")) ) {
+                            allArgs.add(playlistModel.get(i));
                         }
                         else {
-                            if ( (runningOnWindows) && playlistAL.get(i).contains(" ") ) {
-                                allArgs.add('\u0022' + playlistAL.get(i) + '\u0022');
+                            if ( (runningOnWindows) && playlistModel.get(i).contains(" ") ) {
+                                allArgs.add('\u0022' + playlistModel.get(i) + '\u0022');
                             }
                             else {
-                                allArgs.add(playlistAL.get(i));
+                                allArgs.add(playlistModel.get(i));
                             }
                         }
                         i++;
@@ -8896,12 +8942,10 @@ public class GUI extends javax.swing.JFrame {
                     if (((!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".m3u"))
                             || (!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".m3u8")))
                             && (!fn.toString().toLowerCase(Locale.ENGLISH).endsWith(".htv"))) {
-                        playlistAL.add(fn.toString());
+                        playlistModel.addElement(fn.toString());
                     }
                 }
-                populatePlaylist();
-            }
-            else {
+            } else {
                 var file = new File (SharedInst.stripQuotes(f[0].toString()));
                 if ( (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u"))
                       || (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".m3u8")) ) {
@@ -8912,8 +8956,7 @@ public class GUI extends javax.swing.JFrame {
                 else if (file.getAbsolutePath().toLowerCase(Locale.ENGLISH).endsWith(".htv")) {
                     // Don't try to process a file with a .HTV extension
                     messageBox("Configuration files should be opened from the File menu.", JOptionPane.WARNING_MESSAGE);    
-                }
-                else {
+                } else {
                     txtSource.setVisible(true);
                     cmbM3USource.setVisible(false);
                     cmbM3USource.setEnabled(false);
@@ -9388,7 +9431,7 @@ public class GUI extends javax.swing.JFrame {
             chkRandom.setEnabled(true);
         }
         // Does the playlist contain only one item?
-        else if ( (lstPlaylist.getSelectedIndex() == 0) && (playlistAL.size() == 1) ) {
+        else if ( (lstPlaylist.getSelectedIndex() == 0) && (playlistModel.size() == 1) ) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
@@ -9398,7 +9441,7 @@ public class GUI extends javax.swing.JFrame {
             chkRandom.setEnabled(false);
         }
         // Is the selected item an intermediate item? (not the first or last)
-        else if ( (lstPlaylist.getSelectedIndex() != 0) && (lstPlaylist.getSelectedIndex() != playlistAL.size() - 1) ) {
+        else if ( (lstPlaylist.getSelectedIndex() != 0) && (lstPlaylist.getSelectedIndex() != playlistModel.size() - 1) ) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
@@ -9412,7 +9455,7 @@ public class GUI extends javax.swing.JFrame {
             chkRandom.setEnabled(true);
         }
         // Is the first item in the playlist selected?
-        else if ( (lstPlaylist.getSelectedIndex() == 0) && (playlistAL.size() > 1) ) {
+        else if ( (lstPlaylist.getSelectedIndex() == 0) && (playlistModel.size() > 1) ) {
             btnPlaylistUp.setEnabled(false);
             btnPlaylistDown.setEnabled(true);
             btnRemove.setEnabled(true);
@@ -9426,7 +9469,7 @@ public class GUI extends javax.swing.JFrame {
             chkRandom.setEnabled(true);
         }
         // Is the last item in the playlist selected?
-        else if (lstPlaylist.getSelectedIndex() == playlistAL.size() - 1) {
+        else if (lstPlaylist.getSelectedIndex() == playlistModel.size() - 1) {
             btnPlaylistUp.setEnabled(true);
             btnPlaylistDown.setEnabled(false);
             btnRemove.setEnabled(true);
@@ -9444,7 +9487,7 @@ public class GUI extends javax.swing.JFrame {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if (cmbM3USource.isVisible()) {
             // Add the URL from the selected M3U item to the playlist
-            playlistAL.add(((ComboBoxOption) (cmbM3USource.getSelectedItem())).value());
+            playlistModel.addElement(((ComboBoxOption) (cmbM3USource.getSelectedItem())).value());
         }
         // Don't add YouTube or other yt-dlp compatible URLs to the playlist
         else if ( (txtSource.getText().contains("://youtube.com/")) ||
@@ -9464,12 +9507,12 @@ public class GUI extends javax.swing.JFrame {
             return;
         }
         else if ( (txtSource.isEnabled()) && (!txtSource.getText().isBlank()) ) {
-            // Add whatever is in txtSource to playlistAL
-            playlistAL.add(txtSource.getText());
+            // Add whatever is in txtSource to playlistModel
+            playlistModel.addElement(txtSource.getText());
         }
         else if (radTest.isSelected()) {
-            for (String s : playlistAL) {
-                if (s.startsWith("test:")) {
+            for (int i = 0; i < playlistModel.size(); i++) {
+                if (playlistModel.get(i).startsWith("test:")) {
                     messageBox("Only one test card can be added to the playlist.\n"
                         + "It should also be placed as the last item in the playlist.", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -9478,13 +9521,11 @@ public class GUI extends javax.swing.JFrame {
             if (cmbTest.isEnabled()) {
                 // Add the selected test card
                 var ts = (TestSignalOption) cmbTest.getSelectedItem();
-                playlistAL.add("test:" + ts.command());
-                /*String[] sa = tcArray[cmbTest.getSelectedIndex()].split("\\s*,\\s*");
-                if (sa.length > 0) playlistAL.add("test:" + sa[0]);*/
+                playlistModel.addElement("test:" + ts.command());
             }
             else {
                 // Add the test card
-                playlistAL.add("test:colourbars");
+                playlistModel.addElement("test:colourbars");
             }
         }
         else {
@@ -9492,24 +9533,15 @@ public class GUI extends javax.swing.JFrame {
             if (!txtSource.getText().isBlank()) btnAdd.doClick();
             return;
         }
-        // Enable or disable random option
-        if (playlistAL.size() > 1) {
-            chkRandom.setEnabled(true);
-        }
-        else {
-            if (chkRandom.isSelected()) chkRandom.doClick();
-            chkRandom.setEnabled(false);
-        }
-        populatePlaylist();
         txtSource.setText("");
-        lstPlaylist.setSelectedIndex(playlistAL.size() -1);
+        lstPlaylist.setSelectedIndex(playlistModel.size() -1);
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         int[] ia = lstPlaylist.getSelectedIndices();
         // If only one item was selected, put it back in the source box
         if (ia.length == 1) {
-            String item = playlistAL.get(ia[0]);
+            String item = playlistModel.get(ia[0]);
 
             if (radLocalSource.isSelected()) {
                 txtSource.setText(item);
@@ -9532,10 +9564,10 @@ public class GUI extends javax.swing.JFrame {
         // Process the selection array in reverse order and remove the items from the arraylist
         for (int j = ia.length -1; j >= 0; j--) {
             // Remove the requested item from the arraylist
-            playlistAL.remove(ia[j]);
+            playlistModel.remove(ia[j]);
             // If the item removed was the start point, or if only one item
             // is left, reset startPoint to default
-            if ((ia[j] == startPoint) || (playlistAL.size() < 2)) {
+            if ((ia[j] == startPoint) || (playlistModel.size() < 2)) {
                 startPoint = -1;
             }                
             // If the item removed was before the start point, reduce startPoint
@@ -9543,14 +9575,12 @@ public class GUI extends javax.swing.JFrame {
             else if (ia[j] < startPoint) {
                 startPoint = startPoint - 1;
             }
-            // Re-populate the playlist with the new arraylist values
-            populatePlaylist();
         }
         // If only one item was selected...
         if (ia.length == 1) {
             // If the last item in the list was selected, select whatever
             // was the second from last (and is now last).
-            if (playlistAL.size() == ia[0]) {
+            if (playlistModel.size() == ia[0]) {
                 lstPlaylist.setSelectedIndex(ia[0] - 1);
             }
             // Otherwise, select the item that corresponds to the same index
@@ -9570,61 +9600,24 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRemoveActionPerformed
 
     private void btnPlaylistUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistUpActionPerformed
-        int i = lstPlaylist.getSelectedIndex();
-        // If the item above the selected item is the start point, shift the
-        // start point up by one so the selected start point will remain selected
-        if (i - 1 == startPoint) {
-            startPoint = startPoint + 1;
-        }
-        // If the selected item is the start point, shift the start point down
-        // by one so the selected start point will remain selected
-        else if (i == startPoint) {
-            startPoint = startPoint - 1;
-        }
-        if (i > 0) {
-            playlistAL.add(i - 1, playlistAL.get(i));
-            playlistAL.remove(i + 1);
-            populatePlaylist();
-            lstPlaylist.setSelectedIndex(i - 1);
-            lstPlaylist.ensureIndexIsVisible(lstPlaylist.getSelectedIndex());
-        }
-        btnPlaylistDown.setEnabled(true);
-        
-        if (i == 1) {
-            // As we have reached the top of the list, disable the Up button
-            btnPlaylistUp.setEnabled(false);
-        }
-        else {
-            btnPlaylistUp.requestFocusInWindow();
+        int index = lstPlaylist.getSelectedIndex();
+        if (index > 0) {
+            String item = playlistModel.getElementAt(index);
+            playlistModel.remove(index);
+            playlistModel.add(index - 1, item);
+            lstPlaylist.setSelectedIndex(index - 1);
+            lstPlaylist.ensureIndexIsVisible(index - 1);
         }
     }//GEN-LAST:event_btnPlaylistUpActionPerformed
 
     private void btnPlaylistDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaylistDownActionPerformed
-        int i = lstPlaylist.getSelectedIndex();
-        // If the item below the selected item is the start point, shift the
-        // start point down by one so the selected start point will remain selected
-        if (i + 1 == startPoint) {
-            startPoint = startPoint - 1;
-        }
-        // If the selected item is the start point, shift the start point up
-        // by one so the selected start point will remain selected
-        else if (i == startPoint) {
-            startPoint = startPoint + 1;
-        }
-        if ( (i >= 0) && (i != playlistAL.size() - 1) ) {
-            playlistAL.add(i + 2, playlistAL.get(i));
-            playlistAL.remove(i);
-            populatePlaylist();
-            lstPlaylist.setSelectedIndex(i + 1);
-            lstPlaylist.ensureIndexIsVisible(lstPlaylist.getSelectedIndex());
-        }
-        btnPlaylistUp.setEnabled(true);
-        if (i == playlistAL.size() - 2) {
-            // As we have reached the bottom of the list, disable the Down button
-            btnPlaylistDown.setEnabled(false);
-        }
-        else {
-            btnPlaylistDown.requestFocusInWindow();
+        int index = lstPlaylist.getSelectedIndex();
+        if (index != -1 && index < playlistModel.size() - 1) {
+            String item = playlistModel.getElementAt(index);
+            playlistModel.remove(index);
+            playlistModel.add(index + 1, item);
+            lstPlaylist.setSelectedIndex(index + 1);
+            lstPlaylist.ensureIndexIsVisible(index + 1);
         }
     }//GEN-LAST:event_btnPlaylistDownActionPerformed
 
@@ -9680,18 +9673,16 @@ public class GUI extends javax.swing.JFrame {
         // Don't set a test card as the start point of the playlist.
         // It never ends, so the playlist becomes pointless.
         int s = lstPlaylist.getSelectedIndex();
-        if (playlistAL.get(s).startsWith("test:")) {
+        if (playlistModel.get(s).startsWith("test:")) {
             messageBox("Test cards cannot be set as the start point of a playlist.", JOptionPane.WARNING_MESSAGE);
-        }
-        else if (s == startPoint) {
+        } else if (s == startPoint) {
             // Reset the start point
             startPoint = -1;
-            populatePlaylist();
-        }
-        else {
+            lstPlaylist.repaint();
+        } else {
             // Set the start point
             startPoint = s;
-            populatePlaylist();
+            lstPlaylist.repaint();
         }
         // Reselect the item that was selected before the playlist was updated
         lstPlaylist.setSelectedIndex(s);
