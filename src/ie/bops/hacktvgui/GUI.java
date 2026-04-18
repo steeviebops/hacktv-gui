@@ -77,6 +77,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.imageio.ImageIO;
 import javax.swing.ComboBoxModel;
@@ -4332,6 +4333,16 @@ public class GUI extends javax.swing.JFrame {
                     case "systerls+cnr":
                         ca = new ComboBoxOption("systerDualMode", "");
                         break;
+                    case "single-cut":
+                    case "double-cut":
+                        ca = new ComboBoxOption("--" + ica, "");
+                        // Split the scramblingkey value into an array, using
+                        // whitespace as the  separator. [0] contains the CA
+                        // system, while [1] contains the CA key.
+                        String[] macCA = ik1.split("\\s");
+                        ik1 = macCA[0];
+                        if (macCA.length > 1) ik2 = macCA[1];
+                        break;
                     default:
                         ca = new ComboBoxOption("--" + ica, "");
                         break;
@@ -4341,12 +4352,9 @@ public class GUI extends javax.swing.JFrame {
                     invalidConfigFileValue("scrambling system", ica);
                     ica = "";
                 }
-            }            
+            }
             // Scrambling key/viewing card type (including VC1 side of dual VC1/2 mode)
-            if (!ica.isEmpty() && !ik1.isEmpty()) {
-                if (ik1.startsWith("eurocrypt")) {
-                    ik1 = ik1.replace("eurocrypt", "").trim();
-                }
+            if (!ica.isEmpty() && (!ik1.isEmpty())) {
                 ComboBoxOption k1 = new ComboBoxOption(ik1, "");
                 cmbScramblingKey1.setSelectedItem(k1);
                 if (!k1.equals(cmbScramblingKey1.getSelectedItem())) {
@@ -4358,12 +4366,18 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             // VC2 side of dual VC1/2 mode
-            if (ica.equals("videocrypt1+2")) {
+            if (!ik2.isEmpty() && (ica.equals("videocrypt1+2") || ica.equals("single-cut") || ica.equals("double-cut"))) {
                 ComboBoxOption k2 = new ComboBoxOption(ik2, "");
                 cmbScramblingKey2.setSelectedItem(k2);
                 if (!k2.equals(cmbScramblingKey2.getSelectedItem())) {
-                    invalidConfigFileValue("VideoCrypt II scrambling key", ik2);
-                }          
+                    String noKey2;
+                    if (ica.equals("videocrypt1+2")) {
+                        noKey2 = "VideoCrypt II scrambling key";
+                    } else {
+                        noKey2 = "scrambling key";
+                    }
+                    invalidConfigFileValue(noKey2, ik2);
+                }
             } 
         }
         // EMM
@@ -4853,8 +4867,10 @@ public class GUI extends javax.swing.JFrame {
             case ("--single-cut"):
             case ("--double-cut"):
                 newHtv.set("hacktv", "scramblingtype", ca.value().substring(2));
-                if (!k1.value().equals("blank")) {
-                    newHtv.set("hacktv", "scramblingkey", "eurocrypt" + '\u0020' + k1.value());
+                if (!k1.value().isEmpty()) {
+                    String macCA = k1.value();
+                    String macKey = k2.value();
+                    if (!macKey.isEmpty()) newHtv.set("hacktv", "scramblingkey", macCA + '\u0020' + macKey);
                 }
                 break;
             case ("--d14"):
@@ -5707,6 +5723,7 @@ public class GUI extends javax.swing.JFrame {
     }      
     
     private void add625ScramblingTypes() {
+        configureScramblingLabels();
         var ca = new ArrayList<ComboBoxOption>();
         ca.add(new ComboBoxOption("", "No scrambling"));
         // Check if modes file contains a section for these scrambling systems
@@ -5740,19 +5757,18 @@ public class GUI extends javax.swing.JFrame {
     }
     
     private void addMACScramblingTypes() {
-        var ca = new ArrayList<ComboBoxOption>();
-        ca.add(new ComboBoxOption("", "No scrambling"));
+        configureScramblingLabels();
+        var cutType = new ArrayList<ComboBoxOption>();
+        cutType.add(new ComboBoxOption("", "No scrambling"));
         // Check if modes file contains a section for these scrambling systems
         // Only add those which have keys defined
-        if (modesIni.getKeys("eurocrypt").length > 0) {
-            ca.add(new ComboBoxOption("--single-cut", "Single cut"));
-            ca.add(new ComboBoxOption("--double-cut", "Double cut"));
-        }
+        cutType.add(new ComboBoxOption("--single-cut", "Single cut"));
+        cutType.add(new ComboBoxOption("--double-cut", "Double cut"));
         // Convert to an array so we can populate
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
+        cmbScramblingType.setModel(new DefaultComboBoxModel<>(cutType.toArray(ComboBoxOption[]::new)));
         cmbScramblingType.setSelectedIndex(0);
         // If no systems were found, disable the scrambling tab
-        if (ca.size() == 1) disableScrambling();
+        if (cutType.size() == 1) disableScrambling();
     }
     
     private void addScramblingKey() {
@@ -5822,11 +5838,6 @@ public class GUI extends javax.swing.JFrame {
                 disableScramblingKey2();
                 sconf = "syster";
                 break;
-            case "--single-cut":
-            case "--double-cut":
-                disableScramblingKey2();
-                sconf = "eurocrypt";
-                break;
             case "--d14":
                 // Discret 14 has no keys
                 disableScramblingKey1();
@@ -5837,6 +5848,7 @@ public class GUI extends javax.swing.JFrame {
                 return;
             default:
                 // This should never run
+                System.err.println("BUG: Unexpected scrambling type: " + sconf);
                 break;
         }
         // Extract the scrambling key section that we need
@@ -5875,9 +5887,68 @@ public class GUI extends javax.swing.JFrame {
             }
             cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(scramblingKey2Array.toArray(ComboBoxOption[]::new)));
             cmbScramblingKey2.setSelectedIndex(0);
-            // Only enable the comboboxes on Captain Jack's fork
-            cmbScramblingKey1.setEnabled(captainJack);
-            cmbScramblingKey2.setEnabled(captainJack);
+            // Remove VC1 conditional option on faphil's build (only free access supported for now)
+            if (!captainJack) cmbScramblingKey1.removeItem(new ComboBoxOption("conditional", ""));
+        }
+    }
+    
+    private void addMACScramblingCA() {
+        var s = (ComboBoxOption) cmbScramblingType.getSelectedItem();
+        // In the clear (no scrambling)
+        if (s.value().isEmpty()) {
+            scramblingOptionsPanel.setEnabled(false);
+            emmPanel.setEnabled(false);
+            disableScramblingKey1();
+            cmbScramblingKey1.setSelectedIndex(-1);
+            disableScramblingKey2();
+            configureScramblingOptions();
+            txtSampleRate.setText(defaultSampleRate);
+            if (chkPixelRate.isSelected()) chkPixelRate.doClick();
+            return;
+        }
+        else {
+            enableScramblingKey1();
+            scramblingOptionsPanel.setEnabled(true);
+        }
+        cmbScramblingKey1.removeAllItems();
+        cmbScramblingKey1.addItem(new ComboBoxOption("", "No conditional access (free)"));
+        // Check the [macscrambling] section for supported CAs
+        String[] caTypes = modesIni.getKeys("macscrambling");
+        if (caTypes.length == 0) {
+            // See if the [eurocrypt] section exists
+            int ec = modesIni.getKeys("eurocrypt").length;
+            if (ec > 0) cmbScramblingKey1.addItem(new ComboBoxOption("eurocrypt", "EuroCrypt"));
+        } else {
+            for (String ca : caTypes) {
+                cmbScramblingKey1.addItem(new ComboBoxOption(ca, modesIni.get("macscrambling", ca, ca)));
+            }
+        }
+    }
+    
+    private void addMACScramblingKey() {
+        var ca = (ComboBoxOption) cmbScramblingKey1.getSelectedItem();
+        if (ca.value().isEmpty()) {
+            disableScramblingKey2();
+            return;
+        }
+        cmbScramblingKey2.removeAllItems();
+        String[] caKeys = modesIni.getKeys(ca.value());
+        for (String key : caKeys) {
+            String k = modesIni.get(ca.value(), key, "");
+            if (!k.isEmpty() && (!key.equals("blank"))) cmbScramblingKey2.addItem(new ComboBoxOption(key, k));
+        }
+        if (cmbScramblingKey2.getItemCount() > 0) enableScramblingKey2();
+    }
+    
+    private void configureScramblingLabels() {
+        if (!radMAC.isSelected()) {
+            lblScramblingSystem.setText("Scrambling system");
+            lblScramblingKey.setText("Access type");
+            lblVC2ScramblingKey.setText("VC2 access type");
+        } else {
+            lblScramblingSystem.setText("Scrambling type");
+            lblScramblingKey.setText("CA system");
+            lblVC2ScramblingKey.setText("CA mode");
         }
     }
     
@@ -5893,8 +5964,6 @@ public class GUI extends javax.swing.JFrame {
         var caValue = ca.value();
         var keyValue = key.value();
         switch (caValue) {
-            default:
-                break;
             case "--videocrypt":
             case "--videocrypt2":
             case "vcDualMode":
@@ -5914,9 +5983,11 @@ public class GUI extends javax.swing.JFrame {
                 break;
             case "--single-cut":
             case "--double-cut":
-                ecm = !keyValue.equals("blank");
-                eurocrypt = !keyValue.equals("blank");
+                ecm = keyValue.equals("eurocrypt");
+                eurocrypt = keyValue.equals("eurocrypt");
                 scrambleAudio = true;
+                break;
+            default:
                 break;
         }
                 
@@ -5941,15 +6012,10 @@ public class GUI extends javax.swing.JFrame {
         SharedInst.toggleCheckBox(chkFindKeys, videocrypt && keyValue.equals("ppv"));
         
         // Enable EMM options on supported modes
-        boolean emm =
-                (caValue.equals("--videocrypt") &&
-                    (keyValue.equals("sky06") ||
-                     keyValue.equals("sky07") ||
-                     keyValue.equals("sky09") ||
-                     keyValue.equals("skynz01") ||
-                     keyValue.equals("skynz02")))
-                ||
-                (caValue.equals("--videocrypt2") && keyValue.equals("conditional"));
+        boolean vc1 = caValue.equals("--videocrypt");
+        boolean vc2 = caValue.equals("--videocrypt2");
+        var validKeys = Set.of("sky06", "sky07", "sky09", "skynz01", "skynz02");
+        boolean emm = (vc1 && validKeys.contains(keyValue)) || (vc2 && keyValue.equals("conditional"));
         SharedInst.toggleCheckBox(chkActivateCard, emm);
         SharedInst.toggleCheckBox(chkDeactivateCard, emm);
       
@@ -6008,9 +6074,9 @@ public class GUI extends javax.swing.JFrame {
             case "--single-cut":
             case "--double-cut":
                 al.add(ca.value());
-                if (!k1.value().equals("blank")) {
-                    al.add("--eurocrypt");
-                    al.add(k1.value());
+                if (!k1.value().isEmpty()) {
+                    al.add("--" + k1.value());
+                    al.add(k2.value());
                 }
                 break;
             case "--d14":
@@ -6035,8 +6101,8 @@ public class GUI extends javax.swing.JFrame {
         }
         if (chkNoDate.isSelected()) al.add("--nodate");
         if (chkScrambleAudio.isSelected()) {
-            if (k1.value().equals("--single-cut") ||
-                (k1.value().equals("--double-cut")) ) {
+            if (ca.value().equals("--single-cut") ||
+                (ca.value().equals("--double-cut")) ) {
                 al.add("--scramble-audio");
             }
             else {
@@ -8617,13 +8683,18 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbScramblingKey1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScramblingKey1ActionPerformed
         if (cmbScramblingKey1.getSelectedIndex() != -1) {
+            if (radMAC.isSelected()) addMACScramblingKey();
             configureScramblingOptions();
         }
     }//GEN-LAST:event_cmbScramblingKey1ActionPerformed
 
     private void cmbScramblingTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScramblingTypeActionPerformed
         if (cmbScramblingType.getSelectedIndex() != -1) {
-            addScramblingKey();
+            if (!radMAC.isSelected()) {
+                addScramblingKey();
+            } else {
+                addMACScramblingCA();
+            }
         }
     }//GEN-LAST:event_cmbScramblingTypeActionPerformed
 
@@ -9085,8 +9156,8 @@ public class GUI extends javax.swing.JFrame {
             if (rn.equals(sv)) svi = i;
         }
         cmbRegion.setModel(new DefaultComboBoxModel<>(regions));
-        // Enable the region combobox if multiple options are available.
-        cmbRegion.setEnabled(cmbRegion.getItemCount() > 1);
+        // Enable the region combobox if any options are available.
+        cmbRegion.setEnabled(cmbRegion.getItemCount() > 0);
         populateBandPlan();
         // If we found a region name match, select it
         if (svi != -1) cmbRegion.setSelectedIndex(svi);
