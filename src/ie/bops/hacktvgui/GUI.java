@@ -3368,7 +3368,7 @@ public class GUI extends javax.swing.JFrame {
                 // Load failed, retry with the embedded file
                 messageBox("Unable to read the downloaded modes file.\n"
                         + "Retrying with the embedded copy, which may not be up to date.", JOptionPane.WARNING_MESSAGE);
-                modesFilePath = "ie/bops/resources/" + getFork() + getFork() + ".ini";
+                modesFilePath = "ie/bops/resources/" + getFork() + ".ini";
                 modesFileLocation = "embedded";
                 openModesFile();
             }
@@ -4337,7 +4337,7 @@ public class GUI extends javax.swing.JFrame {
                     case "double-cut":
                         ca = new ComboBoxOption("--" + ica, "");
                         // Split the scramblingkey value into an array, using
-                        // whitespace as the  separator. [0] contains the CA
+                        // whitespace as the separator. [0] contains the CA
                         // system, while [1] contains the CA key.
                         String[] macCA = ik1.split("\\s");
                         ik1 = macCA[0];
@@ -4366,6 +4366,7 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
             // VC2 side of dual VC1/2 mode
+            // Also the access mode on MAC scrambling
             if (!ik2.isEmpty() && (ica.equals("videocrypt1+2") || ica.equals("single-cut") || ica.equals("double-cut"))) {
                 ComboBoxOption k2 = new ComboBoxOption(ik2, "");
                 cmbScramblingKey2.setSelectedItem(k2);
@@ -5748,7 +5749,7 @@ public class GUI extends javax.swing.JFrame {
             ca.add(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
             ca.add(new ComboBoxOption("--d11", "Discret 11"));
         }
-        if (captainJack) ca.add(new ComboBoxOption("--d14", "Discret 14"));
+        ca.add(new ComboBoxOption("--d14", "Discret 14"));
         // Convert to an array so we can populate
         cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
         cmbScramblingType.setSelectedIndex(0);
