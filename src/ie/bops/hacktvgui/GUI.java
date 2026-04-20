@@ -87,7 +87,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.KeyStroke;
 
-public class GUI extends javax.swing.JFrame {    
+public class GUI extends javax.swing.JFrame {
     // Application name
     public static final String APP_NAME = "hacktv-gui";
     
@@ -2690,8 +2690,8 @@ public class GUI extends javax.swing.JFrame {
             // Set light/dark mode to current setting, seems to be broken
             // System.setProperty("apple.awt.application.appearance", "system");
         }
-        try {
-            SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
+            try {
                 // Create GUI class instance
                 final var g = new GUI();
                 g.initUI();
@@ -2700,19 +2700,18 @@ public class GUI extends javax.swing.JFrame {
                     // Prevent window from being resized below the current size
                     g.setMinimumSize(g.getSize());
                     g.setVisible(true);
-                }
-                else {
+                } else {
                     System.exit(s);
                 }
-            });
-        } catch (HeadlessException e) {
-            // Catch this error if we find we're running on a headless JRE or an
-            // OS with no GUI support (e.g. WSL or Unix without X).
-            System.err.println("A fatal error occurred while attempting to "
-                    + "initialise the window, please see details below.\n" + 
-                    e.getMessage());
-            System.exit(-1);
-        }
+            } catch (HeadlessException e) {
+                // Catch this error if we find we're running on a headless JRE or an
+                // OS with no GUI support (e.g. WSL or Unix without X).
+                System.err.println("A fatal error occurred while attempting to "
+                        + "initialise the window, please see details below.\n" + 
+                        e.getMessage());
+                System.exit(-1);
+            }
+        });
     }
     
     public void initUI() {
