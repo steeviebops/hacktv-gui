@@ -5350,7 +5350,7 @@ public class GUI extends javax.swing.JFrame {
                         // Set Ceefax temp directory
                         f = new File(tempDir + File.separator + "ceefax");
                         break;
-                    case "http://teastop.plus.com/svn/teletext/":
+                    case "https://teastop.plus.com/svn/teletext/":
                         // Set Teefax temp directory
                         f = new File(tempDir + File.separator + "teefax");
                         break;
@@ -8728,7 +8728,7 @@ public class GUI extends javax.swing.JFrame {
             // Disable hacktv download button so it doesn't interfere
             if (runningOnWindows) btnDownloadHackTV.setEnabled(false);
             // Set variables
-            String dUrl = "http://teastop.plus.com/svn/teletext/";
+            String dUrl = "https://teastop.plus.com/svn/teletext/";
             String regex = "\">(.*?)</a>";
             // Download index page
             downloadTeletext(dUrl, "teefax.html", regex);
