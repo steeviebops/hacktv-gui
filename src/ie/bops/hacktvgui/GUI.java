@@ -4453,15 +4453,15 @@ public class GUI extends javax.swing.JFrame {
             chkVideoFilter.doClick();
         }
         // Audio
-        if (htvFile.getBoolean("hacktv", "audio") == false) {
+        if (!htvFile.getBoolean("hacktv", "audio")) {
             if (chkAudio.isSelected() ) chkAudio.doClick();
         }
         // NICAM
-        if (htvFile.getBoolean("hacktv", "nicam") == false) {
+        if (!htvFile.getBoolean("hacktv", "nicam")) {
             if (chkNICAM.isSelected() ) chkNICAM.doClick();
         }
         // A2 Stereo
-        if (htvFile.getBoolean("hacktv", "a2stereo") == true) {
+        if (htvFile.getBoolean("hacktv", "a2stereo")) {
             if ( (!chkA2Stereo.isSelected()) && (a2Supported) ) chkA2Stereo.doClick();
         }
         // ECM
@@ -7703,7 +7703,7 @@ public class GUI extends javax.swing.JFrame {
             cmbTest.setEnabled(true);
             cmbTest.setSelectedIndex(0);
         }
-        else if (htvLoadInProgress == true) {
+        else if (htvLoadInProgress) {
             // Do nothing so we don't interrupt the file loading process
         }
         else if (cmbTest.isEnabled()) {
@@ -9387,7 +9387,7 @@ public class GUI extends javax.swing.JFrame {
                 cmbFileType.setEnabled(true);
                 cmbFileType.setSelectedIndex(3);
                 // Opens the save file dialogue, but only if selected by the user
-                if (htvLoadInProgress == false) {
+                if (!htvLoadInProgress) {
                     // Retrieve the last used directory from the prefs store if it exists
                     outputFileChooser.setCurrentDirectory(
                         new File(PREFS.get("lastfdir", System.getProperty("user.home")))
