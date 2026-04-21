@@ -5724,51 +5724,41 @@ public class GUI extends javax.swing.JFrame {
     
     private void add625ScramblingTypes() {
         configureScramblingLabels();
-        var ca = new ArrayList<ComboBoxOption>();
-        ca.add(new ComboBoxOption("", "No scrambling"));
+        if (cmbScramblingType.getItemCount() > 0) cmbScramblingType.removeAllItems();
+        cmbScramblingType.addItem(new ComboBoxOption("", "No scrambling"));
         // Check if modes file contains a section for these scrambling systems
         // Only add those which have keys defined
         int vc1 = modesIni.getKeys("videocrypt").length;
         int vc2 = modesIni.getKeys("videocrypt2").length;
         if (vc1 > 0) {
-            ca.add(new ComboBoxOption("--videocrypt", "VideoCrypt I"));
+            cmbScramblingType.addItem(new ComboBoxOption("--videocrypt", "VideoCrypt I"));
         }
         if (vc2 > 0) {
-            ca.add(new ComboBoxOption("--videocrypt2", "VideoCrypt II"));
+            cmbScramblingType.addItem(new ComboBoxOption("--videocrypt2", "VideoCrypt II"));
         }
         if (vc1 > 0 && vc2 > 0) {
-            ca.add(new ComboBoxOption("vcDualMode", "VideoCrypt I+II"));
+            cmbScramblingType.addItem(new ComboBoxOption("vcDualMode", "VideoCrypt I+II"));
         }        
         if (modesIni.getKeys("videocrypts").length > 0) {
-            ca.add(new ComboBoxOption("--videocrypts", "VideoCrypt S"));
+            cmbScramblingType.addItem(new ComboBoxOption("--videocrypts", "VideoCrypt S"));
         }
         if (modesIni.getKeys("syster").length > 0) {
-            ca.add(new ComboBoxOption("--syster", "Nagravision Syster"));
-            ca.add(new ComboBoxOption("--systercnr", "Nagravision Syster (cut-and-rotate mode)"));
-            ca.add(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
-            ca.add(new ComboBoxOption("--d11", "Discret 11"));
+            cmbScramblingType.addItem(new ComboBoxOption("--syster", "Nagravision Syster"));
+            cmbScramblingType.addItem(new ComboBoxOption("--systercnr", "Nagravision Syster (cut-and-rotate mode)"));
+            cmbScramblingType.addItem(new ComboBoxOption("systerDualMode", "Nagravision Syster (line shuffle and cut-and-rotate modes)"));
+            cmbScramblingType.addItem(new ComboBoxOption("--d11", "Discret 11"));
         }
-        ca.add(new ComboBoxOption("--d14", "Discret 14"));
-        // Convert to an array so we can populate
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(ca.toArray(ComboBoxOption[]::new)));
-        cmbScramblingType.setSelectedIndex(0);
+        cmbScramblingType.addItem(new ComboBoxOption("--d14", "Discret 14"));
         // If no systems were found, disable the scrambling tab
-        if (ca.size() == 1) disableScrambling();
+        if (cmbScramblingType.getItemCount() == 1) disableScrambling();
     }
     
     private void addMACScramblingTypes() {
         configureScramblingLabels();
-        var cutType = new ArrayList<ComboBoxOption>();
-        cutType.add(new ComboBoxOption("", "No scrambling"));
-        // Check if modes file contains a section for these scrambling systems
-        // Only add those which have keys defined
-        cutType.add(new ComboBoxOption("--single-cut", "Single cut"));
-        cutType.add(new ComboBoxOption("--double-cut", "Double cut"));
-        // Convert to an array so we can populate
-        cmbScramblingType.setModel(new DefaultComboBoxModel<>(cutType.toArray(ComboBoxOption[]::new)));
-        cmbScramblingType.setSelectedIndex(0);
-        // If no systems were found, disable the scrambling tab
-        if (cutType.size() == 1) disableScrambling();
+        if (cmbScramblingType.getItemCount() > 0) cmbScramblingType.removeAllItems();
+        cmbScramblingType.addItem(new ComboBoxOption("", "No scrambling"));
+        cmbScramblingType.addItem(new ComboBoxOption("--single-cut", "Single cut"));
+        cmbScramblingType.addItem(new ComboBoxOption("--double-cut", "Double cut"));
     }
     
     private void addScramblingKey() {
@@ -5861,13 +5851,11 @@ public class GUI extends javax.swing.JFrame {
                     + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        // Add commands to an ArrayList
-        var scramblingKeyArray = new ArrayList<ComboBoxOption>();
+        // Add commands to the combobox
+        if (cmbScramblingKey1.getItemCount() > 0) cmbScramblingKey1.removeAllItems();
         for (String k : slist) {
-            scramblingKeyArray.add(new ComboBoxOption(k, modesIni.get(sconf, k)));
+            cmbScramblingKey1.addItem(new ComboBoxOption(k, modesIni.get(sconf, k)));
         }
-        cmbScramblingKey1.setModel(new DefaultComboBoxModel<>(scramblingKeyArray.toArray(ComboBoxOption[]::new)));
-        cmbScramblingKey1.setSelectedIndex(0);
         // VC1+2 dual mode
         if (dualVC) {
             String sconf2 = "videocrypt2";
@@ -5880,13 +5868,11 @@ public class GUI extends javax.swing.JFrame {
                         + "missing or corrupt for the selected scrambling type.", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            // Add commands to an ArrayList
-            var scramblingKey2Array = new ArrayList<ComboBoxOption>();
+            // Add commands to the combobox
+            if (cmbScramblingKey2.getItemCount() > 0) cmbScramblingKey2.removeAllItems();
             for (String k : slist2) {
-                scramblingKey2Array.add(new ComboBoxOption(k, modesIni.get(sconf2, k)));
+                cmbScramblingKey2.addItem(new ComboBoxOption(k, modesIni.get(sconf2, k)));
             }
-            cmbScramblingKey2.setModel(new DefaultComboBoxModel<>(scramblingKey2Array.toArray(ComboBoxOption[]::new)));
-            cmbScramblingKey2.setSelectedIndex(0);
             // Remove VC1 conditional option on faphil's build (only free access supported for now)
             if (!captainJack) cmbScramblingKey1.removeItem(new ComboBoxOption("conditional", ""));
         }
@@ -5919,6 +5905,8 @@ public class GUI extends javax.swing.JFrame {
             int ec = modesIni.getKeys("eurocrypt").length;
             if (ec > 0) cmbScramblingKey1.addItem(new ComboBoxOption("eurocrypt", "EuroCrypt"));
         } else {
+            // Get the friendly name of each value in [macscrambling]
+            // This is displayed in cmbScramblingKey1
             for (String ca : caTypes) {
                 cmbScramblingKey1.addItem(new ComboBoxOption(ca, modesIni.get("macscrambling", ca, ca)));
             }
@@ -6775,7 +6763,7 @@ public class GUI extends javax.swing.JFrame {
                  messageBox(bpname + " was not found in bandplans.ini", JOptionPane.ERROR_MESSAGE);
                  return;
             }
-            var options = new ArrayList<ComboBoxOptionLong>();
+            cmbChannel.removeAllItems();
             for (String key : bp) {
                 Long value = bpIni.getLong(bpname, key);
                 // Skip region ID, chid and local oscillator keys if they exist.
@@ -6786,12 +6774,9 @@ public class GUI extends javax.swing.JFrame {
                 if (value == null) continue;
                 // Add all other key/value pairs
                 var opt = new ComboBoxOptionLong(value, key);
-                options.add(opt);
+                cmbChannel.addItem(opt);
             }
-            // Enable cmbChannel and populate it with the contents of options
             cmbChannel.setEnabled(true);       
-            cmbChannel.setModel(new DefaultComboBoxModel<>(options.toArray(ComboBoxOptionLong[]::new)));
-            cmbChannel.setSelectedIndex(0);
         }
         catch (IllegalArgumentException ex) {
             System.err.println(ex);
