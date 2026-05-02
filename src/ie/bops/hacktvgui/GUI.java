@@ -95,7 +95,7 @@ public class GUI extends javax.swing.JFrame {
     private static final Random RND = new Random();
     
     // Boolean used for Microsoft Windows detection and handling
-    private boolean runningOnWindows;
+    private final boolean runningOnWindows = System.getProperty("os.name").contains("Windows");
     
     // Look and feel
     String defaultLaf;
@@ -2735,21 +2735,14 @@ public class GUI extends javax.swing.JFrame {
         });
         // Set the jarDir variable so we know where we're located
         jarDir = Path.of(SharedInst.getCurrentDirectory());
-        // Check operating system and set OS-specific options
-        if (System.getProperty("os.name").contains("Windows")) {
-            runningOnWindows = true;
-            String arch = System.getProperty("os.arch");
-            btnDownloadHackTV.setVisible(arch.equals("amd64") || arch.equals("aarch64"));
-            defaultHackTVPath = System.getProperty("user.dir") + File.separator + "hacktv.exe";
-        }
-        else {
-            runningOnWindows = false;
-            defaultHackTVPath = "/usr/local/bin/hacktv";
-            // Hide the Download button on the GUI Settings tab
-            btnDownloadHackTV.setVisible(false);
-        }
+        // Set OS-specific options
+        String arch = System.getProperty("os.arch");
+        btnDownloadHackTV.setVisible(runningOnWindows && (arch.equals("amd64") || arch.equals("aarch64")));
+        defaultHackTVPath = runningOnWindows ?
+                Paths.get(System.getProperty("user.dir"), "hacktv.exe").toString() :
+                "/usr/local/bin/hacktv";
         // Post-initialisation macOS tasks
-        if (System.getProperty("os.name").contains("Mac")) {
+        if (!runningOnWindows && System.getProperty("os.name").contains("Mac")) {
             // Move About to the application menu
             // Remove it and Exit from Help and File, respectively
             menuAbout.setVisible(false);
@@ -2821,7 +2814,7 @@ public class GUI extends javax.swing.JFrame {
         return 0;
     }
     
-    private static FileFilter createFileFilter() {
+    private FileFilter createFileFilter() {
         // Creates a custom FileFilter for hacktv binaries
         return new FileFilter() {
             @Override
@@ -2830,7 +2823,7 @@ public class GUI extends javax.swing.JFrame {
                 if (file.isDirectory())
                     return true;
                 // but only files with specific name
-                if (!System.getProperty("os.name").contains("Windows")) {
+                if (!runningOnWindows) {
                     return file.getName().equals("hacktv");
                 } else {
                     return file.getName().equals("hacktv.exe");
@@ -2838,7 +2831,7 @@ public class GUI extends javax.swing.JFrame {
             }
             @Override
             public String getDescription() {
-                if (!System.getProperty("os.name").contains("Windows")) {
+                if (!runningOnWindows) {
                     return "hacktv binaries (hacktv)";
                 } else {
                     return "hacktv binaries (hacktv.exe)";
