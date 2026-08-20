@@ -31,3 +31,29 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+# Maven
+target/
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+nbactions.xml
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Visual Studio build output
+[Bb]in/
+[Oo]bj/
+x64/
+x86/
+ARM64/
+
+# Native binaries
+*.dll
+*.exe
+*.lib
+*.exp
+*.pdb
+*.ilk
