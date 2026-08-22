@@ -5981,7 +5981,7 @@ public class MainWindow extends javax.swing.JFrame {
         txtFrequency.setText("");
         txtFrequency.setEnabled(false);
         txtFrequency.setEditable(false);
-        chkLockFrequency.setSelected(!chkLockFrequency.isSelected());
+        chkLockFrequency.setSelected(false);
         chkLockFrequency.setEnabled(false);
         lblRegion.setEnabled(false);
         cmbRegion.setEnabled(false);
