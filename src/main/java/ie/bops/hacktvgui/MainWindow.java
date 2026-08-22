@@ -6026,6 +6026,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void checkMode() {
         if (cmbMode.getSelectedIndex() == -1) return;
         var mode = (ModeInfo) cmbMode.getSelectedItem();
+        var od = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
+        boolean noRf = od != null && (od.value().equals("fl2k") || od.value().equals("file"));
         if (mode == null) return;
         cmbBand.removeAllItems();
         int up = mode.getUhfPlans().length;
@@ -6037,7 +6039,9 @@ public class MainWindow extends javax.swing.JFrame {
         var mod = mode.modulation();
         if (mod != UNMODULATED) cmbBand.addItem(CUSTOM_FREQUENCY);
         int c = cmbBand.getItemCount();
-        if (chkLockFrequency.isSelected()) {
+        if (noRf) {
+            disableRFOptions();
+        } else if (chkLockFrequency.isSelected()) {
             cmbBand.setEnabled(false);
             cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
         } else if (c > 1) {
@@ -6047,12 +6051,7 @@ public class MainWindow extends javax.swing.JFrame {
             cmbRegion.setEnabled(true);
             cmbChannel.setEnabled(true);
         } else if (c == 1 && mod != UNMODULATED) {
-            cmbBand.setEnabled(true);
-            lblRegion.setEnabled(false);
-            cmbRegion.setEnabled(false);
-            cmbRegion.removeAllItems();
-            cmbChannel.setEnabled(false);
-            cmbChannel.removeAllItems();
+            disableRFOptions();
         } else {
             cmbBand.setEnabled(false);
             cmbBand.removeAllItems();
@@ -6123,7 +6122,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
                 chkVsbFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
-                if (!chkAmp.isEnabled()) chkAmp.setEnabled(true);
+                if (!chkAmp.isEnabled() && !noRf) chkAmp.setEnabled(true);
                 disableFMDeviation();
             }
             case FM -> {
@@ -6133,7 +6132,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
                 chkFmFilter.setEnabled(true);
                 if (!chkSwapIQ.isEnabled()) chkSwapIQ.setEnabled(true);
-                if (!chkAmp.isEnabled()) chkAmp.setEnabled(true);
+                if (!chkAmp.isEnabled() && !noRf) chkAmp.setEnabled(true);
                 enableFMDeviation();
             }
             case UNMODULATED -> {
@@ -6147,8 +6146,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         if (mode.sampleRate() != null) {
-            var od = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
-            if (isVisible() && od.value().equals("hackrf") &&
+            if (isVisible() && (od != null && od.value().equals("hackrf")) &&
                     PREFS.getInt("hackdac", 0) == 1 && baseband) {
                 // HackDAC works at 13.5 MHz only 
                 defaultSampleRate = "13.5";
