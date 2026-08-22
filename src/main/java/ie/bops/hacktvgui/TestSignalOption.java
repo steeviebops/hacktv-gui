@@ -17,7 +17,30 @@
  */
 package ie.bops.hacktvgui;
 
+public record TestSignalOption(
+    String command,
+    String displayName,
+    String patternFilename,
+    boolean textInsertSupported,
+    String sampleRate
+) {
+    public TestSignalOption(String command, String displayName, String patternFilename, boolean textInsertSupported, String sampleRate) {
+        this.command = command;
+        this.displayName = displayName;
+        this.patternFilename = patternFilename == null ? "" : patternFilename;
+        this.textInsertSupported = textInsertSupported;
+        this.sampleRate = sampleRate == null ? "" : sampleRate;
+    }
+    
+    @Override public String toString() {
+        // Lets the JComboBox display friendly names
+        return displayName;
+    }
+    
+}
 // Helper class for populating (and reading) the available test signals
+/*
+
 public final class TestSignalOption {
     private final String command;
     private final String displayName;
@@ -43,4 +66,4 @@ public final class TestSignalOption {
         // Lets the JComboBox display friendly names
         return displayName;
     }
-}
+}*/

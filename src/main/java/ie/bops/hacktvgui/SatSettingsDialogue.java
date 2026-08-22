@@ -226,22 +226,22 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         initComponents();
         super.setLocationRelativeTo(parent);
         // Load preferences or use defaults if none defined
-        Double lo = GUI.PREFS.getDouble("localoscillator", GUI.DEFAULT_LO);
+        Double lo = MainWindow.PREFS.getDouble("localoscillator", MainWindow.DEFAULT_LO);
         txtLO.setText(lo.toString());
         // Get RX device setting
-        int rx = GUI.PREFS.getInt("rxdevice", 0);
+        int rx = MainWindow.PREFS.getInt("rxdevice", 0);
         if ( (rx >= 0) && (rx < cmbRxDevice.getItemCount()) ) {
             cmbRxDevice.setSelectedIndex(rx);
         }
         // Get checkbox preferences
-        if (GUI.PREFS.getInt("showrealfrequency", 0) == 1) {
+        if (MainWindow.PREFS.getInt("showrealfrequency", 0) == 1) {
             chkShowRealFreq.doClick();
         }
-        else if (GUI.PREFS.getInt("applyloforcustomfreq", 0) == 1) {
+        else if (MainWindow.PREFS.getInt("applyloforcustomfreq", 0) == 1) {
             chkApplyToCustom.setSelected(true);
         }
         // Get harmonic setting
-        switch (GUI.PREFS.getInt("harmonic", 1)) {
+        switch (MainWindow.PREFS.getInt("harmonic", 1)) {
             case 1:
             default:
                 if (radFirst.isEnabled()) radFirst.setSelected(true);
@@ -274,50 +274,42 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
         try {
             double d = Double.parseDouble(txtLO.getText());
             if ( (d < 5.0) || (d > 30.0) ) {
-                JOptionPane.showMessageDialog(null, invalidLO, GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, invalidLO, Shared.APP_NAME, JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            else if (Math.abs(d - GUI.DEFAULT_LO) < 0.000001) {
-                GUI.PREFS.remove("localoscillator");
+            else if (Math.abs(d - MainWindow.DEFAULT_LO) < 0.000001) {
+                MainWindow.PREFS.remove("localoscillator");
             }
             else {
-                GUI.PREFS.putDouble("localoscillator", d);
+                MainWindow.PREFS.putDouble("localoscillator", d);
             }
         }
         catch (NumberFormatException nfe) {
-            JOptionPane.showMessageDialog(null, invalidLO, GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, invalidLO, Shared.APP_NAME, JOptionPane.WARNING_MESSAGE);
             return;
         }
         // Commit harmonic to preferences
         switch (harmonicBG.getSelection().getActionCommand()) {
-            case "1":
-                GUI.PREFS.remove("harmonic");
-                break;
-            default:
-                GUI.PREFS.put("harmonic", harmonicBG.getSelection().getActionCommand());
-                break;
+            case "1" -> MainWindow.PREFS.remove("harmonic");
+            default -> MainWindow.PREFS.put("harmonic", harmonicBG.getSelection().getActionCommand());
         }
         // Commit checkboxes to preferences
         if (chkApplyToCustom.isSelected()) {
-            GUI.PREFS.putInt("applyloforcustomfreq", 1);
+            MainWindow.PREFS.putInt("applyloforcustomfreq", 1);
         }
         else {
-            GUI.PREFS.remove("applyloforcustomfreq");
+            MainWindow.PREFS.remove("applyloforcustomfreq");
         }
         if (chkShowRealFreq.isSelected()) {
-            GUI.PREFS.putInt("showrealfrequency", 1);
+            MainWindow.PREFS.putInt("showrealfrequency", 1);
         }
         else {
-            GUI.PREFS.remove("showrealfrequency");
+            MainWindow.PREFS.remove("showrealfrequency");
         }
         // Commit RX device to preferences
         switch (cmbRxDevice.getSelectedIndex()) {
-            case 0:
-                GUI.PREFS.remove("rxdevice");
-                break;
-            default:
-                GUI.PREFS.putInt("rxdevice", cmbRxDevice.getSelectedIndex());
-                break;
+            case 0 -> MainWindow.PREFS.remove("rxdevice");
+            default -> MainWindow.PREFS.putInt("rxdevice", cmbRxDevice.getSelectedIndex());
         }
         // Let the parent window know that we changed something...
         changed = true;
@@ -359,8 +351,7 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
     }//GEN-LAST:event_cmbRxDeviceActionPerformed
 
     private void cmbRxDeviceMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_cmbRxDeviceMouseWheelMoved
-        var s = new Shared();
-        s.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRxDevice);
+        Shared.mouseWheelComboBoxHandler(evt.getWheelRotation(), cmbRxDevice);
     }//GEN-LAST:event_cmbRxDeviceMouseWheelMoved
 
     private void chkShowRealFreqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowRealFreqActionPerformed

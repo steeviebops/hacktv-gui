@@ -212,28 +212,22 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void download(int fork) {
-        // Downloads the latest pre-compiled Windows build from my build server
-        String arch;
+        // Downloads the latest pre-compiled Windows build from the build server
+        String server;
         if (System.getProperty("os.arch").equals("aarch64")) {
-            arch = "arm64/";
+            server = Shared.DOWNLOAD_SERVER + "hacktv/arm64/";
         } else {
-            arch = "";
+            server = Shared.DOWNLOAD_SERVER + "hacktv/";
         }
         switch (fork) {
-            case 0:
-                // fsphil download
-                selection = "https://download.bops.ie/hacktv/" + arch + "fsphil.zip";
-                break;
-            case 1:
-                // Captain Jack download
-                selection = "https://download.bops.ie/hacktv/" + arch + "captainjack.zip";
-                break;
-            case 2:
-                // Matt's TV Barn (inaxeon)
-                selection = "https://download.bops.ie/hacktv/" + arch + "mattstvbarn.zip";
-                break;
-            default:
-                break;
+            case 0 -> // fsphil download
+                selection = server + "fsphil.zip";
+            case 1 -> // Captain Jack download
+                selection = server +  "captainjack.zip";
+            case 2 -> // Matt's TV Barn (inaxeon)
+                selection = server + "mattstvbarn.zip";
+            default -> {
+            }
         }
         this.dispose();
     }
@@ -244,10 +238,10 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
     
     private void lblinaxeon2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblinaxeon2MouseClicked
         try {
-            new Shared().launchBrowser(lblinaxeon2.getText().split("\"(.*?)")[1]);
+            Shared.launchBrowser(lblinaxeon2.getText().split("\"(.*?)")[1]);
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Unable to launch default browser.", Shared.APP_NAME, JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_lblinaxeon2MouseClicked
 
@@ -261,10 +255,10 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
 
     private void lblfsphil2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblfsphil2MouseClicked
         try {
-            new Shared().launchBrowser(lblfsphil2.getText().split("\"(.*?)")[1]);
+            Shared.launchBrowser(lblfsphil2.getText().split("\"(.*?)")[1]);
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null ,"Unable to launch default browser.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null ,"Unable to launch default browser.", Shared.APP_NAME, JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_lblfsphil2MouseClicked
 
@@ -278,10 +272,10 @@ public class DownloadButtonDialogue extends javax.swing.JDialog {
 
     private void lblCaptainJack2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCaptainJack2MouseClicked
         try {
-            new Shared().launchBrowser(lblCaptainJack2.getText().split("\"(.*?)")[1]);
+            Shared.launchBrowser(lblCaptainJack2.getText().split("\"(.*?)")[1]);
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null ,"Unable to launch default browser.", GUI.APP_NAME, JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null ,"Unable to launch default browser.", Shared.APP_NAME, JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_lblCaptainJack2MouseClicked
 

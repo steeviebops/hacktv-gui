@@ -112,16 +112,11 @@ public class INIFile implements Serializable {
     }
     
     public boolean getBoolean(String section, String key) {
-        switch(get(section, key, "")) {
-            case "0":
-            case "false":
-                return false;
-            case "1":
-            case "true":
-                return true;
-            default:
-                return false;
-        }
+        return switch (get(section, key, "")) {
+            case "0", "false" -> false;
+            case "1", "true" -> true;
+            default -> false;
+        };
     }
 
     public String get(String section, String key) {
@@ -148,6 +143,10 @@ public class INIFile implements Serializable {
             return new String[0];
         }
         return sec.keySet().toArray(String[]::new);
+    }
+    
+    public String[] getSections() {
+        return sections.keySet().toArray(String[]::new);
     }
 
     // Setters

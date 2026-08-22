@@ -17,6 +17,7 @@
  */
 package ie.bops.hacktvgui;
 
+import com.formdev.flatlaf.util.SystemFileChooser;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +40,6 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
     private void initComponents() {
 
         clockBG = new javax.swing.ButtonGroup();
-        testFileChooser = new javax.swing.JFileChooser();
         locationPanel = new javax.swing.JPanel();
         lblLocationDescriptor = new javax.swing.JLabel();
         txtTSDir = new javax.swing.JTextField();
@@ -58,8 +58,6 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         buttonPanel = new javax.swing.JPanel();
         btnOK = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-
-        testFileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Test signal settings");
@@ -120,11 +118,9 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
 
         clockBG.add(radClockOn);
         radClockOn.setText("Time");
-        radClockOn.setActionCommand("Time");
 
         clockBG.add(radDateOn);
         radDateOn.setText("Time and date");
-        radDateOn.setActionCommand("Time and date");
 
         javax.swing.GroupLayout clockPanelLayout = new javax.swing.GroupLayout(clockPanel);
         clockPanel.setLayout(clockPanelLayout);
@@ -285,11 +281,11 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         initComponents();
         super.setLocationRelativeTo(parent);
         hackTVDir = hackTVDirPath;
-        oldDir = GUI.PREFS.get("testdir", "");
+        oldDir = MainWindow.PREFS.get("testdir", "");
         txtTSDir.setText(oldDir);
-        txtTop.setText(GUI.PREFS.get("philipstext1", ""));
-        txtBottom.setText(GUI.PREFS.get("philipstext2", ""));
-        switch (GUI.PREFS.getInt("philipsclock", 0)) {
+        txtTop.setText(MainWindow.PREFS.get("philipstext1", ""));
+        txtBottom.setText(MainWindow.PREFS.get("philipstext2", ""));
+        switch (MainWindow.PREFS.getInt("philipsclock", 0)) {
             case 0:
             default:
                 radClockOff.setSelected(true);
@@ -311,41 +307,36 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
     
     private void processTypedKey(int kc) {
         switch(kc) {
-            case 10:
-                // Enter key
+            case 10 -> // Enter key
                 btnOK.doClick();
-                break;
-            case 27:
-                // Esc key
+            case 27 -> // Esc key
                 btnCancel.doClick();
-                break;
-            default:
+            default -> {
                 // Do nothing for other keys
-                break;
+            }
         }
     }
     
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         // If the directory has changed, process the new one
         if (!txtTSDir.getText().equals(oldDir)) {
-            var s = new Shared();
-            String l = s.stripQuotes(txtTSDir.getText());
+            String l = Shared.stripQuotes(txtTSDir.getText());
             // Make sure that the selected directory contains what we need
             if (Files.exists(Path.of(l + File.separator + "pm8546g.bin"))) {
                 // Save the chosen directory to prefs
-                GUI.PREFS.put("testdir", l);
+                MainWindow.PREFS.put("testdir", l);
                 changed = true;
             }
             else if (txtTSDir.getText().isBlank()) {
                 // No directory specified, default to the hacktv location
-                GUI.PREFS.remove("testdir");
+                MainWindow.PREFS.remove("testdir");
                 changed = true;
             }
             else {
                 JOptionPane.showMessageDialog(
                         null,
                         "The pm8546g.bin file was not be found in the specified location.",
-                        GUI.APP_NAME,
+                        Shared.APP_NAME,
                         JOptionPane.WARNING_MESSAGE
                 );
                 return;
@@ -367,29 +358,29 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
         int t = txtTop.getText().length();
         int b = txtBottom.getText().length();
         if (txtTop.getText().isBlank()) {
-            GUI.PREFS.remove("philipstext1");
+            MainWindow.PREFS.remove("philipstext1");
         }
         else {
             // Truncate if longer than 9 characters
             if (t > 9) txtTop.setText(txtTop.getText().substring(0,9));
-            GUI.PREFS.put("philipstext1", txtTop.getText());
+            MainWindow.PREFS.put("philipstext1", txtTop.getText());
         }
         if (txtBottom.getText().isBlank()) {
-            GUI.PREFS.remove("philipstext2");
+            MainWindow.PREFS.remove("philipstext2");
         }
         else {
             // Truncate if longer than 13 characters
             if (b > 13) txtBottom.setText(txtBottom.getText().substring(0,13));
-            GUI.PREFS.put("philipstext2", txtBottom.getText());
+            MainWindow.PREFS.put("philipstext2", txtBottom.getText());
         }
         if (radClockOff.isSelected()) {
-            GUI.PREFS.remove("philipsclock");
+            MainWindow.PREFS.remove("philipsclock");
         }
         else if (radClockOn.isSelected()) {
-            GUI.PREFS.putInt("philipsclock", 1);
+            MainWindow.PREFS.putInt("philipsclock", 1);
         }
         else if (radDateOn.isSelected()) {
-            GUI.PREFS.putInt("philipsclock", 2);
+            MainWindow.PREFS.putInt("philipsclock", 2);
         }
         this.dispose();
     }//GEN-LAST:event_btnOKActionPerformed
@@ -399,8 +390,10 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnTSDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTSDirActionPerformed
+        var testFileChooser = new SystemFileChooser();
+        testFileChooser.setFileSelectionMode(SystemFileChooser.DIRECTORIES_ONLY);
         testFileChooser.setCurrentDirectory(
-            new File(GUI.PREFS.get("testdir", hackTVDir))
+            new File(MainWindow.PREFS.get("testdir", hackTVDir))
         );
         int result = testFileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -449,7 +442,6 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
     private javax.swing.JRadioButton radClockOff;
     private javax.swing.JRadioButton radClockOn;
     private javax.swing.JRadioButton radDateOn;
-    private javax.swing.JFileChooser testFileChooser;
     private javax.swing.JPanel textFieldsPanel;
     private javax.swing.JTextField txtBottom;
     private javax.swing.JTextField txtTSDir;

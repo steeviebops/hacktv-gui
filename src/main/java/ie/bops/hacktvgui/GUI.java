@@ -17,34 +17,12 @@
  */
 package ie.bops.hacktvgui;
 
-public final class ComboBoxOption {
+// GUI class retained for backwards compatibility only
+// Calls the real main method and nothing more
+public class GUI {
     
-    private final String value;
-    private final String label;
-
-    public ComboBoxOption(String value, String label) {
-        this.value = value == null ? "" : value;
-        this.label = label == null ? "" : label;
-    }
-    public String value() { return value; }
-    public String label() { return label; }
-    
-    @Override
-    public String toString() {
-        return label;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof ComboBoxOption)) return false;
-        ComboBoxOption other = (ComboBoxOption) obj;
-        return value.equals(other.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return value.hashCode();
+    public static void main(String args[]) {
+        Main.main(args);
     }
     
 }

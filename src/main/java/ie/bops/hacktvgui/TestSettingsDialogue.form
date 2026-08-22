@@ -4,11 +4,6 @@
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="clockBG">
     </Component>
-    <Component class="javax.swing.JFileChooser" name="testFileChooser">
-      <Properties>
-        <Property name="fileSelectionMode" type="int" value="1"/>
-      </Properties>
-    </Component>
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
@@ -228,7 +223,6 @@
                   <ComponentRef name="clockBG"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Time"/>
-                <Property name="actionCommand" type="java.lang.String" value="Time"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JRadioButton" name="radDateOn">
@@ -237,7 +231,6 @@
                   <ComponentRef name="clockBG"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Time and date"/>
-                <Property name="actionCommand" type="java.lang.String" value="Time and date"/>
               </Properties>
             </Component>
           </SubComponents>
