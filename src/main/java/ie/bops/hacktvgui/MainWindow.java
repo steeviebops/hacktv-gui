@@ -2230,6 +2230,7 @@ public class MainWindow extends javax.swing.JFrame {
                 txtSource.setText(args[0]);
             }
         }
+        pack();
         return 0;
     }
     
@@ -3284,6 +3285,8 @@ public class MainWindow extends javax.swing.JFrame {
         captainJackPanel.setEnabled(true);
         chkLogo.setEnabled(true);
         addLogoOptions();
+        // Recalculate the window size, required for macOS
+        if (isMacOS) pack();
         if ( !radTest.isSelected() ) {
             chkPosition.setEnabled(true);
             chkTimestamp.setEnabled(true);
