@@ -2408,7 +2408,7 @@ public class MainWindow extends javax.swing.JFrame {
         standardLaf.addAll(addFlatLafThemes(flIjm, "materialthemeuilite"));
         if (isMacOS) {
             // Use FlatLafMac as default
-            defaultLaf = "com.formdev.flatlaf.FlatMacLightLaf";
+            defaultLaf = "com.formdev.flatlaf.themes.FlatMacLightLaf";
             defaultIndex = standardLaf.indexOf(new ComboBoxOption(defaultLaf, ""));
         } else if (!isWindows) {
             // Use FlatLaf as default
