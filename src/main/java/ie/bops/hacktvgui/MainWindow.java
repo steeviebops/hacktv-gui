@@ -4704,6 +4704,7 @@ public class MainWindow extends javax.swing.JFrame {
         // Reselect the default mode
         chkLockFrequency.setSelected(false);
         lstColour.setSelectedIndex(0);
+        if (cmbMode.getItemCount() > 0) cmbMode.setSelectedIndex(0);
         // Uncheck all checkboxes
         for (JCheckBox cb: checkBoxes){
             if (cb.isSelected()) cb.doClick();
