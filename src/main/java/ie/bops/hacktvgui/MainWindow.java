@@ -219,6 +219,7 @@ public class MainWindow extends javax.swing.JFrame {
     private static final String DOWNLOAD_TELETEXT = "Download";
     private static final String STOP_DOWNLOAD = "Stop";
     
+    // Boolean used for carriage return (CR) handling when capturing hacktv's output
     boolean cr;
 
     /**
@@ -3669,6 +3670,10 @@ public class MainWindow extends javax.swing.JFrame {
                     var df2 = new DecimalFormat("0.00");
                     txtFrequency.setText(df2.format((double) importedFreq / 1000000));
                 }
+                // Enable lock frequency option
+                if (htvFile.getInt("hacktv-gui3", "lockfrequency") != null && chkLockFrequency.isEnabled()) {
+                    if (htvFile.getInt("hacktv-gui3", "lockfrequency") == 1) chkLockFrequency.doClick();
+                }
             }
         }
         // SECAM field ID
@@ -4233,6 +4238,7 @@ public class MainWindow extends javax.swing.JFrame {
             else {
                 if (!bb) newHtv.setLong("hacktv", "frequency", frequency);
             }
+            if (chkLockFrequency.isSelected()) newHtv.setInt("hacktv-gui3", "lockfrequency", 1);
         }
         // Sample rate
         if (Shared.isNumeric(txtSampleRate.getText())) {
@@ -4769,7 +4775,6 @@ public class MainWindow extends javax.swing.JFrame {
                 // Download the index file
                 String index;
                 try {
-                    // If the file already exists from a previous attempt, delete it
                     // Download the index page
                     txtStatus.setText("Downloading index page from " + url);
                     index = Shared.downloadToString(url);
@@ -7487,9 +7492,11 @@ public class MainWindow extends javax.swing.JFrame {
                     hacktvProcess = pb.start();
                     // Capture the output of hacktv
                     try (var br = new BufferedReader(new InputStreamReader(hacktvProcess.getInputStream(), StandardCharsets.UTF_8))) {
+                        // Create a 4096 byte buffer to improve performance.
                         char[] buffer = new char[4096];
                         int count;
                         while ((count = br.read(buffer)) != -1) {
+                            // Publish the buffer
                             publish(new String(buffer, 0, count));
                         }
                         publish("hacktv stopped");
@@ -7533,6 +7540,7 @@ public class MainWindow extends javax.swing.JFrame {
             @Override
             protected void process(List<String> chunks) {
                 for (String chunk : chunks) {
+                    // Iterate through the buffer for CR handling
                     for (int i = 0; i < chunk.length(); i++) {
                         String c = String.valueOf(chunk.charAt(i));
                         if (c.equals("\r")) {
@@ -7706,19 +7714,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (hacktvProcess == null || !hacktvProcess.isAlive()) return;
         String err = "";
         if (hacktvProcess.supportsNormalTermination()) {
-        /* Don't use Process.destroy() here.
-         * 
-         * As per Oracle's documentation on ProcessHandle:
-         * "By comparison, Process instances were started by the current
-         * process and additionally provide access to the process input,
-         * output, and error streams."
-         * 
-         * During testing on macOS, using Process.destroy() could cause
-         * the InputStreamReader to throw an IOException ("Stream closed"),
-         * resulting in hacktv's shutdown messages being truncated.
-         * ProcessHandle.destroy() does not exhibit this behaviour.
-         */
-        hacktvProcess.toHandle().destroy();
+            hacktvProcess.toHandle().destroy(); // Process.destory() also closes the I/O streams
         } else if (isWindows && ConsoleCtrlJNI.isInitialised()) {
             try {
                 ConsoleCtrlJNI.sendCtrlC(hacktvProcess.pid());
