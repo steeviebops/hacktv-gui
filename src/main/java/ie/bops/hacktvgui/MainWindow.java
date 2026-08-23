@@ -3646,7 +3646,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return false;
             } else if (importedCh.isEmpty()) {
                 cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-                double freq = importedFreq / 1000000;
+                double freq = (double) importedFreq / 1000000.0;
                 txtFrequency.setText(Double.toString(freq).replace(".0",".00"));
             } else {
                 // Try to find the band plan
@@ -3668,12 +3668,12 @@ public class MainWindow extends javax.swing.JFrame {
                     // Use a custom frequency instead
                     cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
                     var df2 = new DecimalFormat("0.00");
-                    txtFrequency.setText(df2.format((double) importedFreq / 1000000));
+                    txtFrequency.setText(df2.format((double) importedFreq / 1000000.0));
                 }
-                // Enable lock frequency option
-                if (htvFile.getInt("hacktv-gui3", "lockfrequency") != null && chkLockFrequency.isEnabled()) {
-                    if (htvFile.getInt("hacktv-gui3", "lockfrequency") == 1) chkLockFrequency.doClick();
-                }
+            }
+            // Enable lock frequency option if supported
+            if (htvFile.getInt("hacktv-gui3", "lockfrequency") != null && chkLockFrequency.isEnabled()) {
+                if (htvFile.getInt("hacktv-gui3", "lockfrequency") == 1) chkLockFrequency.doClick();
             }
         }
         // SECAM field ID
@@ -4702,7 +4702,7 @@ public class MainWindow extends javax.swing.JFrame {
         // Clear status bar
         txtStatus.setText("");
         // Reselect the default mode
-        chkLockFrequency.setSelected(false);
+        if (chkLockFrequency.isSelected()) chkLockFrequency.doClick();
         lstColour.setSelectedIndex(0);
         if (cmbMode.getItemCount() > 0) cmbMode.setSelectedIndex(0);
         // Uncheck all checkboxes
@@ -8115,8 +8115,6 @@ public class MainWindow extends javax.swing.JFrame {
                 lblChannel.setEnabled(false);
                 cmbChannel.setEnabled(false);
                 cmbChannel.removeAllItems();
-                txtFrequency.setEnabled(true);
-                txtFrequency.setEditable(true);
                 break;
         }
         for (BandPlan b : bp) {
@@ -8124,6 +8122,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         lblRegion.setEnabled(cmbRegion.getItemCount() > 0);
         cmbRegion.setEnabled(cmbRegion.getItemCount() > 0);
+        txtFrequency.setEditable(band.equals(CUSTOM_FREQUENCY));
     }//GEN-LAST:event_cmbBandActionPerformed
 
     private void cmbChannelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbChannelActionPerformed
