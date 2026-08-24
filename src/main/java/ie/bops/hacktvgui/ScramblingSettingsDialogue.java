@@ -313,6 +313,7 @@ public class ScramblingSettingsDialogue extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
         vcPanel.add(lblCardNumber, gridBagConstraints);
 
+        txtCardNumber.setEditable(false);
         txtCardNumber.setEnabled(false);
         txtCardNumber.addMouseListener(new ContextMenuListener());
         txtCardNumber.addKeyListener(new java.awt.event.KeyAdapter() {

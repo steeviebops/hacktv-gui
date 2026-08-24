@@ -994,7 +994,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         advModePanel.add(chkInvertVideo, gridBagConstraints);
 
-        chkFmFilter.setText("FM video preemphasis filter");
+        chkFmFilter.setText("FM video pre-emphasis filter");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -1649,6 +1649,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         teletextPanel.add(chkTeletextSubtitles, gridBagConstraints);
 
+        txtTeletextSource.setEditable(false);
         txtTeletextSource.setColumns(42);
         txtTeletextSource.setEnabled(false);
         txtTeletextSource.addMouseListener(new ContextMenuListener());
@@ -4701,6 +4702,9 @@ public class MainWindow extends javax.swing.JFrame {
     private void resetAllControls() {
         // Clear status bar
         txtStatus.setText("");
+        // Reset modal dialogue settings
+        scramblingSettings = null;
+        macSettings = null;
         // Reselect the default mode
         if (chkLockFrequency.isSelected()) chkLockFrequency.doClick();
         lstColour.setSelectedIndex(0);
@@ -5509,7 +5513,7 @@ public class MainWindow extends javax.swing.JFrame {
         var s1 = (ComboBoxOption) cmbScrambling1.getSelectedItem();
         var s2 = (ComboBoxOption) cmbScrambling2.getSelectedItem();
         var s3 = (ComboBoxOption) cmbScrambling3.getSelectedItem();
-        String key= null;
+        String key = null;
         var m = (ModeInfo) cmbMode.getSelectedItem();
         ScramblingInfo si = null;
         if (m.colourMode() == MAC) {
@@ -5526,9 +5530,17 @@ public class MainWindow extends javax.swing.JFrame {
             btnScramblingOptions.setEnabled(false);
             return;
         }
-        // Don't enable the Scrambling Options button on VCS or D14
-        boolean u = (si.id().equals("videocrypts") || si.id().equals("d14") || key == null || key.equals("free") );
+        // Don't enable the Scrambling Options button on VCS or D14, or on
+        // any VideoCrypt CA unless in Captain Jack mode
+        boolean u = 
+                (!captainJack && si.id().startsWith("videocrypt")) ||
+                si.id().equals("videocrypts") ||
+                si.id().equals("d14") ||
+                key == null ||
+                key.equals("free");
         btnScramblingOptions.setEnabled(!u);
+        // Reset scrambling settings if unsupported on current CA or key
+        if (!btnScramblingOptions.isEnabled()) scramblingSettings = null;
     }
  
     private void enableScramblingKey1() {

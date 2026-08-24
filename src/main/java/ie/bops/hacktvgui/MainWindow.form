@@ -905,7 +905,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkFmFilter">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="FM video preemphasis filter"/>
+                        <Property name="text" type="java.lang.String" value="FM video pre-emphasis filter"/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1945,6 +1945,7 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtTeletextSource">
                       <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
                         <Property name="columns" type="int" value="42"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
