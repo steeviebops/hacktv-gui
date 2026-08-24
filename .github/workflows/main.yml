@@ -21,29 +21,18 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Locate Visual Studio
-        shell: pwsh
-        run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $vsPath = & $vswhere -latest -products * -property installationPath
-          if (-not $vsPath) {
-              throw "Visual Studio installation not found"
-          }
-          $devenv = Join-Path $vsPath "Common7\IDE"
-          if (-not (Test-Path (Join-Path $devenv "devenv.exe"))) {
-              throw "devenv.exe not found at $devenv"
-          }
-          Add-Content $env:GITHUB_PATH $devenv
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build native libraries (x64)
         shell: cmd
         run: |
-          devenv.exe ConsoleCtrl\ConsoleCtrl.slnx /Build "Release|x64"
+          msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=x64
 
       - name: Build native libraries (ARM64)
         shell: cmd
         run: |
-          devenv.exe ConsoleCtrl\ConsoleCtrl.slnx /Build "Release|ARM64"
+          msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=ARM64
 
       - name: Copy native libraries
         shell: pwsh
