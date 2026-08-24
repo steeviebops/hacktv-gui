@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -38,20 +38,20 @@ jobs:
       - name: Build native libraries (x64)
         shell: cmd
         run: |
-          devenv.exe ConsoleCtrl.slnx /Build "Release|x64"
+          devenv.exe ConsoleCtrl\ConsoleCtrl.slnx /Build "Release|x64"
 
       - name: Build native libraries (ARM64)
         shell: cmd
         run: |
-          devenv.exe ConsoleCtrl.slnx /Build "Release|ARM64"
+          devenv.exe ConsoleCtrl\ConsoleCtrl.slnx /Build "Release|ARM64"
 
       - name: Copy native libraries
         shell: pwsh
         run: |
           $destination = "src/main/resources/ie/bops/resources/native"
           New-Item -ItemType Directory -Force -Path $destination | Out-Null
-          Copy-Item "x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
-          Copy-Item "ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
+          Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
+          Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
 
       - name: Build hacktv-gui
         run: mvn package
