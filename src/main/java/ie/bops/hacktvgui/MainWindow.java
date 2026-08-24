@@ -8027,7 +8027,8 @@ public class MainWindow extends javax.swing.JFrame {
             "\nUsing " + bpFileLocation + " band plan file, version " + bpFileVersion +
             "\nUsing Java Runtime Environment version " + jv +
             "\n\nCopyright" + y + " Stephen McGarry.\n" +
-            "Provided under the terms of the General Public Licence (GPL) v2 or later.\n\n" +
+            "Provided under the terms of the GNU General Public Licence (GPL) v2 or later.\n" +
+            "FlatLaf is provided under the terms of the Apache 2.0 Licence.\n\n" +
             "https://github.com/steeviebops/hacktv-gui\n\n",
             "About " + Shared.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_menuAboutActionPerformed
