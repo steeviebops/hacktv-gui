@@ -1,0 +1,49 @@
+name: Build hacktv-gui
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build native libraries (x64)
+        shell: cmd
+        run: |
+          devenv.exe ConsoleCtrl.slnx /Build "Release|x64"
+
+      - name: Build native libraries (ARM64)
+        shell: cmd
+        run: |
+          devenv.exe ConsoleCtrl.slnx /Build "Release|ARM64"
+
+      - name: Copy native libraries
+        shell: pwsh
+        run: |
+          $destination = "src/main/resources/ie/bops/resources/native"
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          Copy-Item "x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
+          Copy-Item "ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
+
+      - name: Build hacktv-gui
+        run: mvn package
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hacktv-gui
+          path: target/*
