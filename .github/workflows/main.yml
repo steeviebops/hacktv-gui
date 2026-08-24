@@ -22,7 +22,7 @@ jobs:
           cache: maven
 
       - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Build native libraries (x64)
         shell: cmd
@@ -46,7 +46,44 @@ jobs:
         run: mvn package
 
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hacktv-gui
-          path: target/*
+          path: |
+            target/*.jar
+            target/lib/
+            target/licenses/
+
+      - name: Check out download repository
+        uses: actions/checkout@v5
+        with:
+          repository: steeviebops/download.bops.ie
+          token: ${{ secrets.DOWNLOAD_REPO_TOKEN }}
+          path: download-repo
+
+      - name: Update download files
+        shell: pwsh
+        run: |
+          $destination = "download-repo/hacktv-gui"
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          Copy-Item "src/main/resources/ie/bops/resources/captainjack.ini" `
+              "$destination/captainjack.ini"
+          Copy-Item "src/main/resources/ie/bops/resources/fsphil.ini" `
+              "$destination/fsphil.ini"
+          Copy-Item "src/main/resources/ie/bops/resources/bandplans.ini" `
+              "$destination/bandplans.ini"
+
+      - name: Commit updated download files
+        shell: pwsh
+        working-directory: download-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hacktv-gui/
+          if (git diff --cached --quiet) {
+              Write-Host "No changes to commit."
+              exit 0
+          }
+          git commit -m "Update hacktv-gui configuration files"
+          git push
+          
