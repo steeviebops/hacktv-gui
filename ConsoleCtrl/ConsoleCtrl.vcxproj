@@ -99,22 +99,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include\win32;C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot\include</ExternalIncludePath>
+    <ExternalIncludePath>$(JAVA_HOME)\include\win32;$(JAVA_HOME)\include</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
