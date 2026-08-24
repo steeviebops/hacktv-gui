@@ -461,7 +461,6 @@ public class MainWindow extends javax.swing.JFrame {
         cmbScrambling3 = new javax.swing.JComboBox<>();
         btnScramblingOptions = new javax.swing.JButton();
         settingsTab = new javax.swing.JPanel();
-        settingsContainer1 = new javax.swing.JPanel();
         settingsContainerPanel = new javax.swing.JPanel();
         hacktvPathPanel = new javax.swing.JPanel();
         txtHackTVPath = new javax.swing.JTextField();
@@ -527,7 +526,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        sourceTab.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        sourceTab.setLayout(new java.awt.GridBagLayout());
 
         sourceTabContainer.setBorder(javax.swing.BorderFactory.createTitledBorder("Source options"));
         sourceTabContainer.setPreferredSize(new java.awt.Dimension(570, 300));
@@ -693,7 +692,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         sourceTabContainer.add(playlistButtonsPanel, gridBagConstraints);
 
-        sourceTab.add(sourceTabContainer);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
+        sourceTab.add(sourceTabContainer, gridBagConstraints);
 
         tabPane.addTab("Source", sourceTab);
 
@@ -925,6 +930,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         modeTabContainerPanel.add(modeContainerPanel, gridBagConstraints);
 
         advModePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Advanced mode options"));
@@ -1023,6 +1029,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 7, 7, 7);
         modeTabContainerPanel.add(advModePanel, gridBagConstraints);
 
         modeTab.add(modeTabContainerPanel);
@@ -1308,7 +1315,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         outputTab.add(outputContainerPanel, gridBagConstraints);
 
         tabPane.addTab("Output", outputTab);
@@ -1774,7 +1781,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         scramblingContainerPanel.add(scramblingPanel, gridBagConstraints);
 
         btnScramblingOptions.setText("Advanced options...");
@@ -1784,7 +1791,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
         scramblingContainerPanel.add(btnScramblingOptions, gridBagConstraints);
 
         scramblingTab.add(scramblingContainerPanel);
@@ -1792,8 +1799,6 @@ public class MainWindow extends javax.swing.JFrame {
         tabPane.addTab("Scrambling", scramblingTab);
 
         settingsTab.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        settingsContainer1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         settingsContainerPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1984,9 +1989,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         settingsContainerPanel.add(resetSettingsPanel, gridBagConstraints);
 
-        settingsContainer1.add(settingsContainerPanel);
-
-        settingsTab.add(settingsContainer1);
+        settingsTab.add(settingsContainerPanel);
 
         tabPane.addTab("GUI settings", settingsTab);
 
@@ -9279,7 +9282,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator sepAboutSeparator;
     private javax.swing.JPopupMenu.Separator sepExitSeparator;
     private javax.swing.JPopupMenu.Separator sepMruSeparator;
-    private javax.swing.JPanel settingsContainer1;
     private javax.swing.JPanel settingsContainerPanel;
     private javax.swing.JPanel settingsTab;
     private javax.swing.JPanel sourceCardPanel;
