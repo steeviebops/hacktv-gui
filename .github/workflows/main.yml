@@ -21,6 +21,20 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Locate Visual Studio
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -property installationPath
+          if (-not $vsPath) {
+              throw "Visual Studio installation not found"
+          }
+          $devenv = Join-Path $vsPath "Common7\IDE"
+          if (-not (Test-Path (Join-Path $devenv "devenv.exe"))) {
+              throw "devenv.exe not found at $devenv"
+          }
+          Add-Content $env:GITHUB_PATH $devenv
+
       - name: Build native libraries (x64)
         shell: cmd
         run: |
