@@ -1,3 +1,5 @@
+**This project is currently undergoing a major overhaul. Some information may be incorrect or incomplete for now.**
+
 # hacktv-gui - a GUI frontend application for hacktv
 
 **From January 2026, all versions older than 2025-10-05 will no longer receive configuration file updates. Please update to the latest release.**
@@ -8,7 +10,7 @@ hacktv-gui is, as the name suggests, a GUI frontend application for hacktv, whic
 **For other systems, details on how to install and use can be found on the <a href="https://github.com/steeviebops/hacktv-gui/wiki/Getting-started">Getting Started</a> wiki page.**
 
 ### Pre-requisites
-- A Java 21 or later runtime environment is required. Java 8 will not work. <a href="https://adoptium.net">Adoptium</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
+- A Java 21 or later runtime environment is required. Java 8 will not work. <a href="https://adoptium.net">Temurin</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
 - To use yt-dlp features, a copy of <a href="https://github.com/yt-dlp/yt-dlp/releases/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file.
 
 ### Licence information
