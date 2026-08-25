@@ -115,8 +115,8 @@ public class ScramblingSettingsDialogue extends javax.swing.JDialog {
                     break;
             }
         }
-        chkShowCardSerial.setEnabled(ca.videocryptFeatures() && settings.showCardSerial());
-        chkFindKeys.setEnabled(ca.videocryptFeatures() && key.equals("ppv") && settings.findKeys());
+        chkShowCardSerial.setSelected(ca.videocryptFeatures() && settings.showCardSerial());
+        chkFindKeys.setSelected(ca.videocryptFeatures() && key.equals("ppv") && settings.findKeys());
     }
 
     
@@ -539,18 +539,21 @@ public class ScramblingSettingsDialogue extends javax.swing.JDialog {
     private void radNoEmmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radNoEmmActionPerformed
         lblCardNumber.setEnabled(false);
         txtCardNumber.setEnabled(false);
+        txtCardNumber.setEditable(false);
         txtCardNumber.setText("");
     }//GEN-LAST:event_radNoEmmActionPerformed
 
     private void radActivateCardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radActivateCardActionPerformed
         showEMMWarning();
         lblCardNumber.setEnabled(true);
+        txtCardNumber.setEditable(true);
         txtCardNumber.setEnabled(true);
     }//GEN-LAST:event_radActivateCardActionPerformed
 
     private void radDeactivateCardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDeactivateCardActionPerformed
         showEMMWarning();
         lblCardNumber.setEnabled(true);
+        txtCardNumber.setEditable(true);
         txtCardNumber.setEnabled(true);
     }//GEN-LAST:event_radDeactivateCardActionPerformed
     
