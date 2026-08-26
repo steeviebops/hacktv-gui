@@ -42,6 +42,23 @@ jobs:
           Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
           Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
 
+      - name: Build Windows launcher (x64)
+        shell: pwsh
+        run: |
+          msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Build Windows launcher (ARM64)
+        shell: pwsh
+        run: |
+          msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=ARM64
+      
+      - name: Copy launcher binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "target"
+          Copy-Item "launcher\x64\Release\hacktv-gui.exe" "target\hacktv-gui_amd64.exe"
+          Copy-Item "launcher\ARM64\Release\hacktv-gui.exe" "target\hacktv-gui_arm64.exe"
+
       - name: Build hacktv-gui
         run: mvn package
 
@@ -51,6 +68,7 @@ jobs:
           name: hacktv-gui
           path: |
             target/*.jar
+            target/*.exe
             target/lib/
             target/licenses/
 
