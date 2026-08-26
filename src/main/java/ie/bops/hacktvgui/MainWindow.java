@@ -2745,6 +2745,8 @@ public class MainWindow extends javax.swing.JFrame {
             openBandPlanFile();
             lblRegion.setEnabled(false);
             cmbRegion.setEnabled(false);
+            // If the mode reload fails, we're in an unpredictable state.
+            // This is fatal, so exit hard.
             if (!addVideoModes()) System.exit(4);
         }
     }
@@ -3633,33 +3635,77 @@ public class MainWindow extends javax.swing.JFrame {
         String chid = null;
         if (m.colourMode() == MAC) chid = htvFile.get("hacktv", "chid", "");
         if ( (o.value().equals("hackrf") || o.value().equals("soapysdr")) && (!bb) ) {
-            String noFreqOrChannelErr = "No frequency or valid channel number was found in the configuration file. Load aborted.";
+            String noFreqOrChannelErr = "No frequency or valid band plan was found in the configuration file. Load aborted.";
             String importedCh = htvFile.get("hacktv-gui3", "channel", "");
             String ImportedBandPlan = htvFile.get("hacktv-gui3", "bandplan", "").toLowerCase(Locale.ENGLISH);
-            Long importedFreq;
-            if (htvFile.getDouble("hacktv", "frequency") != null) {
-                importedFreq = htvFile.getLong("hacktv", "frequency");
+            Long importedFreq = htvFile.getLong("hacktv", "frequency");
+            if (importedCh.isEmpty()) {
+                // No channel specified, so we need a frequency
+                if (importedFreq == null) {
+                    // No frequency specified either, abort
+                    messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
+                    resetAllControls();
+                    return false;
+                }
+                // Use the frequency specified
+                cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
+                double freq = (double) importedFreq / 1000000.0;
+                txtFrequency.setText(Double.toString(freq).replace(".0", ".00"));
             } else {
-                messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
-                resetAllControls();
-                return false;
+                // A channel was specified. Find the appropriate band plan.
+                BandPlan bp = m.getUhfPlan(ImportedBandPlan);
+                if (bp == null) bp = m.getVhfPlan(ImportedBandPlan);
+                if (bp == null) bp = m.getSatellitePlan(ImportedBandPlan);
+                // Find the channel in the band plan
+                Channel ch = bp != null ? findChannel(bp, importedCh) : null;
+                if (bp != null && ch != null) {
+                    // Use the band and channel that were found
+                    cmbBand.setSelectedItem(bp.band());
+                    cmbChannel.setSelectedItem(ch);
+                } else if (bp == null) {
+                    // Band plan wasn't found
+                    if (importedFreq != null) {
+                        // Fall back to the imported frequency
+                        cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
+                        double freq = (double) importedFreq / 1000000.0;
+                        txtFrequency.setText(Double.toString(freq).replace(".0", ".00"));
+                        invalidConfigFileValue("band plan", ImportedBandPlan);
+                    } else {
+                        // No band and no frequency, abort
+                        messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
+                        resetAllControls();
+                        return false;
+                    }
+                } else if (importedFreq != null) {
+                    // Band plan exists, but channel wasn't found.
+                    // Fall back to the imported frequency.
+                    cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
+                    double freq = (double) importedFreq / 1000000.0;
+                    txtFrequency.setText(Double.toString(freq).replace(".0", ".00"));
+                    invalidConfigFileValue("channel", importedCh);
+                } else {
+                    // Valid band plan, but invalid channel and no frequency
+                    messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
+                    resetAllControls();
+                    return false;
+                }
             }
-            if (importedFreq == null && importedCh.isEmpty()) {
+            /*if (importedFreq == null && importedCh.isEmpty()) {
                 // If not found, and the frequency is also blank, abort
                 messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
                 resetAllControls();
                 return false;
-            } else if (importedCh.isEmpty()) {
+            } else if (importedFreq != null && importedCh.isEmpty()) {
                 cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
                 double freq = (double) importedFreq / 1000000.0;
                 txtFrequency.setText(Double.toString(freq).replace(".0",".00"));
             } else {
                 // Try to find the band plan
                 BandPlan bp = m.getUhfPlan(ImportedBandPlan);
-                // Channel object
-                var ch = new Channel(importedCh, importedFreq, chid);
                 if (bp == null) bp = m.getVhfPlan(ImportedBandPlan);
                 if (bp == null) bp = m.getSatellitePlan(ImportedBandPlan);
+                // Channel object
+                var ch = new Channel(importedCh, importedFreq, chid);
                 if (bp != null) {
                     cmbBand.setSelectedItem(bp.band());
                     cmbRegion.setSelectedItem(bp);
@@ -3675,7 +3721,7 @@ public class MainWindow extends javax.swing.JFrame {
                     var df2 = new DecimalFormat("0.00");
                     txtFrequency.setText(df2.format((double) importedFreq / 1000000.0));
                 }
-            }
+            }*/
             // Enable lock frequency option if supported
             if (htvFile.getInt("hacktv-gui3", "lockfrequency") != null && chkLockFrequency.isEnabled()) {
                 if (htvFile.getInt("hacktv-gui3", "lockfrequency") == 1) chkLockFrequency.doClick();
@@ -4418,6 +4464,13 @@ public class MainWindow extends javax.swing.JFrame {
         updateMRUList(destinationFileName.toString());
     }
     
+    private Channel findChannel(BandPlan bp, String name) {
+        return bp.channels().stream()
+                .filter(ch -> ch.name().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
+    
     private INIFile saveScramblingSettings(INIFile newHtv) {
         var s1 = (ComboBoxOption) cmbScrambling1.getSelectedItem();
         // If no scrambling enabled, send the config back without any changes
@@ -4836,8 +4889,10 @@ public class MainWindow extends javax.swing.JFrame {
                     if (entry.startsWith("http")) {
                         sourceUrl = entry;
                         // Split out the file name only for the destination variable
-                        var u = new URI(entry).toURL();
-                        destination = Path.of(u.getPath()).getFileName().toString();
+                        var u = new URI(entry);
+                        var fileName = Path.of(u.getPath()).getFileName();
+                        if (fileName == null) return "URI does not contain a filename: " + entry;
+                        destination = fileName.toString();
                         // Update the array value so the status bar stays consistent
                         teletextLinks.set(i, destination);
                     } else {
@@ -4859,7 +4914,7 @@ public class MainWindow extends javax.swing.JFrame {
                     } catch (IOException ex) {
                         // The index page was downloaded but a teletext page failed.
                         // Connection failure?
-                        ex.getMessage();
+                        return ex.getMessage();
                     }
                 }
                 return null;
@@ -6288,6 +6343,7 @@ public class MainWindow extends javax.swing.JFrame {
             case A2 -> {
                 if (radA2Stereo.isEnabled()) radA2Stereo.setSelected(true);
             }
+            default -> { System.err.println("Unexpected audio mode: " + defaultMode); }
         }
     }
     
@@ -8009,7 +8065,7 @@ public class MainWindow extends javax.swing.JFrame {
             "\nUsing " + modesFileLocation + " modes file, version " + modesFileVersion +
             "\nUsing " + bpFileLocation + " band plan file, version " + bpFileVersion +
             "\nUsing Java Runtime Environment version " + jv +
-            "\n\nCopyright" + y + " Stephen McGarry.\n" +
+            "\n\nCopyright ©" + y + " Stephen McGarry.\n" +
             "Provided under the terms of the GNU General Public Licence (GPL) v2 or later.\n" +
             "FlatLaf is provided under the terms of the Apache 2.0 Licence.\n\n" +
             "https://github.com/steeviebops/hacktv-gui\n\n",
