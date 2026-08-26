@@ -30,7 +30,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="D:\progs\HackRF\hacktv\hacktv-gui\launcher-src\Launcher\test.ico">
+    <Image Include="test.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
