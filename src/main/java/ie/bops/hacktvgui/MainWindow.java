@@ -1071,7 +1071,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         rfPanel.add(lblRegion, gridBagConstraints);
 
-        cmbRegion.setPrototypeDisplayValue(new BandPlan(null, null, "00Continental Europe00", null));
+        cmbRegion.setPrototypeDisplayValue(new BandPlan(null, null, "United Kingdom (405 line)", null));
         cmbRegion.addMouseWheelListener(this::cmbRegionMouseWheelMoved);
         cmbRegion.addActionListener(this::cmbRegionActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2194,13 +2194,14 @@ public class MainWindow extends javax.swing.JFrame {
         loadPreferences();
         detectFork();
         selectModesFile();
+        addOutputDevices();
         if (!openModesFile()) return 2;
         if (!openBandPlanFile()) return 3;
         if (!addVideoModes()) return 4;
+        cmbOutputDevice.setSelectedIndex(0);
         addARCorrectionOptions();
         populateWSS();
         addFl2kAudioOptions();
-        addOutputDevices();
         addCeefaxRegions();
         addTeletextOptions();
         if (captainJack) {
@@ -6045,43 +6046,25 @@ public class MainWindow extends javax.swing.JFrame {
     }
     
     private void checkMode() {
-        if (cmbMode.getSelectedIndex() == -1) return;
         var mode = (ModeInfo) cmbMode.getSelectedItem();
-        var od = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
-        boolean noRf = od != null && (od.value().equals("fl2k") || od.value().equals("file"));
         if (mode == null) return;
+        var od = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
+        if (od == null) return;
+        boolean noRf = od.value().equals("fl2k") || od.value().equals("file");
         cmbBand.removeAllItems();
-        int up = mode.getUhfPlans().length;
-        int vp = mode.getVhfPlans().length;
-        int sp = mode.getSatellitePlans().length;
-        if (up > 0) cmbBand.addItem(UHF_BAND);
-        if (vp > 0) cmbBand.addItem(VHF_BAND);
-        if (sp > 0) cmbBand.addItem(SATELLITE_BAND);
-        var mod = mode.modulation();
-        if (mod != UNMODULATED) cmbBand.addItem(CUSTOM_FREQUENCY);
-        int c = cmbBand.getItemCount();
         if (noRf) {
             disableRFOptions();
-        } else if (chkLockFrequency.isSelected()) {
-            cmbBand.setEnabled(false);
-            cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-        } else if (c > 1) {
-            cmbBand.setEnabled(true);
-            cmbBand.setSelectedIndex(0);
-            lblRegion.setEnabled(true);
-            cmbRegion.setEnabled(true);
-            cmbChannel.setEnabled(true);
-        } else if (c == 1 && mod != UNMODULATED) {
-            disableRFOptions();
         } else {
-            cmbBand.setEnabled(false);
-            cmbBand.removeAllItems();
-            lblRegion.setEnabled(false);
-            cmbRegion.setEnabled(false);
-            cmbRegion.removeAllItems();
-            cmbChannel.setEnabled(false);
-            cmbChannel.removeAllItems();
+            enableRFOptions();
+            int up = mode.getUhfPlans().length;
+            int vp = mode.getVhfPlans().length;
+            int sp = mode.getSatellitePlans().length;
+            if (up > 0) cmbBand.addItem(UHF_BAND);
+            if (vp > 0) cmbBand.addItem(VHF_BAND);
+            if (sp > 0) cmbBand.addItem(SATELLITE_BAND);            
         }
+        var mod = mode.modulation();
+        if (mod != UNMODULATED) cmbBand.addItem(CUSTOM_FREQUENCY);
         // Populate labels
         String na = "n/a"; // This string is used if the underlying data is null
         String linesValue = mode.lines().toString();
@@ -6162,13 +6145,13 @@ public class MainWindow extends javax.swing.JFrame {
             }
             default -> {
                 messageBox("No modulation specified, defaulting to VSB.", JOptionPane.INFORMATION_MESSAGE);
-                if (!chkFmFilter.isEnabled()) chkFmFilter.setEnabled(true);
+                if (chkFmFilter.isEnabled()) Shared.toggleCheckBox(chkFmFilter, false);
+                if (!chkVsbFilter.isEnabled()) chkVsbFilter.setEnabled(true);
                 disableFMDeviation();
             }
         }
         if (mode.sampleRate() != null) {
-            if (isVisible() && (od != null && od.value().equals("hackrf")) &&
-                    PREFS.getInt("hackdac", 0) == 1 && baseband) {
+            if (isVisible() && baseband && (od.value().equals("hackrf") && chkHackDAC.isSelected())) {
                 // HackDAC works at 13.5 MHz only 
                 defaultSampleRate = "13.5";
                 txtSampleRate.setEnabled(false);
@@ -6177,8 +6160,8 @@ public class MainWindow extends javax.swing.JFrame {
                 if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
             }
         } else {
-            messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
-            defaultSampleRate = "16";
+            messageBox("No sample rate specified, defaulting to 15 MHz.", JOptionPane.INFORMATION_MESSAGE);
+            defaultSampleRate = "15";
             if (!txtSampleRate.isEnabled()) txtSampleRate.setEnabled(true);
         }
         if ( mode.colourMode() != ColourMode.NONE) {
@@ -6322,7 +6305,7 @@ public class MainWindow extends javax.swing.JFrame {
     private boolean checkBasebandSupport() {
         // Check if the selected output device supports baseband modes or not.
         var outputDevice = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
-        if ( (outputDevice.value().equals("hackrf") && (PREFS.getInt("hackdac", 0) == 1)) ||
+        if ( (outputDevice.value().equals("hackrf") && chkHackDAC.isSelected()) ||
                 outputDevice.value().equals("fl2k") ||
                 outputDevice.value().equals("file") ) {
             disableRFOptions();
@@ -8348,14 +8331,15 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_chkSyntaxOnlyActionPerformed
 
     private void cmbOutputDeviceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOutputDeviceActionPerformed
+        var mode = (ModeInfo) cmbMode.getSelectedItem();
+        if (mode == null) return;
         String ModeChanged = "The selected video mode has been changed "
                 + "because this output device does not support it. Please select another mode.";
-        var mode = (ModeInfo) cmbMode.getSelectedItem();
         if (!txtOutputDevice.getText().isBlank()) txtOutputDevice.setText("");
         var c = mode.colourMode();
         var od = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
         boolean bb = mode.modulation() == UNMODULATED;
-        switch(od.value()) {
+        switch (od.value()) {
             case "hackrf" -> {
                 lblFl2kAudio.setEnabled(false);
                 cmbFl2kAudio.setEnabled(false);
@@ -8370,9 +8354,7 @@ public class MainWindow extends javax.swing.JFrame {
                         messageBox(ModeChanged, JOptionPane.WARNING_MESSAGE);
                         cmbMode.setSelectedIndex(0);
                     }
-                    // If the RF panel is disabled, enable it and call checkMode
-                    // to re-populate the channel options correctly
-                    enableRFOptions();
+                    // Call checkMode to re-populate the channel options correctly
                     checkMode();
                 }
                 if (!bb) {
@@ -9034,15 +9016,18 @@ public class MainWindow extends javax.swing.JFrame {
         var selectedItem = (ComboBoxOption) cmbTeletextDownload.getSelectedItem();
         if (selectedItem == null) return;
         String defaultDesc = "No item selected";
-        String desc = null;
+        String desc;
         switch (selectedItem.value()) {
             case "" -> desc = defaultDesc;
             case "ceefax" -> desc = "Ceefax recreation by NMS";
             case "teefax" -> desc = "Teefax by Peter Kwan";
             case "spark" -> desc = "SPARK by TVARK";
-            default -> System.err.println("Unexpected value: " + selectedItem.value());
+            default -> {
+                // Safe fallback
+                System.err.println("Unexpected value: " + selectedItem.value());
+                desc = defaultDesc;
+            }
         }
-        if (desc == null) desc = defaultDesc;
         lblTeletextDescription.setText(desc);
         btnTeletextDownload.setEnabled(!desc.equals(defaultDesc));
     }//GEN-LAST:event_cmbTeletextDownloadActionPerformed
