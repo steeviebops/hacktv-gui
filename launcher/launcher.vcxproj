@@ -228,7 +228,7 @@
     <ResourceCompile Include="hacktv-gui_launcher.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="D:\progs\HackRF\hacktv\hacktv-gui\launcher-src\Launcher\test.ico" />
+    <Image Include="test.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
