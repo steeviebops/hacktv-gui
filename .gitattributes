@@ -2,3 +2,4 @@
 * text eol=lf
 *.tti text eol=crlf
 *.png binary
+*.ico binary
