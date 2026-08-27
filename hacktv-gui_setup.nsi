@@ -69,6 +69,14 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "OriginalFilename" "hacktv-gui_setup.exe"
     !endif
 !endif
 
+!ifdef INSTALL_X64
+    !define HACKTV_URL "https://download.bops.ie/hacktv/fsphil.zip"
+!endif
+
+!ifdef INSTALL_ARM64
+    !define HACKTV_URL "https://download.bops.ie/hacktv/arm64/fsphil.zip"
+!endif
+
 Section "!Required files" MAIN
     SectionIn RO
     SetOutPath $INSTDIR
@@ -114,6 +122,7 @@ Section "!Required files" MAIN
         WriteRegStr HKCU "${UNINSTALL_PATH}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
         WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayIcon" "$\"$INSTDIR\hacktv-gui.exe$\""
         WriteRegStr HKCU "${UNINSTALL_PATH}" "Publisher" "Stephen McGarry"
+        WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayVersion" ${VERSION}
         WriteRegStr HKCU "${UNINSTALL_PATH}" "UrlUpdateInfo" "https://github.com/steeviebops/hacktv-gui"
         # File associations
         !define ASSOC_EXT ".htv"
@@ -139,7 +148,7 @@ Section ""
     SetOutPath "$INSTDIR\bin"
     ${If} ${SectionIsSelected} ${HACKTV}
         DetailPrint "Downloading hacktv..."
-        NScurl::http GET "https://download.bops.ie/hacktv/fsphil.zip" "$INSTDIR\bin\fsphil.zip" /INSIST /CANCEL /RESUME /END
+        NScurl::http GET "${HACKTV_URL}" "$INSTDIR\bin\fsphil.zip" /INSIST /CANCEL /RESUME /END
         Pop $6
         ${If} $6 == "OK"
             ExecWait '"$INSTDIR\hacktv-gui.exe" /copydllandhacktv' $1
@@ -236,7 +245,7 @@ SectionEnd
 Function .onInit
     # CPU architecture check
     !ifdef INSTALL_X64
-        ${IfNot} ${RunningX64}
+        ${If} ${IsNativeARM64}
             MessageBox MB_OK|MB_ICONSTOP \
                 "This installer is for x64 builds of Windows only."
             Quit
