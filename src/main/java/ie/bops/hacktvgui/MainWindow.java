@@ -3690,38 +3690,6 @@ public class MainWindow extends javax.swing.JFrame {
                     return false;
                 }
             }
-            /*if (importedFreq == null && importedCh.isEmpty()) {
-                // If not found, and the frequency is also blank, abort
-                messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
-                resetAllControls();
-                return false;
-            } else if (importedFreq != null && importedCh.isEmpty()) {
-                cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-                double freq = (double) importedFreq / 1000000.0;
-                txtFrequency.setText(Double.toString(freq).replace(".0",".00"));
-            } else {
-                // Try to find the band plan
-                BandPlan bp = m.getUhfPlan(ImportedBandPlan);
-                if (bp == null) bp = m.getVhfPlan(ImportedBandPlan);
-                if (bp == null) bp = m.getSatellitePlan(ImportedBandPlan);
-                // Channel object
-                var ch = new Channel(importedCh, importedFreq, chid);
-                if (bp != null) {
-                    cmbBand.setSelectedItem(bp.band());
-                    cmbRegion.setSelectedItem(bp);
-                    // Try to find the channel
-                    int ind = bp.channels().indexOf(ch);
-                    if (ind != -1) cmbChannel.setSelectedIndex(ind);
-                }
-                // Check if the correct channel was applied
-                var probe = (Channel) cmbChannel.getSelectedItem();
-                if (probe != null && probe.frequency() != ch.frequency()) {
-                    // Use a custom frequency instead
-                    cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-                    var df2 = new DecimalFormat("0.00");
-                    txtFrequency.setText(df2.format((double) importedFreq / 1000000.0));
-                }
-            }*/
             // Enable lock frequency option if supported
             if (htvFile.getInt("hacktv-gui3", "lockfrequency") != null && chkLockFrequency.isEnabled()) {
                 if (htvFile.getInt("hacktv-gui3", "lockfrequency") == 1) chkLockFrequency.doClick();
@@ -6100,6 +6068,13 @@ public class MainWindow extends javax.swing.JFrame {
         card.show(sourceCardPanel, "textbox");
     }
     
+    private void updateFrequencyLock() {
+        boolean b = chkLockFrequency.isSelected();
+        if (b) cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
+        cmbBand.setEnabled(!b);
+        lblBand.setEnabled(!b);
+    }
+    
     private void checkMode() {
         var mode = (ModeInfo) cmbMode.getSelectedItem();
         if (mode == null) return;
@@ -6120,6 +6095,9 @@ public class MainWindow extends javax.swing.JFrame {
         }
         var mod = mode.modulation();
         if (mod != UNMODULATED) cmbBand.addItem(CUSTOM_FREQUENCY);
+        if (!cmbBand.isEnabled()) cmbBand.setSelectedIndex(-1);
+        // If the frequency is locked, keep it that way
+        updateFrequencyLock();
         // Populate labels
         String na = "n/a"; // This string is used if the underlying data is null
         String linesValue = mode.lines().toString();
@@ -6844,46 +6822,41 @@ public class MainWindow extends javax.swing.JFrame {
     
     private boolean checkCustomFrequency(){
         var band = (String) cmbBand.getSelectedItem();
+        if (band == null || !band.equals(CUSTOM_FREQUENCY)) return true;
         var mode = (ModeInfo) cmbMode.getSelectedItem();
-        if (band != null && band.equals(CUSTOM_FREQUENCY)) {
-            boolean sat = mode.getSatellitePlans() != null;
-            boolean s = false;
-            if (sat && PREFS.get("applyloforcustomfreq", "0").equals("1")) {
-                s = true;
-            }
-            BigDecimal CustomFreq;
-            var Multiplier = new BigDecimal(1000000);
-            String InvalidInput = "Please specify a frequency between 1 MHz and 7250 MHz.";
-            String SatHint = """
-                             
-                             If you're trying to use a frequency for a satellite receiver, enable the 
-                             "Apply these settings for custom frequencies" option in "Satellite receiver
-                             settings" on the GUI Settings tab.""";
-            if (Shared.isNumeric(txtFrequency.getText().trim())){
-                CustomFreq = new BigDecimal(txtFrequency.getText().trim());
-                if ( (!s) && ( (CustomFreq.longValue() < 1) || (CustomFreq.longValue() > 7250) ) ) {
-                    if (sat) {
-                        messageBox(InvalidInput + SatHint, JOptionPane.WARNING_MESSAGE);
-                    }
-                    else {
-                        messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
-                    }
-                    return false;
-                }
-                else {
-                    // Multiply the big decimal by 1,000,000 to get the frequency in Hz.
-                    // Then set the Frequency variable to the long value of the BigDecimal.
-                    CustomFreq = CustomFreq.multiply(Multiplier);
-                    frequency = CustomFreq.longValue();
-                    return true;
-                }
-            }
-            else {
-                messageBox(InvalidInput, JOptionPane.WARNING_MESSAGE);
-                return false;  
-            }
+        boolean sat = (mode != null && mode.modulation() == FM);
+        boolean applyLO = false;
+        if (sat && PREFS.get("applyloforcustomfreq", "0").equals("1")) {
+            applyLO = true;
         }
-        return true;
+        BigDecimal customFreq;
+        var multiplier = new BigDecimal(1000000);
+        String invalidInput = "Please specify a frequency between 1 MHz and 7250 MHz.";
+        String satHint = """
+                         
+                         If you're trying to use a frequency for a satellite receiver, enable the 
+                         "Apply these settings for custom frequencies" option in "Satellite receiver
+                         settings" on the GUI Settings tab.""";
+        if (Shared.isNumeric(txtFrequency.getText().trim())){
+            customFreq = new BigDecimal(txtFrequency.getText().trim());
+            if (!applyLO && (customFreq.longValue() < 1 || customFreq.longValue() > 7250)) {
+                if (sat) {
+                    messageBox(invalidInput + satHint, JOptionPane.WARNING_MESSAGE);
+                } else {
+                    messageBox(invalidInput, JOptionPane.WARNING_MESSAGE);
+                }
+                return false;
+            } else {
+                // Multiply the big decimal by 1,000,000 to get the frequency in Hz.
+                // Then set the Frequency variable to the long value of the BigDecimal.
+                customFreq = customFreq.multiply(multiplier);
+                frequency = customFreq.longValue();
+                return true;
+            }
+        } else {
+            messageBox(invalidInput, JOptionPane.WARNING_MESSAGE);
+            return false;  
+        }
     }
     
     private ArrayList<String> checkMacChId() {
@@ -9152,9 +9125,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSatSettingsActionPerformed
 
     private void chkLockFrequencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLockFrequencyActionPerformed
-        boolean b = chkLockFrequency.isSelected();
-        if (b) cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-        cmbBand.setEnabled(!b);
+        updateFrequencyLock();
     }//GEN-LAST:event_chkLockFrequencyActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

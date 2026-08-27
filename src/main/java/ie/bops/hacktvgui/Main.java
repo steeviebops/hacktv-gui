@@ -20,6 +20,7 @@ package ie.bops.hacktvgui;
 import java.awt.HeadlessException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 
@@ -67,8 +68,7 @@ public class Main {
     
     private static Integer parseArguments(String[] args) {
         for (String arg : args) {
-            String a = arg.toLowerCase();
-            Path path = Path.of(System.getProperty("user.dir"), "hacktv.exe");
+            String a = arg.toLowerCase(Locale.ENGLISH);
             Path dllPath = Path.of(System.getProperty("user.dir"), "ConsoleCtrl_" + System.getProperty("os.arch") + ".dll");
             // If the emergency reset command is specified, remove all prefs.
             // This is a safety net, in case any bad preferences prevent us from running.
