@@ -18,6 +18,8 @@
 package ie.bops.hacktvgui;
 
 import java.awt.HeadlessException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 
@@ -25,17 +27,8 @@ public class Main {
     
     // Main method
     public static void main(String args[]) {
-        // If the emergency reset command is specified, remove all prefs.
-        // This is a safety net, in case any bad preferences prevent us from running.
-        // We handle this as early as possible to ensure it will work correctly.
-        if (args.length > 0) {
-            Set<String> resetArgs = Set.of("reset", "-reset", "--reset", "/reset");
-            if (resetArgs.contains(args[0])) {
-                // Reset all preferences and exit
-                Shared.resetPreferences();
-                return;
-            }
-        }
+        Integer exitStatus = parseArguments(args);
+        if (exitStatus != null) System.exit(exitStatus);
         // Pre-initialisation macOS tasks
         // These need to be done before creating the GUI class instance.
         // We'll set the dock icon later because that needs to be done after
@@ -72,4 +65,37 @@ public class Main {
         });
     }
     
+    private static Integer parseArguments(String[] args) {
+        for (String arg : args) {
+            String a = arg.toLowerCase();
+            Path path = Path.of(System.getProperty("user.dir"), "hacktv.exe");
+            Path dllPath = Path.of(System.getProperty("user.dir"), "ConsoleCtrl_" + System.getProperty("os.arch") + ".dll");
+            // If the emergency reset command is specified, remove all prefs.
+            // This is a safety net, in case any bad preferences prevent us from running.
+            // We handle this as early as possible to ensure it will work correctly.
+            Set<String> resetArgs = Set.of("reset", "-reset", "--reset", "/reset");
+            if (resetArgs.contains(a)) {
+                // Reset all preferences and exit
+                Shared.resetPreferences();
+                return 0;
+            } else if (a.equals("/copyhacktv")) {
+                // Unzip hacktv.zip
+                if (!Shared.unzipHackTV()) return 1;
+                return 0;
+            } else if (a.equals("/copydll")) {
+                // Copies the JNI DLL for this architecture
+                ConsoleCtrlJNI.initialise(Path.of(System.getProperty("user.dir")));
+                return 0;
+            } else if (a.equals("/copydllandhacktv")) {
+                // Copies the JNI DLL for this architecture and unzips hacktv
+                ConsoleCtrlJNI.initialise(Path.of(System.getProperty("user.dir")));
+                // Unzip hacktv.zip if it exists
+                if (!Shared.unzipHackTV()) return 1;
+                if (!Files.exists(dllPath)) return 1;
+                return 0;
+            }
+        }
+        return null;
+    }
+        
 }

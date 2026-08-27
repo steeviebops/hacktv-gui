@@ -637,4 +637,22 @@ public class Shared implements Serializable {
         return result;
     }
     
+    public static boolean unzipHackTV() {
+        // Used by the Windows NSIS installer to extract the downloaded
+        // hacktv ZIP file.
+        Path zip = Path.of(System.getProperty("user.dir"), "fsphil.zip");
+        Path readmePath = Path.of(System.getProperty("user.dir"), "readme.txt");
+        try {
+            unzipFile(zip.toString(), System.getProperty("user.dir"));
+            // Delete the readme file that was extracted from the zip
+            if (Files.exists(readmePath)) deleteFSObject(readmePath);
+            // Delete the downloaded zip
+            deleteFSObject(zip);
+            return true;
+        } catch (IOException ioe) {
+            System.err.println(ioe);
+            return false;
+        }
+    }
+    
 }
