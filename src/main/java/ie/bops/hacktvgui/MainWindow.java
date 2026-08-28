@@ -1042,9 +1042,11 @@ public class MainWindow extends javax.swing.JFrame {
         outputContainerPanel.setLayout(new java.awt.GridBagLayout());
 
         rfPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("RF options"));
+        rfPanel.setEnabled(false);
         rfPanel.setLayout(new java.awt.GridBagLayout());
 
         lblBand.setText("Band");
+        lblBand.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1052,6 +1054,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         rfPanel.add(lblBand, gridBagConstraints);
 
+        cmbBand.setEnabled(false);
         cmbBand.setPrototypeDisplayValue("XXXXXXXXXXXXX");
         cmbBand.addMouseWheelListener(this::cmbBandMouseWheelMoved);
         cmbBand.addActionListener(this::cmbBandActionPerformed);
@@ -1064,6 +1067,7 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.add(cmbBand, gridBagConstraints);
 
         lblRegion.setText("Region");
+        lblRegion.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -1071,6 +1075,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         rfPanel.add(lblRegion, gridBagConstraints);
 
+        cmbRegion.setEnabled(false);
         cmbRegion.setPrototypeDisplayValue(new BandPlan(null, null, "United Kingdom (405 line)", new ArrayList<Channel>()));
         cmbRegion.addMouseWheelListener(this::cmbRegionMouseWheelMoved);
         cmbRegion.addActionListener(this::cmbRegionActionPerformed);
@@ -1083,6 +1088,7 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.add(cmbRegion, gridBagConstraints);
 
         lblChannel.setText("Channel");
+        lblChannel.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -1090,6 +1096,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         rfPanel.add(lblChannel, gridBagConstraints);
 
+        cmbChannel.setEnabled(false);
         cmbChannel.setPrototypeDisplayValue(new Channel("XXXXXXXXXXXXXXX", Long.MIN_VALUE, null));
         cmbChannel.addMouseWheelListener(this::cmbChannelMouseWheelMoved);
         cmbChannel.addActionListener(this::cmbChannelActionPerformed);
@@ -1102,6 +1109,7 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.add(cmbChannel, gridBagConstraints);
 
         lblFrequency.setText("Frequency (MHz)");
+        lblFrequency.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -1110,6 +1118,7 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.add(lblFrequency, gridBagConstraints);
 
         txtFrequency.setEditable(false);
+        txtFrequency.setEnabled(false);
         txtFrequency.setPreferredSize(new java.awt.Dimension(64, 22));
         txtFrequency.addMouseListener(new ContextMenuListener());
         txtFrequency.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1125,6 +1134,7 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.add(txtFrequency, gridBagConstraints);
 
         chkLockFrequency.setText("Lock");
+        chkLockFrequency.setEnabled(false);
         chkLockFrequency.addActionListener(this::chkLockFrequencyActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -1142,9 +1152,11 @@ public class MainWindow extends javax.swing.JFrame {
         outputContainerPanel.add(rfPanel, gridBagConstraints);
 
         deviceOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Other device-specific options"));
+        deviceOptionsPanel.setEnabled(false);
         deviceOptionsPanel.setLayout(new java.awt.GridBagLayout());
 
         chkAmp.setText("TX amplifier");
+        chkAmp.setEnabled(false);
         chkAmp.addActionListener(this::chkAmpActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1154,6 +1166,7 @@ public class MainWindow extends javax.swing.JFrame {
         deviceOptionsPanel.add(chkAmp, gridBagConstraints);
 
         lblGain.setText("TX gain (dB)");
+        lblGain.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1161,6 +1174,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         deviceOptionsPanel.add(lblGain, gridBagConstraints);
 
+        txtGain.setEnabled(false);
         txtGain.addMouseListener(new ContextMenuListener());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1171,6 +1185,7 @@ public class MainWindow extends javax.swing.JFrame {
         deviceOptionsPanel.add(txtGain, gridBagConstraints);
 
         lblAntennaName.setText("Antenna name");
+        lblAntennaName.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -1179,6 +1194,7 @@ public class MainWindow extends javax.swing.JFrame {
         deviceOptionsPanel.add(lblAntennaName, gridBagConstraints);
 
         lblFileType.setText("File type");
+        lblFileType.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -1187,6 +1203,7 @@ public class MainWindow extends javax.swing.JFrame {
         deviceOptionsPanel.add(lblFileType, gridBagConstraints);
 
         chkHackDAC.setText("HackDAC support");
+        chkHackDAC.setEnabled(false);
         chkHackDAC.addActionListener(this::chkHackDACActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1196,6 +1213,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         deviceOptionsPanel.add(chkHackDAC, gridBagConstraints);
 
+        txtAntennaName.setEnabled(false);
         txtAntennaName.addMouseListener(new ContextMenuListener());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1207,6 +1225,7 @@ public class MainWindow extends javax.swing.JFrame {
         deviceOptionsPanel.add(txtAntennaName, gridBagConstraints);
 
         cmbFileType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "uint8", "int8", "uint16", "int16", "int32", "float" }));
+        cmbFileType.setEnabled(false);
         cmbFileType.addMouseWheelListener(this::cmbFileTypeMouseWheelMoved);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1261,14 +1280,17 @@ public class MainWindow extends javax.swing.JFrame {
         outputContainerPanel.add(outputDevicePanel, gridBagConstraints);
 
         fl2kOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("FL2000 options"));
+        fl2kOptionsPanel.setEnabled(false);
         fl2kOptionsPanel.setLayout(new java.awt.GridBagLayout());
 
         lblFl2kAudio.setText("FL2K audio mode");
+        lblFl2kAudio.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         fl2kOptionsPanel.add(lblFl2kAudio, gridBagConstraints);
 
+        cmbFl2kAudio.setEnabled(false);
         cmbFl2kAudio.addMouseWheelListener(this::cmbFl2kAudioMouseWheelMoved);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -1276,6 +1298,7 @@ public class MainWindow extends javax.swing.JFrame {
         fl2kOptionsPanel.add(cmbFl2kAudio, gridBagConstraints);
 
         chkSVideo.setText("S-Video output");
+        chkSVideo.setEnabled(false);
         chkSVideo.addActionListener(this::chkSVideoActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1284,6 +1307,7 @@ public class MainWindow extends javax.swing.JFrame {
         fl2kOptionsPanel.add(chkSVideo, gridBagConstraints);
 
         chkOffset.setText("Offset (MHz)");
+        chkOffset.setEnabled(false);
         chkOffset.addActionListener(this::chkOffsetActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -2199,8 +2223,8 @@ public class MainWindow extends javax.swing.JFrame {
         if (!openBandPlanFile()) return 3;
         modes = addVideoModes();
         if (modes == null) return 4;
-        cmbOutputDevice.setSelectedIndex(0);
         lstColour.setSelectedIndex(0);
+        cmbOutputDevice.setSelectedIndex(0);
         addARCorrectionOptions();
         populateWSS();
         addFl2kAudioOptions();
@@ -5982,7 +6006,8 @@ public class MainWindow extends javax.swing.JFrame {
             new ComboBoxOption("spdif", "S/PDIF")
         };
         cmbFl2kAudio.setModel(new DefaultComboBoxModel<>(audio));
-        cmbFl2kAudio.setSelectedIndex(0);
+        cmbFl2kAudio.setSelectedIndex(cmbFl2kAudio.isEnabled() ? 0 : -1
+        );
     }
     
     private void enableRFOptions() {
@@ -8380,6 +8405,7 @@ public class MainWindow extends javax.swing.JFrame {
         switch (od.value()) {
             case "hackrf" -> {
                 setFl2kOptions(false);
+                deviceOptionsPanel.setEnabled(true);
                 chkHackDAC.setEnabled(true);
                 lblOutputDevice2.setText("Serial number (optional)");
                 if (!cmbBand.isEnabled()) {
@@ -8410,6 +8436,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             case "soapysdr" -> {
                 setFl2kOptions(false);
+                deviceOptionsPanel.setEnabled(true);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Device options");
                 if (!cmbBand.isEnabled()) {
@@ -8434,6 +8461,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             case "fl2k" -> {
                 setFl2kOptions(true);
+                deviceOptionsPanel.setEnabled(false);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Device number (optional)");
                 // fl2k is baseband only for now so disable all RF options
@@ -8441,10 +8469,14 @@ public class MainWindow extends javax.swing.JFrame {
                 // Enable S-Video option if a baseband mode is selected
                 if ( bb && (c == ColourMode.PAL || c == ColourMode.NTSC ||
                         c == ColourMode.SECAM)) chkSVideo.setEnabled(true);
+                lblFileType.setEnabled(false);
+                cmbFileType.setEnabled(false);
+                cmbFileType.setSelectedIndex(-1);
             }
             case "file" -> {
                 // Output to file
                 setFl2kOptions(false);
+                deviceOptionsPanel.setEnabled(true);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Destination file");
                 disableRFOptions();
