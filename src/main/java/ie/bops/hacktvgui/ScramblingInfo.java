@@ -17,6 +17,7 @@
  */
 package ie.bops.hacktvgui;
 
+import java.util.Collections;
 import java.util.List;
 
 public record ScramblingInfo (
@@ -34,8 +35,8 @@ public record ScramblingInfo (
 ) {
     
     public ScramblingInfo {
-        caKeys = List.copyOf(caKeys);
-        ca2Keys = List.copyOf(ca2Keys);
+        caKeys = Collections.unmodifiableList(caKeys);
+        ca2Keys = Collections.unmodifiableList(ca2Keys);
     }
     
     @Override
