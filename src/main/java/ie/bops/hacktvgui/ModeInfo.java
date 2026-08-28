@@ -61,13 +61,23 @@ public record ModeInfo(
     }
     
     public enum ColourMode {
-        NONE,
-        PAL,
-        NTSC,
-        SECAM,
-        MAC,
-        OTHER
-    }    
+        PAL("PAL"),
+        NTSC("NTSC"),
+        SECAM("SECAM"),
+        NONE("Black and white"),
+        MAC("MAC"),
+        OTHER("Other");
+
+        private final String displayName;
+
+        ColourMode(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String displayName() {
+            return displayName;
+        }
+    }
     
     public enum AudioModulation {
         NO_AUDIO,

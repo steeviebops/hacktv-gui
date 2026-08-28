@@ -2981,24 +2981,11 @@ public class MainWindow extends javax.swing.JFrame {
             return null;
         }
         var cm = new ArrayList<ColourOption>();
-        // Search the modes array for each system. If found, add it
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.PAL)) {
-            cm.add(new ColourOption(ColourMode.PAL, "PAL"));
-        }        
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.NTSC)) {
-            cm.add(new ColourOption(ColourMode.NTSC, "NTSC"));
-        }        
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.SECAM)) {
-            cm.add(new ColourOption(ColourMode.SECAM, "SECAM"));
-        }        
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.NONE)) {
-            cm.add(new ColourOption(ColourMode.NONE, "Black and white"));
-        }        
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.MAC)) {
-            cm.add(new ColourOption(ColourMode.MAC, "MAC"));
-        }        
-        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.OTHER)) {
-            cm.add(new ColourOption(ColourMode.OTHER, "Other"));
+        // Search the modeList array for each system and add whatever is found
+        for (var sys : ColourMode.values()) {
+            if (modeList.stream().anyMatch(m -> m.colourMode() == sys)) {
+                cm.add(new ColourOption(sys, sys.displayName()));
+            }
         }
         // Create and set a ListModel for the JList
         var listModel = new DefaultListModel<ColourOption>();
@@ -3582,7 +3569,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .findFirst()
                     .orElseThrow());
             // Create a temporary object to set the list box to the correct system
-            var co = new ColourOption(mi.colourMode(), mi.colourMode().toString());
+            var co = new ColourOption(mi.colourMode(), mi.colourMode().displayName());
             lstColour.setSelectedValue(co, true);
             cmbMode.setSelectedItem(mi);
         } catch (NoSuchElementException e) {
@@ -4362,7 +4349,7 @@ public class MainWindow extends javax.swing.JFrame {
             newHtv.set("hacktv", "sismode", "dcsis");
         }
         // Disable colour
-        if (!chkColour.isSelected()) newHtv.setInt("hacktv", "nocolour", 1);
+        if (chkColour.isEnabled() && !chkColour.isSelected()) newHtv.setInt("hacktv", "nocolour", 1);
         // S-Video
         if (chkSVideo.isSelected()) newHtv.setInt("hacktv", "s-video", 1);
         // Closed captioning
@@ -5163,6 +5150,7 @@ public class MainWindow extends javax.swing.JFrame {
     }    
     
     private void disableScrambling() {
+        if (!cmbScrambling1.isEnabled()) return;
         cmbScrambling1.setSelectedIndex(0);
         cmbScrambling1.setEnabled(false);
         lblScrambling1.setEnabled(false);
@@ -6397,7 +6385,7 @@ public class MainWindow extends javax.swing.JFrame {
                 for (int i = 0; i < modes.size(); i++) {
                     if (modes.get(i).modulation() == VSB ||
                             modes.get(i).modulation() == FM) {
-                        var co = new ColourOption(modes.get(i).colourMode(), modes.get(i).colourMode().toString());
+                        var co = new ColourOption(modes.get(i).colourMode(), modes.get(i).colourMode().displayName());
                         lstColour.setSelectedValue(co, true);
                         cmbMode.setSelectedItem(modes.get(i).modeId());
                         return true;
@@ -7204,7 +7192,7 @@ public class MainWindow extends javax.swing.JFrame {
         var s = streamQuery == null ? null : streamQuery.get();
         if (s != null) {
             // Select mode
-            lstColour.setSelectedValue(new ColourOption(colour, colour.toString()), true);
+            lstColour.setSelectedValue(new ColourOption(colour, colour.displayName()), true);
             cmbMode.setSelectedItem(s);
         } else {
             messageBox("Unable to find the '" + mode + "' mode, which is required for this template.", JOptionPane.ERROR_MESSAGE);
