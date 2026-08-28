@@ -18,6 +18,7 @@
 package ie.bops.hacktvgui;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public record ModeInfo(
@@ -46,6 +47,12 @@ public record ModeInfo(
         Map<String, BandPlan> sat,
         String description
     ) {
+    
+    public ModeInfo {
+        uhf = Collections.unmodifiableMap(new LinkedHashMap<>(uhf));
+        vhf = Collections.unmodifiableMap(new LinkedHashMap<>(vhf));
+        sat = Collections.unmodifiableMap(new LinkedHashMap<>(sat));
+    }
     
     public enum VideoModulation {
         UNMODULATED,
@@ -77,27 +84,27 @@ public record ModeInfo(
     }
     
     public BandPlan[] getUhfPlans() {
-        return Collections.unmodifiableMap(uhf).values().toArray(BandPlan[]::new);
+        return uhf.values().toArray(BandPlan[]::new);
     }
     
     public BandPlan[] getVhfPlans() {
-        return Collections.unmodifiableMap(vhf).values().toArray(BandPlan[]::new);
+        return vhf.values().toArray(BandPlan[]::new);
     }
 
     public BandPlan[] getSatellitePlans() {
-        return Collections.unmodifiableMap(sat).values().toArray(BandPlan[]::new);
+        return sat.values().toArray(BandPlan[]::new);
     }
     
     public BandPlan getUhfPlan(String id) {
-        return Collections.unmodifiableMap(uhf).get(id);
+        return uhf.get(id);
     }
 
     public BandPlan getVhfPlan(String id) {
-        return Collections.unmodifiableMap(vhf).get(id);
+        return vhf.get(id);
     }
     
     public BandPlan getSatellitePlan(String id) {
-        return Collections.unmodifiableMap(sat).get(id);
+        return sat.get(id);
     }
 
     @Override

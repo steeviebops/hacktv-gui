@@ -32,6 +32,12 @@ public record ScramblingInfo (
     List<ComboBoxOption> caKeys,
     List<ComboBoxOption> ca2Keys
 ) {
+    
+    public ScramblingInfo {
+        caKeys = List.copyOf(caKeys);
+        ca2Keys = List.copyOf(ca2Keys);
+    }
+    
     @Override
     public String toString() {
         // Lets the JComboBox display friendly names

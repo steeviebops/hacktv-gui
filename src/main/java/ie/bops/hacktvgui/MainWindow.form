@@ -571,7 +571,7 @@
                         <Component class="javax.swing.JComboBox" name="cmbMode">
                           <Properties>
                             <Property name="prototypeDisplayValue" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                              <Connection code="new ModeInfo(&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;null,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null&#xd;&#xa;)" type="code"/>
+                              <Connection code="new ModeInfo(&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;null,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;null,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;false,&#xd;&#xa;new LinkedHashMap&lt;String, BandPlan&gt;(),&#xd;&#xa;new LinkedHashMap&lt;String, BandPlan&gt;(),&#xd;&#xa;new LinkedHashMap&lt;String, BandPlan&gt;(),&#xd;&#xa;null&#xd;&#xa;)" type="code"/>
                             </Property>
                           </Properties>
                           <Events>
@@ -1027,7 +1027,7 @@
                     <Component class="javax.swing.JComboBox" name="cmbRegion">
                       <Properties>
                         <Property name="prototypeDisplayValue" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="new BandPlan(null, null, &quot;United Kingdom (405 line)&quot;, null)" type="code"/>
+                          <Connection code="new BandPlan(null, null, &quot;United Kingdom (405 line)&quot;, new ArrayList&lt;Channel&gt;())" type="code"/>
                         </Property>
                       </Properties>
                       <Events>

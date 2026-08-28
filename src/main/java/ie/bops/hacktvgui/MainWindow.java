@@ -751,9 +751,9 @@ public class MainWindow extends javax.swing.JFrame {
             false,
             false,
             false,
-            null,
-            null,
-            null,
+            new LinkedHashMap<String, BandPlan>(),
+            new LinkedHashMap<String, BandPlan>(),
+            new LinkedHashMap<String, BandPlan>(),
             null
         ));
         cmbMode.addMouseWheelListener(this::cmbModeMouseWheelMoved);
@@ -1071,7 +1071,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         rfPanel.add(lblRegion, gridBagConstraints);
 
-        cmbRegion.setPrototypeDisplayValue(new BandPlan(null, null, "United Kingdom (405 line)", null));
+        cmbRegion.setPrototypeDisplayValue(new BandPlan(null, null, "United Kingdom (405 line)", new ArrayList<Channel>()));
         cmbRegion.addMouseWheelListener(this::cmbRegionMouseWheelMoved);
         cmbRegion.addActionListener(this::cmbRegionActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -5194,7 +5194,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     true,
                     addScramblingKeys(caType),
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
         }
         if (vc2 > 0) {
@@ -5213,7 +5213,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     true,
                     addScramblingKeys(caType),
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
         }
         if (vc1 > 0 && vc2 > 0) {
@@ -5252,7 +5252,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     addScramblingKeys(caType),
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
         }
         if (modesIni.getKeys("syster").length > 0) {
@@ -5272,7 +5272,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
             caType = "systercnr";
             displayName = "Nagravision Syster (cut-and-rotate mode)";
@@ -5289,7 +5289,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
             caType = "syster";
             lookupId = "systerls+cnr";
@@ -5306,7 +5306,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
             caType = "d11";
             displayName = "Discret 11";
@@ -5323,7 +5323,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    null
+                    new ArrayList<ComboBoxOption>()
             ));
         }
         caType = "d14";
@@ -5341,7 +5341,7 @@ public class MainWindow extends javax.swing.JFrame {
                 false,
                 false,
                 addScramblingKeys(caType),
-                null
+                new ArrayList<ComboBoxOption>()
         ));
         // If no systems were found, disable the scrambling tab
         if (cmbScrambling1.getItemCount() == 1) disableScrambling();
@@ -5356,10 +5356,10 @@ public class MainWindow extends javax.swing.JFrame {
     }
     
     private List<ComboBoxOption> addScramblingKeys(String caType) {
-        if (caType == null) return null;
-        var keys = modesIni.getKeys(caType);
-        if (keys == null) return null;
         var values = new ArrayList<ComboBoxOption>();
+        if (caType == null) return values;
+        var keys = modesIni.getKeys(caType);
+        if (keys == null) return values;
         for (String k : keys) {
             String v = modesIni.get(caType, k);
             values.add(new ComboBoxOption(k, v));
