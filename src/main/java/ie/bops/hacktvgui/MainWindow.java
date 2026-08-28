@@ -3116,6 +3116,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             };
             bandPlanMap.put(id, new BandPlan(id, bandName, region, channels));
+            channels.clear();
         }
         return bandPlanMap;
     }
