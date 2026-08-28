@@ -81,6 +81,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -150,9 +151,8 @@ public class MainWindow extends javax.swing.JFrame {
     // This allows us to revert back to the default if the sample rate is changed by filters or scrambling systems
     private String defaultSampleRate;
     
-    // Declare combobox arrays and ArrayLists
-    // These are used to store secondary information (frequencies, parameters, etc)
-    private final ArrayList<ModeInfo> modes = new ArrayList<>();
+    // Modes list
+    private List<ModeInfo> modes;
 
     private final Map<String, Integer> testCommandToIndex = new HashMap<>();
 
@@ -2197,8 +2197,10 @@ public class MainWindow extends javax.swing.JFrame {
         addOutputDevices();
         if (!openModesFile()) return 2;
         if (!openBandPlanFile()) return 3;
-        if (!addVideoModes()) return 4;
+        modes = addVideoModes();
+        if (modes == null) return 4;
         cmbOutputDevice.setSelectedIndex(0);
+        lstColour.setSelectedIndex(0);
         addARCorrectionOptions();
         populateWSS();
         addFl2kAudioOptions();
@@ -2745,9 +2747,11 @@ public class MainWindow extends javax.swing.JFrame {
             openBandPlanFile();
             lblRegion.setEnabled(false);
             cmbRegion.setEnabled(false);
+            modes = addVideoModes();
             // If the mode reload fails, we're in an unpredictable state.
-            // This is fatal, so exit hard.
-            if (!addVideoModes()) System.exit(4);
+            // This is fatal, so exit immediately.
+            if (modes == null) System.exit(4);
+            lstColour.setSelectedIndex(0);
         }
     }
     
@@ -2915,7 +2919,8 @@ public class MainWindow extends javax.swing.JFrame {
         return true;
     }
     
-    private boolean addVideoModes() {
+    private List<ModeInfo> addVideoModes() {
+        var modeList = new ArrayList<ModeInfo>();
         // Retrieve the list of all sections in the modes file
         String[] sections = modesIni.getSections();
         // Below are a list of sections that we want to skip, as we know that 
@@ -2936,8 +2941,6 @@ public class MainWindow extends javax.swing.JFrame {
             "testsignals_625_secam",
             "logos"
         );
-        // Clear any pre-existing modes
-        modes.clear();
         // Iterate through the sections to determine if they are valid.
         // We do this by checking against the list above, as well as the
         // existence of the lines setting.
@@ -2945,32 +2948,32 @@ public class MainWindow extends javax.swing.JFrame {
         for (var s : sections) {
             if (toExclude.contains(s)) continue;
             if (modesIni.get(s, "lines") == null) continue;
-            modes.add(getModeData(s));
+            modeList.add(getModeData(s));
         }
-        if (modes.isEmpty()) {
+        if (modeList.isEmpty()) {
             // No modes found, we can't continue
             messageBox("No video modes were found. The " + getFork() + ".ini file may be invalid or corrupted.\n"
                     + "The application will now exit.", JOptionPane.ERROR_MESSAGE);
-            return false;
+            return null;
         }
         var cm = new ArrayList<ColourOption>();
         // Search the modes array for each system. If found, add it
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.PAL)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.PAL)) {
             cm.add(new ColourOption(ColourMode.PAL, "PAL"));
         }        
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.NTSC)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.NTSC)) {
             cm.add(new ColourOption(ColourMode.NTSC, "NTSC"));
         }        
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.SECAM)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.SECAM)) {
             cm.add(new ColourOption(ColourMode.SECAM, "SECAM"));
         }        
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.NONE)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.NONE)) {
             cm.add(new ColourOption(ColourMode.NONE, "Black and white"));
         }        
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.MAC)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.MAC)) {
             cm.add(new ColourOption(ColourMode.MAC, "MAC"));
         }        
-        if (modes.stream().anyMatch(m -> m.colourMode() == ColourMode.OTHER)) {
+        if (modeList.stream().anyMatch(m -> m.colourMode() == ColourMode.OTHER)) {
             cm.add(new ColourOption(ColourMode.OTHER, "Other"));
         }
         // Create and set a ListModel for the JList
@@ -2978,8 +2981,7 @@ public class MainWindow extends javax.swing.JFrame {
         lstColour.setModel(listModel);
         // Add the above to the ListModel for the JList
         listModel.addAll(cm);
-        lstColour.setSelectedIndex(0);
-        return true;
+        return Collections.unmodifiableList(modeList);
     }
 
     private ModeInfo getModeData(String mode) {
@@ -3075,34 +3077,34 @@ public class MainWindow extends javax.swing.JFrame {
     private Map<String, BandPlan> getBandPlans(String mode, String band) {
         if (band == null) return null; // This should never be null or we have a bug!
         var bandPlanMap = new LinkedHashMap<String, BandPlan>();
-        var channels = new ArrayList<Channel>();
         for (int i = 0; i <= 4; i++) {
+            var channels = new ArrayList<Channel>();
             // Get the uhf/vhf keys from the mode's INI data
             String key = (i == 0) ? band : band + (i + 1);
             String id = modesIni.get(mode, key);
             if (id == null) continue;
-            // Query bandplans.ini for its values related to the ID we just found
+            // Query bandplans.ini for the keys related to the ID we just found
             var bp = bpIni.getKeys(id);
             if (bp == null) {
                 System.err.println("not found");
                 continue;
             }
             String region = bpIni.get(id, "region", "");
-            // Loop through the values found in bandplans.ini
+            // Loop through the keys found in bandplans.ini
             for (String channelNumber : bp) {
                 Long value = bpIni.getLong(id, channelNumber);
                 if (value == null) continue;
-                // Skip region ID, chid and local oscillator keys if they exist.
-                // These should not be processed here.
-                if (channelNumber.equals("region")) continue;
-                if (channelNumber.equals("chid")) continue;
-                if (channelNumber.equals("lo")) continue;
-                // Add all other key/value pairs
+                // Skip metadata keys, these are not channels.
+                if (channelNumber.equals("region")) continue; // Already handled above
+                if (channelNumber.equals("chid")) continue;   // MAC channel ID, handled below
+                if (channelNumber.equals("lo")) continue;     // Local oscillator, not used here
+                // chid should be processed as a property of the channel
                 var chidSection = bpIni.get(id, "chid");
                 String chid = null;
                 if (chidSection != null) {
                     chid = bpIni.get(chidSection, channelNumber);
                 }
+                // Add all other key/value pairs
                 var channel = new Channel(channelNumber, value, chid);
                 channels.add(channel);
             }
@@ -3116,7 +3118,6 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             };
             bandPlanMap.put(id, new BandPlan(id, bandName, region, channels));
-            channels.clear();
         }
         return bandPlanMap;
     }
@@ -3416,31 +3417,7 @@ public class MainWindow extends javax.swing.JFrame {
             if (!selectedFile.toString().toLowerCase(Locale.ENGLISH).endsWith(".htv")) {
                 selectedFile = new File(selectedFile + ".htv");
             }
-            // Create file
-            //try {
-            //    if (!selectedFile.createNewFile()) {
-                    /* File exists, prompt to overwrite.
-                     * If yes, go to the save method. If no, then restart this
-                     * method so the user can select another file. Java doesn't
-                     * appear to support file overwrite prompts in its dialogues
-                     * so this is a workaround/hack.
-                    */
-            //        if (JOptionPane.showConfirmDialog(null, selectedFile.getName() + " already exists.\n"
-            //                + "Do you want to overwrite it?", Shared.APP_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)
-            //                == JOptionPane.YES_OPTION) {
-            //            saveConfigFile(selectedFile);
-            //        }
-            //        else {
-            //            saveFilePrompt();
-            //        }
-            //    }
-            //    else {
-                    saveConfigFile(selectedFile);
-            //    }
-            //} catch (IOException ex) {
-            //        messageBox("An error occurred while writing to this file. "
-            //                + "You may not have the correct permissions to write to this location.", JOptionPane.ERROR_MESSAGE);       
-            //}
+            saveConfigFile(selectedFile);
         }    
     }
     
@@ -5174,6 +5151,8 @@ public class MainWindow extends javax.swing.JFrame {
         String caType;
         String displayName;
         String lookupId;
+        // Dummy list, used for populating caKeys2 if not used
+        var emptyList = new ArrayList<ComboBoxOption>();
         cmbScrambling1.addItem(new ComboBoxOption("", "No scrambling"));
         // Check if modes file contains a section for these scrambling systems
         // Only add those which have keys defined
@@ -5195,7 +5174,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     true,
                     addScramblingKeys(caType),
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
         }
         if (vc2 > 0) {
@@ -5214,7 +5193,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     true,
                     addScramblingKeys(caType),
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
         }
         if (vc1 > 0 && vc2 > 0) {
@@ -5223,6 +5202,13 @@ public class MainWindow extends javax.swing.JFrame {
             displayName = "VideoCrypt I+II";
             lookupId = "videocrypt1+2";
             cmbScrambling1.addItem(new ComboBoxOption(lookupId, displayName));
+            var vc1Keys = addScramblingKeys(caType);
+            if (!captainJack) {
+                // Remove the conditional mode from the VC1 side as it's
+                // not supported in dual mode.
+                int p = vc1Keys.indexOf(new ComboBoxOption("conditional", ""));
+                if (p != -1) vc1Keys.remove(p);
+            }
             scramblingInfo625.put(lookupId, new ScramblingInfo(
                     caType,
                     displayName,
@@ -5233,7 +5219,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     true,
-                    addScramblingKeys(caType),
+                    vc1Keys,
                     addScramblingKeys(ca2Type)
             ));
         }        
@@ -5253,7 +5239,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     addScramblingKeys(caType),
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
         }
         if (modesIni.getKeys("syster").length > 0) {
@@ -5273,7 +5259,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
             caType = "systercnr";
             displayName = "Nagravision Syster (cut-and-rotate mode)";
@@ -5290,7 +5276,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
             caType = "syster";
             lookupId = "systerls+cnr";
@@ -5307,7 +5293,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
             caType = "d11";
             displayName = "Discret 11";
@@ -5324,7 +5310,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     false,
                     systerKeys,
-                    new ArrayList<ComboBoxOption>()
+                    emptyList
             ));
         }
         caType = "d14";
@@ -5342,7 +5328,7 @@ public class MainWindow extends javax.swing.JFrame {
                 false,
                 false,
                 addScramblingKeys(caType),
-                new ArrayList<ComboBoxOption>()
+                emptyList
         ));
         // If no systems were found, disable the scrambling tab
         if (cmbScrambling1.getItemCount() == 1) disableScrambling();
@@ -5416,6 +5402,8 @@ public class MainWindow extends javax.swing.JFrame {
     
     private void addMACScramblingCA() {
         var s = (ComboBoxOption) cmbScrambling1.getSelectedItem();
+        // Dummy list, used for populating caKeys2 if not used
+        var emptyList = new ArrayList<ComboBoxOption>();
         // In the clear (no scrambling)
         if (s.value().isEmpty()) {
             scramblingPanel.setEnabled(false);
@@ -5443,8 +5431,8 @@ public class MainWindow extends javax.swing.JFrame {
                 false,
                 false,
                 false,
-                null,
-                null
+                emptyList,
+                emptyList
         ));
         // Check the [macscrambling] section for supported CAs
         String[] caTypes = modesIni.getKeys("macscrambling");
@@ -5465,7 +5453,7 @@ public class MainWindow extends javax.swing.JFrame {
                     false,
                     true,
                     false,
-                    null,
+                    emptyList,
                     addScramblingKeys(ecValue)  
                 ));
             }
@@ -5489,7 +5477,7 @@ public class MainWindow extends javax.swing.JFrame {
                         false,
                         true,
                         false,
-                        null,
+                        emptyList,
                         addScramblingKeys(ca)
                 ));
             }
@@ -5498,7 +5486,7 @@ public class MainWindow extends javax.swing.JFrame {
     
     private void addMACScramblingKey() {
         var s = (ComboBoxOption) cmbScrambling2.getSelectedItem();
-        if (s.value() == null || s.value().isEmpty()) {
+        if (s == null || s.value() == null || s.value().isEmpty()) {
             disableScramblingKey2();
             return;
         }
@@ -6041,6 +6029,14 @@ public class MainWindow extends javax.swing.JFrame {
         rfPanel.setEnabled(false);
     }
     
+    private void setFl2kOptions(boolean b) {
+        fl2kOptionsPanel.setEnabled(b);
+        chkOffset.setEnabled(b);
+        lblFl2kAudio.setEnabled(b);
+        cmbFl2kAudio.setEnabled(b);
+        cmbFl2kAudio.setSelectedIndex(b ? 0 : -1);
+    }
+    
     private void disableSourceOptions() {
         // Disable all options in the source frame
         if (chkRepeat.isSelected()) chkRepeat.doClick();
@@ -6069,11 +6065,17 @@ public class MainWindow extends javax.swing.JFrame {
         card.show(sourceCardPanel, "textbox");
     }
     
-    private void updateFrequencyLock() {
+    private void checkFrequencyLock() {
+        if (!chkLockFrequency.isEnabled()) return;
         boolean b = chkLockFrequency.isSelected();
-        if (b) cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
-        cmbBand.setEnabled(!b);
-        lblBand.setEnabled(!b);
+        if (b) {
+            cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
+            cmbBand.setEnabled(false);
+            lblBand.setEnabled(false);
+        } else {
+            cmbBand.setEnabled(true);
+            lblBand.setEnabled(true);
+        }
     }
     
     private void checkMode() {
@@ -6098,7 +6100,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (mod != UNMODULATED) cmbBand.addItem(CUSTOM_FREQUENCY);
         if (!cmbBand.isEnabled()) cmbBand.setSelectedIndex(-1);
         // If the frequency is locked, keep it that way
-        updateFrequencyLock();
+        checkFrequencyLock();
         // Populate labels
         String na = "n/a"; // This string is used if the underlying data is null
         String linesValue = mode.lines().toString();
@@ -6281,6 +6283,11 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             if (chkCC608.isSelected()) chkCC608.doClick();
             chkCC608.setEnabled(false);
+        }
+        if (mode.colourMode() == PAL || mode.colourMode() == NTSC || mode.colourMode() == SECAM) {
+            vbiOptionsPanel.setEnabled(true);
+        } else {
+            vbiOptionsPanel.setEnabled(false);
         }
         // If the colour system (PAL/NTSC/SECAM) or line count varies from the previous mode...
         if ( (mode.colourMode() != prevColour) || (oldLines != mode.lines())) {
@@ -7062,6 +7069,7 @@ public class MainWindow extends javax.swing.JFrame {
         // We don't need to return the arguments for unchecked options (such as
         // 32 kHz audio or stereo) because they're defaults anyway).
         var al = new ArrayList<String>();
+        if (macSettings == null) return al;
         if (macSettings.audioMode()) al.add("--mac-audio-mono");
         if (macSettings.audioQuality()) al.add("--mac-audio-medium-quality");
         if (macSettings.audioCompression()) al.add("--mac-audio-linear");
@@ -7090,14 +7098,14 @@ public class MainWindow extends javax.swing.JFrame {
         if (Files.exists(Path.of("/home/linuxbrew/.linuxbrew/bin/yt-dlp"))) {
             return "/home/linuxbrew/.linuxbrew/bin/"; // Linux
         }
-        String home = System.getProperty("user.home") + File.separator;
-        String s1 = findTerminalPaths(Path.of(home + ".bashrc"));
+        String home = System.getProperty("user.home");
+        String s1 = findTerminalPaths(Path.of(home, ".bashrc"));
         if (!s1.isEmpty()) return s1;
-        String s2 = findTerminalPaths(Path.of(home + ".bash_profile"));
+        String s2 = findTerminalPaths(Path.of(home, ".bash_profile"));
         if (!s2.isEmpty()) return s2;
-        String s3 = findTerminalPaths(Path.of(home + ".zshrc"));
+        String s3 = findTerminalPaths(Path.of(home, ".zshrc"));
         if (!s3.isEmpty()) return s3;
-        String s4 = findTerminalPaths(Path.of(home + ".zshenv"));
+        String s4 = findTerminalPaths(Path.of(home, ".zshenv"));
         if (!s4.isEmpty()) return s4;
         // Nothing found, let's hope it's in the system path!
         return "";
@@ -8371,9 +8379,7 @@ public class MainWindow extends javax.swing.JFrame {
         boolean bb = mode.modulation() == UNMODULATED;
         switch (od.value()) {
             case "hackrf" -> {
-                lblFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setSelectedIndex(-1);
+                setFl2kOptions(false);
                 chkHackDAC.setEnabled(true);
                 lblOutputDevice2.setText("Serial number (optional)");
                 if (!cmbBand.isEnabled()) {
@@ -8403,9 +8409,7 @@ public class MainWindow extends javax.swing.JFrame {
                 cmbFileType.setSelectedIndex(-1);
             }
             case "soapysdr" -> {
-                lblFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setSelectedIndex(-1);
+                setFl2kOptions(false);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Device options");
                 if (!cmbBand.isEnabled()) {
@@ -8429,9 +8433,7 @@ public class MainWindow extends javax.swing.JFrame {
                 cmbFileType.setSelectedIndex(-1);
             }
             case "fl2k" -> {
-                lblFl2kAudio.setEnabled(true);
-                cmbFl2kAudio.setSelectedIndex(0);
-                cmbFl2kAudio.setEnabled(true);
+                setFl2kOptions(true);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Device number (optional)");
                 // fl2k is baseband only for now so disable all RF options
@@ -8442,9 +8444,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             case "file" -> {
                 // Output to file
-                lblFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setEnabled(false);
-                cmbFl2kAudio.setSelectedIndex(-1);
+                setFl2kOptions(false);
                 chkHackDAC.setEnabled(false);
                 lblOutputDevice2.setText("Destination file");
                 disableRFOptions();
@@ -8997,10 +8997,6 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_cmbScrambling1ActionPerformed
 
     private void cmbScrambling2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbScrambling2ActionPerformed
-        if (cmbScrambling2.getSelectedIndex() == -1) {
-            configureScramblingOptions();
-            return;
-        }
         if (((ModeInfo) cmbMode.getSelectedItem()).colourMode() == ColourMode.MAC) {
             addMACScramblingKey();
         }
@@ -9126,7 +9122,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSatSettingsActionPerformed
 
     private void chkLockFrequencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLockFrequencyActionPerformed
-        updateFrequencyLock();
+        checkFrequencyLock();
     }//GEN-LAST:event_chkLockFrequencyActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
