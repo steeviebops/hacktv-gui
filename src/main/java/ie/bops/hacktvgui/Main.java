@@ -67,6 +67,7 @@ public class Main {
     }
     
     private static Integer parseArguments(String[] args) {
+        boolean isWindows = (System.getProperty("os.name").contains("Windows"));
         for (String arg : args) {
             String a = arg.toLowerCase(Locale.ENGLISH);
             Path dllPath = Path.of(System.getProperty("user.dir"), "ConsoleCtrl_" + System.getProperty("os.arch") + ".dll");
@@ -79,14 +80,17 @@ public class Main {
                 Shared.resetPreferences();
                 return 0;
             } else if (a.equals("/copyhacktv")) {
+                if (!isWindows) return 0;
                 // Unzip hacktv.zip
                 if (!Shared.unzipHackTV()) return 1;
                 return 0;
             } else if (a.equals("/copydll")) {
+                if (!isWindows) return 0;
                 // Copies the JNI DLL for this architecture
                 ConsoleCtrlJNI.initialise(Path.of(System.getProperty("user.dir")));
                 return 0;
             } else if (a.equals("/copydllandhacktv")) {
+                if (!isWindows) return 0;
                 // Copies the JNI DLL for this architecture and unzips hacktv
                 ConsoleCtrlJNI.initialise(Path.of(System.getProperty("user.dir")));
                 // Unzip hacktv.zip if it exists
