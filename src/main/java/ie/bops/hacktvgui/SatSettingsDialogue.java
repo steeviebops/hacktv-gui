@@ -257,7 +257,7 @@ public class SatSettingsDialogue extends javax.swing.JDialog {
                 break;
         }
         // Set focus on Cancel button
-        btnCancel.requestFocus();
+        btnCancel.requestFocusInWindow();
     }
     
     public boolean settingsChanged() {

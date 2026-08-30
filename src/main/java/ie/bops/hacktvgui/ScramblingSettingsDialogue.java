@@ -65,6 +65,9 @@ public class ScramblingSettingsDialogue extends javax.swing.JDialog {
         radActivateCard.setEnabled(emm);
         radDeactivateCard.setEnabled(emm);
         
+        // Set focus on Cancel button
+        btnCancel.requestFocusInWindow();
+        
         // Get current settings
         if (settings == null) {
             // Enable defaults

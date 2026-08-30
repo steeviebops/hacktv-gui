@@ -32,6 +32,8 @@ public class MacSettingsDialogue extends javax.swing.JDialog {
     }
     
     public void postInit() {
+        // Set focus on Cancel button
+        btnCancel.requestFocusInWindow();
         if (settings == null) return;
         String chid = settings.channelID();
         if (chid == null || chid.isBlank()) {

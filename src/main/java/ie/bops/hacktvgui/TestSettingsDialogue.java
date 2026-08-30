@@ -297,7 +297,7 @@ public class TestSettingsDialogue extends javax.swing.JDialog {
                 radDateOn.setSelected(true);
                 break;
         }
-        btnCancel.requestFocus();
+        btnCancel.requestFocusInWindow();
     }
     
     public boolean settingsChanged() {
