@@ -1951,6 +1951,7 @@ public class MainWindow extends javax.swing.JFrame {
         comboBoxPanel.add(lblLookAndFeel, gridBagConstraints);
 
         cmbNMSCeefaxRegion.addMouseWheelListener(this::cmbNMSCeefaxRegionMouseWheelMoved);
+        cmbNMSCeefaxRegion.addActionListener(this::cmbNMSCeefaxRegionActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -9144,6 +9145,10 @@ public class MainWindow extends javax.swing.JFrame {
     private void chkLockFrequencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLockFrequencyActionPerformed
         checkFrequencyLock();
     }//GEN-LAST:event_chkLockFrequencyActionPerformed
+
+    private void cmbNMSCeefaxRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNMSCeefaxRegionActionPerformed
+        PREFS.putInt("ceefaxregion", cmbNMSCeefaxRegion.getSelectedIndex());
+    }//GEN-LAST:event_cmbNMSCeefaxRegionActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel advModePanel;
