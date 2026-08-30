@@ -1997,7 +1997,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 5, 5, 5);
         resetSettingsPanel.add(btnResetAllSettings, gridBagConstraints);
 
-        btnClearMRUList.setText("Clear MRU list");
+        btnClearMRUList.setText("Clear MRU list...");
         btnClearMRUList.setToolTipText("Clears the list of recently opened files");
         btnClearMRUList.addActionListener(this::btnClearMRUListActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();

@@ -2468,7 +2468,7 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="btnClearMRUList">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Clear MRU list"/>
+                        <Property name="text" type="java.lang.String" value="Clear MRU list..."/>
                         <Property name="toolTipText" type="java.lang.String" value="Clears the list of recently opened files"/>
                       </Properties>
                       <Events>
