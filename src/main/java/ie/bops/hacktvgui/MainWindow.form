@@ -1458,7 +1458,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="chkInterlace">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Update video every field"/>
+                        <Property name="text" type="java.lang.String" value="Update every field"/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

@@ -1360,7 +1360,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
         playbackOptionsPanel.add(chkAspectRatio, gridBagConstraints);
 
-        chkInterlace.setText("Update video every field");
+        chkInterlace.setText("Update every field");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
