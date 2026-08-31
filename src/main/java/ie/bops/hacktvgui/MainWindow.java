@@ -4045,28 +4045,28 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         // Offset
-        Double importedOffset;
-        if (htvFile.getDouble("hacktv", "offset") != null) {
+        Double importedOffset = htvFile.getDouble("hacktv", "offset");
+        if (importedOffset != null) {
             if (!chkOffset.isSelected()) chkOffset.doClick();
             importedOffset = (htvFile.getDouble("hacktv", "offset") / 1000000);
             txtOffset.setText(importedOffset.toString().replace(".0","")); 
         }
         // Pixel rate
-        double importedPixelRate;
-        if ((htvFile.getDouble("hacktv", "pixelrate")) != null) {
+        Double importedPixelRate = htvFile.getDouble("hacktv", "pixelrate");
+        if (importedPixelRate != null) {
             if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
             importedPixelRate = (htvFile.getDouble("hacktv", "pixelrate") / 1000000);
             txtPixelRate.setText(String.valueOf(importedPixelRate).replace(".0","")); 
         }
-        // Sample rate (default to 16 MHz if not specified)
+        // Sample rate (default to 15 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
         // configuration file.
         Double importedSampleRate = htvFile.getDouble("hacktv", "samplerate");
         if (importedSampleRate != null) {
             importedSampleRate = importedSampleRate / 1000000;
         } else {
-            importedSampleRate = Double.valueOf("16");
-            messageBox("No sample rate specified, defaulting to 16 MHz.", JOptionPane.INFORMATION_MESSAGE);
+            importedSampleRate = Double.valueOf("15");
+            messageBox("No sample rate specified, defaulting to 15 MHz.", JOptionPane.INFORMATION_MESSAGE);
         }
         txtSampleRate.setText(importedSampleRate.toString().replace(".0",""));
         // Philips test signal
