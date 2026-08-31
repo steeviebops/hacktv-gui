@@ -82,7 +82,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.InvalidPathException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -154,7 +153,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Modes list
     private List<ModeInfo> modes;
 
-    private final Map<String, Integer> testCommandToIndex = new HashMap<>();
+    private final Map<String, Integer> testSignalMap = new LinkedHashMap<>();
 
     // Checkbox array for the File > New option
     private javax.swing.JCheckBox[] checkBoxes;
@@ -3588,7 +3587,7 @@ public class MainWindow extends javax.swing.JFrame {
             radTest.doClick();
             if (captainJack) {
                 String importedTC = importedSource.replace("test:", "").trim().toLowerCase(Locale.ENGLISH);
-                Integer idx = testCommandToIndex.get(importedTC);
+                Integer idx = testSignalMap.get(importedTC);
                 if (idx != null) {
                     cmbTest.setSelectedIndex(idx);
                 } else if (!importedTC.isEmpty()) {
@@ -3596,11 +3595,11 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             }
         } else if (!m3uSource.isEmpty()) {
-            var M3UFile = new File(m3uSource);
+            var m3uFile = new File(m3uSource);
             // If the source is an M3U file...
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             // Spawn M3UHandler using the source value we got above.
-            m3uHandler(M3UFile.getAbsolutePath(), importedSource);
+            m3uHandler(m3uFile.getAbsolutePath(), importedSource);
             txtSource.setText(m3uSource);
         } else if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
             // Use the playlist we got from checkSelectedFile();
@@ -5863,9 +5862,9 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             }
             // Cache the options to a hashmap we can check later
-            testCommandToIndex.clear();
+            testSignalMap.clear();
             for (int i = 0; i < options.size(); i++) {
-                testCommandToIndex.put(options.get(i).command().toLowerCase(Locale.ENGLISH), i);
+                testSignalMap.put(options.get(i).command().toLowerCase(Locale.ENGLISH), i);
             }
             // Apply the model to the combobox
             var model = new DefaultComboBoxModel<TestSignalOption>();
