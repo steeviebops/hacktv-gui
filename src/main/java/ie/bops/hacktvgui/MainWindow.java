@@ -3618,7 +3618,13 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         else {
-            if ( !ImportedSource.endsWith(".m3u") && !ImportedSource.endsWith(".m3u8") ) txtSource.setText(ImportedSource);
+            if (ImportedSource.endsWith(".m3u") || ImportedSource.endsWith(".m3u8")) {
+                // Only import if a HTTP or HTTPS URL
+                if (ImportedSource.startsWith("http")) 
+                    txtSource.setText(ImportedSource);
+            } else {
+                txtSource.setText(ImportedSource);
+            }
         }
         // Frequency or channel number (and MAC channel ID)
         var o = (ComboBoxOption) cmbOutputDevice.getSelectedItem();
@@ -7779,7 +7785,7 @@ public class MainWindow extends javax.swing.JFrame {
         final String stopErr = err;
         Thread.ofVirtual().start(() -> {
             try {
-                if (!hacktvProcess.waitFor(5, TimeUnit.SECONDS)) {
+                if (!hacktvProcess.waitFor(10, TimeUnit.SECONDS)) {
                     hacktvProcess.destroyForcibly();
                     SwingUtilities.invokeLater(() -> {
                         String message = stopErr;
