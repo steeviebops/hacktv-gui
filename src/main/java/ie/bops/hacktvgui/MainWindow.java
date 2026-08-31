@@ -3582,12 +3582,12 @@ public class MainWindow extends javax.swing.JFrame {
         // Is this a baseband mode?
         boolean bb = mi.modulation() == UNMODULATED;
         // Input source or test card
-        String ImportedSource = htvFile.get("hacktv", "input", "");
-        String M3USource = (htvFile.get("hacktv-gui3", "m3usource", ""));
-        if (ImportedSource.toLowerCase(Locale.ENGLISH).startsWith("test:")) {
+        String importedSource = htvFile.get("hacktv", "input", "");
+        String m3uSource = (htvFile.get("hacktv-gui3", "m3usource", ""));
+        if (importedSource.toLowerCase(Locale.ENGLISH).startsWith("test:")) {
             radTest.doClick();
             if (captainJack) {
-                String importedTC = ImportedSource.replace("test:", "").trim().toLowerCase(Locale.ENGLISH);
+                String importedTC = importedSource.replace("test:", "").trim().toLowerCase(Locale.ENGLISH);
                 Integer idx = testCommandToIndex.get(importedTC);
                 if (idx != null) {
                     cmbTest.setSelectedIndex(idx);
@@ -3595,16 +3595,14 @@ public class MainWindow extends javax.swing.JFrame {
                     invalidConfigFileValue("test card", importedTC);
                 }
             }
-        }
-        else if (!M3USource.isEmpty()) {
-            var M3UFile = new File(M3USource);
+        } else if (!m3uSource.isEmpty()) {
+            var M3UFile = new File(m3uSource);
             // If the source is an M3U file...
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             // Spawn M3UHandler using the source value we got above.
-            m3uHandler(M3UFile.getAbsolutePath(), ImportedSource);
-            txtSource.setText(M3USource);
-        }
-        else if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
+            m3uHandler(M3UFile.getAbsolutePath(), importedSource);
+            txtSource.setText(m3uSource);
+        } else if (htvFile.getBoolean("hacktv-gui3", "playlist")) {
             // Use the playlist we got from checkSelectedFile();
             if (playlist != null) {
                 String[] pl = playlist.split("\n");
@@ -3616,14 +3614,13 @@ public class MainWindow extends javax.swing.JFrame {
                 }
                 chkRandom.setSelected(htvFile.getBoolean("hacktv-gui3", "random"));
             }
-        }
-        else {
-            if (ImportedSource.endsWith(".m3u") || ImportedSource.endsWith(".m3u8")) {
+        } else {
+            if (importedSource.endsWith(".m3u") || importedSource.endsWith(".m3u8")) {
                 // Only import if a HTTP or HTTPS URL
-                if (ImportedSource.startsWith("http")) 
-                    txtSource.setText(ImportedSource);
+                if (importedSource.startsWith("http")) 
+                    txtSource.setText(importedSource);
             } else {
-                txtSource.setText(ImportedSource);
+                txtSource.setText(importedSource);
             }
         }
         // Frequency or channel number (and MAC channel ID)
@@ -3633,7 +3630,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ( (o.value().equals("hackrf") || o.value().equals("soapysdr")) && (!bb) ) {
             String noFreqOrChannelErr = "No frequency or valid band plan was found in the configuration file. Load aborted.";
             String importedCh = htvFile.get("hacktv-gui3", "channel", "");
-            String ImportedBandPlan = htvFile.get("hacktv-gui3", "bandplan", "").toLowerCase(Locale.ENGLISH);
+            String importedBandPlan = htvFile.get("hacktv-gui3", "bandplan", "").toLowerCase(Locale.ENGLISH);
             Long importedFreq = htvFile.getLong("hacktv", "frequency");
             if (importedCh.isEmpty()) {
                 // No channel specified, so we need a frequency
@@ -3649,9 +3646,9 @@ public class MainWindow extends javax.swing.JFrame {
                 txtFrequency.setText(Double.toString(freq).replace(".0", ".00"));
             } else {
                 // A channel was specified. Find the appropriate band plan.
-                BandPlan bp = m.getUhfPlan(ImportedBandPlan);
-                if (bp == null) bp = m.getVhfPlan(ImportedBandPlan);
-                if (bp == null) bp = m.getSatellitePlan(ImportedBandPlan);
+                BandPlan bp = m.getUhfPlan(importedBandPlan);
+                if (bp == null) bp = m.getVhfPlan(importedBandPlan);
+                if (bp == null) bp = m.getSatellitePlan(importedBandPlan);
                 // Find the channel in the band plan
                 Channel ch = bp != null ? findChannel(bp, importedCh) : null;
                 if (bp != null && ch != null) {
@@ -3665,7 +3662,7 @@ public class MainWindow extends javax.swing.JFrame {
                         cmbBand.setSelectedItem(CUSTOM_FREQUENCY);
                         double freq = (double) importedFreq / 1000000.0;
                         txtFrequency.setText(Double.toString(freq).replace(".0", ".00"));
-                        invalidConfigFileValue("band plan", ImportedBandPlan);
+                        invalidConfigFileValue("band plan", importedBandPlan);
                     } else {
                         // No band and no frequency, abort
                         messageBox(noFreqOrChannelErr, JOptionPane.WARNING_MESSAGE);
@@ -3722,21 +3719,21 @@ public class MainWindow extends javax.swing.JFrame {
         }
         // FM deviation
         if ((chkFMDev.isEnabled()) && (htvFile.getDouble("hacktv", "deviation") != null)) {
-            Double ImportedDeviation = (htvFile.getDouble("hacktv", "deviation") / 1000000);
+            double importedDeviation = (htvFile.getDouble("hacktv", "deviation") / 1000000);
             chkFMDev.doClick();
-            txtFMDev.setText(ImportedDeviation.toString().replace(".0",""));
+            txtFMDev.setText(String.valueOf(importedDeviation).replace(".0",""));
         }
         // Output level
-        String ImportedLevel = htvFile.get("hacktv", "level", "").toLowerCase(Locale.ENGLISH);
-        if (!ImportedLevel.isEmpty()) {
+        String importedLevel = htvFile.get("hacktv", "level", "").toLowerCase(Locale.ENGLISH);
+        if (!importedLevel.isEmpty()) {
             chkOutputLevel.doClick();
-            txtOutputLevel.setText(ImportedLevel);
+            txtOutputLevel.setText(importedLevel);
         }
         // Gamma
-        String ImportedGamma = htvFile.get("hacktv", "gamma", "").toLowerCase(Locale.ENGLISH);
-        if (!ImportedGamma.isEmpty()) {
+        String importedGamma = htvFile.get("hacktv", "gamma", "").toLowerCase(Locale.ENGLISH);
+        if (!importedGamma.isEmpty()) {
             chkGamma.doClick();
-            txtGamma.setText(ImportedGamma);
+            txtGamma.setText(importedGamma);
         }
         // Position
         if (chkPosition.isEnabled()) {
@@ -3781,14 +3778,14 @@ public class MainWindow extends javax.swing.JFrame {
             chkInterlace.doClick();
         }
         // Teletext
-        String ImportedTeletext = htvFile.get("hacktv", "teletext", "");
-        if (!ImportedTeletext.isEmpty()) {
+        String importedTeletext = htvFile.get("hacktv", "teletext", "");
+        if (!importedTeletext.isEmpty()) {
             chkTeletext.doClick();
-            if (ImportedTeletext.toLowerCase(Locale.ENGLISH).startsWith("raw:")) {
-                txtTeletextSource.setText(ImportedTeletext.substring(4));
+            if (importedTeletext.toLowerCase(Locale.ENGLISH).startsWith("raw:")) {
+                txtTeletextSource.setText(importedTeletext.substring(4));
             }
             else {
-                txtTeletextSource.setText(ImportedTeletext);
+                txtTeletextSource.setText(importedTeletext);
             }
         }
         // WSS
@@ -4048,18 +4045,18 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         // Offset
-        Double ImportedOffset;
+        Double importedOffset;
         if (htvFile.getDouble("hacktv", "offset") != null) {
             if (!chkOffset.isSelected()) chkOffset.doClick();
-            ImportedOffset = (htvFile.getDouble("hacktv", "offset") / 1000000);
-            txtOffset.setText(ImportedOffset.toString().replace(".0","")); 
+            importedOffset = (htvFile.getDouble("hacktv", "offset") / 1000000);
+            txtOffset.setText(importedOffset.toString().replace(".0","")); 
         }
         // Pixel rate
-        Double ImportedPixelRate;
+        double importedPixelRate;
         if ((htvFile.getDouble("hacktv", "pixelrate")) != null) {
             if (!chkPixelRate.isSelected()) chkPixelRate.doClick();
-            ImportedPixelRate = (htvFile.getDouble("hacktv", "pixelrate") / 1000000);
-            txtPixelRate.setText(ImportedPixelRate.toString().replace(".0","")); 
+            importedPixelRate = (htvFile.getDouble("hacktv", "pixelrate") / 1000000);
+            txtPixelRate.setText(String.valueOf(importedPixelRate).replace(".0","")); 
         }
         // Sample rate (default to 16 MHz if not specified)
         // Add this last so other changes don't interfere with the value in the
@@ -4075,21 +4072,21 @@ public class MainWindow extends javax.swing.JFrame {
         // Philips test signal
         String importedTS = htvFile.get("hacktv", "testsignal", "");
         if (supportsPhilipsTestSignal) {
-            boolean TSFound = false;
+            boolean tsFound = false;
             if (!importedTS.isEmpty()) {
                 var model = cmbTest.getModel();
                 for (int i = 0; i < model.getSize(); i++) {
                     var opt = model.getElementAt(i);
                     if (opt != null && opt.command() != null &&
                         importedTS.equalsIgnoreCase(opt.command())) {
-                        if (!ImportedSource.isBlank()) txtSource.setText(ImportedSource);
+                        if (!importedSource.isBlank()) txtSource.setText(importedSource);
                         radTest.doClick();
                         cmbTest.setSelectedIndex(i);
-                        TSFound = true;
+                        tsFound = true;
                         break;
                     }
                 }
-                if (!TSFound) {
+                if (!tsFound) {
                     invalidConfigFileValue("test signal", importedTS);
                 }
             }
