@@ -3,7 +3,9 @@ Unicode true
 !include "FileFunc.nsh"
 !include "WinVer.nsh"
 !include "Integration.nsh"
-!include x64.nsh
+!include "x64.nsh"
+!include "nsDialogs.nsh"
+!include "LogicLib.nsh"
 
 Target "amd64-unicode"
 
@@ -25,8 +27,15 @@ SetCompressor /SOLID lzma
 
 !insertmacro MUI_PAGE_COMPONENTS
 
-var StartMenuFolder
-!define MUI_INNERTEXT_STARTMENU_CHECKBOX "Do not create shortcuts (Portable installation)"
+Var StartMenuFolder
+Var InstallTypeStandard
+Var InstallTypePortable
+Var InstallType
+
+Page custom InstallTypePage InstallTypePageLeave
+
+!define MUI_STARTMENUPAGE_NODISABLE
+!define MUI_PAGE_CUSTOMFUNCTION_PRE StartMenuPagePre
 !insertmacro MUI_PAGE_STARTMENU $(^Name) $StartMenuFolder
 
 !insertmacro MUI_PAGE_DIRECTORY
@@ -36,6 +45,66 @@ var StartMenuFolder
 #!define MUI_FINISHPAGE_NOAUTOCLOSE
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_LANGUAGE "English"
+!define UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
+
+Function InstallTypePage
+
+    !insertmacro MUI_HEADER_TEXT "Installation type" "Choose how you want to install hacktv-gui."
+
+    nsDialogs::Create 1018
+    Pop $0
+
+    ${If} $0 == error
+        Abort
+    ${EndIf}
+
+    ${NSD_CreateLabel} 0 0 100% 24u \
+        "Choose how you want to install hacktv-gui:"
+    Pop $0
+
+    ${NSD_CreateFirstRadioButton} 0 35u 100% 12u \
+        "Standard installation"
+    Pop $InstallTypeStandard
+
+    ${NSD_CreateLabel} 20u 49u 90% 24u \
+        "Creates Start Menu shortcuts, file associations and an uninstaller."
+    Pop $0
+
+    ${NSD_CreateAdditionalRadioButton} 0 80u 100% 12u \
+        "Portable installation"
+    Pop $InstallTypePortable
+
+    ${NSD_CreateLabel} 20u 94u 90% 24u \
+        "Does not create shortcuts, file associations or an uninstaller."
+    Pop $0
+
+    SendMessage $InstallTypeStandard ${BM_CLICK} "" ""
+
+    nsDialogs::Show
+
+FunctionEnd
+
+
+Function InstallTypePageLeave
+
+    ${NSD_GetState} $InstallTypePortable $0
+
+    ${If} $0 == ${BST_CHECKED}
+        StrCpy $InstallType "portable"
+    ${Else}
+        StrCpy $InstallType "standard"
+    ${EndIf}
+
+FunctionEnd
+
+
+Function StartMenuPagePre
+
+    ${If} $InstallType == "portable"
+        Abort
+    ${EndIf}
+
+FunctionEnd
 
 ;--------------------------------
 ;Version Information
@@ -105,40 +174,48 @@ Section "!Required files" MAIN
     File "licenses\LICENSE.txt"
     File "licenses\FlatLaf-LICENSE.txt"
 
-    # Create Start menu shortcuts if enabled
-    !insertmacro MUI_STARTMENU_WRITE_BEGIN $(^Name)
-        CreateDirectory "$SMPrograms\$StartMenuFolder"
-        CreateShortcut /NoWorkingDir "$SMPrograms\$StartMenuFolder\$(^Name).lnk" "$InstDir\hacktv-gui.exe"
-        CreateShortcut /NoWorkingDir "$SMPrograms\$StartMenuFolder\$(^Name) (Console mode).lnk" "$InstDir\hacktv-gui.exe" "/console"
-        ${If} $(^Name) != $StartMenuFolder
-            # Write the name of the selected Start Menu folder to the registry so we can remove it during uninstall
-            WriteRegStr HKCU "Software\$(^Name)\Setup" "CustomStartDir" $StartMenuFolder
-        ${EndIf}
-        # Uninstaller data
-        WriteUninstaller "$INSTDIR\uninstall.exe"
-        !define UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayName" $(^Name)
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayIcon" "$\"$INSTDIR\hacktv-gui.exe$\""
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "Publisher" "Stephen McGarry"
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayVersion" ${VERSION}
-        WriteRegStr HKCU "${UNINSTALL_PATH}" "UrlUpdateInfo" "https://github.com/steeviebops/hacktv-gui"
-        # File associations
-        !define ASSOC_EXT ".htv"
-        !define ASSOC_PROGID "hacktv-gui"
-        !define ASSOC_VERB "open"
-        !define ASSOC_APPEXE "hacktv-gui.exe"
-        !define ASSOC_DESC "hacktv-gui configuration file"
-        # Register file type
-        WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}\DefaultIcon" "" "$InstDir\${ASSOC_APPEXE},0"
-        WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}" "" "${ASSOC_DESC}"
-        WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}\shell\${ASSOC_VERB}\command" "" '"$InstDir\${ASSOC_APPEXE}" "%1"'
-        WriteRegStr HKCU "Software\Classes\${ASSOC_EXT}" "" "${ASSOC_PROGID}"
+    # Create Start Menu shortcuts and Windows integration for standard installations
+    ${If} $InstallType == "standard"
 
-        ${NotifyShell_AssocChanged}
+        !insertmacro MUI_STARTMENU_WRITE_BEGIN $(^Name)
 
-    !insertmacro MUI_STARTMENU_WRITE_END
+            CreateDirectory "$SMPrograms\$StartMenuFolder"
+            CreateShortcut /NoWorkingDir "$SMPrograms\$StartMenuFolder\$(^Name).lnk" "$InstDir\hacktv-gui.exe"
+            CreateShortcut /NoWorkingDir "$SMPrograms\$StartMenuFolder\$(^Name) (Console mode).lnk" "$InstDir\hacktv-gui.exe" "/console"
+
+            ${If} $(^Name) != $StartMenuFolder
+                # Write the name of the selected Start Menu folder to the registry so we can remove it during uninstall
+                WriteRegStr HKCU "Software\$(^Name)\Setup" "CustomStartDir" $StartMenuFolder
+            ${EndIf}
+
+            # Uninstaller data
+            WriteUninstaller "$INSTDIR\uninstall.exe"
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayName" $(^Name)
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayIcon" "$\"$INSTDIR\hacktv-gui.exe$\""
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "Publisher" "Stephen McGarry"
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "DisplayVersion" ${VERSION}
+            WriteRegStr HKCU "${UNINSTALL_PATH}" "UrlUpdateInfo" "https://github.com/steeviebops/hacktv-gui"
+
+            # File associations
+            !define ASSOC_EXT ".htv"
+            !define ASSOC_PROGID "hacktv-gui"
+            !define ASSOC_VERB "open"
+            !define ASSOC_APPEXE "hacktv-gui.exe"
+            !define ASSOC_DESC "hacktv-gui configuration file"
+
+            WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}\DefaultIcon" "" "$InstDir\${ASSOC_APPEXE},0"
+            WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}" "" "${ASSOC_DESC}"
+            WriteRegStr HKCU "Software\Classes\${ASSOC_PROGID}\shell\${ASSOC_VERB}\command" "" '"$InstDir\${ASSOC_APPEXE}" "%1"'
+            WriteRegStr HKCU "Software\Classes\${ASSOC_EXT}" "" "${ASSOC_PROGID}"
+            ${NotifyShell_AssocChanged}
+
+        !insertmacro MUI_STARTMENU_WRITE_END
+
+    ${Else}
+        # Portable installation: no Windows integration
+    ${EndIf}
 SectionEnd
 
 Section "hacktv" HACKTV
@@ -188,9 +265,11 @@ SectionEnd
 
 Section ""
     # Calculate on-disk size, from https://nsis-dev.github.io/NSIS-Forums/html/t-267188.html
-    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-    IntFmt $0 "0x%08X" $0
-    WriteRegDWORD HKCU "${UNINSTALL_PATH}" "EstimatedSize" "$0"
+    ${If} $InstallType == "standard"
+        ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+        IntFmt $0 "0x%08X" $0
+        WriteRegDWORD HKCU "${UNINSTALL_PATH}" "EstimatedSize" "$0"
+    ${EndIf}
 SectionEnd
 
 Section Uninstall
@@ -243,6 +322,9 @@ Section Uninstall
 SectionEnd
 
 Function .onInit
+    
+    StrCpy $InstallType "standard"
+
     # CPU architecture check
     !ifdef INSTALL_X64
         ${If} ${IsNativeARM64}
@@ -268,7 +350,7 @@ Function .onInit
     ${EndIf}
 
     # Set estimated disk space requirements for each section
-    SectionSetSize ${MAIN} 204800
+    SectionSetSize ${MAIN} 149500
     SectionSetSize ${HACKTV} 24576
     SectionSetSize ${YT_DLP} 20480
 FunctionEnd
