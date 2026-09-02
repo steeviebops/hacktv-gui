@@ -102,7 +102,7 @@ jobs:
 
       - name: Build installer
         run: |
-          Copy-Item hacktv-gui_setup.nsi target
+          Copy-Item scripts\hacktv-gui_setup.nsi target
           Push-Location target
           makensis /DVERSION="${{ inputs.version }}" /DARCH=x64 hacktv-gui_setup.nsi
           Rename-Item hacktv-gui_setup.exe hacktv-gui_setup_x64.exe
