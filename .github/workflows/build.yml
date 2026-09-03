@@ -34,13 +34,16 @@ jobs:
         run: |
           msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=ARM64
 
-      - name: Copy native libraries
-        shell: pwsh
-        run: |
-          $destination = "src/main/resources/ie/bops/resources/native"
-          New-Item -ItemType Directory -Force -Path $destination | Out-Null
-          Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
-          Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
+      # Don't use the built files, just want to be sure they still compile
+      # We'll later use a set that has been signed
+      
+      #- name: Copy native libraries
+      #  shell: pwsh
+      #  run: |
+      #    $destination = "src/main/resources/ie/bops/resources/native"
+      #    New-Item -ItemType Directory -Force -Path $destination | Out-Null
+      #    Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
+      #    Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
 
       - name: Build Windows launcher (x64)
         shell: pwsh
@@ -52,12 +55,28 @@ jobs:
         run: |
           msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=ARM64
       
-      - name: Copy launcher binaries
-        shell: pwsh
+      #- name: Copy launcher binaries
+      #  shell: pwsh
+      #  run: |
+      #    New-Item -ItemType Directory -Force -Path "target"
+      #    Copy-Item "launcher\x64\Release\hacktv-gui.exe" "target\hacktv-gui_amd64.exe"
+      #    Copy-Item "launcher\ARM64\Release\hacktv-gui.exe" "target\hacktv-gui_arm64.exe"
+
+      - name: Download signed artifacts
         run: |
-          New-Item -ItemType Directory -Force -Path "target"
-          Copy-Item "launcher\x64\Release\hacktv-gui.exe" "target\hacktv-gui_amd64.exe"
-          Copy-Item "launcher\ARM64\Release\hacktv-gui.exe" "target\hacktv-gui_arm64.exe"
+          $downloadHash = "752BC316F254B58EE4B556A623ECFF55908E99ED44783AC81039C0EA9B243235"
+          Invoke-WebRequest -Uri https://download.bops.ie/hacktv-gui/buildfiles/signed.zip -OutFile .\signed.zip -UseBasicParsing -ErrorAction Stop
+          if (!(Test-Path .\signed.zip)) {
+              throw "Unable to download signed artifacts"
+          } elseif ((Get-FileHash .\signed.zip).Hash -ne $downloadHash) {
+              throw "Error downloading signed artifacts: hash mismatch"
+          } else {
+              Expand-Archive .\signed.zip
+              Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
+              Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
+              Copy-Item "launcher\x64\Release\hacktv-gui.exe" "target\hacktv-gui_amd64.exe"
+              Copy-Item "launcher\ARM64\Release\hacktv-gui.exe" "target\hacktv-gui_arm64.exe"
+          }
 
       - name: Build hacktv-gui
         run: mvn package
