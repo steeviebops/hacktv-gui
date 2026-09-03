@@ -127,7 +127,7 @@ jobs:
           CERTUM_USERNAME: ${{ secrets.CERTUM_USERNAME }}
           CERTUM_OTP_SECRET: ${{ secrets.CERTUM_OTP_SECRET }}
         run: |
-          .\scripts\SignBinary.ps1 hacktv-gui_setup_x64.exe
+          .\scripts\SignBinary.ps1 target\hacktv-gui_setup_x64.exe
           
       - name: Upload installer
         uses: actions/upload-artifact@v7
