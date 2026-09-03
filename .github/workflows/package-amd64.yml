@@ -89,6 +89,20 @@ jobs:
         run: |
            Rename-Item "target\hacktv-gui_amd64.exe" "hacktv-gui.exe"
            Remove-Item "target\hacktv-gui_arm64.exe"
+
+      - name: Download and install SimplySign Desktop
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi -OutFile $env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi -UseBasicParsing
+          if (-not (Test-Path $env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi)) {
+              throw "SimplySign Desktop installer was not downloaded."
+          } else {
+              $process = Start-Process -Wait -PassThru msiexec.exe `
+                  -ArgumentList "/i", "$env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi", "/qn", "/norestart"
+              if ($process.ExitCode -ne 0) {
+                  throw "SimplySign Desktop installation failed with exit code $($process.ExitCode)"
+              }
+          }
           
       - name: Install NSIS
         id: nsis
@@ -106,6 +120,14 @@ jobs:
           Push-Location target
           makensis /DVERSION="${{ inputs.version }}" /DARCH=x64 hacktv-gui_setup.nsi
           Rename-Item hacktv-gui_setup.exe hacktv-gui_setup_x64.exe
+
+      - name: Sign installer
+        shell: pwsh
+        env:
+          CERTUM_USERNAME: ${{ secrets.CERTUM_USERNAME }}
+          CERTUM_OTP_SECRET: ${{ secrets.CERTUM_OTP_SECRET }}
+        run: |
+          .\scripts\SignBinary.ps1 hacktv-gui_setup_x64.exe
           
       - name: Upload installer
         uses: actions/upload-artifact@v7
