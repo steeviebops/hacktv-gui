@@ -71,7 +71,7 @@ jobs:
           } elseif ((Get-FileHash .\signed.zip).Hash -ne $downloadHash) {
               throw "Error downloading signed artifacts: hash mismatch"
           } else {
-              Expand-Archive .\signed.zip
+              Expand-Archive .\signed.zip -DestinationPath .
               Copy-Item "ConsoleCtrl_amd64.dll" "$destination"
               Copy-Item "ConsoleCtrl_aarch64.dll" "$destination"
               Copy-Item "hacktv-gui_amd64.exe" "target"
