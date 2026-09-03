@@ -64,20 +64,23 @@ jobs:
 
       - name: Download signed artifacts
         run: |
+          $destination = "src/main/resources/ie/bops/resources/native"
           $downloadHash = "752BC316F254B58EE4B556A623ECFF55908E99ED44783AC81039C0EA9B243235"
+          New-Item -ItemType Directory -Force -Path "target" Out-Null
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
           Invoke-WebRequest -Uri https://download.bops.ie/hacktv-gui/buildfiles/signed.zip -OutFile .\signed.zip -UseBasicParsing -ErrorAction Stop
           if (!(Test-Path .\signed.zip)) {
               throw "Unable to download signed artifacts"
-          } elseif ((Get-FileHash .\signed.zip).Hash -ne $downloadHash) {
-              throw "Error downloading signed artifacts: hash mismatch"
-          } else {
-              Expand-Archive .\signed.zip -DestinationPath .
-              Copy-Item "ConsoleCtrl_amd64.dll" "$destination"
-              Copy-Item "ConsoleCtrl_aarch64.dll" "$destination"
-              Copy-Item "hacktv-gui_amd64.exe" "target"
-              Copy-Item "hacktv-gui_arm64.exe" "target"
-              Remove-Item .\signed.zip
           }
+          if ((Get-FileHash .\signed.zip).Hash -ne $downloadHash) {
+              throw "Error downloading signed artifacts: hash mismatch"
+          } 
+          Expand-Archive .\signed.zip -DestinationPath .
+          Copy-Item "ConsoleCtrl_amd64.dll" "$destination"
+          Copy-Item "ConsoleCtrl_aarch64.dll" "$destination"
+          Copy-Item "hacktv-gui_amd64.exe" "target"
+          Copy-Item "hacktv-gui_arm64.exe" "target"
+          Remove-Item .\signed.zip
 
       - name: Build hacktv-gui
         run: mvn package
