@@ -93,7 +93,10 @@ jobs:
       - name: Download and install SimplySign Desktop
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi -OutFile $env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi -UseBasicParsing
+          Invoke-WebRequest `
+             -Uri https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi `
+             -OutFile $env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi `
+             -UseBasicParsing
           if (-not (Test-Path $env:TEMP\SimplySignDesktop-9.4.4.92-64-bit-en.msi)) {
               throw "SimplySign Desktop installer was not downloaded."
           } else {
@@ -107,12 +110,6 @@ jobs:
       - name: Install NSIS
         id: nsis
         uses: negrutiu/nsis-install@v2
-
-      - name: Show NSIS info
-        run: |
-          echo "NSIS dir: ${{ steps.nsis.outputs.instdir }}"
-          echo "NSIS version: ${{ steps.nsis.outputs.version }}"
-          echo "NSIS arch: ${{ steps.nsis.outputs.arch }}"
 
       - name: Build installer
         run: |
@@ -134,4 +131,3 @@ jobs:
         with:
           name: hacktv-gui_setup_x64
           path: target/hacktv-gui_setup_x64.exe
-          
