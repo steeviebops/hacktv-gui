@@ -21,21 +21,22 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v3
+      # Don't build the Windows native files (DLLs or launcher).
+      # Instead, use a set that has been signed.
+      # Uncomment the jobs below to build unsigned copies.
 
-      - name: Build native libraries (x64)
-        shell: cmd
-        run: |
-          msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=x64
+      #- name: Set up MSBuild
+      #  uses: microsoft/setup-msbuild@v3
 
-      - name: Build native libraries (ARM64)
-        shell: cmd
-        run: |
-          msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=ARM64
+      #- name: Build native libraries (x64)
+      #  shell: cmd
+      #  run: |
+      #    msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=x64
 
-      # Don't use the built files, just want to be sure they still compile
-      # We'll later use a set that has been signed
+      #- name: Build native libraries (ARM64)
+      #  shell: cmd
+      #  run: |
+      #    msbuild ConsoleCtrl\ConsoleCtrl.slnx /m /p:Configuration=Release /p:Platform=ARM64
       
       #- name: Copy native libraries
       #  shell: pwsh
@@ -45,15 +46,15 @@ jobs:
       #    Copy-Item "ConsoleCtrl\x64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_amd64.dll"
       #    Copy-Item "ConsoleCtrl\ARM64\Release\ConsoleCtrl.dll" "$destination\ConsoleCtrl_aarch64.dll"
 
-      - name: Build Windows launcher (x64)
-        shell: pwsh
-        run: |
-          msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=x64
+      #- name: Build Windows launcher (x64)
+      #  shell: pwsh
+      #  run: |
+      #    msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=x64
 
-      - name: Build Windows launcher (ARM64)
-        shell: pwsh
-        run: |
-          msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=ARM64
+      #- name: Build Windows launcher (ARM64)
+      #  shell: pwsh
+      #  run: |
+      #    msbuild launcher\launcher.slnx /m /p:Configuration=Release /p:Platform=ARM64
       
       #- name: Copy launcher binaries
       #  shell: pwsh
