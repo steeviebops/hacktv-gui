@@ -1907,14 +1907,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         generalSettingsPanel.add(chkSyntaxOnly, gridBagConstraints);
 
-        chkLocalModes.setText("Always use local copy of modes files (do not download)");
+        chkLocalModes.setText("Download updated configuration files automatically");
         chkLocalModes.addActionListener(this::chkLocalModesActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 25;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         generalSettingsPanel.add(chkLocalModes, gridBagConstraints);
 
         chkUpdateCheck.setText("Check for updates on startup");
@@ -1976,7 +1975,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         generalSettingsPanel.add(comboBoxPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -3182,7 +3181,7 @@ public class MainWindow extends javax.swing.JFrame {
         hackTVDirectory = new File(hackTVPath).getParent();
         txtHackTVPath.setText(hackTVPath);
         // Check status of UseLocalModesFile
-        if (PREFS.getInt("uselocalmodesfile", 0) == 1) {
+        if (PREFS.getInt("uselocalmodesfile", 0) == 0) {
             chkLocalModes.setSelected(true);
         }
     }
@@ -8516,7 +8515,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_chkTeletextSubtitlesActionPerformed
 
     private void chkLocalModesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalModesActionPerformed
-        if (chkLocalModes.isSelected()) {
+        if (!chkLocalModes.isSelected()) {
             PREFS.putInt("uselocalmodesfile", 1);
         } else {
             PREFS.putInt("uselocalmodesfile", 0);
