@@ -1,5 +1,3 @@
-**This project is currently undergoing a major overhaul. Some information may be incorrect or incomplete for now.**
-
 # hacktv-gui - a GUI frontend application for hacktv
 
 hacktv-gui is, as the name suggests, a GUI frontend application for hacktv, which is available at https://codeberg.org/fsphil/hacktv/ or https://github.com/captainjack64/hacktv/. It allows you to run hacktv without the use of a command line. In addition, it includes playlist support, a handler for online teletext services, and support for any streaming video site which is compatible with yt-dlp. You can also save your settings to a file and reload them later.
