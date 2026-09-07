@@ -7617,8 +7617,9 @@ public class MainWindow extends javax.swing.JFrame {
     
     private void runYTDLpipe(String ytp, ArrayList<String> allArgs) {
         String u;
-        if (txtSource.getText().toLowerCase(Locale.ENGLISH).startsWith("ytdl:")) {
-            u = txtSource.getText().substring(5);
+        String prefix = "ytdl:";
+        if (txtSource.getText().toLowerCase(Locale.ENGLISH).startsWith(prefix)) {
+            u = txtSource.getText().substring(prefix.length());
         }
         else {
             u = txtSource.getText();
@@ -7629,6 +7630,7 @@ public class MainWindow extends javax.swing.JFrame {
         var ytargs = new ArrayList<String>();
         ytargs.add(ytp);
         ytargs.add("--ignore-config");
+        ytargs.add("-S vcodec:h264,fps,res:720,acodec:m4a");
         //ytargs.add("-q");
         ytargs.add("-o");
         ytargs.add("-");
