@@ -174,6 +174,16 @@ Section "!Required files" MAIN
     File "licenses\LICENSE.txt"
     File "licenses\FlatLaf-LICENSE.txt"
 
+    # Remove yt-dlp if it exists
+    ${If} ${FileExists} `$INSTDIR\yt-dlp.exe`
+        Delete "$INSTDIR\yt-dlp.exe"
+    ${EndIf}
+
+    # Remove old launcher.exe
+    ${If} ${FileExists} `$INSTDIR\launcher.exe`
+        Delete "$INSTDIR\launcher.exe"
+    ${EndIf}
+
     # Create Start Menu shortcuts and Windows integration for standard installations
     ${If} $InstallType == "standard"
 
@@ -249,17 +259,6 @@ Section ""
             MessageBox MB_OK|MB_ICONEXCLAMATION \
                 "An error occurred while attempting to install native components."
         ${EndIf}
-    ${EndIf}
-SectionEnd
-
-Section /o "yt-dlp" YT_DLP
-    SetOutPath "$INSTDIR\bin"
-    DetailPrint "Downloading https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-    NScurl::http GET "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" "$INSTDIR\bin\yt-dlp.exe" /INSIST /CANCEL /RESUME /END
-    Pop $7
-    ${If} $7 != "OK"
-        MessageBox MB_OK|MB_ICONEXCLAMATION \
-            "An error occurred while attempting to download yt-dlp."
     ${EndIf}
 SectionEnd
 
@@ -352,15 +351,12 @@ Function .onInit
     # Set estimated disk space requirements for each section
     SectionSetSize ${MAIN} 149500
     SectionSetSize ${HACKTV} 24576
-    SectionSetSize ${YT_DLP} 20480
 FunctionEnd
 
 # Set section descriptions
 LangString DESC_MAIN ${LANG_ENGLISH} "Installs hacktv-gui and supporting files."
 LangString DESC_HACKTV ${LANG_ENGLISH} "Installs the latest build of hacktv. The fork can be changed in hacktv-gui after installation is complete."
-LangString DESC_YT_DLP ${LANG_ENGLISH} "Installs yt-dlp, a YouTube downloader. Used for streaming videos from online video sites."
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${MAIN} $(DESC_MAIN)
     !insertmacro MUI_DESCRIPTION_TEXT ${HACKTV} $(DESC_HACKTV)
-    !insertmacro MUI_DESCRIPTION_TEXT ${YT_DLP} $(DESC_YT_DLP)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
