@@ -7,7 +7,7 @@ hacktv-gui is, as the name suggests, a GUI frontend application for hacktv, whic
 
 ### Prerequisites
 - A Java 21 or later runtime environment is required. Java 8 will not work. <a href="https://adoptium.net">Temurin</a> or <a href="https://www.microsoft.com/openjdk">Microsoft's build of OpenJDK</a> have been tested.
-- To use yt-dlp features, a copy of <a href="https://github.com/yt-dlp/yt-dlp/releases/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file. The Windows installer provides a yt-dlp download as an optional extra.
+- To use yt-dlp features, a copy of <a href="https://github.com/yt-dlp/yt-dlp/releases/">yt-dlp</a> is required. This can be either in your system path, or placed in the same directory as the JAR file. ffmpeg may also be required.
 
 ### Licence information
 This project is licensed under GNU GPL v2 or later. Feel free to reuse any of this code in a GPL v3 project.
