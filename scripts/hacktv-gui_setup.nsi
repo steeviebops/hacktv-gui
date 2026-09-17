@@ -175,8 +175,8 @@ Section "!Required files" MAIN
     File "licenses\FlatLaf-LICENSE.txt"
 
     # Remove yt-dlp if it exists
-    ${If} ${FileExists} `$INSTDIR\yt-dlp.exe`
-        Delete "$INSTDIR\yt-dlp.exe"
+    ${If} ${FileExists} `$INSTDIR\bin\yt-dlp.exe`
+        Delete "$INSTDIR\bin\yt-dlp.exe"
     ${EndIf}
 
     # Remove old launcher.exe
