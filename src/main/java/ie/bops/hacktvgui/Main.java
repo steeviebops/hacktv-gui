@@ -17,17 +17,23 @@
  */
 package ie.bops.hacktvgui;
 
-import java.awt.HeadlessException;
+import java.awt.GraphicsEnvironment;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Set;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class Main {
     
     // Main method
     public static void main(String args[]) {
+        // Don't run on a headless system
+        if (GraphicsEnvironment.isHeadless()) {
+            System.err.println("This application requires a graphical environment.");
+            System.exit(-1);
+        }
         Integer exitStatus = parseArguments(args);
         if (exitStatus != null) System.exit(exitStatus);
         // Pre-initialisation macOS tasks
@@ -44,6 +50,8 @@ public class Main {
         }
         SwingUtilities.invokeLater(() -> {
             try {
+                // Prerequisite check
+                Class.forName("com.formdev.flatlaf.util.SystemFileChooser");
                 // Create MainWindow class instance
                 final var g = new MainWindow();
                 g.initUI();
@@ -53,15 +61,15 @@ public class Main {
                 } else {
                     System.exit(s);
                 }
-            } catch (HeadlessException e) {
-                // Catch this error if we find we're running on a headless JRE or an
-                // OS with no GUI support (e.g. WSL or Unix without X).
-                System.err.println(
-                        """
-                        A fatal error occurred while attempting to initialise the window, please see details below.
-                        """ + 
-                        e.getMessage());
-                System.exit(-1);
+            } catch (ClassNotFoundException e) {
+                // Missing FlatLaf library, fatal error
+                String err = """
+                             Unable to find the FlatLaf library.
+                             Please ensure that the lib directory is present in the application
+                             directory, and that it contains the FlatLaf JAR files.
+                             The application will now exit.""";
+                JOptionPane.showMessageDialog(null, err, Shared.APP_NAME, JOptionPane.ERROR_MESSAGE);
+                System.exit(-2);
             }
         });
     }
