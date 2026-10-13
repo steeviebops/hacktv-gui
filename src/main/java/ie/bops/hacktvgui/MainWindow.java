@@ -344,17 +344,18 @@ public class MainWindow extends javax.swing.JFrame {
         spCategory = new javax.swing.JScrollPane();
         lstColour = new javax.swing.JList<>();
         cmbMode = new javax.swing.JComboBox<>();
+        btnMacOptions = new javax.swing.JButton();
+        modeInfoPanel = new javax.swing.JPanel();
         lblLinesDesc = new javax.swing.JLabel();
         lblLinesValue = new javax.swing.JLabel();
         lblFieldRateDesc = new javax.swing.JLabel();
         lblFieldRateValue = new javax.swing.JLabel();
-        lblAudioModDesc = new javax.swing.JLabel();
-        lblVideoModValue = new javax.swing.JLabel();
         lblVideoModDesc = new javax.swing.JLabel();
+        lblVideoModValue = new javax.swing.JLabel();
+        lblAudioModDesc = new javax.swing.JLabel();
         lblAudioModValue = new javax.swing.JLabel();
         lblAudioSpacingDesc = new javax.swing.JLabel();
         lblAudioSpacingValue = new javax.swing.JLabel();
-        btnMacOptions = new javax.swing.JButton();
         audioPanel = new javax.swing.JPanel();
         radMono = new javax.swing.JRadioButton();
         radNoAudio = new javax.swing.JRadioButton();
@@ -722,7 +723,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 5;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         gridBagConstraints.weighty = 1.0;
@@ -765,102 +766,57 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 7);
         modePanel.add(cmbMode, gridBagConstraints);
 
-        lblLinesDesc.setText("Lines:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 2;
-        gridBagConstraints.ipady = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        modePanel.add(lblLinesDesc, gridBagConstraints);
-
-        lblLinesValue.setText("lines");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(8, 4, 0, 8);
-        modePanel.add(lblLinesValue, gridBagConstraints);
-
-        lblFieldRateDesc.setText("Frame/field rate:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        modePanel.add(lblFieldRateDesc, gridBagConstraints);
-
-        lblFieldRateValue.setText("fieldrate");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 8);
-        modePanel.add(lblFieldRateValue, gridBagConstraints);
-
-        lblAudioModDesc.setText("Audio modulation:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        modePanel.add(lblAudioModDesc, gridBagConstraints);
-
-        lblVideoModValue.setText("videomod");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 8);
-        modePanel.add(lblVideoModValue, gridBagConstraints);
-
-        lblVideoModDesc.setText("Video modulation:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        modePanel.add(lblVideoModDesc, gridBagConstraints);
-
-        lblAudioModValue.setText("audiomod");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 8);
-        modePanel.add(lblAudioModValue, gridBagConstraints);
-
-        lblAudioSpacingDesc.setText("Audio spacing:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 8, 0);
-        modePanel.add(lblAudioSpacingDesc, gridBagConstraints);
-
-        lblAudioSpacingValue.setText("audiospacing");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 8, 8);
-        modePanel.add(lblAudioSpacingValue, gridBagConstraints);
-
         btnMacOptions.setText("MAC options");
         btnMacOptions.addActionListener(this::btnMacOptionsActionPerformed);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 2;
         modePanel.add(btnMacOptions, gridBagConstraints);
+
+        modeInfoPanel.setLayout(new java.awt.GridLayout(5, 2, 4, 4));
+
+        lblLinesDesc.setText("Lines:");
+        modeInfoPanel.add(lblLinesDesc);
+
+        lblLinesValue.setText("lines");
+        modeInfoPanel.add(lblLinesValue);
+
+        lblFieldRateDesc.setText("Frame/field rate:");
+        modeInfoPanel.add(lblFieldRateDesc);
+
+        lblFieldRateValue.setText("fieldrate");
+        modeInfoPanel.add(lblFieldRateValue);
+
+        lblVideoModDesc.setText("Video modulation:");
+        modeInfoPanel.add(lblVideoModDesc);
+
+        lblVideoModValue.setText("videomod");
+        modeInfoPanel.add(lblVideoModValue);
+
+        lblAudioModDesc.setText("Audio modulation:");
+        modeInfoPanel.add(lblAudioModDesc);
+
+        lblAudioModValue.setText("audiomod");
+        modeInfoPanel.add(lblAudioModValue);
+
+        lblAudioSpacingDesc.setText("Audio spacing:");
+        modeInfoPanel.add(lblAudioSpacingDesc);
+
+        lblAudioSpacingValue.setText("audiospacing");
+        modeInfoPanel.add(lblAudioSpacingValue);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
+        modePanel.add(modeInfoPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -9295,6 +9251,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuUpdateCheck;
     private javax.swing.JMenuItem menuWiki;
     private javax.swing.JPanel modeContainerPanel;
+    private javax.swing.JPanel modeInfoPanel;
     private javax.swing.JPanel modePanel;
     private javax.swing.JPanel modeTab;
     private javax.swing.JPanel modeTabContainerPanel;
