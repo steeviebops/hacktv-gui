@@ -2911,6 +2911,7 @@ public class MainWindow extends javax.swing.JFrame {
             "videocrypt2",
             "videocrypts",
             "syster",
+            "luxcrypt",
             "eurocrypt",
             "eurocypher",
             "testcards",
@@ -5300,6 +5301,45 @@ public class MainWindow extends javax.swing.JFrame {
                 addScramblingKeys(caType),
                 emptyList
         ));
+        if (captainJack) {
+            caType = "cablecrypt-tvcabo";
+            displayName = "Cablecrypt (TV Cabo)";
+            lookupId = "cablecrypt-tvcabo";
+            cmbScrambling1.addItem(new ComboBoxOption(lookupId, displayName));
+            scramblingInfo625.put(lookupId, new ScramblingInfo(
+                    caType,
+                    displayName,
+                    null,
+                    null,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    addScramblingKeys(caType),
+                    emptyList
+            ));
+            if (modesIni.getKeys("luxcrypt").length > 0) {
+                caType = "luxcrypt";
+                displayName = "Luxcrypt";
+                lookupId = "luxcrypt";
+                cmbScrambling1.addItem(new ComboBoxOption(lookupId, displayName));
+                scramblingInfo625.put(lookupId, new ScramblingInfo(
+                        caType,
+                        displayName,
+                        null,
+                        null,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        addScramblingKeys(caType),
+                        emptyList
+                ));
+            }
+
+        }
         // If no systems were found, disable the scrambling tab
         if (cmbScrambling1.getItemCount() == 1) disableScrambling();
     }
@@ -5522,6 +5562,7 @@ public class MainWindow extends javax.swing.JFrame {
                 (!captainJack && si.id().startsWith("videocrypt")) ||
                 si.id().equals("videocrypts") ||
                 si.id().equals("d14") ||
+                si.id().equals("luxcrypt") ||
                 key == null ||
                 key.equals("free");
         btnScramblingOptions.setEnabled(!u);
