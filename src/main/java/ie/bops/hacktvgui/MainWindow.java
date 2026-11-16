@@ -51,6 +51,7 @@ import java.awt.Desktop;
 import java.util.prefs.Preferences;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
@@ -518,7 +519,7 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GUI wrapper for hacktv");
         setName("mainFrame"); // NOI18N
-        setResizable(false);
+        setResizable(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -2130,6 +2131,9 @@ public class MainWindow extends javax.swing.JFrame {
         // Initialise Swing components
         initComponents();
         SwingUtilities.invokeLater(this::pack);
+        // Restore the window size and position, if previously saved.
+        // This is queued after the pack() above so it runs last.
+        SwingUtilities.invokeLater(this::restoreWindowState);
         // Populate look and feel combobox using the laf variable
         populateLafComboBox(laf);
     }
@@ -2164,6 +2168,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             if (desktop.isSupported(Desktop.Action.APP_QUIT_HANDLER)) {
                 desktop.setQuitHandler( (e, response) -> {
+                    saveWindowState();
                     response.performQuit();
                 } );
             }
@@ -2395,8 +2400,11 @@ public class MainWindow extends javax.swing.JFrame {
         standardLaf.addAll(addFlatLafThemes(flIj, "intellij-themes"));
         standardLaf.addAll(addFlatLafThemes(flIjm, "materialthemeuilite"));
         if (isMacOS) {
-            // Use FlatLafMac as default
-            defaultLaf = "com.formdev.flatlaf.themes.FlatMacLightLaf";
+            // Use FlatLaf Mac as default. If the system is in dark mode,
+            // use the dark variant of the theme.
+            defaultLaf = isMacDarkMode()
+                    ? "com.formdev.flatlaf.themes.FlatMacDarkLaf"
+                    : "com.formdev.flatlaf.themes.FlatMacLightLaf";
             defaultIndex = standardLaf.indexOf(new ComboBoxOption(defaultLaf, ""));
         } else if (!isWindows) {
             // Use FlatLaf as default
@@ -3122,14 +3130,9 @@ public class MainWindow extends javax.swing.JFrame {
         else {
             hackTVPath = PREFS.get("hacktvpath", null);
             if (hackTVPath == null) {
-                // Check if hacktv exists at /usr/bin/hacktv, which is the
-                // package manager's path. Otherwise use the default.
-                if (Files.exists(Path.of("/usr/bin/hacktv"))) {
-                    hackTVPath = "/usr/bin/hacktv";
-                }
-                else {
-                    hackTVPath = defaultHackTVPath;
-                }
+                // Search for hacktv in the usual locations, and in the
+                // directories listed in the PATH environment variable.
+                hackTVPath = findHackTVPath();
             }
         }
         
@@ -3140,6 +3143,61 @@ public class MainWindow extends javax.swing.JFrame {
         // Check status of UseLocalModesFile
         if (PREFS.getInt("uselocalmodesfile", 0) == 0) {
             chkLocalModes.setSelected(true);
+        }
+    }
+    
+    private String findHackTVPath() {
+        // Build a list of the usual locations for the hacktv binary,
+        // in order of preference.
+        var locations = new ArrayList<String>();
+        // A copy of hacktv in the application's own directory
+        locations.add(jarDir.resolve("hacktv").toString());
+        // Homebrew on Apple Silicon
+        locations.add("/opt/homebrew/bin/hacktv");
+        // Homebrew on Intel macOS, and the usual source-build prefix
+        locations.add("/usr/local/bin/hacktv");
+        // Linux package managers
+        locations.add("/usr/bin/hacktv");
+        for (String location : locations) {
+            if (Files.isRegularFile(Path.of(location))) return location;
+        }
+        // Search the directories in the PATH environment variable
+        String pathEnv = System.getenv("PATH");
+        if (pathEnv != null) {
+            for (String dir : pathEnv.split(File.pathSeparator)) {
+                if (dir.isBlank()) continue;
+                var f = new File(dir, "hacktv");
+                if (f.isFile()) return f.getAbsolutePath();
+            }
+        }
+        // Nothing found, use the default
+        return defaultHackTVPath;
+    }
+    
+    private boolean isMacDarkMode() {
+        // There is no Java API to query the macOS system appearance, so ask
+        // the defaults system instead. AppleInterfaceStyle is set to "Dark"
+        // when dark mode is enabled, and does not exist in light mode.
+        try {
+            var pb = new ProcessBuilder("defaults", "read", "-g", "AppleInterfaceStyle");
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            var p = pb.start();
+            String result;
+            try (var br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                result = br.readLine();
+            }
+            if (!p.waitFor(2, TimeUnit.SECONDS)) {
+                p.destroyForcibly();
+                return false;
+            }
+            return result != null && result.strip().equalsIgnoreCase("Dark");
+        }
+        catch (IOException ex) {
+            return false;
+        }
+        catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return false;
         }
     }
     
@@ -9056,8 +9114,45 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_chkUpdateCheckActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        saveWindowState();
         cleanupBeforeExit();
     }//GEN-LAST:event_formWindowClosing
+    
+    private void saveWindowState() {
+        // Save the window size and position so they can be restored
+        // the next time the application is started.
+        PREFS.putInt("windowwidth", getWidth());
+        PREFS.putInt("windowheight", getHeight());
+        PREFS.putInt("windowx", getX());
+        PREFS.putInt("windowy", getY());
+    }
+    
+    public void restoreWindowState() {
+        // Set a minimum size so the window cannot be made smaller than
+        // its natural packed size.
+        setMinimumSize(getSize());
+        // Restore the window size and position from the last time the
+        // application was closed, if they were saved.
+        int w = PREFS.getInt("windowwidth", 0);
+        int h = PREFS.getInt("windowheight", 0);
+        if (w > 0 && h > 0) {
+            setSize(w, h);
+            int x = PREFS.getInt("windowx", Integer.MIN_VALUE);
+            int y = PREFS.getInt("windowy", Integer.MIN_VALUE);
+            if (x != Integer.MIN_VALUE && y != Integer.MIN_VALUE) {
+                // Only restore the position if it is on one of the screens.
+                // The display configuration may have changed since the
+                // previous run.
+                var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                for (var sd : ge.getScreenDevices()) {
+                    if (sd.getDefaultConfiguration().getBounds().contains(x, y)) {
+                        setLocation(x, y);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     private void cmbTeletextDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTeletextDownloadActionPerformed
         var selectedItem = (ComboBoxOption) cmbTeletextDownload.getSelectedItem();
